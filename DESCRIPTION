@@ -1,0 +1,18 @@
+Package: mutscan
+Title: Preprocessing and Analysis of Deep Mutational Scanning Data
+Version: 0.1.0
+Authors@R: 
+    c(person(given = "Charlotte",
+             family = "Soneson",
+             role = c("aut", "cre"),
+             email = "charlotte.soneson@fmi.ch",
+             comment = c(ORCID = "0000-0003-3833-2169")),
+      person(given = "Michael",
+    	     family = "Stadler",
+    	     role = c("aut"),
+    	     email = "",
+    	     comment = c(ORCID = "")))
+Description: What the package does (one paragraph).
+License: What license it uses
+Encoding: UTF-8
+
