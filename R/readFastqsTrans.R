@@ -42,15 +42,13 @@ readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
   ## --------------------------------------------------------------------------
   ## Read forward and reverse FASTQ files
   ## --------------------------------------------------------------------------
-  fqf <- Biostrings::readQualityScaledDNAStringSet(
-    fastqForward, quality.scoring = "phred",
-    nrec = -1L, skip = 0L, seek.first.rec = FALSE,
-    use.names = TRUE)
+  tmp <- ShortRead::readFastq(fastqForward, withIds = FALSE)
+  fqf <- as(tmp, "QualityScaledDNAStringSet")
+  rm(tmp)
   
-  fqr <- Biostrings::readQualityScaledDNAStringSet(
-    fastqReverse, quality.scoring = "phred",
-    nrec = -1L, skip = 0L, seek.first.rec = FALSE,
-    use.names = TRUE)
+  tmp <- ShortRead::readFastq(fastqReverse, withIds = FALSE)
+  fqr <- as(tmp, "QualityScaledDNAStringSet")
+  rm(tmp)
   
   ## Check that the files have the same number of reads
   stopifnot(
@@ -59,6 +57,7 @@ readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
   
   ## Here we should check that the reads are in the same order, and set the 
   ## names to be the same in both files
+  ## For this, we will need to set readFastq(..., withIds = TRUE)
   
   ## Search for adapter sequences and filter read pairs
   hasAdapterMatch <- rep(FALSE, length(fqf))
