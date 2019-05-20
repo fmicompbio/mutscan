@@ -10,8 +10,8 @@ Authors@R:
       person(given = "Michael",
     	     family = "Stadler",
     	     role = c("aut"),
-    	     email = "",
-    	     comment = c(ORCID = "")))
+    	     email = "michael.stadler@fmi.ch",
+    	     comment = c(ORCID = "0000-0002-2269-4934")))
 Description: What the package does (one paragraph).
 License: What license it uses
 Encoding: UTF-8
