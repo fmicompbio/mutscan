@@ -13,6 +13,13 @@ Authors@R:
     	     email = "michael.stadler@fmi.ch",
     	     comment = c(ORCID = "0000-0002-2269-4934")))
 Description: What the package does (one paragraph).
-License: What license it uses
+Depends:
+    R (>= 3.6),
+    BiocGenerics,
+    Biostrings,
+    ShortRead
+Suggests: 
+    testthat
+License: GPL-2
 Encoding: UTF-8
-
+RoxygenNote: 6.1.1
