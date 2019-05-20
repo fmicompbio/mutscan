@@ -60,6 +60,21 @@ readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
   ## Here we should check that the reads are in the same order, and set the 
   ## names to be the same in both files
   
+  ## Search for adapter sequences and filter read pairs
+  hasAdapterMatch <- rep(FALSE, length(fqf))
+  numberReadPairsFiltered <- 0L
+  if (!is.null(adapterForward)) {
+    hasAdapterMatch <- vcountPattern(pattern = adapterForward, subject = fqf) > 0
+  }
+  if (!is.null(adapterReverse)) {
+    hasAdapterMatch <- hasAdapterMatch & (vcountPattern(pattern = adapterReverse, subject = fqr) > 0)
+  }
+  if (any(hasAdapterMatch)) {
+    numberReadPairsFiltered <- sum(hasAdapterMatch)
+    fqf <- fqf[!hasAdapterMatch]
+    fqr <- fqr[!hasAdapterMatch]
+  }
+  
   ## --------------------------------------------------------------------------
   ## Define start and end positions of the different parts of the reads
   ## --------------------------------------------------------------------------
