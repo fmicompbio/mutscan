@@ -35,3 +35,36 @@ findMismatchPositions <- function(pattern, subject) {
   list(nucleotideMismatches = nucleotideMismatches,
        codonMismatches = codonMismatches)
 }
+
+
+#' based on the code above, but tabulate base qualities
+#' for matching/mismatching bases
+#' 
+#' @param pattern A nucleotide sequence corresponding to the 
+#'   expected sequence
+#' @param subject A DNAStringSet with observed variable sequences
+#' @param maxQ Maximum quality to tabulate (\code{nbins} argument to \code{tabulate})
+#' 
+#' @return a two-element list with the numbers of matching/mismatching bases of a given quality
+#'  
+#' @importFrom Biostrings DNAStringSet quality
+#' @importFrom BiocGenerics unlist
+#' 
+tabulateQualitiesByMatchstate <- function(pattern, subject, maxQ = 99L) {
+  if (!is(pattern, "character") || length(pattern) != 1L) {
+    stop("'pattern' must be a length-1 character vector")
+  }
+  if (!is(subject, "DNAStringSet")) {
+    stop("'subject' must be a DNAStringSet object")
+  }
+  
+  pattern <- DNAStringSet(rep(pattern, length(subject)))
+  mismatch_pos <- which(as.raw(unlist(pattern)) != as.raw(unlist(subject)))
+  unlisted_quals <- unlist(as(Biostrings::quality(subject), "IntegerList"))
+  
+  tabErr <- tabulate(unlisted_quals[mismatch_pos], nbins = maxQ)
+  tabCor <- tabulate(unlisted_quals[-mismatch_pos], nbins = maxQ)
+  names(tabErr) <- names(tabCor) <- as.character(seq.int(maxQ))
+  
+  list(error = tabErr, correct = tabCor)
+}
