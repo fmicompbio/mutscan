@@ -22,7 +22,7 @@ context("tabulateQualitiesByMatchstate")
 test_that("tabulateQualitiesByMatchstate works as expected", {
   patt <- "AAAAAAAAAA"
   subj <- QualityScaledDNAStringSet(c("AAAAAAAAAA", "ACAAAAAAAC", "AACAAAACCA", "AAACAAAAAA", "AAAACAAAAA"),
-                                    PhredQuality(c("FFFFFFFFFF", "FBFFFFFFF<", "FF<FFFF//F", "FFF7FFFFFF", "FFFFFFFFFF")))
+                                    Biostrings::PhredQuality(c("FFFFFFFFFF", "FBFFFFFFF<", "FF<FFFF//F", "FFF7FFFFFF", "FFFFFFFFFF")))
   
   expect_error(tabulateQualitiesByMatchstate(NULL, subj))
   expect_error(tabulateQualitiesByMatchstate(patt, NULL))
