@@ -25,7 +25,7 @@ findMismatchPositions <- function(pattern, subject) {
   ans_eltlens <- tabulate(findInterval(unlisted_ans - 1L,
                                        breakpoints) + 1L,
                           nbins = length(pattern))
-  skeleton <- PartitioningByEnd(cumsum(ans_eltlens))
+  skeleton <- IRanges::PartitioningByEnd(cumsum(ans_eltlens))
   nucleotideMismatches <- relist(unlisted_ans, skeleton)
   offsets <- c(0L, breakpoints[-length(breakpoints)])
   nucleotideMismatches <- nucleotideMismatches - offsets
