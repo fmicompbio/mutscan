@@ -20,6 +20,7 @@
 #'   corresponding adapter sequence, the sequence pair will be filtered out.
 #'   \code{NULL} does not perform any filtering. The number of filtered read
 #'   pairs are reported in the return value.
+#' @param verbose Logical(1), whether to print out progress messages.
 #'
 #' @return A list with five elements: \describe{ \item{umis}{Merged forward and
 #'   reverse UMI sequences} \item{constantSeqForward}{Constant forward sequence}
@@ -40,18 +41,24 @@
 readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
                             skipReverse = 1, umiLengthForward = 10, 
                             umiLengthReverse = 8, constantLengthForward = 18,
-                            constantLengthReverse = 20,
-                            adapterForward = NULL, adapterReverse = NULL) {
+                            constantLengthReverse = 20, adapterForward = NULL, 
+                            adapterReverse = NULL, verbose = FALSE) {
   ## --------------------------------------------------------------------------
   ## Read forward and reverse FASTQ files
   ## --------------------------------------------------------------------------
-  tmp <- ShortRead::readFastq(fastqForward, withIds = FALSE)
-  fqf <- as(tmp, "QualityScaledDNAStringSet")
-  rm(tmp)
+  if (verbose) {
+    message("Reading forward FASTQ file...")
+  }
+  fqf <-
+    as(ShortRead::readFastq(fastqForward, withIds = FALSE),
+       "QualityScaledDNAStringSet")
   
-  tmp <- ShortRead::readFastq(fastqReverse, withIds = FALSE)
-  fqr <- as(tmp, "QualityScaledDNAStringSet")
-  rm(tmp)
+  if (verbose) {
+    message("Reading reverse FASTQ file...")
+  }
+  fqr <-
+    as(ShortRead::readFastq(fastqReverse, withIds = FALSE),
+       "QualityScaledDNAStringSet")
   
   ## Check that the files have the same number of reads
   stopifnot(
@@ -63,18 +70,25 @@ readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
   ## For this, we will need to set readFastq(..., withIds = TRUE)
   
   ## Search for adapter sequences and filter read pairs
+  if (verbose && any(!is.null(c(adapterForward, adapterReverse)))) {
+    message("Filtering out reads containing adapter sequences...")
+  }
   hasAdapterMatch <- rep(FALSE, length(fqf))
   numberReadPairsFiltered <- 0L
   if (!is.null(adapterForward)) {
     hasAdapterMatch <- vcountPattern(pattern = adapterForward, subject = fqf) > 0
   }
   if (!is.null(adapterReverse)) {
-    hasAdapterMatch <- hasAdapterMatch & (vcountPattern(pattern = adapterReverse, subject = fqr) > 0)
+    hasAdapterMatch <- hasAdapterMatch | (vcountPattern(pattern = adapterReverse, subject = fqr) > 0)
   }
   if (any(hasAdapterMatch)) {
     numberReadPairsFiltered <- sum(hasAdapterMatch)
     fqf <- fqf[!hasAdapterMatch]
     fqr <- fqr[!hasAdapterMatch]
+    if (verbose) {
+      message("Filtered out ", numberReadPairsFiltered, " reads (", 
+              round(numberReadPairsFiltered/length(fqf) * 100, 2), "%).")
+    }
   }
   
   ## --------------------------------------------------------------------------
@@ -96,6 +110,9 @@ readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
   ## --------------------------------------------------------------------------
   ## It would be nice if this could be done more cleverly - xscat does not 
   ## return a QualityScaledDNAStringSet if provided with two such object
+  if (verbose) {
+    message("Extracting UMI sequences...")
+  }
   umif <- Biostrings::subseq(fqf, start = umiStartForward, 
                              end = umiEndForward)
   umir <- Biostrings::subseq(fqr, start = umiStartReverse, 
@@ -111,6 +128,9 @@ readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
   ## --------------------------------------------------------------------------
   ## Extract constant sequences
   ## --------------------------------------------------------------------------
+  if (verbose) {
+    message("Extracting constant sequences...")
+  }
   constantSeqForward <- Biostrings::subseq(fqf, start = constantStartForward, 
                                            end = constantEndForward)
   constantSeqReverse <- Biostrings::subseq(fqr, start = constantStartReverse,
@@ -119,6 +139,9 @@ readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
   ## --------------------------------------------------------------------------
   ## Extract variable sequences
   ## --------------------------------------------------------------------------
+  if (verbose) {
+    message("Extracting variable sequences")
+  }
   variableSeqForward <- Biostrings::subseq(fqf, start = variableStartForward)
   variableSeqReverse <- Biostrings::subseq(fqr, start = variableStartReverse)
   
