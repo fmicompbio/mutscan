@@ -14,7 +14,8 @@ Authors@R:
     	     comment = c(ORCID = "0000-0002-2269-4934")))
 Description: What the package does (one paragraph).
 Depends:
-    R (>= 3.6),
+    R (>= 3.6)
+Imports:
     BiocGenerics,
     Biostrings,
     ShortRead
