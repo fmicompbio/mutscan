@@ -8,11 +8,14 @@
 #' 
 findMismatchPositions <- function(pattern, subject) {
   ## Code from https://support.bioconductor.org/p/63460/
-  pattern <- DNAStringSet(rep(pattern, length(subject)))
-  
+  if (!is(pattern, "character") || length(pattern) != 1L) {
+    stop("'pattern' must be a length-1 character vector")
+  }
   if (!is(subject, "DNAStringSet")) {
     stop("'subject' must be a DNAStringSet object")
   }
+  
+  pattern <- DNAStringSet(rep(pattern, length(subject)))
   
   pattern_width <- width(pattern)
   subject_width <- width(subject)
