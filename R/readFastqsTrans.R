@@ -1,21 +1,23 @@
 #' Read FASTQ files from TRANS experiment
 #'
-#' It is assumed that the forward and reverse reads are of the form UMI -
+#' It is assumed that both the forward and reverse reads are of the form UMI -
 #' constant sequence - variable sequence, and that the length of the UMI
 #' sequence, and the length of the constant sequence, is the same across all the
-#' reads.
+#' reads in the same file (but it can be different for the forward and reverse 
+#' reads).
 #'
-#' @param fastqForward,fastqReverse FASTQ files corresponding to forward and
-#'   reverse reads, respectively.
+#' @param fastqForward,fastqReverse Character(1), FASTQ files corresponding to 
+#'   forward and reverse reads, respectively.
 #' @param skipForward,skipReverse Numeric(1), the number of bases to skip in the
 #'   start of each read.
 #' @param umiLengthForward,umiLengthReverse Numeric(1), the length of the
 #'   barcode (UMI) sequence in the forward/reverse reads, respectively, not
-#'   including the skipped bases.
-#' @param constantLengthForward,constantLengthReverse Numeric(1), the length of
+#'   including the skipped bases (defined by \code{skipForward}/\code{skipReverse}.
+#' @param constantLengthForward,constantLengthReverse Numeric(1), the lengths of
 #'   the constant sequence in the forward/reverse reads, respectively.
-#' @param adapterForward,adapterReverse Character(1), the adapter sequences, if
-#'   found in forward/reverse sequences, the sequence pair will be filtered out.
+#' @param adapterForward,adapterReverse Character(1), the adapter sequences for 
+#'   forward/reverse reads, respectively. If a forward/reverse read contains the 
+#'   corresponding adapter sequence, the sequence pair will be filtered out.
 #'   \code{NULL} does not perform any filtering. The number of filtered read
 #'   pairs are reported in the return value.
 #'
@@ -24,7 +26,8 @@
 #'   \item{constantSeqReverse}{Constant reverse sequence}
 #'   \item{variableSeqForward}{Variable forward sequence}
 #'   \item{variableSeqReverse}{Variable reverse sequence}
-#'   \item{numberReadPairsFiltered}{because of matches to adaptor sequence(s)} }
+#'   \item{numberReadPairsFiltered}{Number of read pairs filtered out because of 
+#'   matches to adapter sequence(s)} }
 #'
 #' @export
 #'
