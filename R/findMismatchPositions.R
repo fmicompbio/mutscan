@@ -1,7 +1,15 @@
+#' Find positions of mismatching bases in DNAStringSet
+#' 
+#' Compare sequences in a DNAStringSet to expected sequence
+#' and return a list with positions of mismatches.
+#' 
 #' @param pattern A nucleotide sequence corresponding to the 
 #'   wildtype sequence
 #' @param subject A DNAStringSet with observed variable sequences
 #' 
+#' @return A two-element list with base/codon positions of mismatches. The
+#'   list elements have classes InterList and NumericList, respectively.
+#'   
 #' @importFrom Biostrings DNAStringSet quality
 #' @importFrom BiocGenerics unlist width relist
 #' @importFrom IRanges PartitioningByEnd
@@ -37,8 +45,10 @@ findMismatchPositions <- function(pattern, subject) {
 }
 
 
-#' based on the code above, but tabulate base qualities
-#' for matching/mismatching bases
+#' Count numbers of matching/mismatching bases per quality score
+#' 
+#' Based on the code from findMismatchpositions, tabulate base qualities
+#' for matching/mismatching bases.
 #' 
 #' @param pattern A nucleotide sequence corresponding to the 
 #'   expected sequence
