@@ -2,6 +2,10 @@
 #'   wildtype sequence
 #' @param subject A DNAStringSet with observed variable sequences
 #' 
+#' @importFrom Biostrings DNAStringSet quality
+#' @importFrom BiocGenerics unlist width relist
+#' @importFrom IRanges PartitioningByEnd
+#' 
 findMismatchPositions <- function(pattern, subject) {
   ## Code from https://support.bioconductor.org/p/63460/
   pattern <- DNAStringSet(rep(pattern, length(subject)))
