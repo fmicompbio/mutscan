@@ -32,12 +32,12 @@ calcErrorStats <- function(L, expectedForward = NULL, expectedReverse = NULL,
   if (!is(L, "list") || !all(c("constantSeqForward","constantSeqReverse") %in% names(L))) {
     stop("'L' must be a list with elements 'constantSeqForward','constantSeqReverse'.")
   }
-  if (!is.null(expectedForward) && !is(expectedForward, "character") ||
-      length(expectedForward) != 1L) {
+  if (!is.null(expectedForward) && (!is(expectedForward, "character") ||
+      length(expectedForward) != 1L)) {
     stop("'expectedForward' must be length-1 character or NULL.")
   }
-  if (!is.null(expectedReverse) && !is(expectedReverse, "character") ||
-      length(expectedReverse) != 1L) {
+  if (!is.null(expectedReverse) && (!is(expectedReverse, "character") ||
+      length(expectedReverse) != 1L)) {
     stop("'expectedReverse' must be length-1 character or NULL.")
   }
   numberReads <- length(L$constantSeqForward)
