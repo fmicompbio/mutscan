@@ -1,3 +1,25 @@
+#' Check if "sequences" argument is valid
+#' 
+#' Currently: check if it is a list with expected elements.
+#' 
+#' @param L A list as returned by \code{readFastqsTrans}
+#' 
+isValidL <- function(L) {
+  if (!is(L, "list") ||
+      !identical(names(L), c("umis","constantSeqForward","constantSeqReverse",
+                             "variableSeqForward","variableSeqReverse","readSummary")) ||
+      !is(L$umis, "QualityScaledDNAStringSet") ||
+      !is(L$constantSeqForward, "QualityScaledDNAStringSet") ||
+      !is(L$constantSeqReverse, "QualityScaledDNAStringSet") ||
+      !is(L$variableSeqForward, "QualityScaledDNAStringSet") ||
+      !is(L$variableSeqReverse, "QualityScaledDNAStringSet") ||
+      !is(L$readSummary, "data.frame")) {
+    stop("'L' must be a 6-element list as returned by 'readFastqsTrans'.")
+  }
+  return(invisible(TRUE))
+}
+
+
 #' Find positions of mismatching bases in DNAStringSet
 #' 
 #' Compare sequences in a DNAStringSet to expected sequence
@@ -38,7 +60,7 @@ findMismatchPositions <- function(pattern, subject) {
   offsets <- c(0L, breakpoints[-length(breakpoints)])
   nucleotideMismatches <- nucleotideMismatches - offsets
   
-  codonMismatches <- (nucleotideMismatches - 1) %/% 3
+  codonMismatches <- (nucleotideMismatches - 1) %/% 3 + 1
   
   list(nucleotideMismatches = nucleotideMismatches,
        codonMismatches = codonMismatches)

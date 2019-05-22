@@ -29,9 +29,7 @@ calcErrorStats <- function(L, expectedForward = NULL, expectedReverse = NULL,
   ## --------------------------------------------------------------------------
   ## Pre-flight checks
   ## --------------------------------------------------------------------------
-  if (!is(L, "list") || !all(c("constantSeqForward","constantSeqReverse") %in% names(L))) {
-    stop("'L' must be a list with elements 'constantSeqForward','constantSeqReverse'.")
-  }
+  isValidL(L)
   if (!is.null(expectedForward) && (!is(expectedForward, "character") ||
       length(expectedForward) != 1L)) {
     stop("'expectedForward' must be length-1 character or NULL.")

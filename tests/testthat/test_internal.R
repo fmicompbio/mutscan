@@ -1,3 +1,16 @@
+context("isValidL")
+
+test_that("isValidL works as expected", {
+  s <- QualityScaledDNAStringSet(c("AAAAAAAAAA", "ACAAAAAAAC"),
+                                 Biostrings::PhredQuality(c("FFFFFFFFFF", "FBFFFFFFF<")))
+  L <- list(umis = s, constantSeqForward = s, constantSeqReverse = s,
+            variableSeqForward = s, variableSeqReverse = s, readSummary = data.frame())
+  expect_true(isValidL(L))
+  expect_error(isValidL(L[-1]))
+  expect_error(isValidL(unname(L)))
+})
+
+
 context("findMismatchPositions")
 
 test_that("findMismatchPositions works as expected", {
@@ -34,4 +47,7 @@ test_that("tabulateQualitiesByMatchstate works as expected", {
   expect_length(res$error, 99L)
   expect_identical(sum(res$error), 7L)
   expect_equal(unname(which(res$error > 0)), c(14, 22, 27, 33, 37))
+  
+  res2 <- findMismatchPositions(patt, subj)
+  expect_identical(sum(lengths(res2$nucleotideMismatches)), sum(res$error))
 })

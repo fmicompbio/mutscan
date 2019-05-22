@@ -22,13 +22,16 @@
 #'   pairs are reported in the return value.
 #' @param verbose Logical(1), whether to print out progress messages.
 #'
-#' @return A list with five elements: \describe{ \item{umis}{Merged forward and
-#'   reverse UMI sequences} \item{constantSeqForward}{Constant forward sequence}
+#' @return A list with six elements: \describe{ 
+#'   \item{umis}{Merged forward and reverse UMI sequences}
+#'   \item{constantSeqForward}{Constant forward sequence}
 #'   \item{constantSeqReverse}{Constant reverse sequence}
 #'   \item{variableSeqForward}{Variable forward sequence}
 #'   \item{variableSeqReverse}{Variable reverse sequence}
-#'   \item{numberReadPairsFiltered}{Number of read pairs filtered out because of 
-#'   matches to adapter sequence(s)} }
+#'   \item{readSummary}{data.frame tabulating the total number of read pairs, 
+#'   and the number of read pairs filtered out because of 
+#'   matches to adapter sequence(s)} 
+#' }
 #'
 #' @export
 #'
@@ -91,6 +94,7 @@ readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
   stopifnot(
     length(fqf) == length(fqr)
   )
+  totalNbrReads <- length(fqf)
   
   ## Here we should check that the reads are in the same order, and set the 
   ## names to be the same in both files
@@ -184,7 +188,8 @@ readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
     constantSeqReverse = constantSeqReverse,
     variableSeqForward = variableSeqForward,
     variableSeqReverse = variableSeqReverse,
-    numberReadPairsFiltered = numberReadPairsFiltered
+    readSummary = data.frame(totalNbrReadPairs = totalNbrReads, 
+                             nbrReadPairsWithAdapter = numberReadPairsFiltered)
   ))
   
 }

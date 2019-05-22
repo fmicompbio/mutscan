@@ -31,12 +31,13 @@ transInput <- readFastqsTrans(fastqForward = file.path(datadir, "transInput_1.fa
                               umiLengthReverse = 8, constantLengthForward = 18,
                               constantLengthReverse = 20, adapterForward = "GGAAGAGCACACGTC", 
                               adapterReverse = "GGAAGAGCGTCGTGT", verbose = TRUE)
+transInput$readSummary
 ```
 
 ## Estimate sequencing error rate from constant sequences
 
 ```{r}
-errStats <- calcErrorStats(transInput, expectedForward = "AACCGGAGGAGGGAGCTG", 
+errStats <- calcErrorStats(transInputFiltered, expectedForward = "AACCGGAGGAGGGAGCTG", 
                            expectedReverse = "GAAAAAGGAAGCTGGAGAGA", verbose = TRUE)
 errStats$propErrorsConstantF
 errStats$propErrorsConstantR
@@ -46,6 +47,10 @@ errStats$propErrorsConstantR
 
 ```{r}
 transInputFiltered <- filterTrans(transInput, avePhredMin = 20, 
-                                  variableNMax = 0, umiNMax = 0)
+                                  variableNMax = 0, umiNMax = 0, 
+                                  wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+                                  wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
+                                  nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = "NNW")
+transInputFiltered$readSummary
 ```
 
