@@ -1,0 +1,51 @@
+---
+title: "mutscan"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{mutscan}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(mutscan)
+```
+
+## Read example data
+
+```{r}
+datadir <- system.file("extdata", package = "mutscan")
+dir(datadir)
+transInput <- readFastqsTrans(fastqForward = file.path(datadir, "transInput_1.fastq.gz"),
+                              fastqReverse = file.path(datadir, "transInput_2.fastq.gz"),
+                              skipForward = 1, skipReverse = 1, umiLengthForward = 10, 
+                              umiLengthReverse = 8, constantLengthForward = 18,
+                              constantLengthReverse = 20, adapterForward = "GGAAGAGCACACGTC", 
+                              adapterReverse = "GGAAGAGCGTCGTGT", verbose = TRUE)
+```
+
+## Estimate sequencing error rate from constant sequences
+
+```{r}
+errStats <- calcErrorStats(transInput, expectedForward = "AACCGGAGGAGGGAGCTG", 
+                           expectedReverse = "GAAAAAGGAAGCTGGAGAGA", verbose = TRUE)
+errStats$propErrorsConstantF
+errStats$propErrorsConstantR
+```
+
+## Filter reads
+
+```{r}
+transInputFiltered <- filterTrans(transInput, avePhredMin = 20, 
+                                  variableNMax = 0, umiNMax = 0)
+```
+

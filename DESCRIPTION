@@ -20,7 +20,10 @@ Imports:
     Biostrings,
     ShortRead
 Suggests: 
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
 License: GPL-2
 Encoding: UTF-8
 RoxygenNote: 6.1.1
+VignetteBuilder: knitr
