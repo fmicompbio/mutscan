@@ -34,15 +34,6 @@ transInput <- readFastqsTrans(fastqForward = file.path(datadir, "transInput_1.fa
 transInput$readSummary
 ```
 
-## Estimate sequencing error rate from constant sequences
-
-```{r}
-errStats <- calcErrorStats(transInputFiltered, expectedForward = "AACCGGAGGAGGGAGCTG", 
-                           expectedReverse = "GAAAAAGGAAGCTGGAGAGA", verbose = TRUE)
-errStats$propErrorsConstantF
-errStats$propErrorsConstantR
-```
-
 ## Filter reads
 
 ```{r}
@@ -52,5 +43,22 @@ transInputFiltered <- filterTrans(transInput, avePhredMin = 20,
                                   wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
                                   nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = "NNW")
 transInputFiltered$readSummary
+```
+
+## Estimate sequencing error rate from constant sequences
+
+```{r}
+errStats <- calcErrorStats(transInputFiltered, expectedForward = "AACCGGAGGAGGGAGCTG", 
+                           expectedReverse = "GAAAAAGGAAGCTGGAGAGA", verbose = TRUE)
+errStats$propErrorsConstantF
+errStats$propErrorsConstantR
+```
+
+## Count occurrences of each combination of variants 
+
+```{r}
+count <- as.data.frame(table(paste(transInputFiltered$variableSeqForward, 
+                                   transInputFiltered$variableSeqReverse, 
+                                   sep = "__")))
 ```
 
