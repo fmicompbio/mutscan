@@ -13,7 +13,9 @@ isValidL <- function(L) {
       !is(L$constantSeqReverse, "QualityScaledDNAStringSet") ||
       !is(L$variableSeqForward, "QualityScaledDNAStringSet") ||
       !is(L$variableSeqReverse, "QualityScaledDNAStringSet") ||
-      !is(L$readSummary, "data.frame")) {
+      !is(L$readSummary, "data.frame") ||
+      ("minQualMutatedForward" %in% names(L) && !is.numeric(L$minQualMutatedForward)) ||
+      ("minQualMutatedReverse" %in% names(L) && !is.numeric(L$minQualMutatedReverse))) {
     stop("'L' must be a list as returned by 'readFastqsTrans' or 'filterTrans'.")
   }
   return(invisible(TRUE))

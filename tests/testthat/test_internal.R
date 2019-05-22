@@ -5,7 +5,12 @@ test_that("isValidL works as expected", {
                                  Biostrings::PhredQuality(c("FFFFFFFFFF", "FBFFFFFFF<")))
   L <- list(umis = s, constantSeqForward = s, constantSeqReverse = s,
             variableSeqForward = s, variableSeqReverse = s, readSummary = data.frame())
+  L2 <- list(umis = s, constantSeqForward = s, constantSeqReverse = s,
+             variableSeqForward = s, variableSeqReverse = s,
+             minQualMutatedForward = 1:2, minQualMutatedReverse = 1:2,
+             readSummary = data.frame())
   expect_true(isValidL(L))
+  expect_true(isValidL(L2))
   expect_error(isValidL(L[-1]))
   expect_error(isValidL(unname(L)))
 })
