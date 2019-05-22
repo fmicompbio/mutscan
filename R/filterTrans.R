@@ -8,22 +8,26 @@
 #' @param umiNMax Numeric(1) Maximum number of Ns in the UMI for a 
 #'   read to be retained.   
 #'
-#' @return A filtered list with six element:
+#' @return A filtered list with eight elements:
 #' \describe{
 #'   \item{umis}{Merged forward and reverse UMI sequences}
 #'   \item{constantSeqForward}{Constant forward sequence}
 #'   \item{constantSeqReverse}{Constant reverse sequence}
 #'   \item{variableSeqForward}{Variable forward sequence}
 #'   \item{variableSeqReverse}{Variable reverse sequence}
+#'   \item{minQualMutatedForward}{Minimal base quality of a mutated base in forward sequence}
+#'   \item{minQualMutatedReverse}{Minimal base quality of a mutated base in reverse sequence}
 #'   \item{readSummary}{data.frame tabulating the total number of read pairs, 
 #'   and the number that match any of the filtering criteria.} 
 #' }
 #' 
 #' @export
 #' 
-#' @importFrom Biostrings quality vcountPattern
-#' @importFrom ShortRead alphabetScore
+#' @importFrom Biostrings quality vcountPattern vmatchPattern
+#' @importFrom ShortRead alphabetScore FastqQuality
 #' @importFrom BiocGenerics width
+#' @importFrom matrixStats rowMins
+#' @importFrom S4Vectors elementNROWS endoapply
 #' 
 #' @author Charlotte Soneson
 #'
