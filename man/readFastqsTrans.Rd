@@ -32,13 +32,16 @@ pairs are reported in the return value.}
 \item{verbose}{Logical(1), whether to print out progress messages.}
 }
 \value{
-A list with five elements: \describe{ \item{umis}{Merged forward and
-  reverse UMI sequences} \item{constantSeqForward}{Constant forward sequence}
+A list with six elements: \describe{ 
+  \item{umis}{Merged forward and reverse UMI sequences}
+  \item{constantSeqForward}{Constant forward sequence}
   \item{constantSeqReverse}{Constant reverse sequence}
   \item{variableSeqForward}{Variable forward sequence}
   \item{variableSeqReverse}{Variable reverse sequence}
-  \item{numberReadPairsFiltered}{Number of read pairs filtered out because of 
-  matches to adapter sequence(s)} }
+  \item{readSummary}{data.frame tabulating the total number of read pairs, 
+  and the number of read pairs filtered out because of 
+  matches to adapter sequence(s)} 
+}
 }
 \description{
 It is assumed that both the forward and reverse reads are of the form UMI -

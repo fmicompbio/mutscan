@@ -4,7 +4,9 @@
 \alias{filterTrans}
 \title{Filter FASTQ files from TRANS experiment}
 \usage{
-filterTrans(L, avePhredMin = 20, variableNMax = 0, umiNMax = 0)
+filterTrans(L, avePhredMin = 20, variableNMax = 0, umiNMax = 0,
+  wildTypeForward = NULL, wildTypeReverse = NULL,
+  nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = NULL)
 }
 \arguments{
 \item{L}{List, as output by \code{readTransFastqs}.}
@@ -19,13 +21,17 @@ variable region for a read to be retained.}
 read to be retained.}
 }
 \value{
-A filtered list with five element:
+A filtered list with eight elements:
 \describe{
   \item{umis}{Merged forward and reverse UMI sequences}
   \item{constantSeqForward}{Constant forward sequence}
   \item{constantSeqReverse}{Constant reverse sequence}
   \item{variableSeqForward}{Variable forward sequence}
   \item{variableSeqReverse}{Variable reverse sequence}
+  \item{minQualMutatedForward}{Minimal base quality of a mutated base in forward sequence}
+  \item{minQualMutatedReverse}{Minimal base quality of a mutated base in reverse sequence}
+  \item{readSummary}{data.frame tabulating the total number of read pairs, 
+  and the number that match any of the filtering criteria.} 
 }
 }
 \description{

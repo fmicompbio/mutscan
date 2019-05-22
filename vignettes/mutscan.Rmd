@@ -48,8 +48,12 @@ transInputFiltered$readSummary
 ## Estimate sequencing error rate from constant sequences
 
 ```{r}
-errStats <- calcErrorStats(transInputFiltered, expectedForward = "AACCGGAGGAGGGAGCTG", 
-                           expectedReverse = "GAAAAAGGAAGCTGGAGAGA", verbose = TRUE)
+# user-provided expected sequences
+# errStats <- calcErrorStats(transInputFiltered, expectedForward = "AACCGGAGGAGGGAGCTG", 
+#                            expectedReverse = "GAAAAAGGAAGCTGGAGAGA", verbose = TRUE)
+
+# auto-detect expected sequences
+errStats <- calcErrorStats(transInputFiltered, verbose = TRUE)
 errStats$propErrorsConstantF
 errStats$propErrorsConstantR
 ```
