@@ -6,15 +6,15 @@
 #' 
 isValidL <- function(L) {
   if (!is(L, "list") ||
-      !identical(names(L), c("umis","constantSeqForward","constantSeqReverse",
-                             "variableSeqForward","variableSeqReverse","readSummary")) ||
+      !all(c("umis","constantSeqForward","constantSeqReverse",
+             "variableSeqForward","variableSeqReverse","readSummary") %in% names(L)) ||
       !is(L$umis, "QualityScaledDNAStringSet") ||
       !is(L$constantSeqForward, "QualityScaledDNAStringSet") ||
       !is(L$constantSeqReverse, "QualityScaledDNAStringSet") ||
       !is(L$variableSeqForward, "QualityScaledDNAStringSet") ||
       !is(L$variableSeqReverse, "QualityScaledDNAStringSet") ||
       !is(L$readSummary, "data.frame")) {
-    stop("'L' must be a 6-element list as returned by 'readFastqsTrans'.")
+    stop("'L' must be a list as returned by 'readFastqsTrans' or 'filterTrans'.")
   }
   return(invisible(TRUE))
 }
