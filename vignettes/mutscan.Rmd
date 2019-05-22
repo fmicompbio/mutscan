@@ -22,7 +22,7 @@ library(mutscan)
 
 ## Read example data
 
-```{r}
+```{r readTrans}
 datadir <- system.file("extdata", package = "mutscan")
 dir(datadir)
 transInput <- readFastqsTrans(fastqForward = file.path(datadir, "transInput_1.fastq.gz"),
@@ -36,7 +36,7 @@ transInput$readSummary
 
 ## Filter reads
 
-```{r}
+```{r filterTrans}
 transInputFiltered <- filterTrans(transInput, avePhredMin = 20, 
                                   variableNMax = 0, umiNMax = 0, 
                                   wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
@@ -47,7 +47,7 @@ transInputFiltered$readSummary
 
 ## Estimate sequencing error rate from constant sequences
 
-```{r}
+```{r errStats}
 # user-provided expected sequences
 # errStats <- calcErrorStats(transInputFiltered, expectedForward = "AACCGGAGGAGGGAGCTG", 
 #                            expectedReverse = "GAAAAAGGAAGCTGGAGAGA", verbose = TRUE)
@@ -60,7 +60,7 @@ errStats$propErrorsConstantR
 
 ## Count occurrences of each combination of variants 
 
-```{r}
+```{r count}
 count <- as.data.frame(table(paste(transInputFiltered$variableSeqForward, 
                                    transInputFiltered$variableSeqReverse, 
                                    sep = "__")))
