@@ -55,7 +55,7 @@ calcErrorStats <- function(L, expectedForward = NULL, expectedReverse = NULL,
     if (verbose) {
       message("identifying expectedForward...", appendLF = FALSE)
     }
-    tabF <- tables(L$constantSeqForward)
+    tabF <- ShortRead::tables(L$constantSeqForward)
     expectedForward <- names(tabF$top)[1]
     if (verbose) {
       message("done: ", expectedForward, " (", round(100 * tabF$top[1] / numberReads, 1), "%)")
@@ -68,7 +68,7 @@ calcErrorStats <- function(L, expectedForward = NULL, expectedReverse = NULL,
     if (verbose) {
       message("identifying expectedReverse...", appendLF = FALSE)
     }
-    tabR <- tables(L$constantSeqReverse)
+    tabR <- ShortRead::tables(L$constantSeqReverse)
     expectedReverse <- names(tabR$top)[1]
     if (verbose) {
       message("done: ", expectedReverse, " (", round(100 * tabR$top[1] / numberReads, 1), "%)")

@@ -20,7 +20,8 @@ Imports:
     Biostrings,
     ShortRead,
     matrixStats,
-    S4Vectors
+    S4Vectors,
+    IRanges
 Suggests: 
     testthat,
     knitr,

@@ -28,6 +28,7 @@
 #' @importFrom BiocGenerics width
 #' @importFrom matrixStats rowMins
 #' @importFrom S4Vectors elementNROWS endoapply
+#' @importFrom IRanges start
 #' 
 #' @author Charlotte Soneson
 #'
@@ -108,7 +109,7 @@ filterTrans <- function(L, avePhredMin = 20, variableNMax = 0, umiNMax = 0,
                                       as(L$variableSeqForward[mutCodons], "DNAStringSet"), 
                                       fixed = FALSE)
       keepWildTypeForward <- keepWildTypeForward & !vapply(matchForbidden, function(v) {
-        any(start(v) %% 3 == 1)
+        any(IRanges::start(v) %% 3 == 1)
       }, FALSE)
     }
   }
@@ -129,7 +130,7 @@ filterTrans <- function(L, avePhredMin = 20, variableNMax = 0, umiNMax = 0,
                                       as(L$variableSeqReverse[mutCodons], "DNAStringSet"), 
                                       fixed = FALSE)
       keepWildTypeReverse <- keepWildTypeReverse & !vapply(matchForbidden, function(v) {
-        any(start(v) %% 3 == 1)
+        any(IRanges::start(v) %% 3 == 1)
       }, FALSE)
     }
   }
