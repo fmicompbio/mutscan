@@ -66,10 +66,10 @@ filterTrans <- function(L, avePhredMin = 20,
     variableNbrNReverse <= variableNMax & 
     umiNbrN <= umiNMax
   
-  return(list(umis = umis[toKeep], 
-              constantSeqForward = constantSeqForward[toKeep], 
-              constantSeqReverse = constantSeqReverse[toKeep],
-              variableSeqForward = variableSeqForward[toKeep],
-              variableSeqReverse = variableSeqReverse[toKeep]))
+  return(list(umis = L$umis[toKeep], 
+              constantSeqForward = L$constantSeqForward[toKeep], 
+              constantSeqReverse = L$constantSeqReverse[toKeep],
+              variableSeqForward = L$variableSeqForward[toKeep],
+              variableSeqReverse = L$variableSeqReverse[toKeep]))
 
 }

@@ -33,7 +33,8 @@
 #' @export
 #'
 #' @importFrom Biostrings readQualityScaledDNAStringSet subseq
-#'   QualityScaledDNAStringSet xscat quality vcountPattern
+#'   QualityScaledDNAStringSet xscat quality vcountPattern 
+#'   DNA_ALPHABET
 #' @importFrom ShortRead readFastq
 #'
 #' @author Charlotte Soneson
@@ -43,6 +44,32 @@ readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
                             umiLengthReverse = 8, constantLengthForward = 18,
                             constantLengthReverse = 20, adapterForward = NULL, 
                             adapterReverse = NULL, verbose = FALSE) {
+  ## --------------------------------------------------------------------------
+  ## Pre-flight checks
+  ## --------------------------------------------------------------------------
+  if (!is(fastqForward, "character") || length(fastqForward) != 1 || 
+      !file.exists(fastqForward)) {
+    stop("'fastqForward' must be a length-1 character vector pointing to an 
+         existing file.")
+  }
+  if (!is(fastqReverse, "character") || length(fastqReverse) != 1 || 
+      !file.exists(fastqReverse)) {
+    stop("'fastqReverse' must be a length-1 character vector pointing to an 
+         existing file.")
+  }
+  
+  ## Check that adapter sequences only contain valid letters 
+  ## (that would be allowed in a DNAStringSet)
+  alph <- Biostrings::DNA_ALPHABET
+  alph <- rev(as.character(sort(relevel(as.factor(alph), ref = "-"))))
+  rgxdna <- paste0("^[", paste(alph, collapse = ""), "]+$")
+  if (!is.null(adapterForward) && !grepl(rgxdna, adapterForward)) {
+    stop("'adapterForward can only contain letters from Biostrings::DNA_ALPHABET")
+  }
+  if (!is.null(adapterReverse) && !grepl(rgxdna, adapterReverse)) {
+    stop("'adapterReverse can only contain letters from Biostrings::DNA_ALPHABET")
+  }
+  
   ## --------------------------------------------------------------------------
   ## Read forward and reverse FASTQ files
   ## --------------------------------------------------------------------------
@@ -83,12 +110,12 @@ readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
   }
   if (any(hasAdapterMatch)) {
     numberReadPairsFiltered <- sum(hasAdapterMatch)
-    fqf <- fqf[!hasAdapterMatch]
-    fqr <- fqr[!hasAdapterMatch]
     if (verbose) {
-      message("Filtered out ", numberReadPairsFiltered, " reads (", 
+      message("Filtering out ", numberReadPairsFiltered, " reads (", 
               round(numberReadPairsFiltered/length(fqf) * 100, 2), "%).")
     }
+    fqf <- fqf[!hasAdapterMatch]
+    fqr <- fqr[!hasAdapterMatch]
   }
   
   ## --------------------------------------------------------------------------

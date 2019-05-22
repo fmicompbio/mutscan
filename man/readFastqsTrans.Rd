@@ -7,26 +7,29 @@
 readFastqsTrans(fastqForward, fastqReverse, skipForward = 1,
   skipReverse = 1, umiLengthForward = 10, umiLengthReverse = 8,
   constantLengthForward = 18, constantLengthReverse = 20,
-  adapterForward = NULL, adapterReverse = NULL)
+  adapterForward = NULL, adapterReverse = NULL, verbose = FALSE)
 }
 \arguments{
-\item{fastqForward, fastqReverse}{FASTQ files corresponding to forward and
-reverse reads, respectively.}
+\item{fastqForward, fastqReverse}{Character(1), FASTQ files corresponding to 
+forward and reverse reads, respectively.}
 
 \item{skipForward, skipReverse}{Numeric(1), the number of bases to skip in the
 start of each read.}
 
 \item{umiLengthForward, umiLengthReverse}{Numeric(1), the length of the
 barcode (UMI) sequence in the forward/reverse reads, respectively, not
-including the skipped bases.}
+including the skipped bases (defined by \code{skipForward}/\code{skipReverse}.}
 
-\item{constantLengthForward, constantLengthReverse}{Numeric(1), the length of
+\item{constantLengthForward, constantLengthReverse}{Numeric(1), the lengths of
 the constant sequence in the forward/reverse reads, respectively.}
 
-\item{adapterForward, adapterReverse}{Character(1), the adapter sequences, if
-found in forward/reverse sequences, the sequence pair will be filtered out.
+\item{adapterForward, adapterReverse}{Character(1), the adapter sequences for 
+forward/reverse reads, respectively. If a forward/reverse read contains the 
+corresponding adapter sequence, the sequence pair will be filtered out.
 \code{NULL} does not perform any filtering. The number of filtered read
 pairs are reported in the return value.}
+
+\item{verbose}{Logical(1), whether to print out progress messages.}
 }
 \value{
 A list with five elements: \describe{ \item{umis}{Merged forward and
@@ -34,13 +37,15 @@ A list with five elements: \describe{ \item{umis}{Merged forward and
   \item{constantSeqReverse}{Constant reverse sequence}
   \item{variableSeqForward}{Variable forward sequence}
   \item{variableSeqReverse}{Variable reverse sequence}
-  \item{numberReadPairsFiltered}{because of matches to adaptor sequence(s)} }
+  \item{numberReadPairsFiltered}{Number of read pairs filtered out because of 
+  matches to adapter sequence(s)} }
 }
 \description{
-It is assumed that the forward and reverse reads are of the form UMI -
+It is assumed that both the forward and reverse reads are of the form UMI -
 constant sequence - variable sequence, and that the length of the UMI
 sequence, and the length of the constant sequence, is the same across all the
-reads.
+reads in the same file (but it can be different for the forward and reverse 
+reads).
 }
 \author{
 Charlotte Soneson
