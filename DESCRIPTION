@@ -18,7 +18,9 @@ Depends:
 Imports:
     BiocGenerics,
     Biostrings,
-    ShortRead
+    ShortRead,
+    matrixStats,
+    S4Vectors
 Suggests: 
     testthat,
     knitr,
