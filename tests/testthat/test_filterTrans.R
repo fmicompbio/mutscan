@@ -1,0 +1,27 @@
+context("filterTrans")
+
+test_that("filterTrans works as expected", {
+  fnameR1 <- system.file("extdata", "transInput_1.fastq.gz", package = "mutscan")
+  fnameR2 <- system.file("extdata", "transInput_2.fastq.gz", package = "mutscan")
+  
+  transInput <- readFastqsTrans(fastqForward = fnameR1, fastqReverse = fnameR2,
+                                skipForward = 1, skipReverse = 1, umiLengthForward = 10, 
+                                umiLengthReverse = 8, constantLengthForward = 18,
+                                constantLengthReverse = 20, adapterForward = "GGAAGAGCACACGTC", 
+                                adapterReverse = "GGAAGAGCGTCGTGT", verbose = FALSE)
+  transInputFiltered1 <- filterTrans(transInput, avePhredMin = 20, 
+                                     variableNMax = 0, umiNMax = 0, 
+                                     wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+                                     wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
+                                     nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = "NNW")
+  transInputFiltered2 <- filterTrans(transInput, avePhredMin = 20, 
+                                     variableNMax = 0, umiNMax = 0, 
+                                     wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+                                     wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
+                                     nbrMutatedCodonsMax = 2)
+  expect_true(isValidL(transInputFiltered1))
+  expect_true(isValidL(transInputFiltered2))
+  expect_identical(transInputFiltered1$readSummary[1,"totalNbrReadPairsPassedFilters"], 279L)
+  expect_identical(transInputFiltered2$readSummary[1,"totalNbrReadPairsPassedFilters"], 489L)
+})
+

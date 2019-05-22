@@ -64,5 +64,6 @@ errStats$propErrorsConstantR
 count <- as.data.frame(table(paste(transInputFiltered$variableSeqForward, 
                                    transInputFiltered$variableSeqReverse, 
                                    sep = "__")))
+table(count$Freq)
 ```
 
