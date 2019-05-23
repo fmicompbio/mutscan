@@ -8,13 +8,13 @@ calcErrorStats(L, expectedForward = NULL, expectedReverse = NULL,
   verbose = FALSE)
 }
 \arguments{
-\item{L}{List, as output by \code{readTransFastqs}.}
+\item{L}{SummarizedExperiment, as output by \code{readFastqs}.}
 
-\item{expectedForward, expectedRevers}{Character(1) with the expected sequences
+\item{expectedForward, expectedReverse}{character(1) with the expected sequences
 of the forward or reverse constant sequences. If \code{NULL}, the most
 frequent sequence will be used.}
 
-\item{verbose}{Logical(1), whether to print out progress messages.}
+\item{verbose}{logical(1), whether to print out progress messages.}
 }
 \value{
 A list with 6 elements:

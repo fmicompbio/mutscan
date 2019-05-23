@@ -10,7 +10,7 @@ mismatchFilter(wildTypeSeq, variableSeq, nbrMutatedCodonsMax = NULL,
 \arguments{
 \item{wildTypeSeq}{character(1), the wild type sequence}
 
-\item{variableSeq}{qualityScaledDNAStringSet, containing the sequences of the
+\item{variableSeq}{QualityScaledDNAStringSet, containing the sequences of the
 variable region}
 
 \item{nbrMutatedCodonsMax}{numeric(1) Maximum number of mutated codons that
@@ -22,10 +22,12 @@ pair contains a mutated codon matching this pattern, it will be filtered
 out.}
 }
 \value{
-A list with two elements:
+A list with four elements:
   \describe{
-    \item{minQualMutated}{Lowest quality for the mutated bases}
+    \item{qualMutated}{IntegerList with qualities for the mutated bases}
     \item{keepMM}{Logical vector, whether to keep each read}
+    \item{basesWithMutations}{IntegerList, mutated base positions}
+    \item{codonsWithMutations}{NumericList, mutated codons}
  }
 }
 \description{

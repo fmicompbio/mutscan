@@ -4,18 +4,15 @@
 #' 
 #' @param L A list as returned by \code{readFastqs}
 #' 
+#' @importFrom methods is
+#' @importFrom SummarizedExperiment assayNames assays
+#' 
 isValidL <- function(L) {
-  if (!is(L, "list") ||
-      !all(c("umis","constantSeqForward","constantSeqReverse",
-             "variableSeqForward","variableSeqReverse","readSummary") %in% names(L)) ||
-      !is(L$umis, "QualityScaledDNAStringSet") ||
-      !is(L$constantSeqForward, "QualityScaledDNAStringSet") ||
-      !is(L$constantSeqReverse, "QualityScaledDNAStringSet") ||
-      !is(L$variableSeqForward, "QualityScaledDNAStringSet") ||
-      (!is(L$variableSeqReverse, "QualityScaledDNAStringSet") && !is.null(L$variableSeqReverse)) ||
-      !is(L$readSummary, "data.frame") ||
-      ("minQualMutatedForward" %in% names(L) && !is.null(L$minQualMutatedForward) && !is.numeric(L$minQualMutatedForward)) ||
-      ("minQualMutatedReverse" %in% names(L) && !is.null(L$minQualMutatedReverse) && !is.numeric(L$minQualMutatedReverse))) {
+  if (!is(L, "SummarizedExperiment") ||
+      !all(c("umis", "constantSeqForward", "constantSeqReverse",
+             "variableSeqForward") %in% SummarizedExperiment::assayNames(L)) ||
+      !all(vapply(SummarizedExperiment::assays(L), class, "") == "DataFrame") ||
+      !all(vapply(SummarizedExperiment::assays(L), function(w) class(w$seq), "") == "QualityScaledDNAStringSet")) {
     stop("'L' must be a list as returned by 'readFastqs' or 'filterReads'.")
   }
   return(invisible(TRUE))
@@ -37,6 +34,7 @@ isValidL <- function(L) {
 #' @importFrom Biostrings DNAStringSet quality
 #' @importFrom BiocGenerics unlist width relist
 #' @importFrom IRanges PartitioningByEnd
+#' @importFrom methods is
 #' 
 findMismatchPositions <- function(pattern, subject) {
   ## Code from https://support.bioconductor.org/p/63460/
@@ -83,6 +81,7 @@ findMismatchPositions <- function(pattern, subject) {
 #'  
 #' @importFrom Biostrings DNAStringSet quality
 #' @importFrom BiocGenerics unlist
+#' @importFrom methods is as
 #' 
 tabulateQualitiesByMatchstate <- function(pattern, subject, maxQ = 99L) {
   if (!is(pattern, "character") || length(pattern) != 1L) {

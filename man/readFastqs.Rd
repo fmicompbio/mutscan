@@ -11,43 +11,43 @@ readFastqs(experimentType, fastqForward, fastqReverse, skipForward = 1,
   adapterForward = NULL, adapterReverse = NULL, verbose = FALSE)
 }
 \arguments{
-\item{experimentType}{Character(1), either "cis" or "trans".}
+\item{experimentType}{character(1), either "cis" or "trans".}
 
-\item{fastqForward, fastqReverse}{Character(1), FASTQ files corresponding to 
-forward and reverse reads, respectively.}
+\item{fastqForward, fastqReverse}{character(1), paths to FASTQ files
+corresponding to forward and reverse reads, respectively.}
 
-\item{skipForward, skipReverse}{Numeric(1), the number of bases to skip in the
+\item{skipForward, skipReverse}{numeric(1), the number of bases to skip in the
 start of each read.}
 
-\item{umiLengthForward, umiLengthReverse}{Numeric(1), the length of the
+\item{umiLengthForward, umiLengthReverse}{numeric(1), the length of the
 barcode (UMI) sequence in the forward/reverse reads, respectively, not
 including the skipped bases (defined by \code{skipForward}/\code{skipReverse}).}
 
-\item{constantLengthForward, constantLengthReverse}{Numeric(1), the lengths of
+\item{constantLengthForward, constantLengthReverse}{numeric(1), the lengths of
 the constant sequence in the forward/reverse reads, respectively.}
 
-\item{variableLengthForward, variableLengthReverse}{Numeric(1), the lengths of 
+\item{variableLengthForward, variableLengthReverse}{numeric(1), the lengths of 
 the variable sequence in the forward/reverse reads, respectively.}
 
-\item{adapterForward, adapterReverse}{Character(1), the adapter sequences for
+\item{adapterForward, adapterReverse}{character(1), the adapter sequences for
 forward/reverse reads, respectively. If a forward/reverse read contains the
 corresponding adapter sequence, the sequence pair will be filtered out.
 \code{NULL} does not perform any filtering. The number of filtered read
 pairs are reported in the return value.}
 
-\item{verbose}{Logical(1), whether to print out progress messages.}
+\item{verbose}{logical(1), whether to print out progress messages.}
 }
 \value{
-A list with six elements: \describe{ 
+A SummarizedExperiment object list with four or five assays: 
+\describe{ 
   \item{umis}{Merged forward and reverse UMI sequences}
   \item{constantSeqForward}{Constant forward sequence}
   \item{constantSeqReverse}{Constant reverse sequence}
   \item{variableSeqForward}{Variable forward sequence}
-  \item{variableSeqReverse}{Variable reverse sequence}
-  \item{readSummary}{data.frame tabulating the experiment type, the total
-  number of read pairs, and the number of read pairs filtered out because of
-  matches to adapter sequence(s)}
+  \item{variableSeqReverse}{Variable reverse sequence, only for TRANS experiments}
 }
+Each assay is a \code{DataFrame} with one column named \code{seq}, which 
+contains a QualityScaledDNAStringSet object.
 }
 \description{
 It is assumed that both the forward and reverse reads are of the form UMI -

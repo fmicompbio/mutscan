@@ -6,8 +6,8 @@
 #' selected. The function assumes that all reads (forward/reverse, and within
 #' each object) have the same length.
 #'
-#' @param read1,read2 qualityScaledDNAStringSet objects containing matched
-#'   forward and reverse reads.
+#' @param readsForward,readsReverse qualityScaledDNAStringSet objects containing
+#'   matched forward and reverse reads.
 #'
 #' @author Charlotte Soneson
 #'

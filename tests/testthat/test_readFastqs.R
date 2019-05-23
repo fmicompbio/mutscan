@@ -12,7 +12,7 @@ test_that("readFastqs works as expected for trans experiments", {
   s1 <- ShortRead::readFastq(fnameR1)
   
   expect_true(isValidL(transInput))
-  expect_identical(length(s1), transInput$readSummary[1,"totalNbrReadPairs"])
-  expect_true(length(s1) == length(transInput$umis) + transInput$readSummary[1,"nbrReadPairsWithAdapter"])
+  expect_identical(length(s1), colData(transInput)[1, "totalNbrReadPairs"])
+  expect_true(length(s1) == length(assay(transInput, "umis")$seq) + colData(transInput)[1, "nbrReadPairsWithAdapter"])
 })
 

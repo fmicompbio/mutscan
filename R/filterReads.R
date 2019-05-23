@@ -1,6 +1,6 @@
 #' Filter FASTQ files from CIS or TRANS experiments
 #'
-#' @param L List, as output by \code{readTransFastqs}.
+#' @param L SummarizedExperiment, as output by \code{readFastqs}.
 #' @param avePhredMin numeric(1) Minimum average Phred score in the variable
 #'   region for a read to be retained. If L contains both forward and reverse
 #'   variable regions, the minimum average Phred score has to be achieved in
@@ -18,20 +18,7 @@
 #'   pair contains a mutated codon matching this pattern, it will be filtered
 #'   out.
 #'
-#' @return A filtered list with eight elements: 
-#'   \describe{ 
-#'     \item{umis}{Merged forward and reverse UMI sequences}
-#'     \item{constantSeqForward}{Constant forward sequence}
-#'     \item{constantSeqReverse}{Constant reverse sequence}
-#'     \item{variableSeqForward}{Variable forward sequence}
-#'     \item{variableSeqReverse}{Variable reverse sequence}
-#'     \item{minQualMutatedForward}{Minimal base quality of a mutated base in
-#'     forward sequence} 
-#'     \item{minQualMutatedReverse}{Minimal base quality of a
-#'     mutated base in reverse sequence} 
-#'     \item{readSummary}{data.frame tabulating the total number of read pairs,
-#'     and the number that match any of the filtering criteria.} 
-#'  }
+#' @return A filtered SummarizedExperiment object
 #'
 #' @export
 #'
@@ -39,8 +26,9 @@
 #' @importFrom ShortRead alphabetScore FastqQuality
 #' @importFrom BiocGenerics width
 #' @importFrom matrixStats rowMins
-#' @importFrom S4Vectors elementNROWS endoapply
+#' @importFrom S4Vectors elementNROWS endoapply DataFrame
 #' @importFrom IRanges start
+#' @importFrom SummarizedExperiment assay assayNames rowData
 #'
 #' @author Charlotte Soneson
 #'   
@@ -51,88 +39,102 @@ filterReads <- function(L, avePhredMin = 20, variableNMax = 0, umiNMax = 0,
   ## Pre-flight checks
   ## --------------------------------------------------------------------------
   isValidL(L)
-  readSummary <- L$readSummary
-  nbrReads <- length(L$variableSeqForward)
+  nbrReads <- length(assay(L, "variableSeqForward")$seq)
   
   ## --------------------------------------------------------------------------
   ## Calculate average Phred score
   ## --------------------------------------------------------------------------
   keepAvePhredVariableForward <- keepAvePhredVariableReverse <- rep(TRUE, nbrReads)
   if (!is.null(avePhredMin)) {
-    if (!is.null(L$variableSeqForward)) {
+    if ("variableSeqForward" %in% SummarizedExperiment::assayNames(L)) {
       avePhredVariableForward <- ShortRead::alphabetScore(
-        Biostrings::quality(L$variableSeqForward)
-      )/BiocGenerics::width(L$variableSeqForward) 
+        Biostrings::quality(assay(L, "variableSeqForward")$seq)
+      )/BiocGenerics::width(assay(L, "variableSeqForward")$seq) 
       keepAvePhredVariableForward <- avePhredVariableForward >= avePhredMin
     }
-    if (!is.null(L$variableSeqReverse)) {
+    if ("variableSeqReverse" %in% SummarizedExperiment::assayNames(L)) {
       avePhredVariableReverse <- ShortRead::alphabetScore(
-        Biostrings::quality(L$variableSeqReverse)
-      )/BiocGenerics::width(L$variableSeqReverse)
+        Biostrings::quality(assay(L, "variableSeqReverse")$seq)
+      )/BiocGenerics::width(assay(L, "variableSeqReverse")$seq)
       keepAvePhredVariableReverse <- avePhredVariableReverse >= avePhredMin
     }
   }
+  L$nbrReadPairsLowAvePhredVariableForward <- sum(!keepAvePhredVariableForward)
+  L$nbrReadPairsLowAvePhredVariableReverse <- sum(!keepAvePhredVariableReverse)
   
   ## --------------------------------------------------------------------------
   ## Count the number of Ns in variable regions
   ## --------------------------------------------------------------------------
   keepVariableNbrNForward <- keepVariableNbrNReverse <- rep(TRUE, nbrReads)
   if (!is.null(variableNMax)) {
-    if (!is.null(L$variableSeqForward)) {
+    if ("variableSeqForward" %in% SummarizedExperiment::assayNames(L)) {
       variableNbrNForward <- Biostrings::vcountPattern(
-        pattern = "N", subject = L$variableSeqForward,
+        pattern = "N", subject = assay(L, "variableSeqForward")$seq,
         max.mismatch = 0, min.mismatch = 0, with.indels = FALSE, 
         fixed = TRUE, algorithm = "auto")
       keepVariableNbrNForward <- variableNbrNForward <= variableNMax
     }
-    if (!is.null(L$variableSeqReverse)) {
+    if ("variableSeqReverse" %in% SummarizedExperiment::assayNames(L)) {
       variableNbrNReverse <- Biostrings::vcountPattern(
-        pattern = "N", subject = L$variableSeqReverse,
+        pattern = "N", subject = assay(L, "variableSeqReverse")$seq,
         max.mismatch = 0, min.mismatch = 0, with.indels = FALSE, 
         fixed = TRUE, algorithm = "auto")
       keepVariableNbrNReverse <- variableNbrNReverse <= variableNMax
     }
   }
+  L$nbrReadPairsTooManyNVariableForward <- sum(!keepVariableNbrNForward)
+  L$nbrReadPairsTooManyNVariableReverse <- sum(!keepVariableNbrNReverse)
   
   ## --------------------------------------------------------------------------
   ## Count the number of Ns in UMIs
   ## --------------------------------------------------------------------------
   keepUMINbrN <- rep(TRUE, nbrReads)
   if (!is.null(umiNMax)) {
-    if (!is.null(L$umis)) {
+    if ("umis" %in% SummarizedExperiment::assayNames(L)) {
       umiNbrN <- Biostrings::vcountPattern(
-        pattern = "N", subject = L$umis,
+        pattern = "N", subject = assay(L, "umis")$seq,
         max.mismatch = 0, min.mismatch = 0, with.indels = FALSE, 
         fixed = TRUE, algorithm = "auto")
       keepUMINbrN <- umiNbrN <= umiNMax
     }
   }
+  L$nbrReadPairsTooManyNUMI <- sum(!keepUMINbrN)
   
   ## --------------------------------------------------------------------------
   ## Find positions where variable region has mismatches
   ## --------------------------------------------------------------------------
   keepWildTypeForward <- keepWildTypeReverse <- rep(TRUE, nbrReads)
-  minQualMutatedForward <- minQualMutatedReverse <- NULL
+  qualMutatedForward <- qualMutatedReverse <- NULL
+  basesWithMutationsForward <- basesWithMutationsReverse <- NULL
+  codonsWithMutationsForward <- codonsWithMutationsReverse <- NULL
   if (!is.null(wildTypeForward)) {
-    if (!is.null(L$variableSeqForward)) {
+    if ("variableSeqForward" %in% SummarizedExperiment::assayNames(L)) {
       filterForward <- mismatchFilter(wildTypeSeq = wildTypeForward, 
-                                      variableSeq = L$variableSeqForward, 
+                                      variableSeq = assay(L, "variableSeqForward")$seq, 
                                       nbrMutatedCodonsMax = nbrMutatedCodonsMax,
                                       forbiddenMutatedCodon = forbiddenMutatedCodon)
-      minQualMutatedForward <- filterForward$minQualMutated
+      SummarizedExperiment::rowData(L)$qualMutatedForward <- filterForward$qualMutated
+      SummarizedExperiment::rowData(L)$basesWithMutationsForward <- filterForward$basesWithMutations
+      SummarizedExperiment::rowData(L)$codonsWithMutationsForward <- filterForward$codonsWithMutations
+      SummarizedExperiment::rowData(L)$encodedMutatedCodonsForward <- filterForward$encodedMutCodons
       keepWildTypeForward <- filterForward$keepMM
     }
   }
   if (!is.null(wildTypeReverse)) {
-    if (!is.null(L$variableSeqReverse)) {
+    if ("variableSeqReverse" %in% SummarizedExperiment::assayNames(L)) {
       filterReverse <- mismatchFilter(wildTypeSeq = wildTypeReverse, 
-                                      variableSeq = L$variableSeqReverse, 
+                                      variableSeq = assay(L, "variableSeqReverse")$seq, 
                                       nbrMutatedCodonsMax = nbrMutatedCodonsMax,
                                       forbiddenMutatedCodon = forbiddenMutatedCodon)
-      minQualMutatedReverse <- filterReverse$minQualMutated
+      SummarizedExperiment::rowData(L)$qualMutatedReverse <- filterReverse$qualMutated
+      SummarizedExperiment::rowData(L)$basesWithMutationsReverse <- filterReverse$basesWithMutations
+      SummarizedExperiment::rowData(L)$codonsWithMutationsReverse <- filterReverse$codonsWithMutations
+      SummarizedExperiment::rowData(L)$encodedMutatedCodonsReverse <- filterReverse$encodedMutCodons
       keepWildTypeReverse <- filterReverse$keepMM
     }
   }
+  L$nbrReadPairsCodonFilterForward <- sum(!keepWildTypeForward)
+  L$nbrReadPairsCodonFilterReverse <- sum(!keepWildTypeReverse)
   
   ## --------------------------------------------------------------------------
   ## Return filtered object
@@ -145,31 +147,15 @@ filterReads <- function(L, avePhredMin = 20, variableNMax = 0, umiNMax = 0,
     keepWildTypeForward & 
     keepWildTypeReverse
   
-  return(list(umis = L$umis[toKeep], 
-              constantSeqForward = L$constantSeqForward[toKeep], 
-              constantSeqReverse = L$constantSeqReverse[toKeep],
-              variableSeqForward = L$variableSeqForward[toKeep],
-              variableSeqReverse = L$variableSeqReverse[toKeep],
-              minQualMutatedForward = minQualMutatedForward[toKeep],
-              minQualMutatedReverse = minQualMutatedReverse[toKeep],
-              readSummary = data.frame(readSummary,
-                                       nbrReadPairsLowAvePhredVariableForward = sum(!keepAvePhredVariableForward),
-                                       nbrReadPairsLowAvePhredVariableReverse = sum(!keepAvePhredVariableReverse),
-                                       nbrReadPairsTooManyNVariableForward = sum(!keepVariableNbrNForward),
-                                       nbrReadPairsTooManyNVariableReverse = sum(!keepVariableNbrNReverse),
-                                       nbrReadPairsTooManyNUMI = sum(!keepUMINbrN),
-                                       nbrReadPairsCodonFilterForward = ifelse(is.null(wildTypeForward),
-                                                                               NA, sum(!keepWildTypeForward)),
-                                       nbrReadPairsCodonFilterReverse = ifelse(is.null(wildTypeReverse),
-                                                                               NA, sum(!keepWildTypeReverse)),
-                                       totalNbrReadPairsPassedFilters = sum(toKeep))))
+  L$totalNbrReadPairsPassedFilters <- sum(toKeep)
+  return(L[toKeep, ])
 
 }
 
 #' Filter reads based on mismatches with the wildtype sequence
 #'
 #' @param wildTypeSeq character(1), the wild type sequence
-#' @param variableSeq qualityScaledDNAStringSet, containing the sequences of the
+#' @param variableSeq QualityScaledDNAStringSet, containing the sequences of the
 #'   variable region
 #' @param nbrMutatedCodonsMax numeric(1) Maximum number of mutated codons that
 #'   are allowed.
@@ -182,10 +168,12 @@ filterReads <- function(L, avePhredMin = 20, variableNMax = 0, umiNMax = 0,
 #' 
 #' @keywords internal
 #' 
-#' @return A list with two elements:
+#' @return A list with four elements:
 #'   \describe{
-#'     \item{minQualMutated}{Lowest quality for the mutated bases}
+#'     \item{qualMutated}{IntegerList with qualities for the mutated bases}
 #'     \item{keepMM}{Logical vector, whether to keep each read}
+#'     \item{basesWithMutations}{IntegerList, mutated base positions}
+#'     \item{codonsWithMutations}{NumericList, mutated codons}
 #'  }
 #' 
 #' @importFrom Biostrings quality vmatchPattern
@@ -197,26 +185,55 @@ filterReads <- function(L, avePhredMin = 20, variableNMax = 0, umiNMax = 0,
 mismatchFilter <- function(wildTypeSeq, variableSeq, nbrMutatedCodonsMax = NULL,
                            forbiddenMutatedCodon = NULL) {
   keepMM <- rep(TRUE, length(variableSeq))
-  mmpForward <- findMismatchPositions(pattern = wildTypeSeq, 
-                                      subject = variableSeq)
-  minQualMutated <- matrixStats::rowMins(
-    as(ShortRead::FastqQuality(Biostrings::quality(variableSeq)[
-      mmpForward$nucleotideMismatches]), "matrix"), na.rm = TRUE)
   
+  ## --------------------------------------------------------------------------
+  ## Find mismatch positions and qualities of mismatched bases
+  ## --------------------------------------------------------------------------
+  mmp <- findMismatchPositions(pattern = wildTypeSeq, 
+                               subject = variableSeq)
+  qualMutated <- as(Biostrings::quality(variableSeq)[mmp$nucleotideMismatches], "IntegerList")
+
+  ## --------------------------------------------------------------------------
+  ## Count number of mutated codons per read
+  ## --------------------------------------------------------------------------
   if (!is.null(nbrMutatedCodonsMax)) {
-    nbrMutCodons <- S4Vectors::elementNROWS(unique(mmpForward$codonMismatches))
+    nbrMutCodons <- S4Vectors::elementNROWS(unique(mmp$codonMismatches))
     keepMM <- nbrMutCodons <= nbrMutatedCodonsMax
   }
+  
+  ## --------------------------------------------------------------------------
+  ## Derive a characterisation of each sequence, in terms of the codons with 
+  ## mismatches
+  ## --------------------------------------------------------------------------
+  uniqueMutCodons <- unique(mmp$codonMismatches)
+  mutCodons <- S4Vectors::endoapply(uniqueMutCodons, 
+                                    function(v) rep(3 * v, each = 3) + c(-2, -1, 0))
+  seqMutCodons <- variableSeq[mutCodons]
+  splitMutCodons <- strsplit(gsub("([^.]{3})", "\\1\\.", as.character(seqMutCodons)), ".", fixed = TRUE)
+  encodedMutCodons <- BiocGenerics::mapply(uniqueMutCodons, splitMutCodons, FUN = function(a, b) {
+    if (length(a) == 0 || length(b) == 0) {
+      return("WT")
+    } else {
+      out <- paste0("c", a, b)
+      return(paste(out, collapse = "_"))
+    }
+  })
+  
+  ## --------------------------------------------------------------------------
+  ## Find any occurrences of the forbidden mutated codon
+  ## --------------------------------------------------------------------------
   if (!is.null(forbiddenMutatedCodon)) {
-    mutCodons <- S4Vectors::endoapply(unique(mmpForward$codonMismatches), 
-                                      function(v) rep(3 * v, each = 3) + c(-2, -1, 0))
     matchForbidden <- Biostrings::vmatchPattern(
       pattern = forbiddenMutatedCodon, 
-      as(variableSeq[mutCodons], "DNAStringSet"), 
+      as(seqMutCodons, "DNAStringSet"), 
       fixed = FALSE)
     keepMM <- keepMM & !vapply(matchForbidden, function(v) {
       any(IRanges::start(v) %% 3 == 1)
     }, FALSE)
   }
-  list(minQualMutated = minQualMutated, keepMM = keepMM)
+  
+  list(qualMutated = qualMutated, keepMM = keepMM,
+       basesWithMutations = mmp$nucleotideMismatches,
+       codonsWithMutations = mmp$codonMismatches,
+       encodedMutCodons = encodedMutCodons)
 }

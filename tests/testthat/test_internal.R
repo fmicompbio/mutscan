@@ -3,16 +3,14 @@ context("isValidL")
 test_that("isValidL works as expected", {
   s <- QualityScaledDNAStringSet(c("AAAAAAAAAA", "ACAAAAAAAC"),
                                  Biostrings::PhredQuality(c("FFFFFFFFFF", "FBFFFFFFF<")))
-  L <- list(umis = s, constantSeqForward = s, constantSeqReverse = s,
-            variableSeqForward = s, variableSeqReverse = s, readSummary = data.frame())
-  L2 <- list(umis = s, constantSeqForward = s, constantSeqReverse = s,
-             variableSeqForward = s, variableSeqReverse = s,
-             minQualMutatedForward = 1:2, minQualMutatedReverse = 1:2,
-             readSummary = data.frame())
+  L <- SummarizedExperiment(
+    assays = list(umis = DataFrame(seq = s),
+                  constantSeqForward = DataFrame(seq = s),
+                  constantSeqReverse = DataFrame(seq = s),
+                  variableSeqForward = DataFrame(seq = s),
+                  variableSeqReverse = DataFrame(seq = s))
+  )
   expect_true(isValidL(L))
-  expect_true(isValidL(L2))
-  expect_error(isValidL(L[-1]))
-  expect_error(isValidL(unname(L)))
 })
 
 

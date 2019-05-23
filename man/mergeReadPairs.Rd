@@ -7,8 +7,8 @@
 mergeReadPairs(readsForward, readsReverse)
 }
 \arguments{
-\item{read1, read2}{qualityScaledDNAStringSet objects containing matched
-forward and reverse reads.}
+\item{readsForward, readsReverse}{qualityScaledDNAStringSet objects containing
+matched forward and reverse reads.}
 }
 \value{
 A QualityScaledDNAStringSet with consensus sequences/qualities

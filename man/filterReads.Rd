@@ -9,7 +9,7 @@ filterReads(L, avePhredMin = 20, variableNMax = 0, umiNMax = 0,
   nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = NULL)
 }
 \arguments{
-\item{L}{List, as output by \code{readTransFastqs}.}
+\item{L}{SummarizedExperiment, as output by \code{readFastqs}.}
 
 \item{avePhredMin}{numeric(1) Minimum average Phred score in the variable
 region for a read to be retained. If L contains both forward and reverse
@@ -34,20 +34,7 @@ pair contains a mutated codon matching this pattern, it will be filtered
 out.}
 }
 \value{
-A filtered list with eight elements: 
-  \describe{ 
-    \item{umis}{Merged forward and reverse UMI sequences}
-    \item{constantSeqForward}{Constant forward sequence}
-    \item{constantSeqReverse}{Constant reverse sequence}
-    \item{variableSeqForward}{Variable forward sequence}
-    \item{variableSeqReverse}{Variable reverse sequence}
-    \item{minQualMutatedForward}{Minimal base quality of a mutated base in
-    forward sequence} 
-    \item{minQualMutatedReverse}{Minimal base quality of a
-    mutated base in reverse sequence} 
-    \item{readSummary}{data.frame tabulating the total number of read pairs,
-    and the number that match any of the filtering criteria.} 
- }
+A filtered SummarizedExperiment object
 }
 \description{
 Filter FASTQ files from CIS or TRANS experiments

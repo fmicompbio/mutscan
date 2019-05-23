@@ -21,7 +21,7 @@ test_that("filterReads works as expected for trans experiments", {
                                      nbrMutatedCodonsMax = 2)
   expect_true(isValidL(transInputFiltered1))
   expect_true(isValidL(transInputFiltered2))
-  expect_identical(transInputFiltered1$readSummary[1,"totalNbrReadPairsPassedFilters"], 279L)
-  expect_identical(transInputFiltered2$readSummary[1,"totalNbrReadPairsPassedFilters"], 489L)
+  expect_identical(colData(transInputFiltered1)[1, "totalNbrReadPairsPassedFilters"], 279L)
+  expect_identical(colData(transInputFiltered2)[1, "totalNbrReadPairsPassedFilters"], 489L)
 })
 

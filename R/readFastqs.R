@@ -6,35 +6,35 @@
 #' reads in the same file (but it can be different for the forward and reverse 
 #' reads).
 #'
-#' @param experimentType Character(1), either "cis" or "trans".
-#' @param fastqForward,fastqReverse Character(1), FASTQ files corresponding to 
-#'   forward and reverse reads, respectively.
-#' @param skipForward,skipReverse Numeric(1), the number of bases to skip in the
+#' @param experimentType character(1), either "cis" or "trans".
+#' @param fastqForward,fastqReverse character(1), paths to FASTQ files
+#'   corresponding to forward and reverse reads, respectively.
+#' @param skipForward,skipReverse numeric(1), the number of bases to skip in the
 #'   start of each read.
-#' @param umiLengthForward,umiLengthReverse Numeric(1), the length of the
+#' @param umiLengthForward,umiLengthReverse numeric(1), the length of the
 #'   barcode (UMI) sequence in the forward/reverse reads, respectively, not
 #'   including the skipped bases (defined by \code{skipForward}/\code{skipReverse}).
-#' @param constantLengthForward,constantLengthReverse Numeric(1), the lengths of
+#' @param constantLengthForward,constantLengthReverse numeric(1), the lengths of
 #'   the constant sequence in the forward/reverse reads, respectively.
-#' @param variableLengthForward,variableLengthReverse Numeric(1), the lengths of 
+#' @param variableLengthForward,variableLengthReverse numeric(1), the lengths of 
 #'   the variable sequence in the forward/reverse reads, respectively.
-#' @param adapterForward,adapterReverse Character(1), the adapter sequences for
+#' @param adapterForward,adapterReverse character(1), the adapter sequences for
 #'   forward/reverse reads, respectively. If a forward/reverse read contains the
 #'   corresponding adapter sequence, the sequence pair will be filtered out.
 #'   \code{NULL} does not perform any filtering. The number of filtered read
 #'   pairs are reported in the return value.
-#' @param verbose Logical(1), whether to print out progress messages.
+#' @param verbose logical(1), whether to print out progress messages.
 #'
-#' @return A list with six elements: \describe{ 
+#' @return A SummarizedExperiment object list with four or five assays: 
+#' \describe{ 
 #'   \item{umis}{Merged forward and reverse UMI sequences}
 #'   \item{constantSeqForward}{Constant forward sequence}
 #'   \item{constantSeqReverse}{Constant reverse sequence}
 #'   \item{variableSeqForward}{Variable forward sequence}
-#'   \item{variableSeqReverse}{Variable reverse sequence}
-#'   \item{readSummary}{data.frame tabulating the experiment type, the total
-#'   number of read pairs, and the number of read pairs filtered out because of
-#'   matches to adapter sequence(s)}
+#'   \item{variableSeqReverse}{Variable reverse sequence, only for TRANS experiments}
 #' }
+#' Each assay is a \code{DataFrame} with one column named \code{seq}, which 
+#' contains a QualityScaledDNAStringSet object.
 #'
 #' @export
 #'
@@ -42,6 +42,9 @@
 #'   QualityScaledDNAStringSet xscat quality vcountPattern 
 #'   DNA_ALPHABET reverseComplement
 #' @importFrom ShortRead readFastq
+#' @importFrom SummarizedExperiment SummarizedExperiment assay
+#' @importFrom S4Vectors DataFrame
+#' @importFrom stats relevel
 #'
 #' @author Charlotte Soneson
 #'   
@@ -72,7 +75,7 @@ readFastqs <- function(experimentType, fastqForward, fastqReverse, skipForward =
   ## Check that adapter sequences only contain valid letters 
   ## (that would be allowed in a DNAStringSet)
   alph <- Biostrings::DNA_ALPHABET
-  alph <- rev(as.character(sort(relevel(as.factor(alph), ref = "-"))))
+  alph <- rev(as.character(sort(stats::relevel(as.factor(alph), ref = "-"))))
   rgxdna <- paste0("^[", paste(alph, collapse = ""), "]+$")
   if (!is.null(adapterForward) && !grepl(rgxdna, adapterForward)) {
     stop("'adapterForward can only contain letters from Biostrings::DNA_ALPHABET")
@@ -206,18 +209,23 @@ readFastqs <- function(experimentType, fastqForward, fastqReverse, skipForward =
   ## --------------------------------------------------------------------------
   ## Return values
   ## --------------------------------------------------------------------------
-  ## For now we return a list - consider defining a new class if 
-  ## that would make things easier. There is also the DNAStringSetList class,
-  ## but that would convert the objects to regular DNAStringSet objects
-  return(list(
-    umis = umis,
-    constantSeqForward = constantSeqForward, 
-    constantSeqReverse = constantSeqReverse,
-    variableSeqForward = variableSeqForward,
-    variableSeqReverse = variableSeqReverse,
-    readSummary = data.frame(totalNbrReadPairs = totalNbrReads, 
-                             nbrReadPairsWithAdapter = numberReadPairsFiltered,
-                             experimentType = experimentType)
-  ))
+  se <- 
+    SummarizedExperiment::SummarizedExperiment(
+      assays = list(umis = S4Vectors::DataFrame(seq = umis),
+                    constantSeqForward = S4Vectors::DataFrame(seq = constantSeqForward),
+                    constantSeqReverse = S4Vectors::DataFrame(seq = constantSeqReverse),
+                    variableSeqForward = S4Vectors::DataFrame(seq = variableSeqForward)
+      ),
+      colData = S4Vectors::DataFrame(
+        totalNbrReadPairs = totalNbrReads, 
+        nbrReadPairsWithAdapter = numberReadPairsFiltered,
+        experimentType = experimentType
+      )
+    )
+  if (!is.null(variableSeqReverse)) {
+    SummarizedExperiment::assay(se, "variableSeqReverse") <- 
+      S4Vectors::DataFrame(seq = variableSeqReverse)
+  }
   
+  return(se)
 }
