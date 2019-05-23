@@ -1,20 +1,20 @@
-context("filterTrans")
+context("filterReads")
 
-test_that("filterTrans works as expected", {
+test_that("filterReads works as expected for trans experiments", {
   fnameR1 <- system.file("extdata", "transInput_1.fastq.gz", package = "mutscan")
   fnameR2 <- system.file("extdata", "transInput_2.fastq.gz", package = "mutscan")
   
-  transInput <- readFastqsTrans(fastqForward = fnameR1, fastqReverse = fnameR2,
-                                skipForward = 1, skipReverse = 1, umiLengthForward = 10, 
-                                umiLengthReverse = 8, constantLengthForward = 18,
-                                constantLengthReverse = 20, adapterForward = "GGAAGAGCACACGTC", 
-                                adapterReverse = "GGAAGAGCGTCGTGT", verbose = FALSE)
-  transInputFiltered1 <- filterTrans(transInput, avePhredMin = 20, 
+  transInput <- readFastqs(experimentType = "trans", fastqForward = fnameR1, fastqReverse = fnameR2,
+                           skipForward = 1, skipReverse = 1, umiLengthForward = 10, 
+                           umiLengthReverse = 8, constantLengthForward = 18,
+                           constantLengthReverse = 20, adapterForward = "GGAAGAGCACACGTC", 
+                           adapterReverse = "GGAAGAGCGTCGTGT", verbose = FALSE)
+  transInputFiltered1 <- filterReads(transInput, avePhredMin = 20, 
                                      variableNMax = 0, umiNMax = 0, 
                                      wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
                                      wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
                                      nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = "NNW")
-  transInputFiltered2 <- filterTrans(transInput, avePhredMin = 20, 
+  transInputFiltered2 <- filterReads(transInput, avePhredMin = 20, 
                                      variableNMax = 0, umiNMax = 0, 
                                      wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
                                      wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 

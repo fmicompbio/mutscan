@@ -1,4 +1,4 @@
-#' Read FASTQ files from TRANS experiment
+#' Read FASTQ files from CIS or TRANS experiment
 #'
 #' It is assumed that both the forward and reverse reads are of the form UMI -
 #' constant sequence - variable sequence, and that the length of the UMI
@@ -6,17 +6,20 @@
 #' reads in the same file (but it can be different for the forward and reverse 
 #' reads).
 #'
+#' @param experimentType Character(1), either "cis" or "trans".
 #' @param fastqForward,fastqReverse Character(1), FASTQ files corresponding to 
 #'   forward and reverse reads, respectively.
 #' @param skipForward,skipReverse Numeric(1), the number of bases to skip in the
 #'   start of each read.
 #' @param umiLengthForward,umiLengthReverse Numeric(1), the length of the
 #'   barcode (UMI) sequence in the forward/reverse reads, respectively, not
-#'   including the skipped bases (defined by \code{skipForward}/\code{skipReverse}.
+#'   including the skipped bases (defined by \code{skipForward}/\code{skipReverse}).
 #' @param constantLengthForward,constantLengthReverse Numeric(1), the lengths of
 #'   the constant sequence in the forward/reverse reads, respectively.
-#' @param adapterForward,adapterReverse Character(1), the adapter sequences for 
-#'   forward/reverse reads, respectively. If a forward/reverse read contains the 
+#' @param variableLengthForward,variableLengthReverse Numeric(1), the lengths of 
+#'   the variable sequence in the forward/reverse reads, respectively.
+#' @param adapterForward,adapterReverse Character(1), the adapter sequences for
+#'   forward/reverse reads, respectively. If a forward/reverse read contains the
 #'   corresponding adapter sequence, the sequence pair will be filtered out.
 #'   \code{NULL} does not perform any filtering. The number of filtered read
 #'   pairs are reported in the return value.
@@ -28,28 +31,33 @@
 #'   \item{constantSeqReverse}{Constant reverse sequence}
 #'   \item{variableSeqForward}{Variable forward sequence}
 #'   \item{variableSeqReverse}{Variable reverse sequence}
-#'   \item{readSummary}{data.frame tabulating the total number of read pairs, 
-#'   and the number of read pairs filtered out because of 
-#'   matches to adapter sequence(s)} 
+#'   \item{readSummary}{data.frame tabulating the experiment type, the total
+#'   number of read pairs, and the number of read pairs filtered out because of
+#'   matches to adapter sequence(s)}
 #' }
 #'
 #' @export
 #'
 #' @importFrom Biostrings readQualityScaledDNAStringSet subseq
 #'   QualityScaledDNAStringSet xscat quality vcountPattern 
-#'   DNA_ALPHABET
+#'   DNA_ALPHABET reverseComplement
 #' @importFrom ShortRead readFastq
 #'
 #' @author Charlotte Soneson
 #'   
-readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
-                            skipReverse = 1, umiLengthForward = 10, 
-                            umiLengthReverse = 8, constantLengthForward = 18,
-                            constantLengthReverse = 20, adapterForward = NULL, 
-                            adapterReverse = NULL, verbose = FALSE) {
+readFastqs <- function(experimentType, fastqForward, fastqReverse, skipForward = 1,
+                       skipReverse = 1, umiLengthForward = 10, 
+                       umiLengthReverse = 8, constantLengthForward = 18,
+                       constantLengthReverse = 20, variableLengthForward = 96,
+                       variableLengthReverse = 96, adapterForward = NULL, 
+                       adapterReverse = NULL, verbose = FALSE) {
   ## --------------------------------------------------------------------------
   ## Pre-flight checks
   ## --------------------------------------------------------------------------
+  if (!is(experimentType, "character") || length(experimentType) != 1 || 
+      !(experimentType %in% c("cis", "trans"))) {
+    stop("'experimentType' must be either 'cis' or 'trans'")
+  }
   if (!is(fastqForward, "character") || length(fastqForward) != 1 || 
       !file.exists(fastqForward)) {
     stop("'fastqForward' must be a length-1 character vector pointing to an 
@@ -107,15 +115,17 @@ readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
   hasAdapterMatch <- rep(FALSE, length(fqf))
   numberReadPairsFiltered <- 0L
   if (!is.null(adapterForward)) {
-    hasAdapterMatch <- vcountPattern(pattern = adapterForward, subject = fqf) > 0
+    hasAdapterMatch <- Biostrings::vcountPattern(pattern = adapterForward, 
+                                                 subject = fqf) > 0
   }
   if (!is.null(adapterReverse)) {
-    hasAdapterMatch <- hasAdapterMatch | (vcountPattern(pattern = adapterReverse, subject = fqr) > 0)
+    hasAdapterMatch <- hasAdapterMatch | 
+      (Biostrings::vcountPattern(pattern = adapterReverse, subject = fqr) > 0)
   }
   if (any(hasAdapterMatch)) {
     numberReadPairsFiltered <- sum(hasAdapterMatch)
     if (verbose) {
-      message("Filtering out ", numberReadPairsFiltered, " reads (", 
+      message("   Filtered out ", numberReadPairsFiltered, " reads (", 
               round(numberReadPairsFiltered/length(fqf) * 100, 2), "%).")
     }
     fqf <- fqf[!hasAdapterMatch]
@@ -135,6 +145,8 @@ readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
   constantEndReverse <- constantStartReverse + constantLengthReverse - 1
   variableStartForward <- constantEndForward + 1
   variableStartReverse <- constantEndReverse + 1
+  variableEndForward <- variableStartForward + variableLengthForward - 1
+  variableEndReverse <- variableStartReverse + variableLengthReverse - 1
   
   ## --------------------------------------------------------------------------
   ## Extract and concatenate UMIs
@@ -148,6 +160,9 @@ readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
                              end = umiEndForward)
   umir <- Biostrings::subseq(fqr, start = umiStartReverse, 
                              end = umiEndReverse)
+  if (experimentType == "cis") {
+    umir <- Biostrings::reverseComplement(umir)
+  }
   umis <- Biostrings::QualityScaledDNAStringSet(
     x = Biostrings::xscat(umif, umir),
     quality = as(Biostrings::xscat(Biostrings::quality(umif), 
@@ -166,6 +181,9 @@ readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
                                            end = constantEndForward)
   constantSeqReverse <- Biostrings::subseq(fqr, start = constantStartReverse,
                                            end = constantEndReverse)
+  if (experimentType == "cis") {
+    constantSeqReverse <- Biostrings::reverseComplement(constantSeqReverse)
+  }
   
   ## --------------------------------------------------------------------------
   ## Extract variable sequences
@@ -173,8 +191,17 @@ readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
   if (verbose) {
     message("Extracting variable sequences")
   }
-  variableSeqForward <- Biostrings::subseq(fqf, start = variableStartForward)
-  variableSeqReverse <- Biostrings::subseq(fqr, start = variableStartReverse)
+  variableSeqForward <- Biostrings::subseq(fqf, start = variableStartForward,
+                                           end = variableEndForward)
+  variableSeqReverse <- Biostrings::subseq(fqr, start = variableStartReverse,
+                                           end = variableEndReverse)
+  if (experimentType == "cis") {
+    variableSeqForward <- mergeReadPairs(
+      readsForward = variableSeqForward,
+      readsReverse = Biostrings::reverseComplement(variableSeqReverse)
+    )
+    variableSeqReverse <- NULL
+  }
   
   ## --------------------------------------------------------------------------
   ## Return values
@@ -189,7 +216,8 @@ readFastqsTrans <- function(fastqForward, fastqReverse, skipForward = 1,
     variableSeqForward = variableSeqForward,
     variableSeqReverse = variableSeqReverse,
     readSummary = data.frame(totalNbrReadPairs = totalNbrReads, 
-                             nbrReadPairsWithAdapter = numberReadPairsFiltered)
+                             nbrReadPairsWithAdapter = numberReadPairsFiltered,
+                             experimentType = experimentType)
   ))
   
 }

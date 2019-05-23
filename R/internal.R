@@ -2,7 +2,7 @@
 #' 
 #' Currently: check if it is a list with expected elements.
 #' 
-#' @param L A list as returned by \code{readFastqsTrans}
+#' @param L A list as returned by \code{readFastqs}
 #' 
 isValidL <- function(L) {
   if (!is(L, "list") ||
@@ -12,11 +12,11 @@ isValidL <- function(L) {
       !is(L$constantSeqForward, "QualityScaledDNAStringSet") ||
       !is(L$constantSeqReverse, "QualityScaledDNAStringSet") ||
       !is(L$variableSeqForward, "QualityScaledDNAStringSet") ||
-      !is(L$variableSeqReverse, "QualityScaledDNAStringSet") ||
+      (!is(L$variableSeqReverse, "QualityScaledDNAStringSet") && !is.null(L$variableSeqReverse)) ||
       !is(L$readSummary, "data.frame") ||
-      ("minQualMutatedForward" %in% names(L) && !is.numeric(L$minQualMutatedForward)) ||
-      ("minQualMutatedReverse" %in% names(L) && !is.numeric(L$minQualMutatedReverse))) {
-    stop("'L' must be a list as returned by 'readFastqsTrans' or 'filterTrans'.")
+      ("minQualMutatedForward" %in% names(L) && !is.null(L$minQualMutatedForward) && !is.numeric(L$minQualMutatedForward)) ||
+      ("minQualMutatedReverse" %in% names(L) && !is.null(L$minQualMutatedReverse) && !is.numeric(L$minQualMutatedReverse))) {
+    stop("'L' must be a list as returned by 'readFastqs' or 'filterReads'.")
   }
   return(invisible(TRUE))
 }

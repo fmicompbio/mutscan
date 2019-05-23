@@ -7,7 +7,7 @@
 isValidL(L)
 }
 \arguments{
-\item{L}{A list as returned by \code{readFastqsTrans}}
+\item{L}{A list as returned by \code{readFastqs}}
 }
 \description{
 Currently: check if it is a list with expected elements.
