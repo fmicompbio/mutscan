@@ -12,12 +12,10 @@ Authors@R:
     	     role = c("aut"),
     	     email = "michael.stadler@fmi.ch",
     	     comment = c(ORCID = "0000-0002-2269-4934")))
-Description: What the package does (one paragraph).
+Description: Preprocessing and statistical analysis of 
+    deep mutational scanning data
 Depends:
-    R (>= 3.6),
-    methods,
-    stats,
-    SummarizedExperiment
+    R (>= 3.6)
 Imports:
     BiocGenerics,
     Biostrings,
@@ -25,7 +23,10 @@ Imports:
     matrixStats,
     S4Vectors,
     IRanges,
-    seqTools
+    seqTools,
+    methods,
+    stats,
+    SummarizedExperiment
 Suggests: 
     testthat,
     knitr,
