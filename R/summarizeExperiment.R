@@ -60,7 +60,7 @@ summarizeExperiment <- function(x, meta) {
   }
   x <- x[nms]
   meta <- meta[ match(nms, meta$Name), ]
-
+  
   ## --------------------------------------------------------------------------
   ## Count observed reads (read pairs)
   ## --------------------------------------------------------------------------

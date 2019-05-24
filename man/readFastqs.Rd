@@ -11,50 +11,66 @@ readFastqs(experimentType, fastqForward, fastqReverse, skipForward = 1,
   adapterForward = NULL, adapterReverse = NULL, verbose = FALSE)
 }
 \arguments{
-\item{experimentType}{character(1), either "cis" or "trans".}
+\item{experimentType}{character(1), either "cis" or "trans". If this is set
+to "cis", the variable sequences from the forward and reverse reads will be
+consolidated into one single sequence.}
 
 \item{fastqForward, fastqReverse}{character(1), paths to FASTQ files
 corresponding to forward and reverse reads, respectively.}
 
 \item{skipForward, skipReverse}{numeric(1), the number of bases to skip in the
-start of each read.}
+start of each forward and reverse read, respectively.}
 
 \item{umiLengthForward, umiLengthReverse}{numeric(1), the length of the
 barcode (UMI) sequence in the forward/reverse reads, respectively, not
-including the skipped bases (defined by \code{skipForward}/\code{skipReverse}).}
+including the skipped bases (defined by
+\code{skipForward}/\code{skipReverse}).}
 
-\item{constantLengthForward, constantLengthReverse}{numeric(1), the lengths of
+\item{constantLengthForward, constantLengthReverse}{numeric(1), the length of
 the constant sequence in the forward/reverse reads, respectively.}
 
-\item{variableLengthForward, variableLengthReverse}{numeric(1), the lengths of 
+\item{variableLengthForward, variableLengthReverse}{numeric(1), the length of
 the variable sequence in the forward/reverse reads, respectively.}
 
-\item{adapterForward, adapterReverse}{character(1), the adapter sequences for
+\item{adapterForward, adapterReverse}{character(1), the adapter sequence for
 forward/reverse reads, respectively. If a forward/reverse read contains the
 corresponding adapter sequence, the sequence pair will be filtered out.
-\code{NULL} does not perform any filtering. The number of filtered read
-pairs are reported in the return value.}
+If set to \code{NULL}, no adapter filtering is performed. The number of
+filtered read pairs are reported in the return value.}
 
 \item{verbose}{logical(1), whether to print out progress messages.}
 }
 \value{
-A SummarizedExperiment object list with four or five assays: 
-\describe{ 
+A SummarizedExperiment object list with four or five assays:
+  \describe{ 
   \item{umis}{Merged forward and reverse UMI sequences}
   \item{constantSeqForward}{Constant forward sequence}
   \item{constantSeqReverse}{Constant reverse sequence}
   \item{variableSeqForward}{Variable forward sequence}
-  \item{variableSeqReverse}{Variable reverse sequence, only for TRANS experiments}
-}
-Each assay is a \code{DataFrame} with one column named \code{seq}, which 
-contains a QualityScaledDNAStringSet object.
+  \item{variableSeqReverse}{Variable reverse sequence, only for TRANS
+  experiments} 
+  } 
+  Each assay is represented as a \code[S4Vectors]{DataFrame} with one column
+  named \code{seq}, which contains a
+  \code[Biostrings]{QualityScaledDNAStringSet} object.
 }
 \description{
 It is assumed that both the forward and reverse reads are of the form UMI -
 constant sequence - variable sequence, and that the length of the UMI
 sequence, and the length of the constant sequence, is the same across all the
-reads in the same file (but it can be different for the forward and reverse 
+reads in the same file (but it can be different for the forward and reverse
 reads).
+}
+\examples{
+datadir <- system.file("extdata", package = "mutscan")
+transInput <- readFastqs(experimentType = "trans", 
+                         fastqForward = file.path(datadir, "transInput_1.fastq.gz"),
+                         fastqReverse = file.path(datadir, "transInput_2.fastq.gz"),
+                         skipForward = 1, skipReverse = 1, umiLengthForward = 10, 
+                         umiLengthReverse = 8, constantLengthForward = 18,
+                         constantLengthReverse = 20, adapterForward = "GGAAGAGCACACGTC", 
+                         adapterReverse = "GGAAGAGCGTCGTGT", verbose = FALSE)
+
 }
 \author{
 Charlotte Soneson

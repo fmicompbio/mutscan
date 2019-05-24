@@ -7,7 +7,7 @@
 summarizeExperiment(x, meta)
 }
 \arguments{
-\item{x}{A named list of "sequences" objects as returned by \code{\link{readFastqs}}
+\item{x}{A named list of SummarizedExperiment objects as returned by \code{\link{readFastqs}}
 or \code{\link{filterReads}}). Names are used to link the objects to the
 metadata provided in \code{meta}.}
 
