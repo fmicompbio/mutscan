@@ -20,7 +20,7 @@
 #'     \item{colData(x)}{containing the metadata provided by \code{meta}.}
 #'   }
 #'
-#' @importFrom SummarizedExperiment SummarizedExperiment
+#' @importFrom SummarizedExperiment SummarizedExperiment colData
 #' @importFrom BiocGenerics paste
 #' @importFrom S4Vectors DataFrame
 #' @importFrom methods is
@@ -34,7 +34,7 @@ summarizeExperiment <- function(x, meta) {
   ## --------------------------------------------------------------------------
   if (!is(x, "list") || is.null(names(x)) ||
       !all(sapply(x, isValidL)) ||
-      length(unique(sapply(x, function(x) colData(x)[1, "experimentType"]))) != 1L) {
+      length(unique(sapply(x, function(x) SummarizedExperiment::colData(x)[1, "experimentType"]))) != 1L) {
     stop("'x' must be a named list with either only 'cis' or only 'trans' objects")
   }
   if (any(duplicated(names(x)))) {
@@ -44,7 +44,7 @@ summarizeExperiment <- function(x, meta) {
     stop("'meta' must be a data.frame with at least two columns with names ",
          "'Name' and 'Condition'.")
   }
-  experimentType <- colData(x[[1]])[1, "experimentType"]
+  experimentType <- SummarizedExperiment::colData(x[[1]])[1, "experimentType"]
   
   ## --------------------------------------------------------------------------
   ## Link elements in x with meta
@@ -64,26 +64,45 @@ summarizeExperiment <- function(x, meta) {
   ## --------------------------------------------------------------------------
   ## Count observed reads (read pairs)
   ## --------------------------------------------------------------------------
+  ## ... collapse raw counts, umi counts and names per unique sequence
   xCounts <- lapply(x, function(x1) {
     if (experimentType == "cis") {
-      cnt <- table(as.character(assay(x1, "variableSeqForward")$seq))
+      seq <- as.character(assay(x1, "variableSeqForward")$seq)
+      umiL <- split(as.character(assay(x1, "umis")$seq), seq)
+      cnms <- as.character(rowData(x1)$encodedMutatedCodonsForward)[match(names(umiL), seq)]
     } else {
-      cnt <- table(paste(assay(x1, "variableSeqForward")$seq, 
-                         assay(x1, "variableSeqReverse")$seq, 
-                         sep = "__"))
+      seq <- paste(assay(x1, "variableSeqForward")$seq, 
+                   assay(x1, "variableSeqReverse")$seq, 
+                   sep = "__")
+      umiL <- split(as.character(assay(x1, "umis")$seq), seq)
+      cnms <- paste(rowData(x1)$encodedMutatedCodonsForward,
+                    rowData(x1)$encodedMutatedCodonsReverse,
+                    sep = ".")[match(names(umiL), seq)]
     }
-    cnt
+    list(umi = unlist(lapply(umiL, function(u) length(unique(u))), use.names = FALSE),
+         cnt = lengths(umiL, use.names = FALSE),
+         seq = names(umiL),
+         cnms = cnms)
   })
-  uniseqs <- unique(do.call(c, lapply(xCounts, names)))
-  cntall <- matrix(0L, nrow = length(uniseqs), ncol = length(nms), dimnames = list(NULL, nms))
+  uniseqs <- unique(do.call(c, lapply(xCounts, "[[", "seq")))
+  cntall <- umiall <- matrix(0L, nrow = length(uniseqs), ncol = length(nms), dimnames = list(NULL, nms))
+  cnms <- rep(NA, length(uniseqs))
   for (nm in nms) {
-    cntall[match(names(xCounts[[nm]]), uniseqs), nm] <- as.integer(xCounts[[nm]])
+    i <- match(xCounts[[nm]]$seq, uniseqs)
+    cntall[i, nm] <- as.integer(xCounts[[nm]]$cnt)
+    umiall[i, nm] <- as.integer(xCounts[[nm]]$umi)
+    cnms[i] <- xCounts[[nm]]$cnms
   }
+  rownames(cntall) <- rownames(umiall) <- cnms
+
   ## REMARK: this does not consider x[[nm]]minQualMutatedForward or x[[nm]]minQualMutatedReverse yet
   ##         it could be
   ##         1. propagated to rowData(se), combining values for multiple identical
   ##            reads with min, max, mean, median, ...
   ##         2. used directly to further filter reads (would need an additional argument)
+  ##
+  ## REMARK: this currently only "rescues" encodedMutatedCodonsForward/Reverse from rowData(x) to
+  ##         rowData(se) - more could be added
   
   ## --------------------------------------------------------------------------
   ## Create SummarizedExperiment object
@@ -95,7 +114,7 @@ summarizeExperiment <- function(x, meta) {
     rd <- DataFrame(variableSeqForward = unlist(lapply(strsplit(uniseqs, "__"), "[", 1), use.names = FALSE),
                     variableSeqReverse = unlist(lapply(strsplit(uniseqs, "__"), "[", 2), use.names = FALSE))
   }
-  se <- SummarizedExperiment(assays = list(counts = cntall),
+  se <- SummarizedExperiment(assays = list(counts = cntall, umis = umiall),
                              rowData = rd,
                              colData = as(meta, "DataFrame"))
   return(se)
