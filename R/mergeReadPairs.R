@@ -6,12 +6,16 @@
 #' selected. The function assumes that all reads (forward/reverse, and within
 #' each object) have the same length.
 #'
-#' @param readsForward,readsReverse qualityScaledDNAStringSet objects containing
+#' @param readsForward,readsReverse
+#'   \code{\link[Biostrings]{QualityScaledDNAStringSet}} objects containing
 #'   matched forward and reverse reads.
 #'
 #' @author Charlotte Soneson
 #'
-#' @return A QualityScaledDNAStringSet with consensus sequences/qualities
+#' @keywords internal 
+#' 
+#' @return A \code{\link[Biostrings]{QualityScaledDNAStringSet}} with consensus
+#'   sequences/qualities
 #'
 #' @importFrom ShortRead FastqQuality
 #' @importFrom Biostrings quality QualityScaledDNAStringSet replaceLetterAt
@@ -23,7 +27,7 @@ mergeReadPairs <- function(readsForward, readsReverse) {
   ## Find positions where reverse read has higher quality than forward read
   ## --------------------------------------------------------------------------
   replaceAt <- as(ShortRead::FastqQuality(Biostrings::quality(readsReverse)), "matrix") > 
-    as(FastqQuality(quality(readsForward)), "matrix")
+    as(ShortRead::FastqQuality(Biostrings::quality(readsForward)), "matrix")
   replaceAtList <- as(lapply(seq_len(nrow(replaceAt)),
                              function(x) which(replaceAt[x, ])), "IntegerList")
   

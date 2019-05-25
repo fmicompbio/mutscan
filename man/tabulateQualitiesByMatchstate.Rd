@@ -21,3 +21,4 @@ a two-element list with the numbers of matching/mismatching bases of a given qua
 Based on the code from findMismatchpositions, tabulate base qualities
 for matching/mismatching bases.
 }
+\keyword{internal}

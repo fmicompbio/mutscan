@@ -7,11 +7,12 @@
 mergeReadPairs(readsForward, readsReverse)
 }
 \arguments{
-\item{readsForward, readsReverse}{qualityScaledDNAStringSet objects containing
+\item{readsForward, readsReverse}{\code{\link[Biostrings]{QualityScaledDNAStringSet}} objects containing
 matched forward and reverse reads.}
 }
 \value{
-A QualityScaledDNAStringSet with consensus sequences/qualities
+A \code{\link[Biostrings]{QualityScaledDNAStringSet}} with consensus
+  sequences/qualities
 }
 \description{
 Generate a consensus sequence for each pair of forward and reverse reads, for
@@ -23,3 +24,4 @@ each object) have the same length.
 \author{
 Charlotte Soneson
 }
+\keyword{internal}

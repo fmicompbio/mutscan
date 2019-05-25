@@ -26,6 +26,8 @@
 #'   corresponding adapter sequence, the sequence pair will be filtered out.
 #'   If set to \code{NULL}, no adapter filtering is performed. The number of
 #'   filtered read pairs are reported in the return value.
+#' @param maxChunkSize numeric(1), largest allowed chunk size for steps where
+#'   the reads are processed in chunks.
 #' @param verbose logical(1), whether to print out progress messages.
 #'
 #' @return A SummarizedExperiment object list with four or five assays:
@@ -37,9 +39,9 @@
 #'   \item{variableSeqReverse}{Variable reverse sequence, only for TRANS
 #'   experiments} 
 #'   } 
-#'   Each assay is represented as a \code[S4Vectors]{DataFrame} with one column
+#'   Each assay is represented as a \code{\link[S4Vectors]{DataFrame}} with one column
 #'   named \code{seq}, which contains a
-#'   \code[Biostrings]{QualityScaledDNAStringSet} object.
+#'   \code{\link[Biostrings]{QualityScaledDNAStringSet}} object.
 #'
 #' @export
 #'
@@ -68,7 +70,7 @@ readFastqs <- function(experimentType, fastqForward, fastqReverse, skipForward =
                        umiLengthReverse = 8, constantLengthForward = 18,
                        constantLengthReverse = 20, variableLengthForward = 96,
                        variableLengthReverse = 96, adapterForward = NULL, 
-                       adapterReverse = NULL, verbose = FALSE) {
+                       adapterReverse = NULL, maxChunkSize = 1e5, verbose = FALSE) {
   ## --------------------------------------------------------------------------
   ## Pre-flight checks
   ## --------------------------------------------------------------------------
@@ -198,10 +200,15 @@ readFastqs <- function(experimentType, fastqForward, fastqReverse, skipForward =
   variableSeqReverse <- Biostrings::subseq(fqr, start = variableStartReverse,
                                            end = variableEndReverse)
   if (experimentType == "cis") {
-    variableSeqForward <- mergeReadPairs(
-      readsForward = variableSeqForward,
-      readsReverse = Biostrings::reverseComplement(variableSeqReverse)
-    )
+    m <- factor(seq_along(variableSeqForward) %/% maxChunkSize)
+    variableSeqForward <- do.call(c, lapply(levels(m), function(i) {
+      mergeReadPairs(
+        readsForward = variableSeqForward[m == i],
+        readsReverse = Biostrings::reverseComplement(
+          variableSeqReverse[m == i]
+        )
+      )
+    }))
     variableSeqReverse <- NULL
   }
   

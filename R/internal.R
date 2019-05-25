@@ -7,6 +7,9 @@
 #' @importFrom methods is
 #' @importFrom SummarizedExperiment assayNames assays
 #' 
+#' @return \code{TRUE} if \code{L} is valid
+#' @keywords internal
+#' 
 isValidL <- function(L) {
   if (!is(L, "SummarizedExperiment") ||
       !all(c("umis", "constantSeqForward", "constantSeqReverse",
@@ -27,16 +30,19 @@ isValidL <- function(L) {
 #' @param pattern A nucleotide sequence corresponding to the 
 #'   wildtype sequence
 #' @param subject A DNAStringSet with observed variable sequences
+#' @param maxChunkSize numeric(1), largest allowed chunk size for steps where
+#'   the reads are processed in chunks.
 #' 
 #' @return A two-element list with base/codon positions of mismatches. The
 #'   list elements have classes InterList and NumericList, respectively.
+#' @keywords internal
 #'   
 #' @importFrom Biostrings DNAStringSet quality
 #' @importFrom BiocGenerics unlist width relist
 #' @importFrom IRanges PartitioningByEnd
 #' @importFrom methods is
 #' 
-findMismatchPositions <- function(pattern, subject) {
+findMismatchPositions <- function(pattern, subject, maxChunkSize = 1e5) {
   ## Code from https://support.bioconductor.org/p/63460/
   if (!is(pattern, "character") || length(pattern) != 1L) {
     stop("'pattern' must be a length-1 character vector")
@@ -45,20 +51,24 @@ findMismatchPositions <- function(pattern, subject) {
     stop("'subject' must be a DNAStringSet object")
   }
   
-  pattern <- DNAStringSet(rep(pattern, length(subject)))
-  
-  pattern_width <- width(pattern)
-  subject_width <- width(subject)
-  
-  unlisted_ans <- which(as.raw(unlist(pattern)) != as.raw(unlist(subject)))
-  breakpoints <- cumsum(pattern_width)
-  ans_eltlens <- tabulate(findInterval(unlisted_ans - 1L,
-                                       breakpoints) + 1L,
-                          nbins = length(pattern))
-  skeleton <- IRanges::PartitioningByEnd(cumsum(ans_eltlens))
-  nucleotideMismatches <- relist(unlisted_ans, skeleton)
-  offsets <- c(0L, breakpoints[-length(breakpoints)])
-  nucleotideMismatches <- nucleotideMismatches - offsets
+  subjectSplit <- S4Vectors::split(subject, f = factor(seq_along(subject) %/% maxChunkSize))
+  names(subjectSplit) <- NULL
+  nucleotideMismatches <- do.call(c, lapply(subjectSplit, function(s) {
+    p <- DNAStringSet(rep(pattern, length(s)))
+    
+    pattern_width <- width(p)
+    subject_width <- width(s)
+    
+    unlisted_ans <- which(as.raw(unlist(p)) != as.raw(unlist(s)))
+    breakpoints <- cumsum(pattern_width)
+    ans_eltlens <- tabulate(findInterval(unlisted_ans - 1L,
+                                         breakpoints) + 1L,
+                            nbins = length(p))
+    skeleton <- IRanges::PartitioningByEnd(cumsum(ans_eltlens))
+    nucleotideMismatches <- relist(unlisted_ans, skeleton)
+    offsets <- c(0L, breakpoints[-length(breakpoints)])
+    nucleotideMismatches - offsets
+  }))
   
   codonMismatches <- (nucleotideMismatches - 1) %/% 3 + 1
   
@@ -78,6 +88,7 @@ findMismatchPositions <- function(pattern, subject) {
 #' @param maxQ Maximum quality to tabulate (\code{nbins} argument to \code{tabulate})
 #' 
 #' @return a two-element list with the numbers of matching/mismatching bases of a given quality
+#' @keywords internal
 #'  
 #' @importFrom Biostrings DNAStringSet quality
 #' @importFrom BiocGenerics unlist

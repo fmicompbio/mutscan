@@ -50,9 +50,9 @@ A SummarizedExperiment object list with four or five assays:
   \item{variableSeqReverse}{Variable reverse sequence, only for TRANS
   experiments} 
   } 
-  Each assay is represented as a \code[S4Vectors]{DataFrame} with one column
+  Each assay is represented as a \code{\link[S4Vectors]{DataFrame}} with one column
   named \code{seq}, which contains a
-  \code[Biostrings]{QualityScaledDNAStringSet} object.
+  \code{\link[Biostrings]{QualityScaledDNAStringSet}} object.
 }
 \description{
 It is assumed that both the forward and reverse reads are of the form UMI -

@@ -5,7 +5,7 @@
 \title{Filter reads based on mismatches with the wildtype sequence}
 \usage{
 mismatchFilter(wildTypeSeq, variableSeq, nbrMutatedCodonsMax = NULL,
-  forbiddenMutatedCodon = NULL)
+  forbiddenMutatedCodon = NULL, maxChunkSize = 1e+05)
 }
 \arguments{
 \item{wildTypeSeq}{character(1), the wild type sequence}
@@ -20,6 +20,9 @@ are allowed.}
 IUPAC characters, see \code{\link[Biostrings]{IUPAC_CODE_MAP}}). If a read
 pair contains a mutated codon matching this pattern, it will be filtered
 out.}
+
+\item{maxChunkSize}{numeric(1), largest allowed chunk size for steps where
+the reads are processed in chunks.}
 }
 \value{
 A list with four elements:

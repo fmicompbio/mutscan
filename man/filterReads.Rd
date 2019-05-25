@@ -6,21 +6,22 @@
 \usage{
 filterReads(L, avePhredMin = 20, variableNMax = 0, umiNMax = 0,
   wildTypeForward = NULL, wildTypeReverse = NULL,
-  nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = NULL)
+  nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = NULL,
+  maxChunkSize = 1e+05, verbose = FALSE)
 }
 \arguments{
-\item{L}{SummarizedExperiment, as output by \code{readFastqs}.}
+\item{L}{SummarizedExperiment, as output by \code{\link{readFastqs}}.}
 
 \item{avePhredMin}{numeric(1) Minimum average Phred score in the variable
 region for a read to be retained. If L contains both forward and reverse
 variable regions, the minimum average Phred score has to be achieved in
 both for a read pair to be retained.}
 
-\item{variableNMax}{numeric(1) Maximum number of Ns in the variable region
-for a read to be retained.}
+\item{variableNMax}{numeric(1) Maximum number of Ns allowed in the variable
+region for a read to be retained.}
 
-\item{umiNMax}{numeric(1) Maximum number of Ns in the UMI for a read to be
-retained.}
+\item{umiNMax}{numeric(1) Maximum number of Ns allowed in the UMI for a read
+to be retained.}
 
 \item{wildTypeForward, wildTypeReverse}{character(1), the wild type sequence
 for the forward and reverse variable region.}
@@ -32,12 +33,33 @@ are allowed.}
 IUPAC characters, see \code{\link[Biostrings]{IUPAC_CODE_MAP}}). If a read
 pair contains a mutated codon matching this pattern, it will be filtered
 out.}
+
+\item{maxChunkSize}{numeric(1), largest allowed chunk size for steps where
+the reads are processed in chunks.}
+
+\item{verbose}{logical(1), whether to print out progress messages.}
 }
 \value{
 A filtered SummarizedExperiment object
 }
 \description{
 Filter FASTQ files from CIS or TRANS experiments
+}
+\examples{
+datadir <- system.file("extdata", package = "mutscan")
+transInput <- readFastqs(experimentType = "trans",
+                         fastqForward = file.path(datadir, "transInput_1.fastq.gz"),
+                         fastqReverse = file.path(datadir, "transInput_2.fastq.gz"),
+                         skipForward = 1, skipReverse = 1, umiLengthForward = 10,
+                         umiLengthReverse = 8, constantLengthForward = 18,
+                         constantLengthReverse = 20, adapterForward = "GGAAGAGCACACGTC",
+                         adapterReverse = "GGAAGAGCGTCGTGT", verbose = TRUE)
+transInputFiltered <- filterReads(transInput, avePhredMin = 20,
+                                  variableNMax = 0, umiNMax = 0,
+                                  wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+                                  wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT",
+                                  nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = "NNW")
+                                  
 }
 \author{
 Charlotte Soneson

@@ -13,12 +13,13 @@ test_that("filterReads works as expected for trans experiments", {
                                      variableNMax = 0, umiNMax = 0, 
                                      wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
                                      wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
-                                     nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = "NNW")
+                                     nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = "NNW", 
+                                     maxChunkSize = 100)
   transInputFiltered2 <- filterReads(transInput, avePhredMin = 20, 
                                      variableNMax = 0, umiNMax = 0, 
                                      wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
                                      wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
-                                     nbrMutatedCodonsMax = 2)
+                                     nbrMutatedCodonsMax = 2, maxChunkSize = 100)
   expect_true(isValidL(transInputFiltered1))
   expect_true(isValidL(transInputFiltered2))
   expect_identical(colData(transInputFiltered1)[1, "totalNbrReadPairsPassedFilters"], 279L)

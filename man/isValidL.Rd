@@ -9,6 +9,10 @@ isValidL(L)
 \arguments{
 \item{L}{A list as returned by \code{readFastqs}}
 }
+\value{
+\code{TRUE} if \code{L} is valid
+}
 \description{
 Currently: check if it is a list with expected elements.
 }
+\keyword{internal}

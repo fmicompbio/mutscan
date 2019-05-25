@@ -19,10 +19,10 @@ context("findMismatchPositions")
 test_that("findMismatchPositions works as expected", {
   patt <- "AAAAAAAAAA"
   subj <- DNAStringSet(c("AAAAAAAAAA", "ACAAAAAAAC", "AACAAAACCA", "AAACAAAAAA", "AAAACAAAAA"))
-
+  
   expect_error(findMismatchPositions(NULL, subj))
   expect_error(findMismatchPositions(patt, NULL))
-
+  
   res <- findMismatchPositions(patt, subj)
   expect_is(res, "list")
   expect_length(res, 2L)

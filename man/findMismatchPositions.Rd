@@ -4,13 +4,16 @@
 \alias{findMismatchPositions}
 \title{Find positions of mismatching bases in DNAStringSet}
 \usage{
-findMismatchPositions(pattern, subject)
+findMismatchPositions(pattern, subject, maxChunkSize = 1e+05)
 }
 \arguments{
 \item{pattern}{A nucleotide sequence corresponding to the 
 wildtype sequence}
 
 \item{subject}{A DNAStringSet with observed variable sequences}
+
+\item{maxChunkSize}{numeric(1), largest allowed chunk size for steps where
+the reads are processed in chunks.}
 }
 \value{
 A two-element list with base/codon positions of mismatches. The
@@ -20,3 +23,4 @@ A two-element list with base/codon positions of mismatches. The
 Compare sequences in a DNAStringSet to expected sequence
 and return a list with positions of mismatches.
 }
+\keyword{internal}
