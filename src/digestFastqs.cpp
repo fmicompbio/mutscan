@@ -343,9 +343,16 @@ List digestFastqs(std::string experimentType,
   // --------------------------------------------------------------------------
   // pre-flight checks
   // --------------------------------------------------------------------------
+  // experimentType is either 'cis' or 'trans'
   if (experimentType.compare("cis") != 0 && experimentType.compare("trans") != 0) {
-    stop("experimentType' must be either 'cis' or 'trans'");
+    stop("'experimentType' must be either 'cis' or 'trans'");
   }
+  // fastq files exist
+  if ((access(fastqForward.c_str(), F_OK) == -1) || (access(fastqForward.c_str(), F_OK) == -1)) {
+    stop("'fastqForward' and 'fastqReverse' must point to existing files");
+  }
+  
+  
   if (wildTypeForward.compare("") == 0) {
     Rcout << "skipping number-of-mutated-codons filter (missing 'wildTypeForward')";
   }
