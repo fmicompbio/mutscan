@@ -18,17 +18,10 @@ Depends:
     R (>= 3.6)
 Imports:
     BiocGenerics,
-    Biostrings,
-    ShortRead,
-    matrixStats,
     S4Vectors,
-    IRanges,
-    seqTools,
     methods,
-    stats,
     SummarizedExperiment,
-    Rcpp,
-    BH
+    Rcpp
 Suggests: 
     testthat,
     knitr,
@@ -38,5 +31,4 @@ Encoding: UTF-8
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
 LinkingTo: 
-    Rcpp,
-    BH
+    Rcpp

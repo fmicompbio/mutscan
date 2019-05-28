@@ -66,7 +66,3 @@ digestFastqs <- function(experimentType, fastqForward, fastqReverse, skipForward
     .Call(`_mutscan_digestFastqs`, experimentType, fastqForward, fastqReverse, skipForward, skipReverse, umiLengthForward, umiLengthReverse, constantLengthForward, constantLengthReverse, variableLengthForward, variableLengthReverse, adapterForward, adapterReverse, wildTypeForward, wildTypeReverse, constantForward, constantReverse, avePhredMin, variableNMax, umiNMax, nbrMutatedCodonsMax, forbiddenMutatedCodons, mutatedPhredMin, verbose)
 }
 
-qual2int <- function(x) {
-    .Call(`_mutscan_qual2int`, x)
-}
-

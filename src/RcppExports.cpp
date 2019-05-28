@@ -51,22 +51,10 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// qual2int
-IntegerVector qual2int(std::string x);
-RcppExport SEXP _mutscan_qual2int(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(qual2int(x));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 2},
     {"_mutscan_digestFastqs", (DL_FUNC) &_mutscan_digestFastqs, 24},
-    {"_mutscan_qual2int", (DL_FUNC) &_mutscan_qual2int, 1},
     {NULL, NULL, 0}
 };
 
