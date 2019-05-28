@@ -82,6 +82,27 @@ char complement(char n) {
   stop("Non-base character in sequence - aborting");
 }   
 
+// initialize IUPAC code table
+std::map<char,std::vector<char>> initializeIUPAC() {
+  std::map<char,std::vector<char>> IUPAC;
+  IUPAC['A'] = std::vector<char>({'A'});
+  IUPAC['C'] = std::vector<char>({'C'});
+  IUPAC['G'] = std::vector<char>({'G'});
+  IUPAC['T'] = std::vector<char>({'T'});
+  IUPAC['M'] = std::vector<char>({'A','C'});
+  IUPAC['R'] = std::vector<char>({'A','G'});
+  IUPAC['W'] = std::vector<char>({'A','T'});
+  IUPAC['S'] = std::vector<char>({'C','G'});
+  IUPAC['Y'] = std::vector<char>({'C','T'});
+  IUPAC['K'] = std::vector<char>({'G','T'});
+  IUPAC['V'] = std::vector<char>({'A','C','G'});
+  IUPAC['H'] = std::vector<char>({'A','C','T'});
+  IUPAC['D'] = std::vector<char>({'A','G','T'});
+  IUPAC['B'] = std::vector<char>({'C','G','T'});
+  IUPAC['N'] = std::vector<char>({'A','C','G','T'});
+  return IUPAC;
+}
+
 // compare position of codons of the form (std::string)"x123NNN_"
 // [[Rcpp::export]]
 bool compareCodonPositions(std::string a, std::string b) {
@@ -174,6 +195,78 @@ struct mutantInfo {
   std::string mutantName;      // name of the mutant
 };
 
+// open fastq file and check if it worked
+gzFile  openFastq(std::string filename) {
+  gzFile file = gzopen(filename.c_str(), "rb");   
+  if( !file ) {
+    if( errno ) {
+      stop("Failed to open file '", filename,  "': ",
+           strerror(errno), " (errno=", errno, ")");
+    } else {
+      stop("Failed to open file '", filename, "': zlib out of memory");
+    }
+  }
+  return file;
+}
+
+// given a vector of codons (potentially containing IUPAC ambiguous bases),
+// enumerate all non-ambiguious codons that match to them
+std::set<std::string> enumerateCodonsFromIUPAC(CharacterVector forbiddenMutatedCodons,
+                                               std::map<char,std::vector<char>> IUPAC, bool verbose) {
+  std::set<std::string> forbiddenCodons;
+  if (verbose) {
+    Rcout << "start enumerating forbidden codons" << std::endl;
+  }
+  std::string codon("NNN");
+  for (size_t i = 0; i < forbiddenMutatedCodons.length(); i++) {
+    std::vector<char> B1s = IUPAC[forbiddenMutatedCodons[i][0]];
+    std::vector<char> B2s = IUPAC[forbiddenMutatedCodons[i][1]];
+    std::vector<char> B3s = IUPAC[forbiddenMutatedCodons[i][2]];
+    for (std::vector<char>::iterator b1 = B1s.begin(); b1 != B1s.end(); b1++) {
+      codon[0] = (*b1);
+      for (std::vector<char>::iterator b2 = B2s.begin(); b2 != B2s.end(); b2++) {
+        codon[1] = (*b2);
+        for (std::vector<char>::iterator b3 = B3s.begin(); b3 != B3s.end(); b3++) {
+          codon[2] = (*b3);
+          forbiddenCodons.insert(codon);
+        }
+      }
+    }
+  }
+  if (verbose) {
+    Rcout << "done enumerating forbidden codons (" << forbiddenCodons.size() << ")" << std::endl;
+  }
+  return forbiddenCodons;
+}
+
+// for "cis" experiments, merge forward and reverse sequences
+// (keeping the base with maximal Phred quality)
+bool mergeReadPair(std::string &varSeqForward, std::vector<int> &varIntQualForward,
+                   std::string &varSeqReverse, std::vector<int> &varIntQualReverse) {
+  // reverse-complement reverse read
+  transform(
+    begin(varSeqReverse),
+    end(varSeqReverse),
+    begin(varSeqReverse),
+    complement);
+  reverse(begin(varSeqReverse),
+          end(varSeqReverse));
+  reverse(begin(varIntQualReverse),
+          end(varIntQualReverse));
+  // merge reads (keep base with higher quality) and store in forward read
+  for (size_t i = 0; i < varSeqForward.length(); i++) {
+    if (varIntQualReverse[i] > varIntQualForward[i]) {
+      varSeqForward[i] = varSeqReverse[i];
+      varIntQualForward[i] = varIntQualReverse[i];
+    }
+  }
+  // empty the reverse sequence and quality
+  varSeqReverse.clear();
+  varIntQualReverse.clear();
+  
+  return true;
+}
+
 //' @title Read, filter and digest sequences from two fastq files.
 //'
 //' @description
@@ -259,48 +352,14 @@ List digestFastqs(std::string experimentType,
   // need more here
 
   // Biostrings::IUPAC_CODE_MAP
-  std::map<char,std::vector<char>> IUPAC;
-  IUPAC['A'] = std::vector<char>({'A'});
-  IUPAC['C'] = std::vector<char>({'C'});
-  IUPAC['G'] = std::vector<char>({'G'});
-  IUPAC['T'] = std::vector<char>({'T'});
-  IUPAC['M'] = std::vector<char>({'A','C'});
-  IUPAC['R'] = std::vector<char>({'A','G'});
-  IUPAC['W'] = std::vector<char>({'A','T'});
-  IUPAC['S'] = std::vector<char>({'C','G'});
-  IUPAC['Y'] = std::vector<char>({'C','T'});
-  IUPAC['K'] = std::vector<char>({'G','T'});
-  IUPAC['V'] = std::vector<char>({'A','C','G'});
-  IUPAC['H'] = std::vector<char>({'A','C','T'});
-  IUPAC['D'] = std::vector<char>({'A','G','T'});
-  IUPAC['B'] = std::vector<char>({'C','G','T'});
-  IUPAC['N'] = std::vector<char>({'A','C','G','T'});
-  
+  std::map<char,std::vector<char>> IUPAC = initializeIUPAC();
+
   
   // --------------------------------------------------------------------------
   // open fastq files
   // --------------------------------------------------------------------------
-  gzFile file1, file2;
-  file1 = gzopen(fastqForward.c_str(), "rb");   
-  if( !file1 ) {
-    if( errno ) {
-      stop("Failed to open file '", fastqForward,  "': ",
-           strerror(errno), " (errno=", errno, ")");
-      
-    } else {
-      stop("Failed to open file '", fastqForward, "': zlib out of memory");
-    }
-  }	    
-  file2 = gzopen(fastqReverse.c_str(), "rb");   
-  if( !file1 ) {
-    if( errno ) {
-      stop("Failed to open file '", fastqReverse,  "': ",
-           strerror(errno), " (errno=", errno, ")");
-      
-    } else {
-      stop("Failed to open file '", fastqReverse, "': zlib out of memory");
-    }
-  }	    
+  gzFile file1 = openFastq(fastqForward);
+  gzFile file2 = openFastq(fastqReverse);
 
   
   // --------------------------------------------------------------------------
@@ -319,7 +378,6 @@ List digestFastqs(std::string experimentType,
   std::vector<int> varIntQualReverse(variableLengthReverse,0);
   std::vector<int> constIntQualForward(constantLengthForward,0);
   std::vector<int> constIntQualReverse(constantLengthReverse,0);
-  std::set<std::string> forbiddenCodons;
   std::string mutantName;
   std::map<std::string, mutantInfo> mutantSummary;
   std::map<std::string, mutantInfo>::iterator mutantSummaryIt;
@@ -327,29 +385,8 @@ List digestFastqs(std::string experimentType,
   std::vector<int> nPhredCorrectReverse(100, 0), nPhredMismatchReverse(100, 0);
   
   // enumerate forbidden codons based on forbiddenMutatedCodons
-  if (verbose) {
-    Rcout << "start enumerating forbidden codons" << std::endl;
-  }
-  std::string codon("NNN");
-  for (size_t i = 0; i < forbiddenMutatedCodons.length(); i++) {
-    std::vector<char> B1s = IUPAC[forbiddenMutatedCodons[i][0]];
-    std::vector<char> B2s = IUPAC[forbiddenMutatedCodons[i][1]];
-    std::vector<char> B3s = IUPAC[forbiddenMutatedCodons[i][2]];
-    for (std::vector<char>::iterator b1 = B1s.begin(); b1 != B1s.end(); b1++) {
-      codon[0] = (*b1);
-      for (std::vector<char>::iterator b2 = B2s.begin(); b2 != B2s.end(); b2++) {
-        codon[1] = (*b2);
-        for (std::vector<char>::iterator b3 = B3s.begin(); b3 != B3s.end(); b3++) {
-          codon[2] = (*b3);
-          forbiddenCodons.insert(codon);
-        }
-      }
-    }
-  }
-  if (verbose) {
-    Rcout << "done enumerating forbidden codons (" << forbiddenCodons.size() << ")" << std::endl;
-  }
-  
+  std::set<std::string> forbiddenCodons = enumerateCodonsFromIUPAC(forbiddenMutatedCodons, IUPAC, verbose);
+
   // iterate over sequences
   while (done == false) {
     mutantName = ""; // start with empty name
@@ -390,30 +427,13 @@ List digestFastqs(std::string experimentType,
       varIntQualForward[i] = int(varQualForward[i]) - 33;
       varIntQualReverse[i] = int(varQualReverse[i]) - 33;
     }
+    varQualForward.clear();
+    varQualReverse.clear();
     
     // for "cis" experiments, fuse forward and reverse reads
     if (experimentType.compare("cis") == 0) {
-      // reverse-complement reverse read
-      transform(
-        begin(varSeqReverse),
-        end(varSeqReverse),
-        begin(varSeqReverse),
-        complement);
-      reverse(begin(varSeqReverse),
-              end(varSeqReverse));
-      reverse(begin(varIntQualReverse),
-              end(varIntQualReverse));
-      // merge reads (keep base with higher quality) and store in forward read
-      for (size_t i = 0; i < varSeqForward.length(); i++) {
-        if (varIntQualReverse[i] > varIntQualForward[i]) {
-          varSeqForward[i] = varSeqReverse[i];
-          varIntQualForward[i] = varIntQualReverse[i];
-        }
-      }
-      // empty the reverse sequence and quality
-      varSeqReverse.clear();
-      varQualReverse.clear();
-      varIntQualReverse.clear();
+      mergeReadPair(varSeqForward, varIntQualForward,
+                    varSeqReverse, varIntQualReverse);
     }
     
     // filter if the average quality in variable region is too low
@@ -530,15 +550,14 @@ List digestFastqs(std::string experimentType,
     i++;
   }
   DataFrame filt = DataFrame::create(Named("nbrTotal") = nTot,
-                                     Named("1_nbrAdapter") = nAdapter,
-                                     Named("2_nAvgVarQualTooLow") = nAvgVarQualTooLow,
-                                     Named("3_nTooManyNinVar") = nTooManyNinVar,
-                                     Named("4_nTooManyNinUMI") = nTooManyNinUMI,
-                                     Named("5_nMutQualTooLow") = nMutQualTooLow,
-                                     Named("6_nTooManyMutCodons") = nTooManyMutCodons,
-                                     Named("7_nForbiddenCodons") = nForbiddenCodons,
-                                     Named("nbrRetained") = nRetain,
-                                     Named("check.names") = false);
+                                     Named("f1_nbrAdapter") = nAdapter,
+                                     Named("f2_nAvgVarQualTooLow") = nAvgVarQualTooLow,
+                                     Named("f3_nTooManyNinVar") = nTooManyNinVar,
+                                     Named("f4_nTooManyNinUMI") = nTooManyNinUMI,
+                                     Named("f5_nMutQualTooLow") = nMutQualTooLow,
+                                     Named("f6_nTooManyMutCodons") = nTooManyMutCodons,
+                                     Named("f7_nForbiddenCodons") = nForbiddenCodons,
+                                     Named("nbrRetained") = nRetain);
   DataFrame df = DataFrame::create(Named("sequence") = dfSeq,
                                    Named("mutantName") = dfName,
                                    Named("nbrReads") = dfReads,
