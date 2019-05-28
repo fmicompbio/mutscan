@@ -5,6 +5,18 @@
 
 using namespace Rcpp;
 
+// compareCodonPositions
+bool compareCodonPositions(std::string a, std::string b);
+RcppExport SEXP _mutscan_compareCodonPositions(SEXP aSEXP, SEXP bSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type a(aSEXP);
+    Rcpp::traits::input_parameter< std::string >::type b(bSEXP);
+    rcpp_result_gen = Rcpp::wrap(compareCodonPositions(a, b));
+    return rcpp_result_gen;
+END_RCPP
+}
 // digestFastqs
 List digestFastqs(std::string experimentType, std::string fastqForward, std::string fastqReverse, int skipForward, int skipReverse, int umiLengthForward, int umiLengthReverse, int constantLengthForward, int constantLengthReverse, int variableLengthForward, int variableLengthReverse, std::string adapterForward, std::string adapterReverse, std::string wildTypeForward, std::string wildTypeReverse, std::string constantForward, std::string constantReverse, double avePhredMin, int variableNMax, int umiNMax, int nbrMutatedCodonsMax, CharacterVector forbiddenMutatedCodons, double mutatedPhredMin, bool verbose);
 RcppExport SEXP _mutscan_digestFastqs(SEXP experimentTypeSEXP, SEXP fastqForwardSEXP, SEXP fastqReverseSEXP, SEXP skipForwardSEXP, SEXP skipReverseSEXP, SEXP umiLengthForwardSEXP, SEXP umiLengthReverseSEXP, SEXP constantLengthForwardSEXP, SEXP constantLengthReverseSEXP, SEXP variableLengthForwardSEXP, SEXP variableLengthReverseSEXP, SEXP adapterForwardSEXP, SEXP adapterReverseSEXP, SEXP wildTypeForwardSEXP, SEXP wildTypeReverseSEXP, SEXP constantForwardSEXP, SEXP constantReverseSEXP, SEXP avePhredMinSEXP, SEXP variableNMaxSEXP, SEXP umiNMaxSEXP, SEXP nbrMutatedCodonsMaxSEXP, SEXP forbiddenMutatedCodonsSEXP, SEXP mutatedPhredMinSEXP, SEXP verboseSEXP) {
@@ -52,6 +64,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 2},
     {"_mutscan_digestFastqs", (DL_FUNC) &_mutscan_digestFastqs, 24},
     {"_mutscan_qual2int", (DL_FUNC) &_mutscan_qual2int, 1},
     {NULL, NULL, 0}

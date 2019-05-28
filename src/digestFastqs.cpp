@@ -83,6 +83,7 @@ char complement(char n) {
 }   
 
 // compare position of codons of the form (std::string)"x123NNN_"
+// [[Rcpp::export]]
 bool compareCodonPositions(std::string a, std::string b) {
   int posa = std::stoi(a.substr(1, a.length() - 5));
   int posb = std::stoi(b.substr(1, b.length() - 5));
@@ -149,6 +150,9 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
   return false;
 }
 
+// compare constSeq to constant sequence and update
+// counter by match/mismatch and by base Phred quality
+// return true
 bool tabulateBasesByQual(const std::string constSeq, const std::string constant,
                          const std::vector<int> constIntQual,
                          std::vector<int> &nPhredCorrect, std::vector<int> &nPhredMismatch) {
@@ -165,7 +169,7 @@ bool tabulateBasesByQual(const std::string constSeq, const std::string constant,
 
 // stores information about retained mutants
 struct mutantInfo {
-  std::set<std::string> umi;   // unique UMIs observed for read pairs of that mutant
+  std::set<std::string> umi;   // set of unique UMIs observed for read pairs of that mutant
   int nReads;                  // number of reads
   std::string mutantName;      // name of the mutant
 };
@@ -525,25 +529,55 @@ List digestFastqs(std::string experimentType,
     dfUmis[i] = (*mutantSummaryIt).second.umi.size();
     i++;
   }
+  DataFrame filt = DataFrame::create(Named("nbrTotal") = nTot,
+                                     Named("1_nbrAdapter") = nAdapter,
+                                     Named("2_nAvgVarQualTooLow") = nAvgVarQualTooLow,
+                                     Named("3_nTooManyNinVar") = nTooManyNinVar,
+                                     Named("4_nTooManyNinUMI") = nTooManyNinUMI,
+                                     Named("5_nMutQualTooLow") = nMutQualTooLow,
+                                     Named("6_nTooManyMutCodons") = nTooManyMutCodons,
+                                     Named("7_nForbiddenCodons") = nForbiddenCodons,
+                                     Named("nbrRetained") = nRetain,
+                                     Named("check.names") = false);
   DataFrame df = DataFrame::create(Named("sequence") = dfSeq,
                                    Named("mutantName") = dfName,
                                    Named("nbrReads") = dfReads,
-                                   Named("nbrUmis") = dfUmis);
+                                   Named("nbrUmis") = dfUmis,
+                                   Named("stringsAsFactors") = false);
   DataFrame err = DataFrame::create(Named("PhredQuality") = seq_len(100) - 1,
                                     Named("nbrMatchForward") = nPhredCorrectForward,
                                     Named("nbrMismatchForward") = nPhredMismatchForward,
                                     Named("nbrMatchReverse") = nPhredCorrectReverse,
                                     Named("nbrMismatchReverse") = nPhredMismatchReverse);
-  List L = List::create(Named("nbrTotal") = nTot,
-                        Named("1_nbrAdapter") = nAdapter,
-                        Named("2_nAvgVarQualTooLow") = nAvgVarQualTooLow,
-                        Named("3_nTooManyNinVar") = nTooManyNinVar,
-                        Named("4_nTooManyNinUMI") = nTooManyNinUMI,
-                        Named("5_nMutQualTooLow") = nMutQualTooLow,
-                        Named("6_nTooManyMutCodons") = nTooManyMutCodons,
-                        Named("7_nForbiddenCodons") = nForbiddenCodons,
-                        Named("nbrRetained") = nRetain,
+  std::vector<std::string> forbiddenCodonsUsed(forbiddenCodons.begin(), forbiddenCodons.end());
+  List param;
+  param.push_back(experimentType, "experimentType");
+  param.push_back(fastqForward, "fastqForward");
+  param.push_back(fastqReverse, "fastqReverse");
+  param.push_back(skipForward, "skipForward");
+  param.push_back(skipReverse, "skipReverse");
+  param.push_back(umiLengthForward, "umiLengthForward");
+  param.push_back(umiLengthReverse, "umiLengthReverse");
+  param.push_back(constantLengthForward, "constantLengthForward");
+  param.push_back(constantLengthReverse, "constantLengthReverse");
+  param.push_back(variableLengthForward, "variableLengthForward");
+  param.push_back(variableLengthReverse, "variableLengthReverse");
+  param.push_back(adapterForward, "adapterForward");
+  param.push_back(adapterReverse, "adapterReverse");
+  param.push_back(wildTypeForward, "wildTypeForward");
+  param.push_back(wildTypeReverse, "wildTypeReverse");
+  param.push_back(constantForward, "constantForward");
+  param.push_back(constantReverse, "constantReverse");
+  param.push_back(avePhredMin, "avePhredMin");
+  param.push_back(variableNMax, "variableMax");
+  param.push_back(umiNMax, "umiNMax");
+  param.push_back(nbrMutatedCodonsMax, "nbrMutatedCodonsMax");
+  param.push_back(forbiddenCodonsUsed, "forbiddenMutatedCodons");
+  param.push_back(mutatedPhredMin, "mutatedPhredMin");
+  List L = List::create(Named("parameters") = param,
+                        Named("filterSummary") = filt,
                         Named("summaryTable") = df,
-                        Named("errorStatistics") = err);
+                        Named("errorStatistics") = err,
+                        Named("experimentType") = experimentType);
   return L;
 }
