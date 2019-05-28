@@ -8,7 +8,8 @@ readFastqs(experimentType, fastqForward, fastqReverse, skipForward = 1,
   skipReverse = 1, umiLengthForward = 10, umiLengthReverse = 8,
   constantLengthForward = 18, constantLengthReverse = 20,
   variableLengthForward = 96, variableLengthReverse = 96,
-  adapterForward = NULL, adapterReverse = NULL, verbose = FALSE)
+  adapterForward = NULL, adapterReverse = NULL, maxChunkSize = 1e+05,
+  verbose = FALSE)
 }
 \arguments{
 \item{experimentType}{character(1), either "cis" or "trans". If this is set
@@ -37,6 +38,9 @@ forward/reverse reads, respectively. If a forward/reverse read contains the
 corresponding adapter sequence, the sequence pair will be filtered out.
 If set to \code{NULL}, no adapter filtering is performed. The number of
 filtered read pairs are reported in the return value.}
+
+\item{maxChunkSize}{numeric(1), largest allowed chunk size for steps where
+the reads are processed in chunks.}
 
 \item{verbose}{logical(1), whether to print out progress messages.}
 }

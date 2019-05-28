@@ -26,7 +26,9 @@ Imports:
     seqTools,
     methods,
     stats,
-    SummarizedExperiment
+    SummarizedExperiment,
+    Rcpp,
+    BH
 Suggests: 
     testthat,
     knitr,
@@ -35,3 +37,6 @@ License: GPL-2
 Encoding: UTF-8
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
+LinkingTo: 
+    Rcpp,
+    BH

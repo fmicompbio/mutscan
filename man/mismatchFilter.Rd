@@ -5,7 +5,8 @@
 \title{Filter reads based on mismatches with the wildtype sequence}
 \usage{
 mismatchFilter(wildTypeSeq, variableSeq, nbrMutatedCodonsMax = NULL,
-  forbiddenMutatedCodon = NULL, maxChunkSize = 1e+05)
+  forbiddenMutatedCodon = NULL, maxChunkSize = 1e+05,
+  verbose = FALSE)
 }
 \arguments{
 \item{wildTypeSeq}{character(1), the wild type sequence}
@@ -23,6 +24,8 @@ out.}
 
 \item{maxChunkSize}{numeric(1), largest allowed chunk size for steps where
 the reads are processed in chunks.}
+
+\item{verbose}{logical(1), whether to print out progress messages.}
 }
 \value{
 A list with four elements:
