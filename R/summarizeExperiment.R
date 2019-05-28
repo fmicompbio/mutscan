@@ -33,18 +33,17 @@ summarizeExperiment <- function(x, meta) {
   ## Pre-flight checks
   ## --------------------------------------------------------------------------
   if (!is(x, "list") || is.null(names(x)) ||
-      !all(sapply(x, isValidL)) ||
-      length(unique(sapply(x, function(x) SummarizedExperiment::colData(x)[1, "experimentType"]))) != 1L) {
+      length(unique(sapply(x, function(w) w$experimentType))) != 1L) {
     stop("'x' must be a named list with either only 'cis' or only 'trans' objects")
   }
   if (any(duplicated(names(x)))) {
     stop("duplicated names in 'x' (e.g. technical replicated to be merged) is not supported yet")
   }
-  if (!is(meta, "data.frame") || !all(c("Name","Condition") %in% colnames(meta))) {
+  if (!is(meta, "data.frame") || !all(c("Name", "Condition") %in% colnames(meta))) {
     stop("'meta' must be a data.frame with at least two columns with names ",
          "'Name' and 'Condition'.")
   }
-  experimentType <- SummarizedExperiment::colData(x[[1]])[1, "experimentType"]
+  experimentType <- x[[1]]$experimentType
   
   ## --------------------------------------------------------------------------
   ## Link elements in x with meta
@@ -61,61 +60,37 @@ summarizeExperiment <- function(x, meta) {
   x <- x[nms]
   meta <- meta[ match(nms, meta$Name), ]
   
-  ## --------------------------------------------------------------------------
-  ## Count observed reads (read pairs)
-  ## --------------------------------------------------------------------------
-  ## ... collapse raw counts, umi counts and names per unique sequence
-  xCounts <- lapply(x, function(x1) {
-    if (experimentType == "cis") {
-      seq <- as.character(assay(x1, "variableSeqForward")$seq)
-      umiL <- split(as.character(assay(x1, "umis")$seq), seq)
-      cnms <- as.character(rowData(x1)$encodedMutatedCodonsForward)[match(names(umiL), seq)]
-    } else {
-      seq <- paste(assay(x1, "variableSeqForward")$seq, 
-                   assay(x1, "variableSeqReverse")$seq, 
-                   sep = "__")
-      umiL <- split(as.character(assay(x1, "umis")$seq), seq)
-      cnms <- paste(rowData(x1)$encodedMutatedCodonsForward,
-                    rowData(x1)$encodedMutatedCodonsReverse,
-                    sep = ".")[match(names(umiL), seq)]
-    }
-    list(umi = unlist(lapply(umiL, function(u) length(unique(u))), use.names = FALSE),
-         cnt = lengths(umiL, use.names = FALSE),
-         seq = names(umiL),
-         cnms = cnms)
-  })
-  uniseqs <- unique(do.call(c, lapply(xCounts, "[[", "seq")))
-  cntall <- umiall <- matrix(0L, nrow = length(uniseqs), ncol = length(nms), dimnames = list(NULL, nms))
-  cnms <- rep(NA, length(uniseqs))
-  for (nm in nms) {
-    i <- match(xCounts[[nm]]$seq, uniseqs)
-    cntall[i, nm] <- as.integer(xCounts[[nm]]$cnt)
-    umiall[i, nm] <- as.integer(xCounts[[nm]]$umi)
-    cnms[i] <- xCounts[[nm]]$cnms
-  }
-  rownames(cntall) <- rownames(umiall) <- cnms
-
-  ## REMARK: this does not consider x[[nm]]minQualMutatedForward or x[[nm]]minQualMutatedReverse yet
-  ##         it could be
-  ##         1. propagated to rowData(se), combining values for multiple identical
-  ##            reads with min, max, mean, median, ...
-  ##         2. used directly to further filter reads (would need an additional argument)
-  ##
-  ## REMARK: this currently only "rescues" encodedMutatedCodonsForward/Reverse from rowData(x) to
-  ##         rowData(se) - more could be added
+  allSequences <- do.call(
+    dplyr::bind_rows, 
+    lapply(x, function(w) w$summaryTable[, c("sequence", "mutantName")])) %>%
+    dplyr::distinct()
+  allSamples <- names(x)
+  names(allSamples) <- allSamples
   
-  ## --------------------------------------------------------------------------
-  ## Create SummarizedExperiment object
-  ## --------------------------------------------------------------------------
-  if (experimentType == "cis") {
-    rd <- DataFrame(variableSeqForward = uniseqs,
-                    variableSeqReverse = NULL)
-  } else {
-    rd <- DataFrame(variableSeqForward = unlist(lapply(strsplit(uniseqs, "__"), "[", 1), use.names = FALSE),
-                    variableSeqReverse = unlist(lapply(strsplit(uniseqs, "__"), "[", 2), use.names = FALSE))
-  }
-  se <- SummarizedExperiment(assays = list(counts = cntall, umis = umiall),
-                             rowData = rd,
-                             colData = as(meta, "DataFrame"))
+  ## Create a sparse matrix
+  tmp <- do.call(rbind, lapply(allSamples, function(s) {
+    st <- x[[s]]$summaryTable
+    data.frame(i = match(st$mutantName, allSequences$mutantName),
+               j = match(s, allSamples),
+               x = as.numeric(st$nbrUmis))
+  }))
+  umiCounts <- new("dgTMatrix", i = tmp$i - 1L, j = tmp$j - 1L, 
+                   x = tmp$x, Dim = c(nrow(allSequences), length(allSamples)))
+  
+  addMeta <- do.call(rbind, lapply(allSamples, function(s) {
+    x[[s]]$filterSummary %>% dplyr::mutate(Name = s)
+  }))
+  meta <- dplyr::left_join(meta, addMeta, by = "Name")
+  
+  se <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(counts = umiCounts),
+    colData = meta[match(allSamples, meta$Name), ],
+    rowData = DataFrame(sequence = allSequences$sequence),
+    metadata = lapply(allSamples, function(w) x[[w]]$parameters)
+  )
+  
+  rownames(se) <- allSequences$mutantName
+  colnames(se) <- allSamples
+  
   return(se)
 }
