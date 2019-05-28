@@ -485,20 +485,24 @@ List digestFastqs(std::string experimentType,
     }
     
     // for retained reads, count numbers of (mis-)matching bases by Phred quality
-    constSeqForward = sseq1.substr(skipForward + umiLengthForward, constantLengthForward);
-    constSeqReverse = sseq2.substr(skipReverse + umiLengthReverse, constantLengthReverse);
-    constQualForward = squal1.substr(skipForward + umiLengthForward, constantLengthForward);
-    constQualReverse = squal2.substr(skipReverse + umiLengthReverse, constantLengthReverse);
-    for (size_t i = 0; i < constantLengthForward; i++) {
-      constIntQualForward[i] = int(constQualForward[i]) - 33;
+    if (constantForward.compare("") != 0) {
+      constSeqForward = sseq1.substr(skipForward + umiLengthForward, constantLengthForward);
+      constQualForward = squal1.substr(skipForward + umiLengthForward, constantLengthForward);
+      for (size_t i = 0; i < constantLengthForward; i++) {
+        constIntQualForward[i] = int(constQualForward[i]) - 33;
+      }
+      tabulateBasesByQual(constSeqForward, constantForward, constIntQualForward,
+                          nPhredCorrectForward, nPhredMismatchForward);
     }
-    for (size_t i = 0; i < constantLengthReverse; i++) {
-      constIntQualReverse[i] = int(constQualReverse[i]) - 33;
+    if (constantReverse.compare("") != 0) {
+      constSeqReverse = sseq2.substr(skipReverse + umiLengthReverse, constantLengthReverse);
+      constQualReverse = squal2.substr(skipReverse + umiLengthReverse, constantLengthReverse);
+      for (size_t i = 0; i < constantLengthReverse; i++) {
+        constIntQualReverse[i] = int(constQualReverse[i]) - 33;
+      }
+      tabulateBasesByQual(constSeqReverse, constantReverse, constIntQualReverse,
+                          nPhredCorrectReverse, nPhredMismatchReverse);
     }
-    tabulateBasesByQual(constSeqForward, constantForward, constIntQualForward,
-                        nPhredCorrectForward, nPhredMismatchForward);
-    tabulateBasesByQual(constSeqReverse, constantReverse, constIntQualReverse,
-                        nPhredCorrectReverse, nPhredMismatchReverse);
     
   } // iterate over individual sequence pairs
   if (verbose) {
