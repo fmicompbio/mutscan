@@ -186,20 +186,35 @@ digestFastqs <- function(experimentType,
     stop("'verbose' must be a logical scalar.")
   }
   
-  digestFastqsCpp(experimentType = experimentType,
-                  fastqForward = fastqForward, fastqReverse = fastqReverse,
-                  skipForward = skipForward, skipReverse = skipReverse,
-                  umiLengthForward = umiLengthForward, umiLengthReverse = umiLengthReverse,
-                  constantLengthForward = constantLengthForward,
-                  constantLengthReverse = constantLengthReverse,
-                  variableLengthForward = variableLengthForward,
-                  variableLengthReverse = variableLengthReverse,
-                  adapterForward = adapterForward, adapterReverse = adapterReverse,
-                  wildTypeForward = wildTypeForward, wildTypeReverse = wildTypeReverse, 
-                  constantForward = constantForward, constantReverse = constantReverse, 
-                  avePhredMin = avePhredMin, variableNMax = variableNMax, umiNMax = umiNMax,
-                  nbrMutatedCodonsMax = nbrMutatedCodonsMax,
-                  forbiddenMutatedCodons = forbiddenMutatedCodons,
-                  mutatedPhredMin = mutatedPhredMin,
-                  verbose = verbose)
+  res <- digestFastqsCpp(experimentType = experimentType,
+                         fastqForward = fastqForward, 
+                         fastqReverse = fastqReverse,
+                         skipForward = skipForward, 
+                         skipReverse = skipReverse,
+                         umiLengthForward = umiLengthForward, 
+                         umiLengthReverse = umiLengthReverse,
+                         constantLengthForward = constantLengthForward,
+                         constantLengthReverse = constantLengthReverse,
+                         variableLengthForward = variableLengthForward,
+                         variableLengthReverse = variableLengthReverse,
+                         adapterForward = adapterForward, 
+                         adapterReverse = adapterReverse,
+                         wildTypeForward = wildTypeForward, 
+                         wildTypeReverse = wildTypeReverse, 
+                         constantForward = constantForward, 
+                         constantReverse = constantReverse, 
+                         avePhredMin = avePhredMin, 
+                         variableNMax = variableNMax, 
+                         umiNMax = umiNMax,
+                         nbrMutatedCodonsMax = nbrMutatedCodonsMax,
+                         forbiddenMutatedCodons = forbiddenMutatedCodons,
+                         mutatedPhredMin = mutatedPhredMin,
+                         verbose = verbose)
+  
+  ## Add package version and processing date
+  res$parameters$processingInfo <- paste0(
+    "Processed by mutscan v", utils::packageVersion("mutscan"), " on ",
+    Sys.time()
+  )
+  res
 }
