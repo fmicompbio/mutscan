@@ -1,0 +1,205 @@
+checkNumericInput <- function(...) {
+  varName <- deparse(substitute(...))
+  if (length(...) != 1) {
+    stop(varName, " must be of length 1")
+  }
+  if (!is.numeric(...)) {
+    stop(varName, " must be numeric")
+  }
+  if (... < 0) {
+    stop(varName, " must be non-negative")
+  }
+}
+  
+#' @title Read, filter and digest sequences from two fastq files.
+#'
+#' @description
+#' \code{readAndDigestFastqs} reads sequences for a pair of fastq files
+#' and digests them (extracts umis, constant and variable parts, filters,
+#' extracts mismatch information from constant and counts the observed
+#' unique variable parts).
+#'
+#' @details
+#' more details.
+#'
+#' @param experimentType character(1), either "cis" or "trans". If this is set
+#'   to "cis", the variable sequences from the forward and reverse reads will be
+#'   consolidated into one single sequence.
+#' @param fastqForward,fastqReverse character(1), paths to FASTQ files
+#'   corresponding to forward and reverse reads, respectively.
+#' @param skipForward,skipReverse numeric(1), the number of bases to skip in the
+#'   start of each forward and reverse read, respectively.
+#' @param umiLengthForward,umiLengthReverse numeric(1), the length of the
+#'   barcode (UMI) sequence in the forward/reverse reads, respectively, not
+#'   including the skipped bases (defined by
+#'   \code{skipForward}/\code{skipReverse}).
+#' @param constantLengthForward,constantLengthReverse numeric(1), the length of
+#'   the constant sequence in the forward/reverse reads, respectively.
+#' @param variableLengthForward,variableLengthReverse numeric(1), the length of
+#'   the variable sequence in the forward/reverse reads, respectively.
+#' @param adapterForward,adapterReverse character(1), the adapter sequence for
+#'   forward/reverse reads, respectively. If a forward/reverse read contains the
+#'   corresponding adapter sequence, the sequence pair will be filtered out.
+#'   If set to \code{NULL}, no adapter filtering is performed. The number of
+#'   filtered read pairs are reported in the return value.
+#' @param wildTypeForward,wildTypeReverse character(1), the wild type sequence
+#'   for the forward and reverse variable region.
+#' @param constantForward,constantReverse character(1), the expected constant
+#'   forward and reverse sequences.
+#' @param avePhredMin numeric(1) Minimum average Phred score in the variable
+#'   region for a read to be retained. If L contains both forward and reverse
+#'   variable regions, the minimum average Phred score has to be achieved in
+#'   both for a read pair to be retained.
+#' @param variableNMax numeric(1) Maximum number of Ns allowed in the variable
+#'   region for a read to be retained.
+#' @param umiNMax numeric(1) Maximum number of Ns allowed in the UMI for a read
+#'   to be retained.
+#' @param nbrMutatedCodonsMax numeric(1) Maximum number of mutated codons that
+#'   are allowed.
+#' @param forbiddenMutatedCodons character vector. Codons (can contain ambiguous
+#'   IUPAC characters, see \code{\link[Biostrings]{IUPAC_CODE_MAP}}). If a read
+#'   pair contains a mutated codon matching this pattern, it will be filtered
+#'   out.
+#' @param mutatedPhredMin numeric(1) Minimum Phred score of a mutated base for the
+#'   read to be retained. If any mutated base has a Phred score lower than
+#'   \code{mutatedPhredMin}, the read will be discarded.
+#' @param verbose logical(1), whether to print out progress messages.
+#'
+#' @return A list with ---more details---.
+#'
+#' @export
+digestFastqs <- function(experimentType,
+                         fastqForward, fastqReverse,
+                         skipForward = 1, skipReverse = 1,
+                         umiLengthForward = 10, umiLengthReverse = 8,
+                         constantLengthForward = 18,
+                         constantLengthReverse = 20,
+                         variableLengthForward = 96,
+                         variableLengthReverse = 96,
+                         adapterForward = "", adapterReverse = "",
+                         wildTypeForward = "", wildTypeReverse = "", 
+                         constantForward = "", constantReverse = "", 
+                         avePhredMin = 20.0, variableNMax = 0, umiNMax = 0,
+                         nbrMutatedCodonsMax = 1,
+                         forbiddenMutatedCodons = "NNW",
+                         mutatedPhredMin = 0.0,
+                         verbose = FALSE) {
+  ## --------------------------------------------------------------------------
+  ## pre-flight checks
+  ## --------------------------------------------------------------------------
+  ## experimentType is either 'cis' or 'trans'
+  if (!is.character(experimentType) || length(experimentType) != 1 || 
+      !(experimentType %in% c("cis", "trans"))) {
+    stop("'experimentType' must be either 'cis' or 'trans'")
+  }
+  
+  ## fastq files exist
+  if (length(fastqForward) != 1 || length(fastqReverse) != 1 || 
+      !file.exists(fastqForward) || !file.exists(fastqReverse)) {
+    stop("'fastqForward' and 'fastqReverse' must point to single, existing files");
+  }
+  
+  ## check numeric inputs
+  checkNumericInput(skipForward)
+  checkNumericInput(skipReverse)
+  checkNumericInput(umiLengthForward)
+  checkNumericInput(umiLengthReverse)
+  checkNumericInput(constantLengthForward)
+  checkNumericInput(constantLengthReverse)
+  checkNumericInput(variableLengthForward)
+  checkNumericInput(variableLengthReverse)
+  checkNumericInput(avePhredMin)
+  checkNumericInput(variableNMax)
+  checkNumericInput(umiNMax)
+  checkNumericInput(nbrMutatedCodonsMax)
+  checkNumericInput(mutatedPhredMin)
+  
+  ## adapters must be strings, valid DNA characters
+  if (!is.character(adapterForward) || length(adapterForward) != 1 ||
+      !grepl("^[AaCcGgTt]*$", adapterForward) || !is.character(adapterReverse) ||
+      length(adapterReverse) != 1 || !grepl("^[AaCcGgTt]*$", adapterReverse)) {
+    stop("adapters must be character strings, only containing valid DNA characters")
+  } else {
+    adapterForward <- toupper(adapterForward)
+    adapterReverse <- toupper(adapterReverse)
+  }
+  
+  ## wild type sequences must be strings, valid DNA characters
+  if (!is.character(wildTypeForward) || length(wildTypeForward) != 1 ||
+      !grepl("^[AaCcGgTt]*$", wildTypeForward) || !is.character(wildTypeReverse) ||
+      length(wildTypeReverse) != 1 || !grepl("^[AaCcGgTt]*$", wildTypeReverse)) {
+    stop("wild type sequences must be character strings, only containing valid DNA characters")
+  } else {
+    wildTypeForward <- toupper(wildTypeForward)
+    wildTypeReverse <- toupper(wildTypeReverse)
+  }
+  
+  if (nchar(wildTypeForward) == 0) {
+    message("'wildTypeForward' is missing, no comparisons to wild type sequence will be done.")
+  }
+  
+  ## wild type sequence lengths must match variable sequence lengths
+  if (nchar(wildTypeForward) > 0 && nchar(wildTypeForward) != variableLengthForward) {
+    stop("The length of the given 'wildTypeForward' (", nchar(wildTypeForward), 
+         ") does not correspond to the given 'variableLengthForward' (", variableLengthForward, ")")
+  }
+  if (nchar(wildTypeReverse) > 0 && nchar(wildTypeReverse) != variableLengthReverse) {
+    stop("The length of the given 'wildTypeReverse' (", nchar(wildTypeReverse), 
+         ") does not correspond to the given 'variableLengthReverse' (", variableLengthReverse, ")")
+  }
+  
+  ## cis experiment - should not have wildTypeReverse
+  if (experimentType == "cis" && nchar(wildTypeReverse) > 0) {
+    warning("Ignoring 'wildTypeReverse' for CIS experiment")
+    wildTypeReverse <- ""
+  }
+  
+  ## if both constantForward and constantLengthForward are given, check that
+  ## the lengths inferred from the two are consistent
+  if (!is.character(constantForward) || !is.character(constantReverse) ||
+      length(constantForward) != 1 || length(constantReverse) != 1 ||
+      !grepl("^[AaCcGgTt]*$", constantForward) || !grepl("^[AaCcGgTt]*$", constantReverse)) {
+    stop("constant sequences must be character strings, only containing valid DNA characters.")
+  } else {
+    constantForward <- toupper(constantForward)
+    constantReverse <- toupper(constantReverse)
+  }
+  
+  if (nchar(constantForward) > 0 && nchar(constantForward) != constantLengthForward) {
+    stop("'constantLengthForward' (", constantLengthForward, 
+         ") does not correspond to the length of the given 'constantForward' (", 
+         nchar(constantForward), ")")
+  }
+  if (nchar(constantReverse) > 0 && nchar(constantReverse) != constantLengthReverse) {
+    stop("'constantLengthReverse' (", constantLengthReverse, 
+         ") does not correspond to the length of the given 'constantReverse' (", 
+         nchar(constantReverse), ")")
+  }
+  
+  if (!all(is.character(forbiddenMutatedCodons)) || !all(grepl("^[ACGTMRWSYKVHDBN]{3}$", toupper(forbiddenMutatedCodons)))) {
+    stop("All elements of 'forbiddenMutatedCodons' must be character strings consisting of three valid IUPAC letters.")
+  } else {
+    forbiddenMutatedCodons <- toupper(forbiddenMutatedCodons)
+  }
+  
+  if (!is.logical(verbose) || length(verbose) != 1) {
+    stop("'verbose' must be a logical scalar.")
+  }
+  
+  digestFastqsCpp(experimentType = experimentType,
+                  fastqForward = fastqForward, fastqReverse = fastqReverse,
+                  skipForward = skipForward, skipReverse = skipReverse,
+                  umiLengthForward = umiLengthForward, umiLengthReverse = umiLengthReverse,
+                  constantLengthForward = constantLengthForward,
+                  constantLengthReverse = constantLengthReverse,
+                  variableLengthForward = variableLengthForward,
+                  variableLengthReverse = variableLengthReverse,
+                  adapterForward = adapterForward, adapterReverse = adapterReverse,
+                  wildTypeForward = wildTypeForward, wildTypeReverse = wildTypeReverse, 
+                  constantForward = constantForward, constantReverse = constantReverse, 
+                  avePhredMin = avePhredMin, variableNMax = variableNMax, umiNMax = umiNMax,
+                  nbrMutatedCodonsMax = nbrMutatedCodonsMax,
+                  forbiddenMutatedCodons = forbiddenMutatedCodons,
+                  mutatedPhredMin = mutatedPhredMin,
+                  verbose = verbose)
+}

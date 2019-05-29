@@ -134,7 +134,7 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
         break;
       }
       // add codon to mutatedCodons
-      mutatedCodons.insert(codonPrefix + std::to_string((int)(i / 3) * 3) +
+      mutatedCodons.insert(codonPrefix + std::to_string((int)(i / 3) + 1) +
         varSeq.substr((int)(i / 3) * 3, 3) +
         std::string("_"));
     }
@@ -213,9 +213,6 @@ gzFile  openFastq(std::string filename) {
 std::set<std::string> enumerateCodonsFromIUPAC(CharacterVector forbiddenMutatedCodons,
                                                std::map<char,std::vector<char>> IUPAC, bool verbose) {
   std::set<std::string> forbiddenCodons;
-  if (verbose) {
-    Rcout << "start enumerating forbidden codons" << std::endl;
-  }
   std::string codon("NNN");
   for (int i = 0; i < forbiddenMutatedCodons.length(); i++) {
     std::vector<char> B1s = IUPAC[forbiddenMutatedCodons[i][0]];
@@ -266,119 +263,24 @@ bool mergeReadPair(std::string &varSeqForward, std::vector<int> &varIntQualForwa
   return true;
 }
 
-//' @title Read, filter and digest sequences from two fastq files.
-//'
-//' @description
-//' \code{readAndDigestFastqs} reads sequences for a pair of fastq files
-//' and digests them (extracts umis, constant and variable parts, filters,
-//' extracts mismatch information from constant and counts the observed
-//' unique variable parts).
-//'
-//' @details
-//' more details.
-//'
-//' @param experimentType character(1), either "cis" or "trans". If this is set
-//'   to "cis", the variable sequences from the forward and reverse reads will be
-//'   consolidated into one single sequence.
-//' @param fastqForward,fastqReverse character(1), paths to FASTQ files
-//'   corresponding to forward and reverse reads, respectively.
-//' @param skipForward,skipReverse numeric(1), the number of bases to skip in the
-//'   start of each forward and reverse read, respectively.
-//' @param umiLengthForward,umiLengthReverse numeric(1), the length of the
-//'   barcode (UMI) sequence in the forward/reverse reads, respectively, not
-//'   including the skipped bases (defined by
-//'   \code{skipForward}/\code{skipReverse}).
-//' @param constantLengthForward,constantLengthReverse numeric(1), the length of
-//'   the constant sequence in the forward/reverse reads, respectively.
-//' @param variableLengthForward,variableLengthReverse numeric(1), the length of
-//'   the variable sequence in the forward/reverse reads, respectively.
-//' @param adapterForward,adapterReverse character(1), the adapter sequence for
-//'   forward/reverse reads, respectively. If a forward/reverse read contains the
-//'   corresponding adapter sequence, the sequence pair will be filtered out.
-//'   If set to \code{NULL}, no adapter filtering is performed. The number of
-//'   filtered read pairs are reported in the return value.
-//' @param wildTypeForward,wildTypeReverse character(1), the wild type sequence
-//'   for the forward and reverse variable region.
-//' @param constantForward,constantReverse character(1), the expected constant
-//'   forward and reverse sequences.
-//' @param avePhredMin numeric(1) Minimum average Phred score in the variable
-//'   region for a read to be retained. If L contains both forward and reverse
-//'   variable regions, the minimum average Phred score has to be achieved in
-//'   both for a read pair to be retained.
-//' @param variableNMax numeric(1) Maximum number of Ns allowed in the variable
-//'   region for a read to be retained.
-//' @param umiNMax numeric(1) Maximum number of Ns allowed in the UMI for a read
-//'   to be retained.
-//' @param nbrMutatedCodonsMax numeric(1) Maximum number of mutated codons that
-//'   are allowed.
-//' @param forbiddenMutatedCodons character vector. Codons (can contain ambiguous
-//'   IUPAC characters, see \code{\link[Biostrings]{IUPAC_CODE_MAP}}). If a read
-//'   pair contains a mutated codon matching this pattern, it will be filtered
-//'   out.
-//' @param mutatedPhredMin numeric(1) Minimum Phred score of a mutated base for the
-//'   read to be retained. If any mutated base has a Phred score lower than
-//'   \code{mutatedPhredMin}, the read will be discarded.
-//' @param verbose logical(1), whether to print out progress messages.
-//'
-//' @return A list with ---more details---.
-//'
-//' @export
-// [[Rcpp::export]]
-List digestFastqs(std::string experimentType,
-                  std::string fastqForward, std::string fastqReverse,
-                  int skipForward = 1, int skipReverse = 1,
-                  int umiLengthForward = 10, int umiLengthReverse = 8,
-                  unsigned int constantLengthForward = 18,
-                  unsigned int constantLengthReverse = 20,
-                  unsigned int variableLengthForward = 96,
-                  unsigned int variableLengthReverse = 96,
-                  std::string adapterForward = "", std::string adapterReverse = "",
-                  std::string wildTypeForward = "", std::string wildTypeReverse = "", 
-                  std::string constantForward = "", std::string constantReverse = "", 
-                  double avePhredMin = 20.0, int variableNMax = 0, int umiNMax = 0,
-                  unsigned int nbrMutatedCodonsMax = 1,
-                  CharacterVector forbiddenMutatedCodons = "NNW",
-                  double mutatedPhredMin = 0.0,
-                  bool verbose = false) {
 
-  // --------------------------------------------------------------------------
-  // pre-flight checks
-  // --------------------------------------------------------------------------
-  // experimentType is either 'cis' or 'trans'
-  if (experimentType.compare("cis") != 0 && experimentType.compare("trans") != 0) {
-    stop("'experimentType' must be either 'cis' or 'trans'");
-  }
-  // fastq files exist
-  if ((access(fastqForward.c_str(), F_OK) == -1) || (access(fastqReverse.c_str(), F_OK) == -1)) {
-    stop("'fastqForward' and 'fastqReverse' must point to existing files");
-  }
-  // if both constantForward and constantLengthForward are given, check that
-  // the lengths inferred from the two are consistent
-  if (constantForward.compare("") != 0 && constantForward.length() != constantLengthForward) {
-    stop("'constantLengthForward' (%d) does not correspond to the length of the given 'constantForward' (%d)",
-         constantLengthForward, constantForward.length());
-  }
-  // corresponding test for reverse constant sequence
-  if (constantReverse.compare("") != 0 && constantReverse.length() != constantLengthReverse) {
-    stop("'constantLengthReverse' (%d) does not correspond to the length of the given 'constantForward' (%d)",
-         constantLengthReverse, constantReverse.length());
-  }
-  // all thresholds are non-negative
-  if (!(skipForward >= 0) || !(skipReverse >= 0) || !(umiLengthForward >= 0) ||
-      !(umiLengthReverse >= 0) || !(constantLengthForward >= 0) || 
-      !(constantLengthReverse >= 0) || !(variableLengthForward >= 0) ||
-      !(variableLengthReverse >= 0) || !(avePhredMin >= 0) ||
-      !(variableNMax >= 0) || !(umiNMax >= 0) || !(nbrMutatedCodonsMax >= 0) ||
-      !(mutatedPhredMin >= 0)) {
-    stop("Make sure that all arguments that should be non-negative numbers are that");
-  }
-  // required numbers are specified
-  
-  
-  if (wildTypeForward.compare("") == 0) {
-    Rcout << "skipping number-of-mutated-codons filter (missing 'wildTypeForward')";
-  }
-  // need more here
+// [[Rcpp::export]]
+List digestFastqsCpp(std::string experimentType,
+                     std::string fastqForward, std::string fastqReverse,
+                     int skipForward = 1, int skipReverse = 1,
+                     int umiLengthForward = 10, int umiLengthReverse = 8,
+                     unsigned int constantLengthForward = 18,
+                     unsigned int constantLengthReverse = 20,
+                     unsigned int variableLengthForward = 96,
+                     unsigned int variableLengthReverse = 96,
+                     std::string adapterForward = "", std::string adapterReverse = "",
+                     std::string wildTypeForward = "", std::string wildTypeReverse = "", 
+                     std::string constantForward = "", std::string constantReverse = "", 
+                     double avePhredMin = 20.0, int variableNMax = 0, int umiNMax = 0,
+                     unsigned int nbrMutatedCodonsMax = 1,
+                     CharacterVector forbiddenMutatedCodons = "NNW",
+                     double mutatedPhredMin = 0.0,
+                     bool verbose = false) {
 
   // Biostrings::IUPAC_CODE_MAP
   std::map<char,std::vector<char>> IUPAC = initializeIUPAC();
