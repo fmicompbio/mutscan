@@ -84,7 +84,7 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
   ## --------------------------------------------------------------------------
   ## Create a sparse matrix
   ## --------------------------------------------------------------------------
-  countCol <- ifelse(countType == "umis", "nbrUmis", "nReads")
+  countCol <- ifelse(countType == "umis", "nbrUmis", "nbrReads")
   tmp <- do.call(dplyr::bind_rows, lapply(allSamples, function(s) {
     st <- x[[s]]$summaryTable
     data.frame(i = match(st$mutantName, allSequences$mutantName),

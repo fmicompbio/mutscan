@@ -22,8 +22,8 @@ bool reached_end_of_file(gzFile file, char *ret) {
     if (gzeof(file)) {
       return true;
     } else {
-      const char * error_string;
-      error_string = gzerror (file, &err);
+      const char *error_string;
+      error_string = gzerror(file, &err);
       if (err) {
         stop(error_string);
       }
@@ -33,11 +33,11 @@ bool reached_end_of_file(gzFile file, char *ret) {
 }
 
 // read next four lines from gzipped file and store
-// second and forth in *seq and *qual
+// second and fourth in *seq and *qual
 // return either:
 // - true (reached end of file, I am done)
 // - false (not yet reached end of file, not done yet)
-// - nothing (encounetered an error, fall back to R from reached_end_of_file())
+// - nothing (encountered an error, fall back to R from reached_end_of_file())
 bool get_next_seq(gzFile file, char *seq, char *qual) {
   // sequence identifier
   if (reached_end_of_file(file, gzgets(file, seq, BUFFER_SIZE))) {
@@ -78,7 +78,7 @@ char complement(char n) {
     case 'n':
       return 'N';
   }   
-  stop("Non-base character in sequence - aborting");
+  stop("Invalid DNA base character in sequence - aborting");
 }   
 
 // initialize IUPAC code table
@@ -110,10 +110,11 @@ bool compareCodonPositions(std::string a, std::string b) {
   return (posa < posb);
 }
 
-// compare read to wiltype sequence,
+// compare read to wildtype sequence,
 // identify mutated bases/codons, filter, update counters
 // and add to the name
-// returns true if the read needs to be filtered out (and a counter has been incremented)
+// returns true if the read needs to be filtered out 
+// (and a counter has been incremented)
 bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
                        const std::vector<int> varIntQual, const double mutatedPhredMin,
                        const unsigned int nbrMutatedCodonsMax, const std::set<std::string> &forbiddenCodons,
@@ -150,8 +151,8 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
   }
   // check if there are forbidden codons
   hasForbidden = false;
-  for ( mutatedCodonIt = mutatedCodons.begin(); mutatedCodonIt != mutatedCodons.end(); mutatedCodonIt++) {
-    if (forbiddenCodons.find((*mutatedCodonIt).substr((*mutatedCodonIt).length()-4, 3)) != forbiddenCodons.end()) { // found forbidden codon
+  for (mutatedCodonIt = mutatedCodons.begin(); mutatedCodonIt != mutatedCodons.end(); mutatedCodonIt++) {
+    if (forbiddenCodons.find((*mutatedCodonIt).substr((*mutatedCodonIt).length() - 4, 3)) != forbiddenCodons.end()) { // found forbidden codon
       hasForbidden = true;
       break;
     }
@@ -197,8 +198,8 @@ struct mutantInfo {
 // open fastq file and check if it worked
 gzFile  openFastq(std::string filename) {
   gzFile file = gzopen(filename.c_str(), "rb");   
-  if( !file ) {
-    if( errno ) {
+  if (!file) {
+    if (errno) {
       stop("Failed to open file '", filename,  "': ",
            strerror(errno), " (errno=", errno, ")");
     } else {
@@ -382,8 +383,8 @@ List digestFastqsCpp(std::string experimentType,
     // filter if the average quality in variable region is too low
     if (std::accumulate(varIntQualForward.begin(), varIntQualForward.end(), 0.0) <
         avePhredMin * variableLengthForward ||
-        (!varIntQualReverse.empty() && std::accumulate(varIntQualForward.begin(), varIntQualForward.end(), 0.0) <
-          avePhredMin * variableLengthForward)) {
+        (!varIntQualReverse.empty() && std::accumulate(varIntQualReverse.begin(), varIntQualReverse.end(), 0.0) <
+          avePhredMin * variableLengthReverse)) {
       nAvgVarQualTooLow++;
       continue;
     }
