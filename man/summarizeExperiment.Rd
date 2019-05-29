@@ -4,31 +4,38 @@
 \alias{summarizeExperiment}
 \title{Summarize and collapse multiple mutational scanning experiments}
 \usage{
-summarizeExperiment(x, meta)
+summarizeExperiment(x, coldata, countType = "umis")
 }
 \arguments{
-\item{x}{A named list of SummarizedExperiment objects as returned by \code{\link{readFastqs}}
-or \code{\link{filterReads}}). Names are used to link the objects to the
-metadata provided in \code{meta}.}
+\item{x}{A named list of SummarizedExperiment objects as returned by
+\code{\link{digestFastqs}}. Names are used to link the objects to the
+metadata provided in \code{coldata}.}
 
-\item{meta}{A \code{data.frame} with at least two columns ("Name" and "Condition").
-"Name" will be used to link to objects in \code{x}, and a potentially subset
-and reordered version of \code{meta} is stored in \code{colData} or the
+\item{countType}{Either "reads" or "umis". If "reads", the "count" assay of
+the returned object will contain the observed number of reads for each
+sequence (pair). If "umis", the "count" assay will contain the number of
+unique UMIs observed for each sequence (pair).}
+
+\item{meta}{A \code{data.frame} with at least one column ("Name"). "Name"
+will be used to link to objects in \code{x}, and a potentially subset and
+reordered version of \code{coldata} is stored in \code{colData} or the
 returned \code{\link[SummarizedExperiment]{SummarizedExperiment}}.}
 }
 \value{
 A \code{\link[SummarizedExperiment]{SummarizedExperiment}} with
   \describe{
-    \item{assays(x)$counts}{containing the observed number of sequences or sequence pairs.}
+    \item{assays(x)$counts}{containing the observed number of sequences or
+    sequence pairs (if \code{countType} = "reads"), or the observed number of
+    unique UMIs for each sequence or sequence pair (if \code{countType} =
+    "umis").}
     \item{rowData(x)}{containing the unique sequences or sequence pairs.}
-    \item{colData(x)}{containing the metadata provided by \code{meta}.}
+    \item{colData(x)}{containing the metadata provided by \code{coldata}.}
   }
 }
 \description{
-Combine multiple sequence lists (as returned by \code{\link{readFastqs}} or
-\code{\link{filterReads}}) into a \code{\link[SummarizedExperiment]{SummarizedExperiment}},
-with observed variable sequences (sequence pairs) in rows and samples in
-columns.
+Combine multiple sequence lists (as returned by \code{\link{digestFastqs}}
+into a \code{\link[SummarizedExperiment]{SummarizedExperiment}}, with
+observed variable sequences (sequence pairs) in rows and samples in columns.
 }
 \author{
 Michael Stadler

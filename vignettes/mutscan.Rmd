@@ -26,37 +26,32 @@ library(mutscan)
 ```{r readTrans}
 datadir <- system.file("extdata", package = "mutscan")
 dir(datadir)
-transInput <- readFastqs(experimentType = "trans", fastqForward = file.path(datadir, "transInput_1.fastq.gz"),
-                         fastqReverse = file.path(datadir, "transInput_2.fastq.gz"),
-                         skipForward = 1, skipReverse = 1, umiLengthForward = 10, 
-                         umiLengthReverse = 8, constantLengthForward = 18,
-                         constantLengthReverse = 20, adapterForward = "GGAAGAGCACACGTC", 
-                         adapterReverse = "GGAAGAGCGTCGTGT", verbose = TRUE)
-colData(transInput)
-```
-
-## Filter reads
-
-```{r filterReads}
-transInputFiltered <- filterReads(transInput, avePhredMin = 20, 
-                                  variableNMax = 0, umiNMax = 0, 
-                                  wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
-                                  wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
-                                  nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = "NNW")
-colData(transInputFiltered)
+transInput <- digestFastqs(experimentType = "trans", fastqForward = file.path(datadir, "transInput_1.fastq.gz"),
+                           fastqReverse = file.path(datadir, "transInput_2.fastq.gz"),
+                           skipForward = 1, skipReverse = 1, umiLengthForward = 10, 
+                           umiLengthReverse = 8, constantLengthForward = 18,
+                           constantLengthReverse = 20, variableLengthForward = 96,
+                           variableLengthReverse = 96, constantForward = "AACCGGAGGAGGGAGCTG",
+                           constantReverse = "GAAAAAGGAAGCTGGAGAGA", adapterForward = "GGAAGAGCACACGTC", 
+                           adapterReverse = "GGAAGAGCGTCGTGT", 
+                           avePhredMin = 20, variableNMax = 0, umiNMax = 0,
+                           wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA", 
+                           wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
+                           nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = "NNW",verbose = FALSE)
+transInput$parameters
+transInput$filterSummary
+head(transInput$summaryTable)
+transInput$errorStatistics[rowSums(transInput$errorStatistics[, -1]) != 0, ]
+transInput$experimentType
 ```
 
 ## Estimate sequencing error rate from constant sequences
 
 ```{r errStats}
-# user-provided expected sequences
-# errStats <- calcErrorStats(transInputFiltered, expectedForward = "AACCGGAGGAGGGAGCTG", 
-#                            expectedReverse = "GAAAAAGGAAGCTGGAGAGA", verbose = TRUE)
-
-# auto-detect expected sequences
-errStats <- calcErrorStats(transInputFiltered, verbose = TRUE)
-errStats$propErrorsConstantF
-errStats$propErrorsConstantR
+(propErrorsConstantF <- sum(transInput$errorStatistics$nbrMismatchForward)/
+   (transInput$parameters$constantLengthForward * transInput$filterSummary$nbrRetained))
+(propErrorsConstantR <- sum(transInput$errorStatistics$nbrMismatchReverse)/
+   (transInput$parameters$constantLengthReverse * transInput$filterSummary$nbrRetained))
 ```
 
 ## Combine samples (will count occurrences of each combination of variants) 

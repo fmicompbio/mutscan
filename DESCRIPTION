@@ -21,7 +21,9 @@ Imports:
     S4Vectors,
     methods,
     SummarizedExperiment,
-    Rcpp
+    Rcpp,
+    edgeR,
+    dplyr
 Suggests: 
     testthat,
     knitr,
