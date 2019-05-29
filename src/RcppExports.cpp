@@ -18,7 +18,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // digestFastqs
-List digestFastqs(std::string experimentType, std::string fastqForward, std::string fastqReverse, int skipForward, int skipReverse, int umiLengthForward, int umiLengthReverse, int constantLengthForward, int constantLengthReverse, int variableLengthForward, int variableLengthReverse, std::string adapterForward, std::string adapterReverse, std::string wildTypeForward, std::string wildTypeReverse, std::string constantForward, std::string constantReverse, double avePhredMin, int variableNMax, int umiNMax, int nbrMutatedCodonsMax, CharacterVector forbiddenMutatedCodons, double mutatedPhredMin, bool verbose);
+List digestFastqs(std::string experimentType, std::string fastqForward, std::string fastqReverse, int skipForward, int skipReverse, int umiLengthForward, int umiLengthReverse, unsigned int constantLengthForward, unsigned int constantLengthReverse, unsigned int variableLengthForward, unsigned int variableLengthReverse, std::string adapterForward, std::string adapterReverse, std::string wildTypeForward, std::string wildTypeReverse, std::string constantForward, std::string constantReverse, double avePhredMin, int variableNMax, int umiNMax, unsigned int nbrMutatedCodonsMax, CharacterVector forbiddenMutatedCodons, double mutatedPhredMin, bool verbose);
 RcppExport SEXP _mutscan_digestFastqs(SEXP experimentTypeSEXP, SEXP fastqForwardSEXP, SEXP fastqReverseSEXP, SEXP skipForwardSEXP, SEXP skipReverseSEXP, SEXP umiLengthForwardSEXP, SEXP umiLengthReverseSEXP, SEXP constantLengthForwardSEXP, SEXP constantLengthReverseSEXP, SEXP variableLengthForwardSEXP, SEXP variableLengthReverseSEXP, SEXP adapterForwardSEXP, SEXP adapterReverseSEXP, SEXP wildTypeForwardSEXP, SEXP wildTypeReverseSEXP, SEXP constantForwardSEXP, SEXP constantReverseSEXP, SEXP avePhredMinSEXP, SEXP variableNMaxSEXP, SEXP umiNMaxSEXP, SEXP nbrMutatedCodonsMaxSEXP, SEXP forbiddenMutatedCodonsSEXP, SEXP mutatedPhredMinSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -30,10 +30,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type skipReverse(skipReverseSEXP);
     Rcpp::traits::input_parameter< int >::type umiLengthForward(umiLengthForwardSEXP);
     Rcpp::traits::input_parameter< int >::type umiLengthReverse(umiLengthReverseSEXP);
-    Rcpp::traits::input_parameter< int >::type constantLengthForward(constantLengthForwardSEXP);
-    Rcpp::traits::input_parameter< int >::type constantLengthReverse(constantLengthReverseSEXP);
-    Rcpp::traits::input_parameter< int >::type variableLengthForward(variableLengthForwardSEXP);
-    Rcpp::traits::input_parameter< int >::type variableLengthReverse(variableLengthReverseSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type constantLengthForward(constantLengthForwardSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type constantLengthReverse(constantLengthReverseSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type variableLengthForward(variableLengthForwardSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type variableLengthReverse(variableLengthReverseSEXP);
     Rcpp::traits::input_parameter< std::string >::type adapterForward(adapterForwardSEXP);
     Rcpp::traits::input_parameter< std::string >::type adapterReverse(adapterReverseSEXP);
     Rcpp::traits::input_parameter< std::string >::type wildTypeForward(wildTypeForwardSEXP);
@@ -43,7 +43,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type avePhredMin(avePhredMinSEXP);
     Rcpp::traits::input_parameter< int >::type variableNMax(variableNMaxSEXP);
     Rcpp::traits::input_parameter< int >::type umiNMax(umiNMaxSEXP);
-    Rcpp::traits::input_parameter< int >::type nbrMutatedCodonsMax(nbrMutatedCodonsMaxSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type nbrMutatedCodonsMax(nbrMutatedCodonsMaxSEXP);
     Rcpp::traits::input_parameter< CharacterVector >::type forbiddenMutatedCodons(forbiddenMutatedCodonsSEXP);
     Rcpp::traits::input_parameter< double >::type mutatedPhredMin(mutatedPhredMinSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);

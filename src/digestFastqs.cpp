@@ -12,7 +12,7 @@
 using namespace Rcpp;
 
 // check if the last gzgets reached end of file
-// return either:
+// return either: 
 // - true (reached end of file)
 // - false (not yet reached end of file, but reading was ok)
 // - fall back to R with an error (reading was not ok)
@@ -28,9 +28,8 @@ bool reached_end_of_file(gzFile file, char *ret) {
         stop(error_string);
       }
     }
-  } else {
-    return false;
   }
+  return false;
 }
 
 // read next four lines from gzipped file and store
@@ -117,7 +116,7 @@ bool compareCodonPositions(std::string a, std::string b) {
 // returns true if the read needs to be filtered out (and a counter has been incremented)
 bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
                        const std::vector<int> varIntQual, const double mutatedPhredMin,
-                       const int nbrMutatedCodonsMax, const std::set<std::string> &forbiddenCodons,
+                       const unsigned int nbrMutatedCodonsMax, const std::set<std::string> &forbiddenCodons,
                        const std::string codonPrefix, int &nMutQualTooLow, int &nTooManyMutCodons,
                        int &nForbiddenCodons, std::string &mutantName) {
   static std::set<std::string> mutatedCodons;
@@ -218,7 +217,7 @@ std::set<std::string> enumerateCodonsFromIUPAC(CharacterVector forbiddenMutatedC
     Rcout << "start enumerating forbidden codons" << std::endl;
   }
   std::string codon("NNN");
-  for (size_t i = 0; i < forbiddenMutatedCodons.length(); i++) {
+  for (int i = 0; i < forbiddenMutatedCodons.length(); i++) {
     std::vector<char> B1s = IUPAC[forbiddenMutatedCodons[i][0]];
     std::vector<char> B2s = IUPAC[forbiddenMutatedCodons[i][1]];
     std::vector<char> B3s = IUPAC[forbiddenMutatedCodons[i][2]];
@@ -329,13 +328,15 @@ List digestFastqs(std::string experimentType,
                   std::string fastqForward, std::string fastqReverse,
                   int skipForward = 1, int skipReverse = 1,
                   int umiLengthForward = 10, int umiLengthReverse = 8,
-                  int constantLengthForward = 18, int constantLengthReverse = 20,
-                  int variableLengthForward = 96, int variableLengthReverse = 96,
+                  unsigned int constantLengthForward = 18,
+                  unsigned int constantLengthReverse = 20,
+                  unsigned int variableLengthForward = 96,
+                  unsigned int variableLengthReverse = 96,
                   std::string adapterForward = "", std::string adapterReverse = "",
                   std::string wildTypeForward = "", std::string wildTypeReverse = "", 
                   std::string constantForward = "", std::string constantReverse = "", 
                   double avePhredMin = 20.0, int variableNMax = 0, int umiNMax = 0,
-                  int nbrMutatedCodonsMax = 1,
+                  unsigned int nbrMutatedCodonsMax = 1,
                   CharacterVector forbiddenMutatedCodons = "NNW",
                   double mutatedPhredMin = 0.0,
                   bool verbose = false) {
@@ -348,9 +349,30 @@ List digestFastqs(std::string experimentType,
     stop("'experimentType' must be either 'cis' or 'trans'");
   }
   // fastq files exist
-  if ((access(fastqForward.c_str(), F_OK) == -1) || (access(fastqForward.c_str(), F_OK) == -1)) {
+  if ((access(fastqForward.c_str(), F_OK) == -1) || (access(fastqReverse.c_str(), F_OK) == -1)) {
     stop("'fastqForward' and 'fastqReverse' must point to existing files");
   }
+  // if both constantForward and constantLengthForward are given, check that
+  // the lengths inferred from the two are consistent
+  if (constantForward.compare("") != 0 && constantForward.length() != constantLengthForward) {
+    stop("'constantLengthForward' (%d) does not correspond to the length of the given 'constantForward' (%d)",
+         constantLengthForward, constantForward.length());
+  }
+  // corresponding test for reverse constant sequence
+  if (constantReverse.compare("") != 0 && constantReverse.length() != constantLengthReverse) {
+    stop("'constantLengthReverse' (%d) does not correspond to the length of the given 'constantForward' (%d)",
+         constantLengthReverse, constantReverse.length());
+  }
+  // all thresholds are non-negative
+  if (!(skipForward >= 0) || !(skipReverse >= 0) || !(umiLengthForward >= 0) ||
+      !(umiLengthReverse >= 0) || !(constantLengthForward >= 0) || 
+      !(constantLengthReverse >= 0) || !(variableLengthForward >= 0) ||
+      !(variableLengthReverse >= 0) || !(avePhredMin >= 0) ||
+      !(variableNMax >= 0) || !(umiNMax >= 0) || !(nbrMutatedCodonsMax >= 0) ||
+      !(mutatedPhredMin >= 0)) {
+    stop("Make sure that all arguments that should be non-negative numbers are that");
+  }
+  // required numbers are specified
   
   
   if (wildTypeForward.compare("") == 0) {
@@ -394,7 +416,11 @@ List digestFastqs(std::string experimentType,
   // enumerate forbidden codons based on forbiddenMutatedCodons
   std::set<std::string> forbiddenCodons = enumerateCodonsFromIUPAC(forbiddenMutatedCodons, IUPAC, verbose);
 
+  
   // iterate over sequences
+  if (verbose) {
+    Rcout << "start reading sequences..." << std::endl;
+  }
   while (done == false) {
     mutantName = ""; // start with empty name
     
@@ -409,7 +435,15 @@ List digestFastqs(std::string experimentType,
     
     // update counters
     nTot++;
-    
+    if (nTot % 200000 == 0) { // every 200,000 reads (every ~1.6 seconds)
+      Rcpp::checkUserInterrupt(); // ... check for user interrupt
+      // ... and give an update
+      if (verbose && nTot % 1000000 == 0) {
+        Rcout << "    " << nTot << " read pairs read (" 
+              << std::setprecision(1) << (100*nRetain/nTot) << " retained)" << std::endl;
+      }
+    }
+
     // convert C char* to C++ string
     std::string sseq1(seq1);
     std::string sseq2(seq2);
@@ -537,7 +571,8 @@ List digestFastqs(std::string experimentType,
     
   } // iterate over individual sequence pairs
   if (verbose) {
-    Rcout << "collapsed to " << mutantSummary.size() << " elements" << std::endl;
+    Rcout << "done reading sequences" << std::endl << "    collapsed to " <<
+             mutantSummary.size() << " elements" << std::endl;
   }
 
   // clean up
