@@ -130,7 +130,7 @@ The processing of a read pair goes as follows:
  \item Filter out read pair if the number of mutated codons exceeds
  \code{nbrMutatedCodonsMax}
  \item Filter out read pair if any of the mutated codons match any of the
- codons encoded by \code{forbiddenCodons}
+ codons encoded by \code{forbiddenMutatedCodons}
 }
 
 Based on the retained reads following this filtering process, count the

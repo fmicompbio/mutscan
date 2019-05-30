@@ -240,7 +240,8 @@ digestFastqs <- function(experimentType,
   }
   
   if (!all(is.character(forbiddenMutatedCodons)) || 
-      !all(grepl("^[ACGTMRWSYKVHDBN]{3}$", toupper(forbiddenMutatedCodons)))) {
+      !all(grepl("^[ACGTMRWSYKVHDBN]{3}$", toupper(forbiddenMutatedCodons)) | 
+           forbiddenMutatedCodons == "")) {
     stop("All elements of 'forbiddenMutatedCodons' must be ", 
          "character strings consisting of three valid IUPAC letters.")
   } else {

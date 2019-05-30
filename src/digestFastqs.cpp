@@ -306,10 +306,10 @@ List digestFastqsCpp(std::string experimentType,
   int nTooManyMutCodons = 0, nForbiddenCodons = 0, nMutQualTooLow = 0, nRetain = 0;
   std::string varSeqForward, varSeqReverse, varQualForward, varQualReverse, umiSeq;
   std::string constSeqForward, constSeqReverse, constQualForward, constQualReverse;
-  std::vector<int> varIntQualForward(variableLengthForward,0);
-  std::vector<int> varIntQualReverse(variableLengthReverse,0);
-  std::vector<int> constIntQualForward(constantLengthForward,0);
-  std::vector<int> constIntQualReverse(constantLengthReverse,0);
+//  std::vector<int> varIntQualForward(variableLengthForward,0);
+//  std::vector<int> varIntQualReverse(variableLengthReverse,0);
+//  std::vector<int> constIntQualForward(constantLengthForward,0);
+//  std::vector<int> constIntQualReverse(constantLengthReverse,0);
   std::string mutantName;
   std::map<std::string, mutantInfo> mutantSummary;
   std::map<std::string, mutantInfo>::iterator mutantSummaryIt;
@@ -365,7 +365,9 @@ List digestFastqsCpp(std::string experimentType,
     varSeqReverse = sseq2.substr(skipReverse + umiLengthReverse + constantLengthReverse, variableLengthReverse);
     varQualForward = squal1.substr(skipForward + umiLengthForward + constantLengthForward, variableLengthForward);
     varQualReverse = squal2.substr(skipReverse + umiLengthReverse + constantLengthReverse, variableLengthReverse);
-    
+
+    std::vector<int> varIntQualForward(variableLengthForward, 0);
+    std::vector<int> varIntQualReverse(variableLengthReverse, 0);
     // convert qualities to int
     for (size_t i = 0; i < variableLengthForward; i++) {
       varIntQualForward[i] = int(varQualForward[i]) - 33;
@@ -452,6 +454,8 @@ List digestFastqsCpp(std::string experimentType,
       mutantSummary.insert(std::pair<std::string,mutantInfo>(varSeqForward, newMutant));
     }
     
+    std::vector<int> constIntQualForward(constantLengthForward,0);
+    std::vector<int> constIntQualReverse(constantLengthReverse,0);
     // for retained reads, count numbers of (mis-)matching bases by Phred quality
     if (constantForward.compare("") != 0) {
       constSeqForward = sseq1.substr(skipForward + umiLengthForward, constantLengthForward);
@@ -465,6 +469,10 @@ List digestFastqsCpp(std::string experimentType,
     if (constantReverse.compare("") != 0) {
       constSeqReverse = sseq2.substr(skipReverse + umiLengthReverse, constantLengthReverse);
       constQualReverse = squal2.substr(skipReverse + umiLengthReverse, constantLengthReverse);
+      transform(begin(constSeqReverse), end(constSeqReverse),
+        begin(constSeqReverse), complement);
+      reverse(constSeqReverse.begin(), constSeqReverse.end());
+      reverse(constQualReverse.begin(), constQualReverse.end());
       for (size_t i = 0; i < constantLengthReverse; i++) {
         constIntQualReverse[i] = int(constQualReverse[i]) - 33;
       }
@@ -533,7 +541,7 @@ List digestFastqsCpp(std::string experimentType,
   param.push_back(constantForward, "constantForward");
   param.push_back(constantReverse, "constantReverse");
   param.push_back(avePhredMin, "avePhredMin");
-  param.push_back(variableNMax, "variableMax");
+  param.push_back(variableNMax, "variableNMax");
   param.push_back(umiNMax, "umiNMax");
   param.push_back(nbrMutatedCodonsMax, "nbrMutatedCodonsMax");
   param.push_back(forbiddenCodonsUsed, "forbiddenMutatedCodons");

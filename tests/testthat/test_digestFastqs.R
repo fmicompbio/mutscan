@@ -68,6 +68,8 @@ test_that("digestFastqs fails with incorrect arguments", {
     expect_error(do.call(digestFastqs, L))
     L <- Ldef; L[[var]] <- "EF"
     expect_error(do.call(digestFastqs, L))
+    L <- Ldef; L[[var]] <- paste0(L[[var]], " ")
+    expect_error(do.call(digestFastqs, L))
   }
   
   ## Wild type sequence of wrong length
@@ -103,55 +105,152 @@ test_that("digestFastqs fails with incorrect arguments", {
   expect_error(do.call(digestFastqs, L))
 })
 
-test_that("readFastqs works as expected for trans experiments", {
-  fnameR1 <- system.file("extdata", "transInput_1.fastq.gz", package = "mutscan")
-  fnameR2 <- system.file("extdata", "transInput_2.fastq.gz", package = "mutscan")
+context("digestFastqs - trans")
+test_that("digestFastqs works as expected for trans experiments", {
+  fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
+  fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
+  ## default arguments
+  Ldef <- list(
+    experimentType = "trans", fastqForward = fqt1, 
+    fastqReverse = fqt2, skipForward = 1, skipReverse = 1, 
+    umiLengthForward = 10, umiLengthReverse = 8, 
+    constantLengthForward = 18, constantLengthReverse = 20, 
+    variableLengthForward = 96, variableLengthReverse = 96,
+    adapterForward = "GGAAGAGCACACGTC", 
+    adapterReverse = "GGAAGAGCGTCGTGT",
+    wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+    wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
+    constantForward = "AACCGGAGGAGGGAGCTG", 
+    constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
+    avePhredMin = 20.0, variableNMax = 0, umiNMax = 0,
+    nbrMutatedCodonsMax = 1,
+    forbiddenMutatedCodons = "NNW",
+    mutatedPhredMin = 0.0,
+    verbose = FALSE
+  )
   
-  transInput <- readFastqs(experimentType = "trans", fastqForward = fnameR1, fastqReverse = fnameR2,
-                           skipForward = 1, skipReverse = 1, umiLengthForward = 10, 
-                           umiLengthReverse = 8, constantLengthForward = 18,
-                           constantLengthReverse = 20, variableLengthForward = 96,
-                           variableLengthReverse = 96, adapterForward = "GGAAGAGCACACGTC", 
-                           adapterReverse = "GGAAGAGCGTCGTGT", maxChunkSize = 100, verbose = FALSE)
-  s1 <- ShortRead::readFastq(fnameR1)
+  res <- do.call(digestFastqs, Ldef)
   
-  expect_true(isValidL(transInput))
-  expect_identical(length(s1), SummarizedExperiment::colData(transInput)[1, "totalNbrReadPairs"])
-  expect_true(length(s1) == length(assay(transInput, "umis")$seq) + 
-                SummarizedExperiment::colData(transInput)[1, "nbrReadPairsWithAdapter"])
-  expect_true(all(c("umis", "constantSeqForward", "constantSeqReverse", "variableSeqForward", 
-                    "variableSeqReverse") %in% SummarizedExperiment::assayNames(transInput)))
+  expect_equal(res$filterSummary$nbrTotal, 1000L)
+  expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
+  expect_equal(res$filterSummary$f2_nAvgVarQualTooLow, 7L)
+  expect_equal(res$filterSummary$f3_nTooManyNinVar, 0L)
+  expect_equal(res$filterSummary$f4_nTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f5_nMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f6_nTooManyMutCodons, 287L + 105L)
+  expect_equal(res$filterSummary$f7_nForbiddenCodons, 6L + 2L)
+  expect_equal(res$filterSummary$nbrRetained, 279L)
+  
+  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodons", "verbose"))) {
+    expect_equal(res$parameters[[nm]], Ldef[[nm]])
+  }
+  
+  expect_equal(sum(res$summaryTable$nbrReads == 2), 2L)
+  expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
+               sort(c("f13GAG", "f26TAG_r8AGG")))
+  expect_true(all(res$summaryTable$nbrReads == res$summaryTable$nbrUmis))
+  
+  ## Check that mutant naming worked (compare to manual matching)
+  example_seq <- paste0("ACTGATACAACCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTG", 
+                        "CAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA_ATCGCCCGGCT", 
+                        "GGAGGAAAAAGTGGGCACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGC", 
+                        "CAACATGCTCAGGGAACAGGTGGCACAGCTT")
+  expect_equal(res$summaryTable$mutantName[res$summaryTable$sequence == example_seq], 
+               "f4ACC_r9GGC")
+  
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 14], 160L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 22], 52L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 27], 302L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 33], 472L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 37], 4020L)
+  
+  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 14], 11L)
+  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 27], 4L)
+  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 37], 1L)
+
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 14], 204L)
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 22], 14L)
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 27], 474L)
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 33], 462L)
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 37], 4405L)
+  
+  expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 14], 17L)
+  expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 27], 3L)
+  expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 37], 1L)
+  
 })
 
-test_that("readFastqs works as expected for cis experiments", {
-  fnameR1 <- system.file("extdata", "cisInput_1.fastq.gz", package = "mutscan")
-  fnameR2 <- system.file("extdata", "cisInput_2.fastq.gz", package = "mutscan")
+context("digestFastqs - cis")
+test_that("digestFastqs works as expected for cis experiments", {
+  fqc1 <- system.file("extdata/cisInput_1.fastq.gz", package = "mutscan")
+  fqc2 <- system.file("extdata/cisInput_2.fastq.gz", package = "mutscan")
+  ## default arguments
+  Ldef <- list(
+    experimentType = "cis", fastqForward = fqc1, 
+    fastqReverse = fqc2, skipForward = 1, skipReverse = 1, 
+    umiLengthForward = 10, umiLengthReverse = 7, 
+    constantLengthForward = 18, constantLengthReverse = 17, 
+    variableLengthForward = 96, variableLengthReverse = 96,
+    adapterForward = "GGAAGAGCACACGTC", 
+    adapterReverse = "GGAAGAGCGTCGTGT",
+    wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+    wildTypeReverse = "", 
+    constantForward = "AACCGGAGGAGGGAGCTG", 
+    constantReverse = "GAGTTCATCCTGGCAGC", 
+    avePhredMin = 20.0, variableNMax = 0, umiNMax = 0,
+    nbrMutatedCodonsMax = 1,
+    forbiddenMutatedCodons = "NNW",
+    mutatedPhredMin = 0.0,
+    verbose = FALSE
+  )
   
-  cisInput <- readFastqs(experimentType = "cis", fastqForward = fnameR1, fastqReverse = fnameR2,
-                         skipForward = 1, skipReverse = 1, umiLengthForward = 10, 
-                         umiLengthReverse = 7, constantLengthForward = 18,
-                         constantLengthReverse = 17, variableLengthForward = 96,
-                         variableLengthReverse = 96, adapterForward = "GGAAGAGCACACGTC", 
-                         adapterReverse = "GGAAGAGCGTCGTGT", verbose = FALSE)
-  s1 <- ShortRead::readFastq(fnameR1)
+  res <- do.call(digestFastqs, Ldef)
   
-  expect_true(isValidL(cisInput))
-  expect_identical(length(s1), SummarizedExperiment::colData(cisInput)[1, "totalNbrReadPairs"])
-  expect_true(length(s1) == length(assay(cisInput, "umis")$seq) + 
-                SummarizedExperiment::colData(cisInput)[1, "nbrReadPairsWithAdapter"])
-  expect_true(all(c("umis", "constantSeqForward", "constantSeqReverse", "variableSeqForward") %in% 
-                    SummarizedExperiment::assayNames(cisInput)))
-  expect_false("variableSeqReverse" %in% assayNames(cisInput))
+  expect_equal(res$filterSummary$nbrTotal, 1000L)
+  expect_equal(res$filterSummary$f1_nbrAdapter, 126L)
+  expect_equal(res$filterSummary$f2_nAvgVarQualTooLow, 0L)
+  expect_equal(res$filterSummary$f3_nTooManyNinVar, 44L)
+  expect_equal(res$filterSummary$f4_nTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f5_nMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f6_nTooManyMutCodons, 581L)
+  expect_equal(res$filterSummary$f7_nForbiddenCodons, 82L)
+  expect_equal(res$filterSummary$nbrRetained, 167)
+  
+  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodons", "verbose"))) {
+    expect_equal(res$parameters[[nm]], Ldef[[nm]])
+  }
+  
+  expect_equal(sum(res$summaryTable$nbrReads == 2), 11L)
+  expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
+               sort(c("f14AAG", "f15ATG", "f19CAC", "f1ACC", "f20AAC", "f21GTG",
+                      "f24AGC", "f4CGC", "f7GTG", "f9GGC", "f9GTC")))
+  expect_true(all(res$summaryTable$nbrReads == res$summaryTable$nbrUmis))
+  
+  ## Check that mutant naming worked (compare to manual matching)
+  example_seq <- paste0("ACTGATACACGCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCT", 
+                        "GCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")
+  expect_equal(res$summaryTable$mutantName[res$summaryTable$sequence == example_seq], 
+               "f4CGC")
+  
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 14], 51L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 22], 19L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 27], 79L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 33], 163L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 37], 2690L)
+  
+  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 14], 1L)
+  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 27], 1L)
+  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 37], 2L)
+  
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 14], 41L)
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 27], 56L)
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 33], 96L)
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 37], 2620L)
+  
+  expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 2], 4L)
+  expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 14], 7L)
+  expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 33], 1L)
+  expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 37], 14L)
+  
 })
 
-test_that("readFastqs fails when the wrong inputs are given", {
-  fnameR1 <- system.file("extdata", "transInput_1.fastq.gz", package = "mutscan")
-  fnameR2 <- system.file("extdata", "transInput_2.fastq.gz", package = "mutscan")
-  expect_error(readFastqs(experimentType = "unknown", fastqForward = fnameR1, fastqReverse = fnameR2))
-  expect_error(readFastqs(experimentType = "trans", fastqForward = paste0(fnameR1, "_unknown"),
-                          fastqReverse = fnameR2))
-  expect_error(readFastqs(experimentType = "trans", fastqForward = fnameR1, fastqReverse = fnameR2,
-                          skipForward = "1"))
-  expect_error(readFastqs(experimentType = "trans", fastqForward = fnameR1, fastqReverse = fnameR2,
-                          adapterForward = "EE "))
-})
