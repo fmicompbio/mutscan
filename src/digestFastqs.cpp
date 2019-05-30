@@ -541,7 +541,6 @@ List digestFastqsCpp(std::string experimentType,
   List L = List::create(Named("parameters") = param,
                         Named("filterSummary") = filt,
                         Named("summaryTable") = df,
-                        Named("errorStatistics") = err,
-                        Named("experimentType") = experimentType);
+                        Named("errorStatistics") = err);
   return L;
 }

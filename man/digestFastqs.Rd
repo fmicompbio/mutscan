@@ -4,10 +4,9 @@
 \alias{digestFastqs}
 \title{Read, filter and digest sequences from two fastq files.}
 \usage{
-digestFastqs(experimentType, fastqForward, fastqReverse, skipForward = 1,
-  skipReverse = 1, umiLengthForward = 10, umiLengthReverse = 8,
-  constantLengthForward = 18, constantLengthReverse = 20,
-  variableLengthForward = 96, variableLengthReverse = 96,
+digestFastqs(experimentType, fastqForward, fastqReverse, skipForward,
+  skipReverse, umiLengthForward, umiLengthReverse, constantLengthForward,
+  constantLengthReverse, variableLengthForward, variableLengthReverse,
   adapterForward = "", adapterReverse = "", wildTypeForward = "",
   wildTypeReverse = "", constantForward = "", constantReverse = "",
   avePhredMin = 20, variableNMax = 0, umiNMax = 0,
@@ -19,7 +18,7 @@ digestFastqs(experimentType, fastqForward, fastqReverse, skipForward = 1,
 to "cis", the variable sequences from the forward and reverse reads will be
 consolidated into one single sequence.}
 
-\item{fastqForward, fastqReverse}{character(1), paths to FASTQ files
+\item{fastqForward, fastqReverse}{character(1), paths to gzipped FASTQ files
 corresponding to forward and reverse reads, respectively.}
 
 \item{skipForward, skipReverse}{numeric(1), the number of bases to skip in the
@@ -74,14 +73,67 @@ read to be retained. If any mutated base has a Phred score lower than
 \item{verbose}{logical(1), whether to print out progress messages.}
 }
 \value{
-A list with ---more details---.
+A list with four entries:
+\describe{
+\item{summaryTable}{A \code{data.frame} that contains, for each observed
+variable region sequence (or pair of sequences, for trans experiments), a
+simplified "mutantName", the number of observed such sequences, and the
+number of unique UMIs obseved for the sequence. The "mutantName" for each
+mutated codon is of the form "{f/r}xxNNN", where f/r indicates
+forward/reverse read, xx indicates the mutated codon, and NNN is the observed
+sequence for the codon. In the case of multiple mutated codons, these are
+separated by underscores.}
+\item{filterSummary}{A \code{data.frame} that contains the number of input
+reads, the number of reads filtered out in the processing, and the number of
+retained reads. The filters are named according to the convention
+"fxx_filter", where "xx" indicates the order in which the filters were
+applied, and "filter" indicates the type of filter. Note that filters are
+applied successively, and the reads filtered out in one step are not
+considered for successive filtering steps.}
+\item{errorStatistics}{A \code{data.frame} that contains, for each Phred
+quality score between 0 and 99, the number of bases in the extracted constant
+sequences with that quality score that match/mismatch with the provided
+reference constant sequence.}
+\item{parameters}{A \code{list} with all parameter settings that were used in
+the processing. Also contains the version of the package and the time of
+processing.}
+}
 }
 \description{
-\code{readAndDigestFastqs} reads sequences for a pair of fastq files
-and digests them (extracts umis, constant and variable parts, filters,
-extracts mismatch information from constant and counts the observed
-unique variable parts).
+Read sequences for a pair of fastq files and digest them (extract umis,
+constant and variable parts, filter, extract mismatch information from
+constant and count the observed unique variable parts).
 }
 \details{
-more details.
+The processing of a read pair goes as follows:
+\enumerate{
+ \item Search for perfect matches to forward/reverse adapter sequences,
+ filter out the read pair if a match is found in either the forward or
+ reverse read.
+ \item For "cis" experiment, collapse forward and reverse variable regions by
+ retaining, for each position, the base with the highest reported base
+ quality.
+ \item Filter out read pair if the average quality in the variable region is
+ below \code{avePhredMin} (for "trans" experiments, filter out a read pair if
+ either the forward or reverse variable region falls below the quality
+ threshold)
+ \item Filter out read pair if the number of Ns in the variable region (for
+ "trans" experiments, either the forward or reverse) exceeds
+ \code{variableNMax}
+ \item Filter out read pair if the number of Ns in the combined forward and
+ reverse UMI sequence exceeds \code{umiNMax}
+ \item If a wild type sequence (for the variable region) is provided, find
+ the mismatches between the (forward/reverse) variable region and the
+ provided wild type sequence.
+ \item Filter out read pair if any mutated base has a quality below
+ \code{mutatedPhredMin}
+ \item Filter out read pair if the number of mutated codons exceeds
+ \code{nbrMutatedCodonsMax}
+ \item Filter out read pair if any of the mutated codons match any of the
+ codons encoded by \code{forbiddenCodons}
+}
+
+Based on the retained reads following this filtering process, count the
+number of reads, and the number of unique UMIs, for each variable sequence
+(or pair of variable sequences, for "trans" experiments).
 }
