@@ -7,7 +7,7 @@
 #' @param x A named list of SummarizedExperiment objects as returned by
 #'   \code{\link{digestFastqs}}. Names are used to link the objects to the
 #'   metadata provided in \code{coldata}.
-#' @param meta A \code{data.frame} with at least one column ("Name"). "Name"
+#' @param coldata A \code{data.frame} with at least one column ("Name"). "Name"
 #'   will be used to link to objects in \code{x}, and a potentially subset and
 #'   reordered version of \code{coldata} is stored in \code{colData} or the
 #'   returned \code{\link[SummarizedExperiment]{SummarizedExperiment}}.
@@ -30,7 +30,7 @@
 #' @importFrom BiocGenerics paste
 #' @importFrom S4Vectors DataFrame
 #' @importFrom methods is new
-#' @importFrom dplyr bind_rows distinct left_join
+#' @importFrom dplyr bind_rows distinct left_join %>%
 #' 
 #' @author Michael Stadler
 #' 

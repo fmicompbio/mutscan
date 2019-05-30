@@ -57,10 +57,10 @@ transInput$experimentType
 ## Combine samples (will count occurrences of each combination of variants) 
 
 ```{r combine}
-se <- summarizeExperiment(x = list(sample1 = transInputFiltered,
-                                   sample2 = transInputFiltered),
-                          meta = data.frame(Name = c("sample1", "sample2"),
-                                            Condition = c("input", "enriched")))
-head(assays(se)$counts)
+# se <- summarizeExperiment(x = list(sample1 = transInput,
+#                                    sample2 = transInput),
+#                           coldata = data.frame(Name = c("sample1", "sample2"),
+#                                                Condition = c("input", "enriched")))
+# head(assays(se)$counts)
 ```
 

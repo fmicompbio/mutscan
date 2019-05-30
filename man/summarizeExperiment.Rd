@@ -11,15 +11,15 @@ summarizeExperiment(x, coldata, countType = "umis")
 \code{\link{digestFastqs}}. Names are used to link the objects to the
 metadata provided in \code{coldata}.}
 
+\item{coldata}{A \code{data.frame} with at least one column ("Name"). "Name"
+will be used to link to objects in \code{x}, and a potentially subset and
+reordered version of \code{coldata} is stored in \code{colData} or the
+returned \code{\link[SummarizedExperiment]{SummarizedExperiment}}.}
+
 \item{countType}{Either "reads" or "umis". If "reads", the "count" assay of
 the returned object will contain the observed number of reads for each
 sequence (pair). If "umis", the "count" assay will contain the number of
 unique UMIs observed for each sequence (pair).}
-
-\item{meta}{A \code{data.frame} with at least one column ("Name"). "Name"
-will be used to link to objects in \code{x}, and a potentially subset and
-reordered version of \code{coldata} is stored in \code{colData} or the
-returned \code{\link[SummarizedExperiment]{SummarizedExperiment}}.}
 }
 \value{
 A \code{\link[SummarizedExperiment]{SummarizedExperiment}} with

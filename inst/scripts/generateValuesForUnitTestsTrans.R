@@ -83,7 +83,7 @@ ans_eltlens <- tabulate(findInterval(unlisted_ans - 1L,
                                      breakpoints) + 1L,
                         nbins = length(p))
 skeleton <- IRanges::PartitioningByEnd(cumsum(ans_eltlens))
-nucleotideMismatches <- relist(unlisted_ans, skeleton)
+nucleotideMismatches <- BiocGenerics::relist(unlisted_ans, skeleton)
 offsets <- c(0L, breakpoints[-length(breakpoints)])
 mismatchPositions <- nucleotideMismatches - offsets
 mismatchQualities <- Biostrings::quality(varForward)[mismatchPositions]
@@ -111,8 +111,8 @@ matchForbidden <- Biostrings::vmatchPattern(
   pattern = Ldef$forbiddenMutatedCodon, 
   as(mutCodons, "DNAStringSet"), 
   fixed = FALSE)
-forbiddencodon <- sapply(relist(start(unlist(matchForbidden)) %% 3==1, 
-                                matchForbidden), function(i) any(i))
+forbiddencodon <- sapply(BiocGenerics::relist(start(unlist(matchForbidden)) %% 3==1, 
+                                              matchForbidden), function(i) any(i))
 sum(forbiddencodon)  ## 6
 fq1 <- fq1[!forbiddencodon]
 fq2 <- fq2[!forbiddencodon]
@@ -139,7 +139,7 @@ ans_eltlens <- tabulate(findInterval(unlisted_ans - 1L,
                                      breakpoints) + 1L,
                         nbins = length(p))
 skeleton <- IRanges::PartitioningByEnd(cumsum(ans_eltlens))
-nucleotideMismatches <- relist(unlisted_ans, skeleton)
+nucleotideMismatches <- BiocGenerics::relist(unlisted_ans, skeleton)
 offsets <- c(0L, breakpoints[-length(breakpoints)])
 mismatchPositions <- nucleotideMismatches - offsets
 mismatchQualities <- Biostrings::quality(varReverse)[mismatchPositions]
@@ -169,8 +169,8 @@ matchForbidden <- Biostrings::vmatchPattern(
   pattern = Ldef$forbiddenMutatedCodon, 
   as(mutCodons, "DNAStringSet"), 
   fixed = FALSE)
-forbiddencodon <- sapply(relist(start(unlist(matchForbidden)) %% 3==1, 
-                                matchForbidden), function(i) any(i))
+forbiddencodon <- sapply(BiocGenerics::relist(start(unlist(matchForbidden)) %% 3==1, 
+                                              matchForbidden), function(i) any(i))
 sum(forbiddencodon)  ## 2
 fq1 <- fq1[!forbiddencodon]
 fq2 <- fq2[!forbiddencodon]
@@ -207,7 +207,7 @@ ans_eltlens <- tabulate(findInterval(unlisted_ans - 1L,
                                      breakpoints) + 1L,
                         nbins = length(p))
 skeleton <- IRanges::PartitioningByEnd(cumsum(ans_eltlens))
-nucleotideMismatches <- relist(unlisted_ans, skeleton)
+nucleotideMismatches <- BiocGenerics::relist(unlisted_ans, skeleton)
 offsets <- c(0L, breakpoints[-length(breakpoints)])
 mismatchPositions <- nucleotideMismatches - offsets
 mismatchQualities <- unlist(as(quality(constForward)[mismatchPositions], "IntegerList"))
@@ -218,7 +218,7 @@ ans_eltlens <- tabulate(findInterval(unlisted_ans - 1L,
                                      breakpoints) + 1L,
                         nbins = length(p))
 skeleton <- IRanges::PartitioningByEnd(cumsum(ans_eltlens))
-nucleotideMatches <- relist(unlisted_ans, skeleton)
+nucleotideMatches <- BiocGenerics::relist(unlisted_ans, skeleton)
 offsets <- c(0L, breakpoints[-length(breakpoints)])
 matchPositions <- nucleotideMatches - offsets
 matchQualities <- unlist(as(quality(constForward)[matchPositions], "IntegerList"))
@@ -240,7 +240,7 @@ ans_eltlens <- tabulate(findInterval(unlisted_ans - 1L,
                                      breakpoints) + 1L,
                         nbins = length(p))
 skeleton <- IRanges::PartitioningByEnd(cumsum(ans_eltlens))
-nucleotideMismatches <- relist(unlisted_ans, skeleton)
+nucleotideMismatches <- BiocGenerics::relist(unlisted_ans, skeleton)
 offsets <- c(0L, breakpoints[-length(breakpoints)])
 mismatchPositions <- nucleotideMismatches - offsets
 mismatchQualities <- unlist(as(quality(constReverse)[mismatchPositions], "IntegerList"))
@@ -251,7 +251,7 @@ ans_eltlens <- tabulate(findInterval(unlisted_ans - 1L,
                                      breakpoints) + 1L,
                         nbins = length(p))
 skeleton <- IRanges::PartitioningByEnd(cumsum(ans_eltlens))
-nucleotideMatches <- relist(unlisted_ans, skeleton)
+nucleotideMatches <- BiocGenerics::relist(unlisted_ans, skeleton)
 offsets <- c(0L, breakpoints[-length(breakpoints)])
 matchPositions <- nucleotideMatches - offsets
 matchQualities <- unlist(as(quality(constReverse)[matchPositions], "IntegerList"))

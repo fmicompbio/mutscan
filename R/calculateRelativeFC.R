@@ -28,7 +28,8 @@ calculateRelativeFC <- function(se, design, coef, selAssay = "counts", pseudocou
   }
 
   if (!(selAssay %in% SummarizedExperiment::assayNames(se))) {
-    if (is.null(assayNames(se)) && length(assays(se)) == 1) {
+    if (is.null(SummarizedExperiment::assayNames(se)) && 
+        length(SummarizedExperiment::assays(se)) == 1) {
       warning("No assayNames provided in 'se', but only one assay present - using that.")
     } else {
       stop("Provided 'selAssay' not present in 'se'.")

@@ -11,12 +11,14 @@ GENETIC_CODE <- structure(c(TTT = "F", TTC = "F", TTA = "L", TTG = "L", TCT = "S
                             GCC = "A", GCA = "A", GCG = "A", GAT = "D", GAC = "D", GAA = "E", 
                             GAG = "E", GGT = "G", GGC = "G", GGA = "G", GGG = "G"), alt_init_codons = c("TTG", 
                                                                                                         "CTG"))
-
+#' @importFrom Matrix.utils aggregate.Matrix
+#' @importFrom utils relist
+#' 
 collapseMutantsByAA <- function(se) {
   tmp <- base::strsplit(rownames(se), split = "_", fixed = TRUE)
   unl <- unlist(tmp, use.names = FALSE)
   unl <- paste0(substr(unl, 1, nchar(unl) - 3), GENETIC_CODE[substr(unl, nchar(unl) - 2, nchar(unl))])
-  tmp <- relist(unl, skeleton = tmp)
+  tmp <- utils::relist(unl, skeleton = tmp)
   tmp <- S4Vectors::unstrsplit(tmp, sep = "_")
   tmp[rownames(se) == "WT"] <- "WT"
 

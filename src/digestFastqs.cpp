@@ -469,10 +469,12 @@ List digestFastqsCpp(std::string experimentType,
     if (constantReverse.compare("") != 0) {
       constSeqReverse = sseq2.substr(skipReverse + umiLengthReverse, constantLengthReverse);
       constQualReverse = squal2.substr(skipReverse + umiLengthReverse, constantLengthReverse);
-      transform(begin(constSeqReverse), end(constSeqReverse),
-        begin(constSeqReverse), complement);
-      reverse(constSeqReverse.begin(), constSeqReverse.end());
-      reverse(constQualReverse.begin(), constQualReverse.end());
+      if (experimentType.compare("cis") == 0) {
+        transform(begin(constSeqReverse), end(constSeqReverse),
+                  begin(constSeqReverse), complement);
+        reverse(constSeqReverse.begin(), constSeqReverse.end());
+        reverse(constQualReverse.begin(), constQualReverse.end());
+      }
       for (size_t i = 0; i < constantLengthReverse; i++) {
         constIntQualReverse[i] = int(constQualReverse[i]) - 33;
       }

@@ -23,7 +23,9 @@ Imports:
     SummarizedExperiment,
     Rcpp,
     edgeR,
-    dplyr
+    dplyr,
+    Matrix,
+    Matrix.utils
 Suggests: 
     testthat,
     knitr,
