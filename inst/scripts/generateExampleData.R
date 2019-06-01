@@ -72,7 +72,7 @@ allSamples <- mclapply(sampleIds, function(id) {
                         wildTypeReverse = "", 
                         nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = "NNW",verbose = TRUE)
 }, mc.cores = 6)
-se <- mutscan::summarizeExperiment(x = allSamples, coldata = meta)
+se <- mutscan::summarizeExperiment(x = allSamples, coldata = meta, countType = "umis")
 seaa <- mutscan::collapseMutantsByAA(se)
 saveRDS(list(se = se, se_collapsed = seaa), file = "../../../data/GSE102901/processed_data/GSE102901_cis_se.rds")
 saveRDS(se, file = "GSE102901_cis_se.rds")

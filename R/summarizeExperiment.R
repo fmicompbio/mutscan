@@ -4,19 +4,20 @@
 #' into a \code{\link[SummarizedExperiment]{SummarizedExperiment}}, with
 #' observed variable sequences (sequence pairs) in rows and samples in columns.
 #' 
-#' @param x A named list of SummarizedExperiment objects as returned by
-#'   \code{\link{digestFastqs}}. Names are used to link the objects to the
-#'   metadata provided in \code{coldata}.
-#' @param coldata A \code{data.frame} with at least one column ("Name"). "Name"
-#'   will be used to link to objects in \code{x}, and a potentially subset and
-#'   reordered version of \code{coldata} is stored in \code{colData} or the
+#' @param x A named list of objects returned by \code{\link{digestFastqs}}.
+#'   Names are used to link the objects to the metadata provided in
+#'   \code{coldata}.
+#' @param coldata A \code{data.frame} with at least one column "Name", which
+#'   will be used to link to objects in \code{x}. A potentially subset and
+#'   reordered version of \code{coldata} is stored in the \code{colData} of the
 #'   returned \code{\link[SummarizedExperiment]{SummarizedExperiment}}.
 #' @param countType Either "reads" or "umis". If "reads", the "count" assay of
 #'   the returned object will contain the observed number of reads for each
 #'   sequence (pair). If "umis", the "count" assay will contain the number of
 #'   unique UMIs observed for each sequence (pair).
 #'
-#' @return A \code{\link[SummarizedExperiment]{SummarizedExperiment}} with
+#' @return A \code{\link[SummarizedExperiment]{SummarizedExperiment}} \code{x}
+#'   with
 #'   \describe{
 #'     \item{assays(x)$counts}{containing the observed number of sequences or
 #'     sequence pairs (if \code{countType} = "reads"), or the observed number of
@@ -26,21 +27,22 @@
 #'     \item{colData(x)}{containing the metadata provided by \code{coldata}.}
 #'   }
 #'
+#' @author Michael Stadler
+#' 
+#' @export
+#' 
 #' @importFrom SummarizedExperiment SummarizedExperiment colData
 #' @importFrom BiocGenerics paste
 #' @importFrom S4Vectors DataFrame
 #' @importFrom methods is new
 #' @importFrom dplyr bind_rows distinct left_join %>%
 #' 
-#' @author Michael Stadler
-#' 
-#' @export
 summarizeExperiment <- function(x, coldata, countType = "umis") {
   ## --------------------------------------------------------------------------
   ## Pre-flight checks
   ## --------------------------------------------------------------------------
   if (!is(x, "list") || is.null(names(x)) ||
-      length(unique(vapply(x, function(w) w$experimentType, ""))) != 1L) {
+      length(unique(vapply(x, function(w) w$parameters$experimentType, ""))) != 1L) {
     stop("'x' must be a named list with either only 'cis' or only 'trans' objects")
   }
   if (any(duplicated(names(x)))) {
@@ -69,7 +71,7 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
             "match any 'coldata$Name'.")
   }
   x <- x[nms]
-  coldata <- coldata[match(nms, coldata$Name), ]
+  coldata <- coldata[match(nms, coldata$Name), , drop = FALSE]
   
   ## --------------------------------------------------------------------------
   ## Get all sequences, and all sample names
@@ -107,7 +109,7 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
   ## --------------------------------------------------------------------------
   se <- SummarizedExperiment::SummarizedExperiment(
     assays = list(counts = countMat),
-    colData = coldata[match(allSamples, coldata$Name), ],
+    colData = coldata[match(allSamples, coldata$Name), , drop = FALSE],
     rowData = S4Vectors::DataFrame(sequence = allSequences$sequence),
     metadata = lapply(allSamples, function(w) x[[w]]$parameters)
   )

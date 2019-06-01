@@ -7,13 +7,13 @@
 summarizeExperiment(x, coldata, countType = "umis")
 }
 \arguments{
-\item{x}{A named list of SummarizedExperiment objects as returned by
-\code{\link{digestFastqs}}. Names are used to link the objects to the
-metadata provided in \code{coldata}.}
+\item{x}{A named list of objects returned by \code{\link{digestFastqs}}.
+Names are used to link the objects to the metadata provided in
+\code{coldata}.}
 
-\item{coldata}{A \code{data.frame} with at least one column ("Name"). "Name"
-will be used to link to objects in \code{x}, and a potentially subset and
-reordered version of \code{coldata} is stored in \code{colData} or the
+\item{coldata}{A \code{data.frame} with at least one column "Name", which
+will be used to link to objects in \code{x}. A potentially subset and
+reordered version of \code{coldata} is stored in the \code{colData} of the
 returned \code{\link[SummarizedExperiment]{SummarizedExperiment}}.}
 
 \item{countType}{Either "reads" or "umis". If "reads", the "count" assay of
@@ -22,7 +22,8 @@ sequence (pair). If "umis", the "count" assay will contain the number of
 unique UMIs observed for each sequence (pair).}
 }
 \value{
-A \code{\link[SummarizedExperiment]{SummarizedExperiment}} with
+A \code{\link[SummarizedExperiment]{SummarizedExperiment}} \code{x}
+  with
   \describe{
     \item{assays(x)$counts}{containing the observed number of sequences or
     sequence pairs (if \code{countType} = "reads"), or the observed number of

@@ -16,36 +16,140 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+## Introduction
+
+`mutscan` provides functionality for processing and visualization of Deep
+Mutational Scanning data, starting from paired-end FASTQ files. Both TRANS
+experiments (considering combinations of two proteins) and CIS experiments
+(studying a single protein) can be accommodated.
+
+```{r setup, message = FALSE}
 library(SummarizedExperiment)
 library(mutscan)
 ```
 
-## Read example data
+## Reading example data
+
+The `mutscan` package contains small example FASTQ files representing both TRANS
+and CIS experiments. Each of these FASTQ file pairs contains 1,000 reads from
+one of the replicates in [@Diss2018].
 
 ```{r readTrans}
 datadir <- system.file("extdata", package = "mutscan")
 dir(datadir)
-transInput <- digestFastqs(experimentType = "trans", fastqForward = file.path(datadir, "transInput_1.fastq.gz"),
+```
+
+## Processing Deep Mutational Scanning data
+
+The main function for processing the Deep Mutational Scanning FASTQ files is
+`digestFastqs`. This function requires the specification of the experiment type,
+paths to compressed FASTQ files, and the composition of the reads. For TRANS
+experiments, the two reads in a pair are expected to be of the form:
+
+read1: [skipped] - [UMI] - [constant sequence] - [variable region, protein 1, 5'-3']
+
+read2: [skipped] - [UMI] - [constant sequence] - [variable region, protein 2, 5'-3']
+
+For CIS experiments, the two reads are expected to be of the form:
+
+read1: [skipped] - [UMI] - [constant sequence] - [variable region, protein 1, 5'-3']
+
+read2: [skipped] - [UMI] - [constant sequence] - [variable region, protein 1, reverse complemented]
+
+The lengths of each of the constituent parts of the reads, and the expected
+constant and variable (wild type) sequences, are specified when calling
+`digestFastqs`.
+
+In addition to reading the FASTQ files, `digestFastqs` will perform a series of
+filtering steps, in the following order:
+
+* Search for perfect matches to forward/reverse adapter sequences, filter out
+the read pair if a match is found in either the forward or reverse read.
+* For CIS experiment, collapse forward and reverse variable regions by
+retaining, for each position, the base with the highest reported base quality.
+* Filter out read pair if the average quality in the variable region is below
+`avePhredMin` (for TRANS experiments, filter out a read pair if either the
+forward or reverse variable region falls below the quality threshold).
+* Filter out read pair if the number of Ns in the variable region (for TRANS
+experiments, either the forward or reverse) exceeds `variableNMax`.
+* Filter out read pair if the number of Ns in the combined forward and reverse
+UMI sequence exceeds `umiNMax1`.
+* If a wild type sequence (for the variable region) is provided, find the
+mismatches between the (forward/reverse) variable region and the provided wild
+type sequence.
+* Filter out read pair if any mutated base has a quality below
+`mutatedPhredMin`.
+* Filter out read pair if the number of mutated codons exceeds
+`nbrMutatedCodonsMax`.
+* Filter out read pair if any of the mutated codons match any of the
+codons encoded by `forbiddenMutatedCodons`.
+
+## Reading TRANS data
+
+Here, we illustrate the processing of the provided TRANS experiment example
+data. We filter out reads with any adapter match, an average phred quality below
+20, any Ns in the UMI or variable sequence, more than one mutated codon, or a
+mutated codon ending with A or T (represented by the `NNW` value of the
+`forbiddenMutatedCodon` argument).
+
+```{r}
+transInput <- digestFastqs(experimentType = "trans", 
+                           fastqForward = file.path(datadir, "transInput_1.fastq.gz"),
                            fastqReverse = file.path(datadir, "transInput_2.fastq.gz"),
-                           skipForward = 1, skipReverse = 1, umiLengthForward = 10, 
-                           umiLengthReverse = 8, constantLengthForward = 18,
-                           constantLengthReverse = 20, variableLengthForward = 96,
-                           variableLengthReverse = 96, constantForward = "AACCGGAGGAGGGAGCTG",
-                           constantReverse = "GAAAAAGGAAGCTGGAGAGA", adapterForward = "GGAAGAGCACACGTC", 
+                           skipForward = 1, skipReverse = 1, 
+                           umiLengthForward = 10, umiLengthReverse = 8, 
+                           constantLengthForward = 18,
+                           constantLengthReverse = 20, 
+                           variableLengthForward = 96,
+                           variableLengthReverse = 96, 
+                           constantForward = "AACCGGAGGAGGGAGCTG",
+                           constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
+                           adapterForward = "GGAAGAGCACACGTC", 
                            adapterReverse = "GGAAGAGCGTCGTGT", 
                            avePhredMin = 20, variableNMax = 0, umiNMax = 0,
                            wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA", 
                            wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
-                           nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = "NNW",verbose = FALSE)
-transInput$parameters
-transInput$filterSummary
-head(transInput$summaryTable)
-transInput$errorStatistics[rowSums(transInput$errorStatistics[, -1]) != 0, ]
-transInput$experimentType
+                           nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = "NNW",
+                           verbose = FALSE)
 ```
 
-## Estimate sequencing error rate from constant sequences
+The `digestFastqs` function returns a list with four elements. The `parameters`
+list record all parameter values used during the processing, as well as the
+package version and time of processing.
+
+```{r}
+transInput$parameters
+```
+
+The `filterSummary` data.frame contains a summary of the number of reads
+filtered out in each step. Note that for any given filtering step, only the
+reads retained by the previous filters are considered. The numbers in the filter
+column names indicate the order of the filters.
+
+```{r}
+transInput$filterSummary
+```
+
+The `summaryTable` provides the number of reads and unique UMIs observed for
+each variable sequence pair. In addition, it contains a column `mutNames`, which
+provides a shorthand notation for each mutant. The format of the values in this
+column is a combination of `{f/r}xxNNN` (separated by `_`), where `f/r` refers
+to the forward/reverse read, `xx` indicates the mutated codon, and `NNN` gives
+the observed sequence for the mutated codon.
+
+```{r}
+head(transInput$summaryTable)
+```
+
+Finally, the `errorStatistics` data.frame lists the number of matching and
+mismatching bases in the constant sequences, stratified by the phred quality
+score (from 0 to 99).
+
+```{r}
+transInput$errorStatistics[rowSums(transInput$errorStatistics[, -1]) != 0, ]
+```
+
+The `errorStatistics` output can be used to estimate the sequencing error rate:
 
 ```{r errStats}
 (propErrorsConstantF <- sum(transInput$errorStatistics$nbrMismatchForward)/
@@ -54,13 +158,150 @@ transInput$experimentType
    (transInput$parameters$constantLengthReverse * transInput$filterSummary$nbrRetained))
 ```
 
-## Combine samples (will count occurrences of each combination of variants) 
+## Reading CIS data
+
+Here, we illustrate the processing of the provided CIS experiment example data.
+As for the TRANS data, we filter out reads with any adapter match, an average
+phred quality below 20, any Ns in the UMI or variable sequence, more than one
+mutated codon, or a mutated codon ending with A or T (represented by the `NNW`
+value of the `forbiddenMutatedCodon` argument). Note that only one wild type
+sequence is provided (the `wildTypeReverse` argument will be ignored if
+provided).
+
+```{r}
+cisInput <- digestFastqs(experimentType = "cis", 
+                         fastqForward = file.path(datadir, "cisInput_1.fastq.gz"),
+                         fastqReverse = file.path(datadir, "cisInput_2.fastq.gz"),
+                         skipForward = 1, skipReverse = 1, 
+                         umiLengthForward = 10, umiLengthReverse = 7, 
+                         constantLengthForward = 18,
+                         constantLengthReverse = 17, 
+                         variableLengthForward = 96,
+                         variableLengthReverse = 96, 
+                         constantForward = "AACCGGAGGAGGGAGCTG",
+                         constantReverse = "GAGTTCATCCTGGCAGC", 
+                         adapterForward = "GGAAGAGCACACGTC", 
+                         adapterReverse = "GGAAGAGCGTCGTGT", 
+                         avePhredMin = 20, variableNMax = 0, umiNMax = 0,
+                         wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA", 
+                         wildTypeReverse = "", 
+                         nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = "NNW",
+                         verbose = TRUE)
+```
+
+```{r}
+cisInput$parameters
+cisInput$filterSummary
+cisInput$errorStatistics[rowSums(cisInput$errorStatistics[, -1]) != 0, ]
+```
+
+The `summaryTable` now provides the number of reads and unique UMIs observed for
+each variable sequence, and all values in the `mutNames` column will start with `f`.
+
+```{r}
+head(cisInput$summaryTable)
+```
+
+## Combining samples
+
+The `digestFastqs` function processes each sample (pair of FASTQ files)
+separately. In order to prepare the data for statistical analysis, the
+`summarizeExperiment` function takes a named list of outputs from
+`digestFastqs`, and a data.frame with condition information, and generates a
+\code{\link[SummarizedExperiment]{SummarizedExperiment}}, with an `assay`
+containing either UMI or read counts.
 
 ```{r combine}
-# se <- summarizeExperiment(x = list(sample1 = transInput,
-#                                    sample2 = transInput),
-#                           coldata = data.frame(Name = c("sample1", "sample2"),
-#                                                Condition = c("input", "enriched")))
-# head(assays(se)$counts)
+transOutput <- digestFastqs(experimentType = "trans", 
+                            fastqForward = file.path(datadir, "transOutput_1.fastq.gz"),
+                            fastqReverse = file.path(datadir, "transOutput_2.fastq.gz"),
+                            skipForward = 1, skipReverse = 1, 
+                            umiLengthForward = 10, umiLengthReverse = 8, 
+                            constantLengthForward = 18,
+                            constantLengthReverse = 20, 
+                            variableLengthForward = 96,
+                            variableLengthReverse = 96, 
+                            constantForward = "AACCGGAGGAGGGAGCTG",
+                            constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
+                            adapterForward = "GGAAGAGCACACGTC", 
+                            adapterReverse = "GGAAGAGCGTCGTGT", 
+                            avePhredMin = 20, variableNMax = 0, umiNMax = 0,
+                            wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA", 
+                            wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
+                            nbrMutatedCodonsMax = 1, forbiddenMutatedCodon = "NNW",
+                            verbose = FALSE)
+se <- summarizeExperiment(x = list(sample1 = transInput,
+                                   sample2 = transOutput),
+                          coldata = data.frame(Name = c("sample1", "sample2"),
+                                               Condition = c("input", "output"),
+                                               Replicate = c(1, 1),
+                                               OD = c(0.05, 1.5)))
+head(assay(se, "counts"))
+Matrix::colSums(assay(se, "counts"))
+head(rowData(se))
+colData(se)
+```
+
+## Collapsing count matrix to amino acids
+
+The \link{\code[SummarizedExperiment]{SummarizedExperiment}} object generated by
+`summarizeExperiment()` contains one row for each observed variant
+(combination). This can be further collapsed by replacing the mutated codon by
+the corresponding amino acid, and aggregating the counts corresponding to the
+same mutated amino acid (combination).
+
+```{r}
+se_collapsed <- collapseMutantsByAA(se)
+head(assay(se_collapsed, "counts"))
+Matrix::colSums(assay(se_collapsed, "counts"))
+colData(se_collapsed)
+```
+
+## Calculating PPI scores
+
+The function `calculatePPIScore` can be used to calculate PPI scores as in
+[@Diss2018]. The function requires the user to specify a `pairingCol`,
+containing the replicate ID for each sample; one or more `ODCols`, containing
+the optical density for each sample, and a `comparison`, which is a character
+vector of length 3 specifying the comparison to perform, of the form
+(`groupColumn`, `numerator`, `denominator`). Here, `groupColumn` is the name of
+the column in `colData(se)` that contains the grouping information, and
+`numerator` and `denominator` specify the values of this column representing the
+two groups to be compared.
+
+Here, we illustrate the application of `calculatePPIScore` on a
+SummarizedExperiment object generated as described above, for all the three CIS
+replicates fro [@Diss2018].
+
+```{r}
+se_collapsed <- readRDS(file.path(datadir, "GSE102901_cis_se.rds"))
+ppis <- calculatePPIScore(se = se_collapsed, pairingCol = "Replicate", 
+                          ODCols = c("OD1", "OD2"),
+                          comparison = c("Condition", "cis_output", "cis_input"))
+head(ppis[order(abs(rowMeans(ppis)), decreasing = TRUE), , drop = FALSE])
+```
+
+## Scoring mutations with `edgeR`
+
+As an alternative to the PPI scoring, `edgeR` can be used to model the observed
+counts using a generalized linear model and estimate a logFC and a p-value for
+the enrichment of each variant betwen two conditions (or more generally, in
+association with any predictor) compared to the WT sequence. Note that for this,
+at least two replicates are required.
+
+```{r}
+scores <- calculateRelativeFC(se = se_collapsed,
+                              design = model.matrix(~ Replicate + Condition,
+                                                    data = colData(se_collapsed)),
+                              coef = 3, pseudocount = 1)
+head(scores[order(scores$PValue), , drop = FALSE])
+```
+
+## Session info
+
+This vignette was compiled on the following system:
+
+```{r}
+sessionInfo()
 ```
 

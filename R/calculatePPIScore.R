@@ -41,14 +41,14 @@ calculatePPIScore <- function(se, pairingCol, ODCols, comparison) {
          paste(colnames(colData(se))), collapse = ", ")
   }
   
-  ## ODcols are all in colData(se) and contain numeric values
-  if (!is.character(ODcols) || length(ODcols) < 1L ||
-      !all(ODcols %in% colnames(colData(se)))) {
-    stop("'ODcols' must be one or several string from ",
+  ## ODCols are all in colData(se) and contain numeric values
+  if (!is.character(ODCols) || length(ODCols) < 1L ||
+      !all(ODCols %in% colnames(colData(se)))) {
+    stop("'ODCols' must be one or several string from ",
          paste(colnames(colData(se)), collapse = ", "))
   }
-  if (!all(apply(colData(se)[, ODcols], 2, is.numeric))) {
-    stop("'ODcols' columns must only contain numeric values")
+  if (!all(apply(colData(se)[, ODCols, drop = FALSE], 2, is.numeric))) {
+    stop("'ODCols' columns must only contain numeric values")
   }
   
   ## comparison is length(3)-character with column and values in colData(se)
