@@ -52,7 +52,7 @@ qualsReverse <- as(ShortRead::FastqQuality(Biostrings::quality(varReverse)), "ma
 qualsForward[replaceAt] <- qualsReverse[replaceAt]
 phredQuals <- apply(qualsForward, 1, function(v) seqTools::ascii2char(v + 33))
 consensusQuals <- Biostrings::PhredQuality(phredQuals)
-varForward <- QualityScaledDNAStringSet(consensusSeq, consensusQuals)
+varForward <- Biostrings::QualityScaledDNAStringSet(consensusSeq, consensusQuals)
 
 ## Average quality in variable sequences too low
 avgQualForward <- ShortRead::alphabetScore(Biostrings::quality(varForward))/

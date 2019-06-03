@@ -257,8 +257,9 @@ bool mergeReadPair(std::string &varSeqForward, std::vector<int> &varIntQualForwa
       varIntQualForward[i] = varIntQualReverse[i];
     }
   }
+  
   // empty the reverse sequence and quality
-  varSeqReverse.clear();
+  varSeqReverse.clear(); 
   varIntQualReverse.clear();
   
   return true;
@@ -365,6 +366,13 @@ List digestFastqsCpp(std::string experimentType,
     varSeqReverse = sseq2.substr(skipReverse + umiLengthReverse + constantLengthReverse, variableLengthReverse);
     varQualForward = squal1.substr(skipForward + umiLengthForward + constantLengthForward, variableLengthForward);
     varQualReverse = squal2.substr(skipReverse + umiLengthReverse + constantLengthReverse, variableLengthReverse);
+    
+    // check that extracted sequences and qualities are of the right length 
+    // (if the read is too short, substr() will just read until the end of it)
+    if (varSeqForward.length() != variableLengthForward || varSeqReverse.length() != variableLengthForward || 
+        varQualForward.length() != variableLengthForward || varQualReverse.length() != variableLengthForward) {
+      stop("The read is not long enough to extract a variable sequence of the indicated length");
+    }
 
     std::vector<int> varIntQualForward(variableLengthForward, 0);
     std::vector<int> varIntQualReverse(variableLengthReverse, 0);
@@ -460,6 +468,13 @@ List digestFastqsCpp(std::string experimentType,
     if (constantForward.compare("") != 0) {
       constSeqForward = sseq1.substr(skipForward + umiLengthForward, constantLengthForward);
       constQualForward = squal1.substr(skipForward + umiLengthForward, constantLengthForward);
+      
+      // check that extracted sequences have the right length
+      if (constSeqForward.length() != constantLengthForward || constQualForward.length() != constantLengthForward) {
+        stop("The read is not long enough to extract a forward constant sequence of the indicated length");
+      }
+      
+      // populate an integer vector of base qualities
       for (size_t i = 0; i < constantLengthForward; i++) {
         constIntQualForward[i] = int(constQualForward[i]) - 33;
       }
@@ -469,12 +484,21 @@ List digestFastqsCpp(std::string experimentType,
     if (constantReverse.compare("") != 0) {
       constSeqReverse = sseq2.substr(skipReverse + umiLengthReverse, constantLengthReverse);
       constQualReverse = squal2.substr(skipReverse + umiLengthReverse, constantLengthReverse);
+      
+      // check that extracted sequences have the right length
+      if (constSeqReverse.length() != constantLengthReverse || constQualReverse.length() != constantLengthReverse) {
+        stop("The read is not long enough to extract a reverse constant sequence of the indicated length");
+      }
+      
+      // reverse (complement) sequence and quality string
       if (experimentType.compare("cis") == 0) {
         transform(begin(constSeqReverse), end(constSeqReverse),
                   begin(constSeqReverse), complement);
         reverse(constSeqReverse.begin(), constSeqReverse.end());
         reverse(constQualReverse.begin(), constQualReverse.end());
       }
+      
+      // populate an integer vector of base qualities
       for (size_t i = 0; i < constantLengthReverse; i++) {
         constIntQualReverse[i] = int(constQualReverse[i]) - 33;
       }
