@@ -257,11 +257,7 @@ bool mergeReadPair(std::string &varSeqForward, std::vector<int> &varIntQualForwa
       varIntQualForward[i] = varIntQualReverse[i];
     }
   }
-  
-  // empty the reverse sequence and quality
-  varSeqReverse.clear(); 
-  varIntQualReverse.clear();
-  
+
   return true;
 }
 
@@ -269,12 +265,12 @@ bool mergeReadPair(std::string &varSeqForward, std::vector<int> &varIntQualForwa
 // [[Rcpp::export]]
 List digestFastqsCpp(std::string experimentType,
                      std::string fastqForward, std::string fastqReverse,
-                     int skipForward = 1, int skipReverse = 1,
-                     int umiLengthForward = 10, int umiLengthReverse = 8,
-                     unsigned int constantLengthForward = 18,
-                     unsigned int constantLengthReverse = 20,
-                     unsigned int variableLengthForward = 96,
-                     unsigned int variableLengthReverse = 96,
+                     int skipForward, int skipReverse,
+                     int umiLengthForward, int umiLengthReverse,
+                     unsigned int constantLengthForward,
+                     unsigned int constantLengthReverse,
+                     unsigned int variableLengthForward,
+                     unsigned int variableLengthReverse,
                      std::string adapterForward = "", std::string adapterReverse = "",
                      std::string wildTypeForward = "", std::string wildTypeReverse = "", 
                      std::string constantForward = "", std::string constantReverse = "", 
@@ -307,10 +303,10 @@ List digestFastqsCpp(std::string experimentType,
   int nTooManyMutCodons = 0, nForbiddenCodons = 0, nMutQualTooLow = 0, nRetain = 0;
   std::string varSeqForward, varSeqReverse, varQualForward, varQualReverse, umiSeq;
   std::string constSeqForward, constSeqReverse, constQualForward, constQualReverse;
-//  std::vector<int> varIntQualForward(variableLengthForward,0);
-//  std::vector<int> varIntQualReverse(variableLengthReverse,0);
-//  std::vector<int> constIntQualForward(constantLengthForward,0);
-//  std::vector<int> constIntQualReverse(constantLengthReverse,0);
+  std::vector<int> varIntQualForward(variableLengthForward,0);
+  std::vector<int> varIntQualReverse(variableLengthReverse,0);
+  std::vector<int> constIntQualForward(constantLengthForward,0);
+  std::vector<int> constIntQualReverse(constantLengthReverse,0);
   std::string mutantName;
   std::map<std::string, mutantInfo> mutantSummary;
   std::map<std::string, mutantInfo>::iterator mutantSummaryIt;
@@ -374,16 +370,12 @@ List digestFastqsCpp(std::string experimentType,
       stop("The read is not long enough to extract a variable sequence of the indicated length");
     }
 
-    std::vector<int> varIntQualForward(variableLengthForward, 0);
-    std::vector<int> varIntQualReverse(variableLengthReverse, 0);
     // convert qualities to int
     for (size_t i = 0; i < variableLengthForward; i++) {
       varIntQualForward[i] = int(varQualForward[i]) - 33;
       varIntQualReverse[i] = int(varQualReverse[i]) - 33;
     }
-    varQualForward.clear();
-    varQualReverse.clear();
-    
+
     // for "cis" experiments, fuse forward and reverse reads
     if (experimentType.compare("cis") == 0) {
       mergeReadPair(varSeqForward, varIntQualForward,
@@ -393,7 +385,7 @@ List digestFastqsCpp(std::string experimentType,
     // filter if the average quality in variable region is too low
     if (std::accumulate(varIntQualForward.begin(), varIntQualForward.end(), 0.0) <
         avePhredMin * variableLengthForward ||
-        (!varIntQualReverse.empty() && std::accumulate(varIntQualReverse.begin(), varIntQualReverse.end(), 0.0) <
+        (experimentType.compare("trans") == 0 && std::accumulate(varIntQualReverse.begin(), varIntQualReverse.end(), 0.0) <
           avePhredMin * variableLengthReverse)) {
       nAvgVarQualTooLow++;
       continue;
@@ -401,7 +393,7 @@ List digestFastqsCpp(std::string experimentType,
     
     // filter if there are too many N's in variable regions
     if (std::count(varSeqForward.begin(), varSeqForward.end(), 'N') > variableNMax ||
-        std::count(varSeqReverse.begin(), varSeqReverse.end(), 'N') > variableNMax) {
+        (experimentType.compare("trans") == 0 && std::count(varSeqReverse.begin(), varSeqReverse.end(), 'N') > variableNMax)) {
       nTooManyNinVar++;
       continue;
     }
@@ -425,7 +417,7 @@ List digestFastqsCpp(std::string experimentType,
     }
     
     // if wildTypeReverse is available...
-    if (!varSeqReverse.empty() && wildTypeReverse.compare("") != 0) {
+    if (experimentType.compare("trans") == 0 && wildTypeReverse.compare("") != 0) {
       if (compareToWildtype(varSeqReverse, wildTypeReverse, varIntQualReverse,
                             mutatedPhredMin, nbrMutatedCodonsMax, forbiddenCodons,
                             std::string("r"), nMutQualTooLow, 
@@ -441,12 +433,12 @@ List digestFastqsCpp(std::string experimentType,
     if (mutantName.length() > 0) { // we have a least one mutation
       mutantName.pop_back(); // remove '_' at the end
     } else {
-      if (wildTypeForward.compare("") != 0 || (!varSeqReverse.empty() && wildTypeReverse.compare("") != 0)) {
+      if (wildTypeForward.compare("") != 0 || (experimentType.compare("trans") == 0 && wildTypeReverse.compare("") != 0)) {
         mutantName = "WT";
       }
     }
     // ... check if mutant already exists in mutantSummary
-    if (!varSeqReverse.empty()) { // "trans" experiment
+    if (experimentType.compare("trans") == 0) { // "trans" experiment
       varSeqForward += (std::string("_") + varSeqReverse);
     }
     if ((mutantSummaryIt = mutantSummary.find(varSeqForward)) != mutantSummary.end()) {
@@ -462,8 +454,6 @@ List digestFastqsCpp(std::string experimentType,
       mutantSummary.insert(std::pair<std::string,mutantInfo>(varSeqForward, newMutant));
     }
     
-    std::vector<int> constIntQualForward(constantLengthForward,0);
-    std::vector<int> constIntQualReverse(constantLengthReverse,0);
     // for retained reads, count numbers of (mis-)matching bases by Phred quality
     if (constantForward.compare("") != 0) {
       constSeqForward = sseq1.substr(skipForward + umiLengthForward, constantLengthForward);
