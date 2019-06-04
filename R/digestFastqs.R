@@ -79,23 +79,24 @@ checkNumericInput <- function(...) {
 #'   for the forward and reverse variable region.
 #' @param constantForward,constantReverse character(1), the expected constant
 #'   forward and reverse sequences.
-#' @param avePhredMin numeric(1) Minimum average Phred score in the variable
-#'   region for a read to be retained. If L contains both forward and reverse
-#'   variable regions, the minimum average Phred score has to be achieved in
-#'   both for a read pair to be retained.
-#' @param variableNMax numeric(1) Maximum number of Ns allowed in the variable
-#'   region for a read to be retained.
+#' @param avePhredMinForward,avePhredMinReverse numeric(1) Minimum average Phred
+#'   score in the variable region for a read to be retained. If L contains both
+#'   forward and reverse variable regions, the minimum average Phred score has
+#'   to be achieved in both for a read pair to be retained.
+#' @param variableNMaxForward,variableNMaxReverse numeric(1) Maximum number of
+#'   Ns allowed in the variable region for a read to be retained.
 #' @param umiNMax numeric(1) Maximum number of Ns allowed in the UMI for a read
 #'   to be retained.
-#' @param nbrMutatedCodonsMax numeric(1) Maximum number of mutated codons that
-#'   are allowed.
-#' @param forbiddenMutatedCodons character vector. Codons (can contain ambiguous
-#'   IUPAC characters, see \code{\link[Biostrings]{IUPAC_CODE_MAP}}). If a read
-#'   pair contains a mutated codon matching this pattern, it will be filtered
-#'   out.
-#' @param mutatedPhredMin numeric(1) Minimum Phred score of a mutated base for the
-#'   read to be retained. If any mutated base has a Phred score lower than
-#'   \code{mutatedPhredMin}, the read will be discarded.
+#' @param nbrMutatedCodonsMaxForward,nbrMutatedCodonsMaxReverse numeric(1)
+#'   Maximum number of mutated codons that are allowed.
+#' @param forbiddenMutatedCodonsForward,forbiddenMutatedCodonsReverse character
+#'   vector. Codons (can contain ambiguous IUPAC characters, see
+#'   \code{\link[Biostrings]{IUPAC_CODE_MAP}}). If a read pair contains a
+#'   mutated codon matching this pattern, it will be filtered out.
+#' @param mutatedPhredMinForward,mutatedPhredMinReverse numeric(1) Minimum Phred
+#'   score of a mutated base for the read to be retained. If any mutated base
+#'   has a Phred score lower than \code{mutatedPhredMin}, the read will be
+#'   discarded.
 #' @param verbose logical(1), whether to print out progress messages.
 #'
 #' @return A list with four entries:
@@ -136,10 +137,15 @@ digestFastqs <- function(experimentType,
                          adapterForward = "", adapterReverse = "",
                          wildTypeForward = "", wildTypeReverse = "", 
                          constantForward = "", constantReverse = "", 
-                         avePhredMin = 20.0, variableNMax = 0, umiNMax = 0,
-                         nbrMutatedCodonsMax = 1,
-                         forbiddenMutatedCodons = "NNW",
-                         mutatedPhredMin = 0.0,
+                         avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+                         variableNMaxForward = 0, variableNMaxReverse = 0, 
+                         umiNMax = 0,
+                         nbrMutatedCodonsMaxForward = 1,
+                         nbrMutatedCodonsMaxReverse = 1,
+                         forbiddenMutatedCodonsForward = "NNW",
+                         forbiddenMutatedCodonsReverse = "NNW",
+                         mutatedPhredMinForward = 0.0,
+                         mutatedPhredMinReverse = 0.0,
                          verbose = FALSE) {
   ## --------------------------------------------------------------------------
   ## pre-flight checks
@@ -165,11 +171,15 @@ digestFastqs <- function(experimentType,
   checkNumericInput(constantLengthReverse)
   checkNumericInput(variableLengthForward)
   checkNumericInput(variableLengthReverse)
-  checkNumericInput(avePhredMin)
-  checkNumericInput(variableNMax)
+  checkNumericInput(avePhredMinForward)
+  checkNumericInput(avePhredMinReverse)
+  checkNumericInput(variableNMaxForward)
+  checkNumericInput(variableNMaxReverse)
   checkNumericInput(umiNMax)
-  checkNumericInput(nbrMutatedCodonsMax)
-  checkNumericInput(mutatedPhredMin)
+  checkNumericInput(nbrMutatedCodonsMaxForward)
+  checkNumericInput(nbrMutatedCodonsMaxReverse)
+  checkNumericInput(mutatedPhredMinForward)
+  checkNumericInput(mutatedPhredMinReverse)
   
   ## adapters must be strings, valid DNA characters
   if (!is.character(adapterForward) || length(adapterForward) != 1 ||
@@ -239,13 +249,17 @@ digestFastqs <- function(experimentType,
          nchar(constantReverse), ")")
   }
   
-  if (!all(is.character(forbiddenMutatedCodons)) || 
-      !all(grepl("^[ACGTMRWSYKVHDBN]{3}$", toupper(forbiddenMutatedCodons)) | 
-           forbiddenMutatedCodons == "")) {
-    stop("All elements of 'forbiddenMutatedCodons' must be ", 
+  if (!all(is.character(forbiddenMutatedCodonsForward)) || 
+      !all(grepl("^[ACGTMRWSYKVHDBN]{3}$", toupper(forbiddenMutatedCodonsForward)) | 
+           forbiddenMutatedCodonsForward == "") ||
+      !all(is.character(forbiddenMutatedCodonsReverse)) || 
+      !all(grepl("^[ACGTMRWSYKVHDBN]{3}$", toupper(forbiddenMutatedCodonsReverse)) | 
+           forbiddenMutatedCodonsReverse == "")) {
+    stop("All elements of 'forbiddenMutatedCodonsForward' and 'forbiddenMutatedCodonsReverse' must be ", 
          "character strings consisting of three valid IUPAC letters.")
   } else {
-    forbiddenMutatedCodons <- toupper(forbiddenMutatedCodons)
+    forbiddenMutatedCodonsForward <- toupper(forbiddenMutatedCodonsForward)
+    forbiddenMutatedCodonsReverse <- toupper(forbiddenMutatedCodonsReverse)
   }
   
   if (!is.logical(verbose) || length(verbose) != 1) {
@@ -269,12 +283,17 @@ digestFastqs <- function(experimentType,
                          wildTypeReverse = wildTypeReverse, 
                          constantForward = constantForward, 
                          constantReverse = constantReverse, 
-                         avePhredMin = avePhredMin, 
-                         variableNMax = variableNMax, 
+                         avePhredMinForward = avePhredMinForward,
+                         avePhredMinReverse = avePhredMinReverse,
+                         variableNMaxForward = variableNMaxForward,
+                         variableNMaxReverse = variableNMaxReverse,
                          umiNMax = umiNMax,
-                         nbrMutatedCodonsMax = nbrMutatedCodonsMax,
-                         forbiddenMutatedCodons = forbiddenMutatedCodons,
-                         mutatedPhredMin = mutatedPhredMin,
+                         nbrMutatedCodonsMaxForward = nbrMutatedCodonsMaxForward,
+                         nbrMutatedCodonsMaxReverse = nbrMutatedCodonsMaxReverse,
+                         forbiddenMutatedCodonsForward = forbiddenMutatedCodonsForward,
+                         forbiddenMutatedCodonsReverse = forbiddenMutatedCodonsReverse,
+                         mutatedPhredMinForward = mutatedPhredMinForward,
+                         mutatedPhredMinReverse = mutatedPhredMinReverse,
                          verbose = verbose)
   
   ## Add package version and processing date

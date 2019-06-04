@@ -274,10 +274,15 @@ List digestFastqsCpp(std::string experimentType,
                      std::string adapterForward = "", std::string adapterReverse = "",
                      std::string wildTypeForward = "", std::string wildTypeReverse = "", 
                      std::string constantForward = "", std::string constantReverse = "", 
-                     double avePhredMin = 20.0, int variableNMax = 0, int umiNMax = 0,
-                     unsigned int nbrMutatedCodonsMax = 1,
-                     CharacterVector forbiddenMutatedCodons = "NNW",
-                     double mutatedPhredMin = 0.0,
+                     double avePhredMinForward = 20.0, double avePhredMinReverse = 20.0,
+                     int variableNMaxForward = 0, int variableNMaxReverse = 0, 
+                     int umiNMax = 0,
+                     unsigned int nbrMutatedCodonsMaxForward = 1,
+                     unsigned int nbrMutatedCodonsMaxReverse = 1,
+                     CharacterVector forbiddenMutatedCodonsForward = "NNW",
+                     CharacterVector forbiddenMutatedCodonsReverse = "NNW",
+                     double mutatedPhredMinForward = 0.0,
+                     double mutatedPhredMinReverse = 0.0,
                      bool verbose = false) {
 
   // Biostrings::IUPAC_CODE_MAP
@@ -314,8 +319,8 @@ List digestFastqsCpp(std::string experimentType,
   std::vector<int> nPhredCorrectReverse(100, 0), nPhredMismatchReverse(100, 0);
   
   // enumerate forbidden codons based on forbiddenMutatedCodons
-  std::set<std::string> forbiddenCodons = enumerateCodonsFromIUPAC(forbiddenMutatedCodons, IUPAC, verbose);
-
+  std::set<std::string> forbiddenCodonsForward = enumerateCodonsFromIUPAC(forbiddenMutatedCodonsForward, IUPAC, verbose);
+  std::set<std::string> forbiddenCodonsReverse = enumerateCodonsFromIUPAC(forbiddenMutatedCodonsReverse, IUPAC, verbose);
   
   // iterate over sequences
   if (verbose) {
@@ -384,16 +389,16 @@ List digestFastqsCpp(std::string experimentType,
     
     // filter if the average quality in variable region is too low
     if (std::accumulate(varIntQualForward.begin(), varIntQualForward.end(), 0.0) <
-        avePhredMin * variableLengthForward ||
+        avePhredMinForward * variableLengthForward ||
         (experimentType.compare("trans") == 0 && std::accumulate(varIntQualReverse.begin(), varIntQualReverse.end(), 0.0) <
-          avePhredMin * variableLengthReverse)) {
+          avePhredMinReverse * variableLengthReverse)) {
       nAvgVarQualTooLow++;
       continue;
     }
     
     // filter if there are too many N's in variable regions
-    if (std::count(varSeqForward.begin(), varSeqForward.end(), 'N') > variableNMax ||
-        (experimentType.compare("trans") == 0 && std::count(varSeqReverse.begin(), varSeqReverse.end(), 'N') > variableNMax)) {
+    if (std::count(varSeqForward.begin(), varSeqForward.end(), 'N') > variableNMaxForward ||
+        (experimentType.compare("trans") == 0 && std::count(varSeqReverse.begin(), varSeqReverse.end(), 'N') > variableNMaxReverse)) {
       nTooManyNinVar++;
       continue;
     }
@@ -408,7 +413,7 @@ List digestFastqsCpp(std::string experimentType,
     // if wildTypeForward is available...
     if (wildTypeForward.compare("") != 0) {
       if (compareToWildtype(varSeqForward, wildTypeForward, varIntQualForward,
-                            mutatedPhredMin, nbrMutatedCodonsMax, forbiddenCodons,
+                            mutatedPhredMinForward, nbrMutatedCodonsMaxForward, forbiddenCodonsForward,
                             std::string("f"), nMutQualTooLow, 
                             nTooManyMutCodons, nForbiddenCodons, mutantName)) {
         // read is to be filtered out
@@ -419,7 +424,7 @@ List digestFastqsCpp(std::string experimentType,
     // if wildTypeReverse is available...
     if (experimentType.compare("trans") == 0 && wildTypeReverse.compare("") != 0) {
       if (compareToWildtype(varSeqReverse, wildTypeReverse, varIntQualReverse,
-                            mutatedPhredMin, nbrMutatedCodonsMax, forbiddenCodons,
+                            mutatedPhredMinReverse, nbrMutatedCodonsMaxReverse, forbiddenCodonsReverse,
                             std::string("r"), nMutQualTooLow, 
                             nTooManyMutCodons, nForbiddenCodons, mutantName)) {
         // read is to be filtered out
@@ -537,7 +542,8 @@ List digestFastqsCpp(std::string experimentType,
                                     Named("nbrMismatchForward") = nPhredMismatchForward,
                                     Named("nbrMatchReverse") = nPhredCorrectReverse,
                                     Named("nbrMismatchReverse") = nPhredMismatchReverse);
-  std::vector<std::string> forbiddenCodonsUsed(forbiddenCodons.begin(), forbiddenCodons.end());
+  std::vector<std::string> forbiddenCodonsUsedForward(forbiddenCodonsForward.begin(), forbiddenCodonsForward.end());
+  std::vector<std::string> forbiddenCodonsUsedReverse(forbiddenCodonsReverse.begin(), forbiddenCodonsReverse.end());
   List param;
   param.push_back(experimentType, "experimentType");
   param.push_back(fastqForward, "fastqForward");
@@ -556,12 +562,17 @@ List digestFastqsCpp(std::string experimentType,
   param.push_back(wildTypeReverse, "wildTypeReverse");
   param.push_back(constantForward, "constantForward");
   param.push_back(constantReverse, "constantReverse");
-  param.push_back(avePhredMin, "avePhredMin");
-  param.push_back(variableNMax, "variableNMax");
+  param.push_back(avePhredMinForward, "avePhredMinForward");
+  param.push_back(avePhredMinReverse, "avePhredMinReverse");
+  param.push_back(variableNMaxForward, "variableNMaxForward");
+  param.push_back(variableNMaxReverse, "variableNMaxReverse");
   param.push_back(umiNMax, "umiNMax");
-  param.push_back(nbrMutatedCodonsMax, "nbrMutatedCodonsMax");
-  param.push_back(forbiddenCodonsUsed, "forbiddenMutatedCodons");
-  param.push_back(mutatedPhredMin, "mutatedPhredMin");
+  param.push_back(nbrMutatedCodonsMaxForward, "nbrMutatedCodonsMaxForward");
+  param.push_back(nbrMutatedCodonsMaxReverse, "nbrMutatedCodonsMaxReverse");
+  param.push_back(forbiddenCodonsUsedForward, "forbiddenMutatedCodonsForward");
+  param.push_back(forbiddenCodonsUsedReverse, "forbiddenMutatedCodonsReverse");
+  param.push_back(mutatedPhredMinForward, "mutatedPhredMinForward");
+  param.push_back(mutatedPhredMinReverse, "mutatedPhredMinReverse");
   List L = List::create(Named("parameters") = param,
                         Named("filterSummary") = filt,
                         Named("summaryTable") = df,

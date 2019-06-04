@@ -9,9 +9,12 @@ digestFastqs(experimentType, fastqForward, fastqReverse, skipForward,
   constantLengthReverse, variableLengthForward, variableLengthReverse,
   adapterForward = "", adapterReverse = "", wildTypeForward = "",
   wildTypeReverse = "", constantForward = "", constantReverse = "",
-  avePhredMin = 20, variableNMax = 0, umiNMax = 0,
-  nbrMutatedCodonsMax = 1, forbiddenMutatedCodons = "NNW",
-  mutatedPhredMin = 0, verbose = FALSE)
+  avePhredMinForward = 20, avePhredMinReverse = 20,
+  variableNMaxForward = 0, variableNMaxReverse = 0, umiNMax = 0,
+  nbrMutatedCodonsMaxForward = 1, nbrMutatedCodonsMaxReverse = 1,
+  forbiddenMutatedCodonsForward = "NNW",
+  forbiddenMutatedCodonsReverse = "NNW", mutatedPhredMinForward = 0,
+  mutatedPhredMinReverse = 0, verbose = FALSE)
 }
 \arguments{
 \item{experimentType}{character(1), either "cis" or "trans". If this is set
@@ -47,28 +50,29 @@ for the forward and reverse variable region.}
 \item{constantForward, constantReverse}{character(1), the expected constant
 forward and reverse sequences.}
 
-\item{avePhredMin}{numeric(1) Minimum average Phred score in the variable
-region for a read to be retained. If L contains both forward and reverse
-variable regions, the minimum average Phred score has to be achieved in
-both for a read pair to be retained.}
+\item{avePhredMinForward, avePhredMinReverse}{numeric(1) Minimum average Phred
+score in the variable region for a read to be retained. If L contains both
+forward and reverse variable regions, the minimum average Phred score has
+to be achieved in both for a read pair to be retained.}
 
-\item{variableNMax}{numeric(1) Maximum number of Ns allowed in the variable
-region for a read to be retained.}
+\item{variableNMaxForward, variableNMaxReverse}{numeric(1) Maximum number of
+Ns allowed in the variable region for a read to be retained.}
 
 \item{umiNMax}{numeric(1) Maximum number of Ns allowed in the UMI for a read
 to be retained.}
 
-\item{nbrMutatedCodonsMax}{numeric(1) Maximum number of mutated codons that
-are allowed.}
+\item{nbrMutatedCodonsMaxForward, nbrMutatedCodonsMaxReverse}{numeric(1)
+Maximum number of mutated codons that are allowed.}
 
-\item{forbiddenMutatedCodons}{character vector. Codons (can contain ambiguous
-IUPAC characters, see \code{\link[Biostrings]{IUPAC_CODE_MAP}}). If a read
-pair contains a mutated codon matching this pattern, it will be filtered
-out.}
+\item{forbiddenMutatedCodonsForward, forbiddenMutatedCodonsReverse}{character
+vector. Codons (can contain ambiguous IUPAC characters, see
+\code{\link[Biostrings]{IUPAC_CODE_MAP}}). If a read pair contains a
+mutated codon matching this pattern, it will be filtered out.}
 
-\item{mutatedPhredMin}{numeric(1) Minimum Phred score of a mutated base for the
-read to be retained. If any mutated base has a Phred score lower than
-\code{mutatedPhredMin}, the read will be discarded.}
+\item{mutatedPhredMinForward, mutatedPhredMinReverse}{numeric(1) Minimum Phred
+score of a mutated base for the read to be retained. If any mutated base
+has a Phred score lower than \code{mutatedPhredMin}, the read will be
+discarded.}
 
 \item{verbose}{logical(1), whether to print out progress messages.}
 }

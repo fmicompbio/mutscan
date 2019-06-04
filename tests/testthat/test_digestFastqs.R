@@ -22,10 +22,14 @@ test_that("digestFastqs fails with incorrect arguments", {
     wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
     constantForward = "AACCGGAGGAGGGAGCTG", 
     constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
-    avePhredMin = 20.0, variableNMax = 0, umiNMax = 0,
-    nbrMutatedCodonsMax = 1,
-    forbiddenMutatedCodons = "NNW",
-    mutatedPhredMin = 0.0,
+    avePhredMinForward = 20.0, avePhredMinReverse = 20.0, 
+    variableNMaxForward = 0, variableNMaxReverse = 0, 
+    umiNMax = 0,
+    nbrMutatedCodonsMaxForward = 1,
+    nbrMutatedCodonsMaxReverse = 1,
+    forbiddenMutatedCodonsForward = "NNW",
+    forbiddenMutatedCodonsReverse = "NNW",
+    mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
     verbose = FALSE
   )
   
@@ -49,8 +53,10 @@ test_that("digestFastqs fails with incorrect arguments", {
   for (var in c("skipForward", "skipReverse", "umiLengthForward", 
                 "umiLengthRevese", "constantLengthForward", "constantLengthReverse",
                 "variableLengthForward", "variableLengthReverse", 
-                "avePhredMin", "variableNMax", "umiNMax", 
-                "nbrMutatedCodonsMax", "mutatedPhredMin")) {
+                "avePhredMinForward", "avePhredMinReverse", "variableNMaxForward",
+                "variableNMaxReverse", "umiNMax", 
+                "nbrMutatedCodonsMaxForward", "nbrMutatedCodonsMaxReverse", 
+                "mutatedPhredMinForward", "mutatedPhredMinReverse")) {
     L <- Ldef; L[[var]] <- "str"
     expect_error(do.call(digestFastqs, L))
     L <- Ldef; L[[var]] <- c(1, 2)
@@ -95,7 +101,9 @@ test_that("digestFastqs fails with incorrect arguments", {
   }
   
   ## Invalid forbidden codons
-  L <- Ldef; L[["forbiddenMutatedCodons"]] <- c("EFI")
+  L <- Ldef; L[["forbiddenMutatedCodonsForward"]] <- c("EFI")
+  expect_error(do.call(digestFastqs, L))
+  L <- Ldef; L[["forbiddenMutatedCodonsReverse"]] <- c("EFI")
   expect_error(do.call(digestFastqs, L))
   
   ## Invalid value of verbose
@@ -122,10 +130,14 @@ test_that("digestFastqs works as expected for trans experiments", {
     wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
     constantForward = "AACCGGAGGAGGGAGCTG", 
     constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
-    avePhredMin = 20.0, variableNMax = 0, umiNMax = 0,
-    nbrMutatedCodonsMax = 1,
-    forbiddenMutatedCodons = "NNW",
-    mutatedPhredMin = 0.0,
+    avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+    variableNMaxForward = 0, variableNMaxReverse = 0, 
+    umiNMax = 0,
+    nbrMutatedCodonsMaxForward = 1,
+    nbrMutatedCodonsMaxReverse = 1,
+    forbiddenMutatedCodonsForward = "NNW",
+    forbiddenMutatedCodonsReverse = "NNW",
+    mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
     verbose = FALSE
   )
   
@@ -141,7 +153,7 @@ test_that("digestFastqs works as expected for trans experiments", {
   expect_equal(res$filterSummary$f7_nForbiddenCodons, 6L + 2L)
   expect_equal(res$filterSummary$nbrRetained, 279L)
   
-  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodons", "verbose"))) {
+  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
     expect_equal(res$parameters[[nm]], Ldef[[nm]])
   }
   
@@ -197,10 +209,14 @@ test_that("digestFastqs works as expected for cis experiments", {
     wildTypeReverse = "", 
     constantForward = "AACCGGAGGAGGGAGCTG", 
     constantReverse = "GAGTTCATCCTGGCAGC", 
-    avePhredMin = 20.0, variableNMax = 0, umiNMax = 0,
-    nbrMutatedCodonsMax = 1,
-    forbiddenMutatedCodons = "NNW",
-    mutatedPhredMin = 0.0,
+    avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+    variableNMaxForward = 0, variableNMaxReverse = 0, 
+    umiNMax = 0,
+    nbrMutatedCodonsMaxForward = 1,
+    nbrMutatedCodonsMaxReverse = 1,
+    forbiddenMutatedCodonsForward = "NNW",
+    forbiddenMutatedCodonsReverse = "NNW",
+    mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
     verbose = FALSE
   )
   
@@ -216,7 +232,7 @@ test_that("digestFastqs works as expected for cis experiments", {
   expect_equal(res$filterSummary$f7_nForbiddenCodons, 82L)
   expect_equal(res$filterSummary$nbrRetained, 167)
   
-  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodons", "verbose"))) {
+  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
     expect_equal(res$parameters[[nm]], Ldef[[nm]])
   }
   

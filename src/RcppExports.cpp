@@ -18,8 +18,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // digestFastqsCpp
-List digestFastqsCpp(std::string experimentType, std::string fastqForward, std::string fastqReverse, int skipForward, int skipReverse, int umiLengthForward, int umiLengthReverse, unsigned int constantLengthForward, unsigned int constantLengthReverse, unsigned int variableLengthForward, unsigned int variableLengthReverse, std::string adapterForward, std::string adapterReverse, std::string wildTypeForward, std::string wildTypeReverse, std::string constantForward, std::string constantReverse, double avePhredMin, int variableNMax, int umiNMax, unsigned int nbrMutatedCodonsMax, CharacterVector forbiddenMutatedCodons, double mutatedPhredMin, bool verbose);
-RcppExport SEXP _mutscan_digestFastqsCpp(SEXP experimentTypeSEXP, SEXP fastqForwardSEXP, SEXP fastqReverseSEXP, SEXP skipForwardSEXP, SEXP skipReverseSEXP, SEXP umiLengthForwardSEXP, SEXP umiLengthReverseSEXP, SEXP constantLengthForwardSEXP, SEXP constantLengthReverseSEXP, SEXP variableLengthForwardSEXP, SEXP variableLengthReverseSEXP, SEXP adapterForwardSEXP, SEXP adapterReverseSEXP, SEXP wildTypeForwardSEXP, SEXP wildTypeReverseSEXP, SEXP constantForwardSEXP, SEXP constantReverseSEXP, SEXP avePhredMinSEXP, SEXP variableNMaxSEXP, SEXP umiNMaxSEXP, SEXP nbrMutatedCodonsMaxSEXP, SEXP forbiddenMutatedCodonsSEXP, SEXP mutatedPhredMinSEXP, SEXP verboseSEXP) {
+List digestFastqsCpp(std::string experimentType, std::string fastqForward, std::string fastqReverse, int skipForward, int skipReverse, int umiLengthForward, int umiLengthReverse, unsigned int constantLengthForward, unsigned int constantLengthReverse, unsigned int variableLengthForward, unsigned int variableLengthReverse, std::string adapterForward, std::string adapterReverse, std::string wildTypeForward, std::string wildTypeReverse, std::string constantForward, std::string constantReverse, double avePhredMinForward, double avePhredMinReverse, int variableNMaxForward, int variableNMaxReverse, int umiNMax, unsigned int nbrMutatedCodonsMaxForward, unsigned int nbrMutatedCodonsMaxReverse, CharacterVector forbiddenMutatedCodonsForward, CharacterVector forbiddenMutatedCodonsReverse, double mutatedPhredMinForward, double mutatedPhredMinReverse, bool verbose);
+RcppExport SEXP _mutscan_digestFastqsCpp(SEXP experimentTypeSEXP, SEXP fastqForwardSEXP, SEXP fastqReverseSEXP, SEXP skipForwardSEXP, SEXP skipReverseSEXP, SEXP umiLengthForwardSEXP, SEXP umiLengthReverseSEXP, SEXP constantLengthForwardSEXP, SEXP constantLengthReverseSEXP, SEXP variableLengthForwardSEXP, SEXP variableLengthReverseSEXP, SEXP adapterForwardSEXP, SEXP adapterReverseSEXP, SEXP wildTypeForwardSEXP, SEXP wildTypeReverseSEXP, SEXP constantForwardSEXP, SEXP constantReverseSEXP, SEXP avePhredMinForwardSEXP, SEXP avePhredMinReverseSEXP, SEXP variableNMaxForwardSEXP, SEXP variableNMaxReverseSEXP, SEXP umiNMaxSEXP, SEXP nbrMutatedCodonsMaxForwardSEXP, SEXP nbrMutatedCodonsMaxReverseSEXP, SEXP forbiddenMutatedCodonsForwardSEXP, SEXP forbiddenMutatedCodonsReverseSEXP, SEXP mutatedPhredMinForwardSEXP, SEXP mutatedPhredMinReverseSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -40,21 +40,26 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type wildTypeReverse(wildTypeReverseSEXP);
     Rcpp::traits::input_parameter< std::string >::type constantForward(constantForwardSEXP);
     Rcpp::traits::input_parameter< std::string >::type constantReverse(constantReverseSEXP);
-    Rcpp::traits::input_parameter< double >::type avePhredMin(avePhredMinSEXP);
-    Rcpp::traits::input_parameter< int >::type variableNMax(variableNMaxSEXP);
+    Rcpp::traits::input_parameter< double >::type avePhredMinForward(avePhredMinForwardSEXP);
+    Rcpp::traits::input_parameter< double >::type avePhredMinReverse(avePhredMinReverseSEXP);
+    Rcpp::traits::input_parameter< int >::type variableNMaxForward(variableNMaxForwardSEXP);
+    Rcpp::traits::input_parameter< int >::type variableNMaxReverse(variableNMaxReverseSEXP);
     Rcpp::traits::input_parameter< int >::type umiNMax(umiNMaxSEXP);
-    Rcpp::traits::input_parameter< unsigned int >::type nbrMutatedCodonsMax(nbrMutatedCodonsMaxSEXP);
-    Rcpp::traits::input_parameter< CharacterVector >::type forbiddenMutatedCodons(forbiddenMutatedCodonsSEXP);
-    Rcpp::traits::input_parameter< double >::type mutatedPhredMin(mutatedPhredMinSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type nbrMutatedCodonsMaxForward(nbrMutatedCodonsMaxForwardSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type nbrMutatedCodonsMaxReverse(nbrMutatedCodonsMaxReverseSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type forbiddenMutatedCodonsForward(forbiddenMutatedCodonsForwardSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type forbiddenMutatedCodonsReverse(forbiddenMutatedCodonsReverseSEXP);
+    Rcpp::traits::input_parameter< double >::type mutatedPhredMinForward(mutatedPhredMinForwardSEXP);
+    Rcpp::traits::input_parameter< double >::type mutatedPhredMinReverse(mutatedPhredMinReverseSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(digestFastqsCpp(experimentType, fastqForward, fastqReverse, skipForward, skipReverse, umiLengthForward, umiLengthReverse, constantLengthForward, constantLengthReverse, variableLengthForward, variableLengthReverse, adapterForward, adapterReverse, wildTypeForward, wildTypeReverse, constantForward, constantReverse, avePhredMin, variableNMax, umiNMax, nbrMutatedCodonsMax, forbiddenMutatedCodons, mutatedPhredMin, verbose));
+    rcpp_result_gen = Rcpp::wrap(digestFastqsCpp(experimentType, fastqForward, fastqReverse, skipForward, skipReverse, umiLengthForward, umiLengthReverse, constantLengthForward, constantLengthReverse, variableLengthForward, variableLengthReverse, adapterForward, adapterReverse, wildTypeForward, wildTypeReverse, constantForward, constantReverse, avePhredMinForward, avePhredMinReverse, variableNMaxForward, variableNMaxReverse, umiNMax, nbrMutatedCodonsMaxForward, nbrMutatedCodonsMaxReverse, forbiddenMutatedCodonsForward, forbiddenMutatedCodonsReverse, mutatedPhredMinForward, mutatedPhredMinReverse, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 2},
-    {"_mutscan_digestFastqsCpp", (DL_FUNC) &_mutscan_digestFastqsCpp, 24},
+    {"_mutscan_digestFastqsCpp", (DL_FUNC) &_mutscan_digestFastqsCpp, 29},
     {NULL, NULL, 0}
 };
 
