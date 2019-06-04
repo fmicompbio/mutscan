@@ -33,6 +33,11 @@ GENETIC_CODE <- structure(c(
 #' @importFrom SummarizedExperiment assay SummarizedExperiment colData 
 #' 
 collapseMutantsByAA <- function(se) {
+  ## se must be a SummarizedExperiment object
+  if (!is(se, "SummarizedExperiment")) {
+    stop("'se' must be a SummarizedExperiment object")
+  }
+  
   ## Replace codon by corresponding amino acid
   tmp <- base::strsplit(rownames(se), split = "_", fixed = TRUE)
   unl <- base::unlist(tmp, use.names = FALSE)

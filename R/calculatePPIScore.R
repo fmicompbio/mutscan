@@ -38,7 +38,7 @@ calculatePPIScore <- function(se, pairingCol, ODCols, comparison) {
   if (!is.character(pairingCol) || length(pairingCol) != 1L ||
       !(pairingCol %in% colnames(colData(se)))) {
     stop("'pairingCol' must be a character(1) from ",
-         paste(colnames(colData(se))), collapse = ", ")
+         paste(colnames(colData(se)), collapse = ", "))
   }
   
   ## ODCols are all in colData(se) and contain numeric values
@@ -78,16 +78,18 @@ calculatePPIScore <- function(se, pairingCol, ODCols, comparison) {
   se_denominator <- se_denominator[, match(shared_repl, colData(se_denominator)[, pairingCol])]
   
   ## --------------------------------------------------------------------------
-  ## calcuate normalized counts (n_i)
+  ## calculate normalized counts (n_i)
   ## --------------------------------------------------------------------------
-   norm_counts_numerator <- sweep(as.matrix(assay(se_numerator, "counts")), MARGIN = 2, 
-                                 STATS = apply(colData(se_numerator)[, ODCols, drop = FALSE], MARGIN = 1, prod)/
-                                   Matrix::colSums(assay(se_numerator, "counts")), 
-                                 FUN = "*")
-  norm_counts_denominator <- sweep(as.matrix(assay(se_denominator, "counts")), MARGIN = 2, 
-                                   STATS = apply(colData(se_denominator)[, ODCols, drop = FALSE], MARGIN = 1, prod)/
-                                     Matrix::colSums(assay(se_denominator, "counts")), 
-                                   FUN = "*")
+   norm_counts_numerator <- sweep(
+     as.matrix(assay(se_numerator, "counts")), MARGIN = 2, 
+     STATS = apply(colData(se_numerator)[, ODCols, drop = FALSE], MARGIN = 1, prod)/
+       Matrix::colSums(assay(se_numerator, "counts")), 
+     FUN = "*")
+  norm_counts_denominator <- sweep(
+    as.matrix(assay(se_denominator, "counts")), MARGIN = 2, 
+    STATS = apply(colData(se_denominator)[, ODCols, drop = FALSE], MARGIN = 1, prod)/
+      Matrix::colSums(assay(se_denominator, "counts")), 
+    FUN = "*")
   n <- log2(norm_counts_numerator/norm_counts_denominator)
   n[!is.finite(n)] <- NA
   colnames(n) <- paste0(comparison[2], "_vs_", comparison[3], "_repl", shared_repl)

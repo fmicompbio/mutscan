@@ -53,6 +53,8 @@ test_that("digestFastqs fails with incorrect arguments", {
   expect_error(do.call(digestFastqs, L))
   L <- Ldef; L$fastqForward <- c(fqt1, fqt2)
   expect_error(do.call(digestFastqs, L))
+  L <- Ldef; L$fastqReverse <- c(fqt1, fqt2)
+  expect_error(do.call(digestFastqs, L))
   
   ## Wrong type of numeric argument
   for (var in c("skipForward", "skipReverse", "umiLengthForward", 
@@ -84,6 +86,12 @@ test_that("digestFastqs fails with incorrect arguments", {
     L <- Ldef; L[[var]] <- paste0(L[[var]], " ")
     expect_error(do.call(digestFastqs, L))
   }
+  
+  ## Wild type sequence not in named vector (or unnamed string)
+  L <- Ldef
+  L$wildTypeForward <- c("ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA", 
+                         "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT")
+  expect_error(do.call(digestFastqs, L))
   
   ## Wild type sequence of wrong length
   for (var in c("wildTypeForward", "wildTypeReverse")) {
@@ -165,6 +173,7 @@ test_that("digestFastqs works as expected for trans experiments", {
     expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
   }
   
+  expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
   expect_equal(sum(res$summaryTable$nbrReads == 2), 2L)
   expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
                sort(c("f13GAG", "f26TAG_r8AGG")))
@@ -198,6 +207,88 @@ test_that("digestFastqs works as expected for trans experiments", {
   expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 27], 3L)
   expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 33], 1L)
   
+})
+
+context("digestFastqs - trans - multiple reference sequences")
+test_that("digestFastqs works as expected for trans experiments when multiple reference sequences are provided", {
+  fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
+  fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
+  ## default arguments
+  Ldef <- list(
+    fastqForward = fqt1, fastqReverse = fqt2, 
+    mergeForwardReverse = FALSE, revComplForward = FALSE, revComplReverse = FALSE,
+    skipForward = 1, skipReverse = 1, 
+    umiLengthForward = 10, umiLengthReverse = 8, 
+    constantLengthForward = 18, constantLengthReverse = 20, 
+    variableLengthForward = 96, variableLengthReverse = 96,
+    adapterForward = "GGAAGAGCACACGTC", 
+    adapterReverse = "GGAAGAGCGTCGTGT",
+    wildTypeForward = c(a = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",  ## this is the right one
+                        b = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT"),
+    wildTypeReverse = c(x = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+                        y = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT"), ## this is the right one
+    constantForward = "AACCGGAGGAGGGAGCTG", 
+    constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
+    avePhredMinForward = 20.0, avePhredMinReverse = 30.0,
+    variableNMaxForward = 0, variableNMaxReverse = 0, 
+    umiNMax = 0,
+    nbrMutatedCodonsMaxForward = 1,
+    nbrMutatedCodonsMaxReverse = 1,
+    forbiddenMutatedCodonsForward = "NNA",
+    forbiddenMutatedCodonsReverse = "NNW",
+    mutatedPhredMinForward = 25.0, mutatedPhredMinReverse = 0.0,
+    verbose = TRUE
+  )
+  
+  res <- do.call(digestFastqs, Ldef)
+  
+  expect_equal(res$filterSummary$nbrTotal, 1000L)
+  expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
+  expect_equal(res$filterSummary$f2_nAvgVarQualTooLow, 88L)
+  expect_equal(res$filterSummary$f3_nTooManyNinVar, 0L)
+  expect_equal(res$filterSummary$f4_nTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f5_nMutQualTooLow, 333L)
+  expect_equal(res$filterSummary$f6_nTooManyMutCodons, 10L + 59L)
+  expect_equal(res$filterSummary$f7_nForbiddenCodons, 1L + 2L)
+  expect_equal(res$filterSummary$nbrRetained, 193L)
+  
+  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
+    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+  }
+  
+  expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
+  expect_equal(sum(res$summaryTable$nbrReads == 2), 1L)
+  expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
+               sort(c("a26TAG_y8AGG")))
+  expect_true(all(res$summaryTable$nbrReads == res$summaryTable$nbrUmis))
+  
+  ## Check that mutant naming worked (compare to manual matching)
+  example_seq <- paste0("ACTGATACAACCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTG", 
+                        "CAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA_ATCGCCCGGCT", 
+                        "GGAGGAAAAAGTGGGCACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGC", 
+                        "CAACATGCTCAGGGAACAGGTGGCACAGCTT")
+  expect_equal(res$summaryTable$mutantName[res$summaryTable$sequence == example_seq], 
+               "a4ACC_y9GGC")
+  
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 14], 96L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 22], 26L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 27], 179L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 33], 302L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 37], 2865L)
+  
+  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 14], 2L)
+  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 27], 3L)
+  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 37], 1L)
+  
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 14], 116L)
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 22], 5L)
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 27], 308L)
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 33], 322L)
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 37], 3101L)
+  
+  expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 14], 6L)
+  expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 27], 1L)
+  expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 33], 1L)
 })
 
 context("digestFastqs - cis")
@@ -245,6 +336,7 @@ test_that("digestFastqs works as expected for cis experiments", {
     expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
   }
   
+  expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
   expect_equal(sum(res$summaryTable$nbrReads == 2), 11L)
   expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
                sort(c("f14AAG", "f15ATG", "f19CAC", "f1ACC", "f20AAC", "f21GTG",

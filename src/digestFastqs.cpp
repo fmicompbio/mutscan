@@ -251,6 +251,7 @@ bool mergeReadPair(std::string &varSeqForward, std::vector<int> &varIntQualForwa
   return true;
 }
 
+// Find closest wild type sequence to a variable sequence
 int findClosestRefSeq(std::string varSeq, Rcpp::StringVector wtSeq) {
   // return index of most similar sequence
   int idx = 0;

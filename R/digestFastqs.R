@@ -202,7 +202,8 @@ digestFastqs <- function(fastqForward, fastqReverse,
   }
   
   ## wild type sequences must be given in named vectors
-  if (any(names(wildTypeForward) == "") || any(names(wildTypeReverse) == "")) {
+  if (is.null(names(wildTypeForward)) || any(names(wildTypeForward) == "") || 
+      is.null(names(wildTypeReverse)) || any(names(wildTypeReverse) == "")) {
     stop('wild type sequences must be given in named vectors')
   }
   

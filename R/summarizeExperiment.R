@@ -48,7 +48,7 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     stop("duplicated names in 'x' (e.g. technical replicated to be merged) is not supported yet")
   }
   if (!is(coldata, "data.frame") || !("Name" %in% colnames(coldata))) {
-    stop("'coldata' must be a data.frame with at least one column named ",
+    stop("'coldata' must be a data.frame with at least one column, named ",
          "'Name'.")
   }
   if (!is.character(countType) || length(countType) != 1 || 
