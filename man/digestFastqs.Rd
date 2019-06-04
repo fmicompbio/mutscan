@@ -4,8 +4,9 @@
 \alias{digestFastqs}
 \title{Read, filter and digest sequences from two fastq files.}
 \usage{
-digestFastqs(experimentType, fastqForward, fastqReverse, skipForward,
-  skipReverse, umiLengthForward, umiLengthReverse, constantLengthForward,
+digestFastqs(fastqForward, fastqReverse, mergeForwardReverse,
+  revComplForward, revComplReverse, skipForward, skipReverse,
+  umiLengthForward, umiLengthReverse, constantLengthForward,
   constantLengthReverse, variableLengthForward, variableLengthReverse,
   adapterForward = "", adapterReverse = "", wildTypeForward = "",
   wildTypeReverse = "", constantForward = "", constantReverse = "",
@@ -17,12 +18,14 @@ digestFastqs(experimentType, fastqForward, fastqReverse, skipForward,
   mutatedPhredMinReverse = 0, verbose = FALSE)
 }
 \arguments{
-\item{experimentType}{character(1), either "cis" or "trans". If this is set
-to "cis", the variable sequences from the forward and reverse reads will be
-consolidated into one single sequence.}
-
 \item{fastqForward, fastqReverse}{character(1), paths to gzipped FASTQ files
 corresponding to forward and reverse reads, respectively.}
+
+\item{mergeForwardReverse}{logical(1), whether to fuse the forward and
+reverse variable sequences.}
+
+\item{revComplForward, revComplReverse}{logical(1), whether to reverse
+complement the forward/reverse reads, respectively.}
 
 \item{skipForward, skipReverse}{numeric(1), the number of bases to skip in the
 start of each forward and reverse read, respectively.}

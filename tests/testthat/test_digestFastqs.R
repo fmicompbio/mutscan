@@ -11,8 +11,9 @@ test_that("digestFastqs fails with incorrect arguments", {
   fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
   ## default arguments
   Ldef <- list(
-    experimentType = "trans", fastqForward = fqt1, 
-    fastqReverse = fqt2, skipForward = 1, skipReverse = 1, 
+    fastqForward = fqt1, fastqReverse = fqt2, 
+    mergeForwardReverse = FALSE, revComplForward = FALSE, revComplReverse = FALSE,
+    skipForward = 1, skipReverse = 1, 
     umiLengthForward = 10, umiLengthReverse = 8, 
     constantLengthForward = 18, constantLengthReverse = 20, 
     variableLengthForward = 96, variableLengthReverse = 96,
@@ -33,14 +34,18 @@ test_that("digestFastqs fails with incorrect arguments", {
     verbose = FALSE
   )
   
-  ## Incorrect experimentType
-  L <- Ldef; L$experimentType <- "unknown"
-  expect_error(do.call(digestFastqs, L))
-  L <- Ldef; L$experimentType <- c("cis", "trans")
-  expect_error(do.call(digestFastqs, L))
-  L <- Ldef; L$experimentType <- 3
-  expect_error(do.call(digestFastqs, L))
-
+  ## Incorrect specification of merging/rev complementing arguments
+  for (var in c("mergeForwardReverse", "revComplForward", "revComplReverse")) {
+    L <- Ldef; L[[var]] <- "str"
+    expect_error(do.call(digestFastqs, L))
+    L <- Ldef; L[[var]] <- c(TRUE, TRUE)
+    expect_error(do.call(digestFastqs, L))
+    L <- Ldef; L[[var]] <- c(TRUE, FALSE)
+    expect_error(do.call(digestFastqs, L))
+    L <- Ldef; L[[var]] <- 1
+    expect_error(do.call(digestFastqs, L))
+  }
+  
   ## Nonexistent fastqForward/fastqReverse file
   L <- Ldef; L$fastqForward <- "nonexistent.fastq.gz"
   expect_error(do.call(digestFastqs, L))
@@ -62,6 +67,8 @@ test_that("digestFastqs fails with incorrect arguments", {
     L <- Ldef; L[[var]] <- c(1, 2)
     expect_error(do.call(digestFastqs, L))
     L <- Ldef; L[[var]] <- -1
+    expect_error(do.call(digestFastqs, L))
+    L <- Ldef; L[[var]] <- TRUE
     expect_error(do.call(digestFastqs, L))
   }
   
@@ -87,7 +94,7 @@ test_that("digestFastqs fails with incorrect arguments", {
     L <- Ldef; L[[var]] <- 10
     expect_error(do.call(digestFastqs, L))
   }
-  L <- Ldef; L[["experimentType"]] <- "cis"
+  L <- Ldef; L[["mergeForwardReverse"]] <- TRUE
   expect_warning(do.call(digestFastqs, L))
   
   ## Constant sequence of wrong length
@@ -119,8 +126,9 @@ test_that("digestFastqs works as expected for trans experiments", {
   fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
   ## default arguments
   Ldef <- list(
-    experimentType = "trans", fastqForward = fqt1, 
-    fastqReverse = fqt2, skipForward = 1, skipReverse = 1, 
+    fastqForward = fqt1, fastqReverse = fqt2, 
+    mergeForwardReverse = FALSE, revComplForward = FALSE, revComplReverse = FALSE,
+    skipForward = 1, skipReverse = 1, 
     umiLengthForward = 10, umiLengthReverse = 8, 
     constantLengthForward = 18, constantLengthReverse = 20, 
     variableLengthForward = 96, variableLengthReverse = 96,
@@ -198,8 +206,9 @@ test_that("digestFastqs works as expected for cis experiments", {
   fqc2 <- system.file("extdata/cisInput_2.fastq.gz", package = "mutscan")
   ## default arguments
   Ldef <- list(
-    experimentType = "cis", fastqForward = fqc1, 
-    fastqReverse = fqc2, skipForward = 1, skipReverse = 1, 
+    fastqForward = fqc1, fastqReverse = fqc2, 
+    mergeForwardReverse = TRUE, revComplForward = FALSE, revComplReverse = TRUE,
+    skipForward = 1, skipReverse = 1, 
     umiLengthForward = 10, umiLengthReverse = 7, 
     constantLengthForward = 18, constantLengthReverse = 17, 
     variableLengthForward = 96, variableLengthReverse = 96,

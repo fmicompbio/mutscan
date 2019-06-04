@@ -241,15 +241,15 @@ std::set<std::string> enumerateCodonsFromIUPAC(CharacterVector forbiddenMutatedC
 bool mergeReadPair(std::string &varSeqForward, std::vector<int> &varIntQualForward,
                    std::string &varSeqReverse, std::vector<int> &varIntQualReverse) {
   // reverse-complement reverse read
-  transform(
-    begin(varSeqReverse),
-    end(varSeqReverse),
-    begin(varSeqReverse),
-    complement);
-  reverse(begin(varSeqReverse),
-          end(varSeqReverse));
-  reverse(begin(varIntQualReverse),
-          end(varIntQualReverse));
+  // transform(
+  //   begin(varSeqReverse),
+  //   end(varSeqReverse),
+  //   begin(varSeqReverse),
+  //   complement);
+  // reverse(begin(varSeqReverse),
+  //         end(varSeqReverse));
+  // reverse(begin(varIntQualReverse),
+  //         end(varIntQualReverse));
   // merge reads (keep base with higher quality) and store in forward read
   for (size_t i = 0; i < varSeqForward.length(); i++) {
     if (varIntQualReverse[i] > varIntQualForward[i]) {
@@ -263,8 +263,8 @@ bool mergeReadPair(std::string &varSeqForward, std::vector<int> &varIntQualForwa
 
 
 // [[Rcpp::export]]
-List digestFastqsCpp(std::string experimentType,
-                     std::string fastqForward, std::string fastqReverse,
+List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
+                     bool mergeForwardReverse, bool revComplForward, bool revComplReverse,
                      int skipForward, int skipReverse,
                      int umiLengthForward, int umiLengthReverse,
                      unsigned int constantLengthForward,
@@ -362,7 +362,7 @@ List digestFastqsCpp(std::string experimentType,
       continue;
     }
     
-    // extract variable sequence and merge ("cis" only)
+    // extract variable sequence
     varSeqForward = sseq1.substr(skipForward + umiLengthForward + constantLengthForward, variableLengthForward);
     varSeqReverse = sseq2.substr(skipReverse + umiLengthReverse + constantLengthReverse, variableLengthReverse);
     varQualForward = squal1.substr(skipForward + umiLengthForward + constantLengthForward, variableLengthForward);
@@ -375,6 +375,22 @@ List digestFastqsCpp(std::string experimentType,
       stop("The read is not long enough to extract a variable sequence of the indicated length");
     }
 
+    // reverse complement if requested
+    if (revComplForward) {
+      transform(
+        begin(varSeqForward), end(varSeqForward),
+        begin(varSeqForward), complement);
+      reverse(begin(varSeqForward), end(varSeqForward));
+      reverse(begin(varQualForward), end(varQualForward));
+    }
+    if (revComplReverse) {
+      transform(
+        begin(varSeqReverse), end(varSeqReverse),
+        begin(varSeqReverse), complement);
+      reverse(begin(varSeqReverse), end(varSeqReverse));
+      reverse(begin(varQualReverse), end(varQualReverse));
+    }
+    
     // convert qualities to int
     for (size_t i = 0; i < variableLengthForward; i++) {
       varIntQualForward[i] = int(varQualForward[i]) - 33;
@@ -382,7 +398,7 @@ List digestFastqsCpp(std::string experimentType,
     }
 
     // for "cis" experiments, fuse forward and reverse reads
-    if (experimentType.compare("cis") == 0) {
+    if (mergeForwardReverse) {
       mergeReadPair(varSeqForward, varIntQualForward,
                     varSeqReverse, varIntQualReverse);
     }
@@ -390,7 +406,7 @@ List digestFastqsCpp(std::string experimentType,
     // filter if the average quality in variable region is too low
     if (std::accumulate(varIntQualForward.begin(), varIntQualForward.end(), 0.0) <
         avePhredMinForward * variableLengthForward ||
-        (experimentType.compare("trans") == 0 && std::accumulate(varIntQualReverse.begin(), varIntQualReverse.end(), 0.0) <
+        (!mergeForwardReverse && std::accumulate(varIntQualReverse.begin(), varIntQualReverse.end(), 0.0) <
           avePhredMinReverse * variableLengthReverse)) {
       nAvgVarQualTooLow++;
       continue;
@@ -398,7 +414,7 @@ List digestFastqsCpp(std::string experimentType,
     
     // filter if there are too many N's in variable regions
     if (std::count(varSeqForward.begin(), varSeqForward.end(), 'N') > variableNMaxForward ||
-        (experimentType.compare("trans") == 0 && std::count(varSeqReverse.begin(), varSeqReverse.end(), 'N') > variableNMaxReverse)) {
+        (!mergeForwardReverse && std::count(varSeqReverse.begin(), varSeqReverse.end(), 'N') > variableNMaxReverse)) {
       nTooManyNinVar++;
       continue;
     }
@@ -422,7 +438,7 @@ List digestFastqsCpp(std::string experimentType,
     }
     
     // if wildTypeReverse is available...
-    if (experimentType.compare("trans") == 0 && wildTypeReverse.compare("") != 0) {
+    if (!mergeForwardReverse && wildTypeReverse.compare("") != 0) {
       if (compareToWildtype(varSeqReverse, wildTypeReverse, varIntQualReverse,
                             mutatedPhredMinReverse, nbrMutatedCodonsMaxReverse, forbiddenCodonsReverse,
                             std::string("r"), nMutQualTooLow, 
@@ -438,12 +454,12 @@ List digestFastqsCpp(std::string experimentType,
     if (mutantName.length() > 0) { // we have a least one mutation
       mutantName.pop_back(); // remove '_' at the end
     } else {
-      if (wildTypeForward.compare("") != 0 || (experimentType.compare("trans") == 0 && wildTypeReverse.compare("") != 0)) {
+      if (wildTypeForward.compare("") != 0 || (!mergeForwardReverse && wildTypeReverse.compare("") != 0)) {
         mutantName = "WT";
       }
     }
     // ... check if mutant already exists in mutantSummary
-    if (experimentType.compare("trans") == 0) { // "trans" experiment
+    if (!mergeForwardReverse) { // "trans" experiment
       varSeqForward += (std::string("_") + varSeqReverse);
     }
     if ((mutantSummaryIt = mutantSummary.find(varSeqForward)) != mutantSummary.end()) {
@@ -469,6 +485,14 @@ List digestFastqsCpp(std::string experimentType,
         stop("The read is not long enough to extract a forward constant sequence of the indicated length");
       }
       
+      // reverse complement if requested
+      if (revComplForward) {
+        transform(begin(constSeqForward), end(constSeqForward),
+                  begin(constSeqForward), complement);
+        reverse(constSeqForward.begin(), constSeqForward.end());
+        reverse(constQualForward.begin(), constQualForward.end());
+      }
+      
       // populate an integer vector of base qualities
       for (size_t i = 0; i < constantLengthForward; i++) {
         constIntQualForward[i] = int(constQualForward[i]) - 33;
@@ -486,7 +510,7 @@ List digestFastqsCpp(std::string experimentType,
       }
       
       // reverse (complement) sequence and quality string
-      if (experimentType.compare("cis") == 0) {
+      if (revComplReverse) {
         transform(begin(constSeqReverse), end(constSeqReverse),
                   begin(constSeqReverse), complement);
         reverse(constSeqReverse.begin(), constSeqReverse.end());
@@ -545,9 +569,11 @@ List digestFastqsCpp(std::string experimentType,
   std::vector<std::string> forbiddenCodonsUsedForward(forbiddenCodonsForward.begin(), forbiddenCodonsForward.end());
   std::vector<std::string> forbiddenCodonsUsedReverse(forbiddenCodonsReverse.begin(), forbiddenCodonsReverse.end());
   List param;
-  param.push_back(experimentType, "experimentType");
   param.push_back(fastqForward, "fastqForward");
   param.push_back(fastqReverse, "fastqReverse");
+  param.push_back(mergeForwardReverse, "mergeForwardReverse");
+  param.push_back(revComplForward, "revComplForward");
+  param.push_back(revComplReverse, "revComplReverse");
   param.push_back(skipForward, "skipForward");
   param.push_back(skipReverse, "skipReverse");
   param.push_back(umiLengthForward, "umiLengthForward");

@@ -55,11 +55,12 @@ checkNumericInput <- function(...) {
 #' number of reads, and the number of unique UMIs, for each variable sequence
 #' (or pair of variable sequences, for "trans" experiments).
 #'
-#' @param experimentType character(1), either "cis" or "trans". If this is set
-#'   to "cis", the variable sequences from the forward and reverse reads will be
-#'   consolidated into one single sequence.
 #' @param fastqForward,fastqReverse character(1), paths to gzipped FASTQ files
 #'   corresponding to forward and reverse reads, respectively.
+#' @param mergeForwardReverse logical(1), whether to fuse the forward and
+#'   reverse variable sequences.
+#' @param revComplForward,revComplReverse logical(1), whether to reverse
+#'   complement the forward/reverse reads, respectively.
 #' @param skipForward,skipReverse numeric(1), the number of bases to skip in the
 #'   start of each forward and reverse read, respectively.
 #' @param umiLengthForward,umiLengthReverse numeric(1), the length of the
@@ -126,8 +127,8 @@ checkNumericInput <- function(...) {
 #' }
 #'
 #' @export
-digestFastqs <- function(experimentType,
-                         fastqForward, fastqReverse,
+digestFastqs <- function(fastqForward, fastqReverse,
+                         mergeForwardReverse, revComplForward, revComplReverse,
                          skipForward, skipReverse,
                          umiLengthForward, umiLengthReverse,
                          constantLengthForward,
@@ -150,16 +151,17 @@ digestFastqs <- function(experimentType,
   ## --------------------------------------------------------------------------
   ## pre-flight checks
   ## --------------------------------------------------------------------------
-  ## experimentType is either 'cis' or 'trans'
-  if (!is.character(experimentType) || length(experimentType) != 1 || 
-      !(experimentType %in% c("cis", "trans"))) {
-    stop("'experimentType' must be either 'cis' or 'trans'")
-  }
-  
   ## fastq files exist
   if (length(fastqForward) != 1 || length(fastqReverse) != 1 || 
       !file.exists(fastqForward) || !file.exists(fastqReverse)) {
     stop("'fastqForward' and 'fastqReverse' must point to single, existing files");
+  }
+  
+  ## merging/rev complementing arguments are ok
+  if (any(!is.logical(c(mergeForwardReverse, revComplForward, revComplReverse))) || 
+      any(c(length(mergeForwardReverse), length(revComplForward), 
+            length(revComplReverse)) != 1)) {
+    stop("'mergeForwardReverse', 'revComplForward' and 'revComplReverse' must be logical scalars. ")
   }
   
   ## check numeric inputs
@@ -220,7 +222,7 @@ digestFastqs <- function(experimentType,
   }
   
   ## cis experiment - should not have wildTypeReverse
-  if (experimentType == "cis" && nchar(wildTypeReverse) > 0) {
+  if (mergeForwardReverse && nchar(wildTypeReverse) > 0) {
     warning("Ignoring 'wildTypeReverse' for CIS experiment")
     wildTypeReverse <- ""
   }
@@ -266,9 +268,11 @@ digestFastqs <- function(experimentType,
     stop("'verbose' must be a logical scalar.")
   }
   
-  res <- digestFastqsCpp(experimentType = experimentType,
-                         fastqForward = fastqForward, 
+  res <- digestFastqsCpp(fastqForward = fastqForward, 
                          fastqReverse = fastqReverse,
+                         mergeForwardReverse = mergeForwardReverse,
+                         revComplForward = revComplForward,
+                         revComplReverse = revComplReverse,
                          skipForward = skipForward, 
                          skipReverse = skipReverse,
                          umiLengthForward = umiLengthForward, 
