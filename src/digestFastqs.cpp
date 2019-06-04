@@ -240,16 +240,6 @@ std::set<std::string> enumerateCodonsFromIUPAC(CharacterVector forbiddenMutatedC
 // (keeping the base with maximal Phred quality)
 bool mergeReadPair(std::string &varSeqForward, std::vector<int> &varIntQualForward,
                    std::string &varSeqReverse, std::vector<int> &varIntQualReverse) {
-  // reverse-complement reverse read
-  // transform(
-  //   begin(varSeqReverse),
-  //   end(varSeqReverse),
-  //   begin(varSeqReverse),
-  //   complement);
-  // reverse(begin(varSeqReverse),
-  //         end(varSeqReverse));
-  // reverse(begin(varIntQualReverse),
-  //         end(varIntQualReverse));
   // merge reads (keep base with higher quality) and store in forward read
   for (size_t i = 0; i < varSeqForward.length(); i++) {
     if (varIntQualReverse[i] > varIntQualForward[i]) {

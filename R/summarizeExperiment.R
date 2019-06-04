@@ -41,9 +41,8 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
   ## --------------------------------------------------------------------------
   ## Pre-flight checks
   ## --------------------------------------------------------------------------
-  if (!is(x, "list") || is.null(names(x)) ||
-      length(unique(vapply(x, function(w) w$parameters$experimentType, ""))) != 1L) {
-    stop("'x' must be a named list with either only 'cis' or only 'trans' objects")
+  if (!is(x, "list") || is.null(names(x))) {
+    stop("'x' must be a named list")
   }
   if (any(duplicated(names(x)))) {
     stop("duplicated names in 'x' (e.g. technical replicated to be merged) is not supported yet")
