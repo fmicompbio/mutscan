@@ -162,7 +162,7 @@ test_that("digestFastqs works as expected for trans experiments", {
   expect_equal(res$filterSummary$nbrRetained, 279L)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
-    expect_equal(res$parameters[[nm]], Ldef[[nm]])
+    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
   }
   
   expect_equal(sum(res$summaryTable$nbrReads == 2), 2L)
@@ -242,7 +242,7 @@ test_that("digestFastqs works as expected for cis experiments", {
   expect_equal(res$filterSummary$nbrRetained, 167)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
-    expect_equal(res$parameters[[nm]], Ldef[[nm]])
+    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
   }
   
   expect_equal(sum(res$summaryTable$nbrReads == 2), 11L)

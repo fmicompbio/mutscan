@@ -193,10 +193,24 @@ digestFastqs <- function(fastqForward, fastqReverse,
     adapterReverse <- toupper(adapterReverse)
   }
   
+  ## if wild type sequence is a string, make it into a vector
+  if (length(wildTypeForward) == 1) {
+    wildTypeForward <- c(f = wildTypeForward)
+  }
+  if (length(wildTypeReverse) == 1) {
+    wildTypeReverse <- c(r = wildTypeReverse)
+  }
+  
+  ## wild type sequences must be given in named vectors
+  if (any(names(wildTypeForward) == "") || any(names(wildTypeReverse) == "")) {
+    stop('wild type sequences must be given in named vectors')
+  }
+  
   ## wild type sequences must be strings, valid DNA characters
-  if (!is.character(wildTypeForward) || length(wildTypeForward) != 1 ||
-      !grepl("^[AaCcGgTt]*$", wildTypeForward) || !is.character(wildTypeReverse) ||
-      length(wildTypeReverse) != 1 || !grepl("^[AaCcGgTt]*$", wildTypeReverse)) {
+  if (!all(sapply(wildTypeForward, is.character)) || !all(sapply(wildTypeForward, length) == 1) ||
+      !all(sapply(wildTypeForward, function(w) grepl("^[AaCcGgTt]*$", w))) ||
+      !all(sapply(wildTypeReverse, is.character)) || !all(sapply(wildTypeReverse, length) == 1) ||
+      !all(sapply(wildTypeReverse, function(w) grepl("^[AaCcGgTt]*$", w)))) {
     stop("wild type sequences must be character strings, ", 
          "only containing valid DNA characters")
   } else {
@@ -204,27 +218,27 @@ digestFastqs <- function(fastqForward, fastqReverse,
     wildTypeReverse <- toupper(wildTypeReverse)
   }
   
-  if (nchar(wildTypeForward) == 0) {
-    message("'wildTypeForward' is missing, no comparisons to ", 
-            "wild type sequence will be done.")
-  }
+  # if (nchar(wildTypeForward) == 0) {
+  #   message("'wildTypeForward' is missing, no comparisons to ", 
+  #           "wild type sequence will be done.")
+  # }
   
   ## wild type sequence lengths must match variable sequence lengths
-  if (nchar(wildTypeForward) > 0 && nchar(wildTypeForward) != variableLengthForward) {
-    stop("The length of the given 'wildTypeForward' (", nchar(wildTypeForward), 
-         ") does not correspond to the given 'variableLengthForward' (", 
+  if (any(sapply(wildTypeForward, function(w) nchar(w) > 0 && nchar(w) != variableLengthForward))) {
+    stop("The lengths of the elements in 'wildTypeForward' (", paste(sapply(wildTypeForward, nchar), collapse = ","), 
+         ") do not all correspond to the given 'variableLengthForward' (", 
          variableLengthForward, ")")
   }
-  if (nchar(wildTypeReverse) > 0 && nchar(wildTypeReverse) != variableLengthReverse) {
-    stop("The length of the given 'wildTypeReverse' (", nchar(wildTypeReverse), 
-         ") does not correspond to the given 'variableLengthReverse' (", 
+  if (any(sapply(wildTypeReverse, function(w) nchar(w) > 0 && nchar(w) != variableLengthReverse))) {
+    stop("The lengths of the elements in 'wildTypeReverse' (", paste(sapply(wildTypeReverse, nchar), collapse = ","), 
+         ") do not all correspond to the given 'variableLengthReverse' (", 
          variableLengthReverse, ")")
   }
   
   ## cis experiment - should not have wildTypeReverse
-  if (mergeForwardReverse && nchar(wildTypeReverse) > 0) {
+  if (mergeForwardReverse && any(sapply(wildTypeReverse, nchar) > 0)) {
     warning("Ignoring 'wildTypeReverse' for CIS experiment")
-    wildTypeReverse <- ""
+    wildTypeReverse <- c(r = "")
   }
   
   ## if both constantForward and constantLengthForward are given, check that

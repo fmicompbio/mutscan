@@ -251,6 +251,26 @@ bool mergeReadPair(std::string &varSeqForward, std::vector<int> &varIntQualForwa
   return true;
 }
 
+int findClosestRefSeq(std::string varSeq, Rcpp::StringVector wtSeq) {
+  // return index of most similar sequence
+  int idx = 0;
+  int maxsim = 0;
+  int currsim;
+  for (int i = 0; i < wtSeq.size(); i++) {
+    currsim = 0;
+    std::string currSeq = std::string(wtSeq[i]);
+    for (size_t j = 0; j < currSeq.length(); j++) {
+      if (currSeq[j] == varSeq[j]) {
+        currsim++;
+      }
+    }
+    if (currsim > maxsim) {
+      idx = i;
+      maxsim = currsim;
+    }
+  }
+  return idx;
+}
 
 // [[Rcpp::export]]
 List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
@@ -261,9 +281,10 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
                      unsigned int constantLengthReverse,
                      unsigned int variableLengthForward,
                      unsigned int variableLengthReverse,
-                     std::string adapterForward = "", std::string adapterReverse = "",
-                     std::string wildTypeForward = "", std::string wildTypeReverse = "", 
-                     std::string constantForward = "", std::string constantReverse = "", 
+                     std::string adapterForward, std::string adapterReverse,
+                     Rcpp::StringVector wildTypeForward, 
+                     Rcpp::StringVector wildTypeReverse, 
+                     std::string constantForward, std::string constantReverse, 
                      double avePhredMinForward = 20.0, double avePhredMinReverse = 20.0,
                      int variableNMaxForward = 0, int variableNMaxReverse = 0, 
                      int umiNMax = 0,
@@ -417,10 +438,14 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
     }
     
     // if wildTypeForward is available...
-    if (wildTypeForward.compare("") != 0) {
-      if (compareToWildtype(varSeqForward, wildTypeForward, varIntQualForward,
+    if (std::string(wildTypeForward[0]).compare("") != 0) {
+      std::vector<std::string> refNamesForward = wildTypeForward.attr("names");
+      int idxForward = findClosestRefSeq(varSeqForward, wildTypeForward);
+      std::string wtForward = std::string(wildTypeForward[idxForward]);
+      std::string wtNameForward = std::string(refNamesForward[idxForward]);
+      if (compareToWildtype(varSeqForward, wtForward, varIntQualForward,
                             mutatedPhredMinForward, nbrMutatedCodonsMaxForward, forbiddenCodonsForward,
-                            std::string("f"), nMutQualTooLow, 
+                            wtNameForward, nMutQualTooLow, 
                             nTooManyMutCodons, nForbiddenCodons, mutantName)) {
         // read is to be filtered out
         continue;
@@ -428,10 +453,14 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
     }
     
     // if wildTypeReverse is available...
-    if (!mergeForwardReverse && wildTypeReverse.compare("") != 0) {
-      if (compareToWildtype(varSeqReverse, wildTypeReverse, varIntQualReverse,
+    if (!mergeForwardReverse && std::string(wildTypeReverse[0]).compare("") != 0) {
+      std::vector<std::string> refNamesReverse = wildTypeReverse.attr("names");
+      int idxReverse = findClosestRefSeq(varSeqReverse, wildTypeReverse);
+      std::string wtReverse = std::string(wildTypeReverse[idxReverse]);
+      std::string wtNameReverse = std::string(refNamesReverse[idxReverse]);
+      if (compareToWildtype(varSeqReverse, wtReverse, varIntQualReverse,
                             mutatedPhredMinReverse, nbrMutatedCodonsMaxReverse, forbiddenCodonsReverse,
-                            std::string("r"), nMutQualTooLow, 
+                            wtNameReverse, nMutQualTooLow, 
                             nTooManyMutCodons, nForbiddenCodons, mutantName)) {
         // read is to be filtered out
         continue;
@@ -444,7 +473,8 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
     if (mutantName.length() > 0) { // we have a least one mutation
       mutantName.pop_back(); // remove '_' at the end
     } else {
-      if (wildTypeForward.compare("") != 0 || (!mergeForwardReverse && wildTypeReverse.compare("") != 0)) {
+      if (std::string(wildTypeForward[0]).compare("") != 0 || 
+          (!mergeForwardReverse && std::string(wildTypeReverse[0]).compare("") != 0)) {
         mutantName = "WT";
       }
     }

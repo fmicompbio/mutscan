@@ -18,7 +18,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // digestFastqsCpp
-List digestFastqsCpp(std::string fastqForward, std::string fastqReverse, bool mergeForwardReverse, bool revComplForward, bool revComplReverse, int skipForward, int skipReverse, int umiLengthForward, int umiLengthReverse, unsigned int constantLengthForward, unsigned int constantLengthReverse, unsigned int variableLengthForward, unsigned int variableLengthReverse, std::string adapterForward, std::string adapterReverse, std::string wildTypeForward, std::string wildTypeReverse, std::string constantForward, std::string constantReverse, double avePhredMinForward, double avePhredMinReverse, int variableNMaxForward, int variableNMaxReverse, int umiNMax, unsigned int nbrMutatedCodonsMaxForward, unsigned int nbrMutatedCodonsMaxReverse, CharacterVector forbiddenMutatedCodonsForward, CharacterVector forbiddenMutatedCodonsReverse, double mutatedPhredMinForward, double mutatedPhredMinReverse, bool verbose);
+List digestFastqsCpp(std::string fastqForward, std::string fastqReverse, bool mergeForwardReverse, bool revComplForward, bool revComplReverse, int skipForward, int skipReverse, int umiLengthForward, int umiLengthReverse, unsigned int constantLengthForward, unsigned int constantLengthReverse, unsigned int variableLengthForward, unsigned int variableLengthReverse, std::string adapterForward, std::string adapterReverse, Rcpp::StringVector wildTypeForward, Rcpp::StringVector wildTypeReverse, std::string constantForward, std::string constantReverse, double avePhredMinForward, double avePhredMinReverse, int variableNMaxForward, int variableNMaxReverse, int umiNMax, unsigned int nbrMutatedCodonsMaxForward, unsigned int nbrMutatedCodonsMaxReverse, CharacterVector forbiddenMutatedCodonsForward, CharacterVector forbiddenMutatedCodonsReverse, double mutatedPhredMinForward, double mutatedPhredMinReverse, bool verbose);
 RcppExport SEXP _mutscan_digestFastqsCpp(SEXP fastqForwardSEXP, SEXP fastqReverseSEXP, SEXP mergeForwardReverseSEXP, SEXP revComplForwardSEXP, SEXP revComplReverseSEXP, SEXP skipForwardSEXP, SEXP skipReverseSEXP, SEXP umiLengthForwardSEXP, SEXP umiLengthReverseSEXP, SEXP constantLengthForwardSEXP, SEXP constantLengthReverseSEXP, SEXP variableLengthForwardSEXP, SEXP variableLengthReverseSEXP, SEXP adapterForwardSEXP, SEXP adapterReverseSEXP, SEXP wildTypeForwardSEXP, SEXP wildTypeReverseSEXP, SEXP constantForwardSEXP, SEXP constantReverseSEXP, SEXP avePhredMinForwardSEXP, SEXP avePhredMinReverseSEXP, SEXP variableNMaxForwardSEXP, SEXP variableNMaxReverseSEXP, SEXP umiNMaxSEXP, SEXP nbrMutatedCodonsMaxForwardSEXP, SEXP nbrMutatedCodonsMaxReverseSEXP, SEXP forbiddenMutatedCodonsForwardSEXP, SEXP forbiddenMutatedCodonsReverseSEXP, SEXP mutatedPhredMinForwardSEXP, SEXP mutatedPhredMinReverseSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -38,8 +38,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< unsigned int >::type variableLengthReverse(variableLengthReverseSEXP);
     Rcpp::traits::input_parameter< std::string >::type adapterForward(adapterForwardSEXP);
     Rcpp::traits::input_parameter< std::string >::type adapterReverse(adapterReverseSEXP);
-    Rcpp::traits::input_parameter< std::string >::type wildTypeForward(wildTypeForwardSEXP);
-    Rcpp::traits::input_parameter< std::string >::type wildTypeReverse(wildTypeReverseSEXP);
+    Rcpp::traits::input_parameter< Rcpp::StringVector >::type wildTypeForward(wildTypeForwardSEXP);
+    Rcpp::traits::input_parameter< Rcpp::StringVector >::type wildTypeReverse(wildTypeReverseSEXP);
     Rcpp::traits::input_parameter< std::string >::type constantForward(constantForwardSEXP);
     Rcpp::traits::input_parameter< std::string >::type constantReverse(constantReverseSEXP);
     Rcpp::traits::input_parameter< double >::type avePhredMinForward(avePhredMinForwardSEXP);
