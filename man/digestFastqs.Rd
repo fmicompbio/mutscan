@@ -8,8 +8,9 @@ digestFastqs(fastqForward, fastqReverse, mergeForwardReverse,
   revComplForward, revComplReverse, skipForward, skipReverse,
   umiLengthForward, umiLengthReverse, constantLengthForward,
   constantLengthReverse, variableLengthForward, variableLengthReverse,
-  adapterForward = "", adapterReverse = "", wildTypeForward = "",
-  wildTypeReverse = "", constantForward = "", constantReverse = "",
+  adapterForward = "", adapterReverse = "", primerForward = "",
+  primerReverse = "", wildTypeForward = "", wildTypeReverse = "",
+  constantForward = "", constantReverse = "",
   avePhredMinForward = 20, avePhredMinReverse = 20,
   variableNMaxForward = 0, variableNMaxReverse = 0, umiNMax = 0,
   nbrMutatedCodonsMaxForward = 1, nbrMutatedCodonsMaxReverse = 1,
@@ -47,6 +48,10 @@ forward/reverse reads, respectively. If a forward/reverse read contains the
 corresponding adapter sequence, the sequence pair will be filtered out.
 If set to \code{NULL}, no adapter filtering is performed. The number of
 filtered read pairs are reported in the return value.}
+
+\item{primerForward, primerReverse}{character(1), the primer sequence for
+forward/reverse reads, respectively. Only read pairs that contain both the
+forward and reverse primers will be retained.}
 
 \item{wildTypeForward, wildTypeReverse}{character(1), the wild type sequence
 for the forward and reverse variable region.}

@@ -4,7 +4,7 @@
 \alias{checkNumericInput}
 \title{Check numeric input argument}
 \usage{
-checkNumericInput(...)
+checkNumericInput(..., nonnegative)
 }
 \description{
 Check that input argument is numeric, length 1 and non-negative.

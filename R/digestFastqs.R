@@ -4,7 +4,7 @@
 #' 
 #' @keywords internal
 #' 
-checkNumericInput <- function(...) {
+checkNumericInput <- function(..., nonnegative) {
   varName <- deparse(substitute(...))
   if (length(...) != 1) {
     stop(varName, " must be of length 1")
@@ -12,7 +12,7 @@ checkNumericInput <- function(...) {
   if (!is.numeric(...)) {
     stop(varName, " must be numeric")
   }
-  if (... < 0) {
+  if (nonnegative && ... < 0) {
     stop(varName, " must be non-negative")
   }
 }
@@ -76,6 +76,9 @@ checkNumericInput <- function(...) {
 #'   corresponding adapter sequence, the sequence pair will be filtered out.
 #'   If set to \code{NULL}, no adapter filtering is performed. The number of
 #'   filtered read pairs are reported in the return value.
+#' @param primerForward,primerReverse character(1), the primer sequence for
+#'   forward/reverse reads, respectively. Only read pairs that contain both the
+#'   forward and reverse primers will be retained.
 #' @param wildTypeForward,wildTypeReverse character(1), the wild type sequence
 #'   for the forward and reverse variable region.
 #' @param constantForward,constantReverse character(1), the expected constant
@@ -142,6 +145,7 @@ digestFastqs <- function(fastqForward, fastqReverse,
                          variableLengthForward,
                          variableLengthReverse,
                          adapterForward = "", adapterReverse = "",
+                         primerForward = "", primerReverse = "",
                          wildTypeForward = "", wildTypeReverse = "", 
                          constantForward = "", constantReverse = "", 
                          avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
@@ -172,23 +176,23 @@ digestFastqs <- function(fastqForward, fastqReverse,
   }
   
   ## check numeric inputs
-  checkNumericInput(skipForward)
-  checkNumericInput(skipReverse)
-  checkNumericInput(umiLengthForward)
-  checkNumericInput(umiLengthReverse)
-  checkNumericInput(constantLengthForward)
-  checkNumericInput(constantLengthReverse)
-  checkNumericInput(variableLengthForward)
-  checkNumericInput(variableLengthReverse)
-  checkNumericInput(avePhredMinForward)
-  checkNumericInput(avePhredMinReverse)
-  checkNumericInput(variableNMaxForward)
-  checkNumericInput(variableNMaxReverse)
-  checkNumericInput(umiNMax)
-  checkNumericInput(nbrMutatedCodonsMaxForward)
-  checkNumericInput(nbrMutatedCodonsMaxReverse)
-  checkNumericInput(mutatedPhredMinForward)
-  checkNumericInput(mutatedPhredMinReverse)
+  checkNumericInput(skipForward, nonnegative = TRUE)
+  checkNumericInput(skipReverse, nonnegative = TRUE)
+  checkNumericInput(umiLengthForward, nonnegative = FALSE)
+  checkNumericInput(umiLengthReverse, nonnegative = FALSE)
+  checkNumericInput(constantLengthForward, nonnegative = FALSE)
+  checkNumericInput(constantLengthReverse, nonnegative = FALSE)
+  checkNumericInput(variableLengthForward, nonnegative = FALSE)
+  checkNumericInput(variableLengthReverse, nonnegative = FALSE)
+  checkNumericInput(avePhredMinForward, nonnegative = TRUE)
+  checkNumericInput(avePhredMinReverse, nonnegative = TRUE)
+  checkNumericInput(variableNMaxForward, nonnegative = TRUE)
+  checkNumericInput(variableNMaxReverse, nonnegative = TRUE)
+  checkNumericInput(umiNMax, nonnegative = TRUE)
+  checkNumericInput(nbrMutatedCodonsMaxForward, nonnegative = TRUE)
+  checkNumericInput(nbrMutatedCodonsMaxReverse, nonnegative = TRUE)
+  checkNumericInput(mutatedPhredMinForward, nonnegative = TRUE)
+  checkNumericInput(mutatedPhredMinReverse, nonnegative = TRUE)
   
   ## adapters must be strings, valid DNA characters
   if (!is.character(adapterForward) || length(adapterForward) != 1 ||
@@ -232,12 +236,12 @@ digestFastqs <- function(fastqForward, fastqReverse,
   # }
   
   ## wild type sequence lengths must match variable sequence lengths
-  if (any(sapply(wildTypeForward, function(w) nchar(w) > 0 && nchar(w) != variableLengthForward))) {
+  if (any(sapply(wildTypeForward, function(w) variableLengthForward != (-1) && nchar(w) > 0 && nchar(w) != variableLengthForward))) {
     stop("The lengths of the elements in 'wildTypeForward' (", paste(sapply(wildTypeForward, nchar), collapse = ","), 
          ") do not all correspond to the given 'variableLengthForward' (", 
          variableLengthForward, ")")
   }
-  if (any(sapply(wildTypeReverse, function(w) nchar(w) > 0 && nchar(w) != variableLengthReverse))) {
+  if (any(sapply(wildTypeReverse, function(w) variableLengthReverse != (-1) && nchar(w) > 0 && nchar(w) != variableLengthReverse))) {
     stop("The lengths of the elements in 'wildTypeReverse' (", paste(sapply(wildTypeReverse, nchar), collapse = ","), 
          ") do not all correspond to the given 'variableLengthReverse' (", 
          variableLengthReverse, ")")
@@ -298,6 +302,24 @@ digestFastqs <- function(fastqForward, fastqReverse,
     stop("'verbose' must be a logical scalar.")
   }
   
+  ## If one of umiLength, constantLength, skip is not -1, all of them must be not -1
+  if (!(umiLengthForward != (-1) && constantLengthForward != (-1) && skipForward != (-1)) && 
+      !(umiLengthForward == (-1) && constantLengthForward == (-1) && skipForward == (-1))) {
+    stop("Either all or none of 'skipForward', 'umiLengthForward' and 'constantLengthForward' should be -1.")
+  }
+  if (!(umiLengthReverse != (-1) && constantLengthReverse != (-1) && skipReverse != (-1)) && 
+      !(umiLengthReverse == (-1) && constantLengthReverse == (-1) && skipReverse == (-1))) {
+    stop("Either all or none of 'skipReverse', 'umiLengthReverse' and 'constantLengthReverse' should be -1.")
+  }
+  
+  ## If mergeForwardReverse is TRUE, forward and reverse sequence lengths must be set, and identical
+  if (mergeForwardReverse && (variableLengthForward == (-1) || variableLengthReverse == (-1))) {
+    stop("If 'mergeForwardReverse' is set to TRUE, the variable sequence lengths must be specified.")
+  }
+  if (mergeForwardReverse && variableLengthForward != variableLengthReverse) {
+    stop("If 'mergeForwardReverse' is set to TRUE, 'variableLengthForward' must be equal to 'variableLengthReverse'.")
+  }
+  
   res <- digestFastqsCpp(fastqForward = fastqForward, 
                          fastqReverse = fastqReverse,
                          mergeForwardReverse = mergeForwardReverse,
@@ -313,6 +335,8 @@ digestFastqs <- function(fastqForward, fastqReverse,
                          variableLengthReverse = variableLengthReverse,
                          adapterForward = adapterForward, 
                          adapterReverse = adapterReverse,
+                         primerForward = primerForward,
+                         primerReverse = primerReverse,
                          wildTypeForward = wildTypeForward, 
                          wildTypeReverse = wildTypeReverse, 
                          constantForward = constantForward, 
