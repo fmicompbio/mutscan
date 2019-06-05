@@ -15,6 +15,9 @@ checkNumericInput <- function(..., nonnegative) {
   if (nonnegative && ... < 0) {
     stop(varName, " must be non-negative")
   }
+  if (!nonnegative && (... < 0 && ... != -1)) {
+    stop(varName, " must be non-negative or -1")
+  }
 }
   
 #' Read, filter and digest sequences from two fastq files.
@@ -176,8 +179,8 @@ digestFastqs <- function(fastqForward, fastqReverse,
   }
   
   ## check numeric inputs
-  checkNumericInput(skipForward, nonnegative = TRUE)
-  checkNumericInput(skipReverse, nonnegative = TRUE)
+  checkNumericInput(skipForward, nonnegative = FALSE)
+  checkNumericInput(skipReverse, nonnegative = FALSE)
   checkNumericInput(umiLengthForward, nonnegative = FALSE)
   checkNumericInput(umiLengthReverse, nonnegative = FALSE)
   checkNumericInput(constantLengthForward, nonnegative = FALSE)

@@ -312,6 +312,7 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
                      std::string mutNameDelimiter = ".",
                      bool verbose = false) {
 
+  
   // Biostrings::IUPAC_CODE_MAP
   std::map<char,std::vector<char>> IUPAC = initializeIUPAC();
 
@@ -322,7 +323,6 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
   gzFile file1 = openFastq(fastqForward);
   gzFile file2 = openFastq(fastqReverse);
 
-  
   // --------------------------------------------------------------------------
   // digest reads one by one
   // --------------------------------------------------------------------------
@@ -336,8 +336,6 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
   unsigned int primerPosForward, primerPosReverse;
   std::string varSeqForward, varSeqReverse, varQualForward, varQualReverse, umiSeq;
   std::string constSeqForward, constSeqReverse, constQualForward, constQualReverse;
-  std::vector<int> constIntQualForward(constantLengthForward,0);
-  std::vector<int> constIntQualReverse(constantLengthReverse,0);
   std::string mutantName;
   std::map<std::string, mutantInfo> mutantSummary;
   std::map<std::string, mutantInfo>::iterator mutantSummaryIt;
@@ -459,12 +457,15 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
       stop("Either expected sequence lengths or a primer sequence must be provided (reverse)");
     }
 
+    // TODO
+    // check if the last character(s) are new line, if so remove them
+    
     // check that extracted sequences and qualities are of the right length 
     // (if the read is too short, substr() will just read until the end of it)
-    if ((variableLengthForward != (-1) && varSeqForward.length() != variableLengthForward) || 
-        (variableLengthReverse != (-1) && varSeqReverse.length() != variableLengthReverse) || 
-        (variableLengthForward != (-1) && varQualForward.length() != variableLengthForward) || 
-        (variableLengthReverse != (-1) && varQualReverse.length() != variableLengthReverse)) {
+    if ((variableLengthForward != (-1) && varSeqForward.length() != (size_t) variableLengthForward) || 
+        (variableLengthReverse != (-1) && varSeqReverse.length() != (size_t) variableLengthReverse) || 
+        (variableLengthForward != (-1) && varQualForward.length() != (size_t) variableLengthForward) || 
+        (variableLengthReverse != (-1) && varQualReverse.length() != (size_t) variableLengthReverse)) {
       stop("The read is not long enough to extract a variable sequence of the indicated length");
     }
 
@@ -592,7 +593,8 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
       constQualForward = squal1.substr(skipForward + umiLengthForward, constantLengthForward);
       
       // check that extracted sequences have the right length
-      if (constSeqForward.length() != constantLengthForward || constQualForward.length() != constantLengthForward) {
+      if (constSeqForward.length() != (size_t) constantLengthForward || 
+          constQualForward.length() != (size_t) constantLengthForward) {
         stop("The read is not long enough to extract a forward constant sequence of the indicated length");
       }
       
@@ -605,7 +607,8 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
       }
       
       // populate an integer vector of base qualities
-      for (size_t i = 0; i < constantLengthForward; i++) {
+      std::vector<int> constIntQualForward(constantLengthForward, 0);
+      for (size_t i = 0; i < (size_t) constantLengthForward; i++) {
         constIntQualForward[i] = int(constQualForward[i]) - 33;
       }
       tabulateBasesByQual(constSeqForward, constantForward, constIntQualForward,
@@ -616,7 +619,8 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
       constQualReverse = squal2.substr(skipReverse + umiLengthReverse, constantLengthReverse);
       
       // check that extracted sequences have the right length
-      if (constSeqReverse.length() != constantLengthReverse || constQualReverse.length() != constantLengthReverse) {
+      if (constSeqReverse.length() != (size_t) constantLengthReverse || 
+          constQualReverse.length() != (size_t) constantLengthReverse) {
         stop("The read is not long enough to extract a reverse constant sequence of the indicated length");
       }
       
@@ -629,7 +633,8 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
       }
       
       // populate an integer vector of base qualities
-      for (size_t i = 0; i < constantLengthReverse; i++) {
+      std::vector<int> constIntQualReverse(constantLengthReverse,0);
+      for (size_t i = 0; i < (size_t) constantLengthReverse; i++) {
         constIntQualReverse[i] = int(constQualReverse[i]) - 33;
       }
       tabulateBasesByQual(constSeqReverse, constantReverse, constIntQualReverse,
@@ -660,13 +665,13 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
   }
   DataFrame filt = DataFrame::create(Named("nbrTotal") = nTot,
                                      Named("f1_nbrAdapter") = nAdapter,
-                                     Named("f1.5_nNoPrimer") = nNoPrimer,
-                                     Named("f2_nAvgVarQualTooLow") = nAvgVarQualTooLow,
-                                     Named("f3_nTooManyNinVar") = nTooManyNinVar,
-                                     Named("f4_nTooManyNinUMI") = nTooManyNinUMI,
-                                     Named("f5_nMutQualTooLow") = nMutQualTooLow,
-                                     Named("f6_nTooManyMutCodons") = nTooManyMutCodons,
-                                     Named("f7_nForbiddenCodons") = nForbiddenCodons,
+                                     Named("f2_nNoPrimer") = nNoPrimer,
+                                     Named("f3_nAvgVarQualTooLow") = nAvgVarQualTooLow,
+                                     Named("f4_nTooManyNinVar") = nTooManyNinVar,
+                                     Named("f5_nTooManyNinUMI") = nTooManyNinUMI,
+                                     Named("f6_nMutQualTooLow") = nMutQualTooLow,
+                                     Named("f7_nTooManyMutCodons") = nTooManyMutCodons,
+                                     Named("f8_nForbiddenCodons") = nForbiddenCodons,
                                      Named("nbrRetained") = nRetain);
   DataFrame df = DataFrame::create(Named("sequence") = dfSeq,
                                    Named("mutantName") = dfName,

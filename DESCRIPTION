@@ -15,7 +15,7 @@ Authors@R:
 Description: Provides functionality for preprocessing and statistical analysis 
     of deep mutational scanning data.
 Depends:
-    R (>= 3.6)
+    R (>= 3.5)
 Imports:
     BiocGenerics,
     S4Vectors,
