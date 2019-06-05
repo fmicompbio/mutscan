@@ -98,6 +98,12 @@ checkNumericInput <- function(...) {
 #'   score of a mutated base for the read to be retained. If any mutated base
 #'   has a Phred score lower than \code{mutatedPhredMin}, the read will be
 #'   discarded.
+#' @param mutNameDelimiter character(1) Delimiter used in the naming of mutants.
+#'   Generally, mutants will be named as XX{.}NN{.}AAA, where XX is the closest
+#'   provided reference sequence, NN is the mutated codon number, and AAA is the
+#'   mutated codon. Here, {.} is the provided \code{mutNameDelimiter}. The
+#'   delimiter must be a single character, and can not appear in any of the
+#'   provided reference sequence names.
 #' @param verbose logical(1), whether to print out progress messages.
 #'
 #' @return A list with four entries:
@@ -147,6 +153,7 @@ digestFastqs <- function(fastqForward, fastqReverse,
                          forbiddenMutatedCodonsReverse = "NNW",
                          mutatedPhredMinForward = 0.0,
                          mutatedPhredMinReverse = 0.0,
+                         mutNameDelimiter = ".",
                          verbose = FALSE) {
   ## --------------------------------------------------------------------------
   ## pre-flight checks
@@ -279,6 +286,14 @@ digestFastqs <- function(fastqForward, fastqReverse,
     forbiddenMutatedCodonsReverse <- toupper(forbiddenMutatedCodonsReverse)
   }
   
+  ## mutNameDelimiter must be a single character, and can not appear in any of the WT sequence names
+  if (!is.character(mutNameDelimiter) || length(mutNameDelimiter) != 1 || nchar(mutNameDelimiter) != 1) {
+    stop("'mutNameDelimiter' must be a single-letter character scalar")
+  }
+  if (any(grepl(mutNameDelimiter, c(names(wildTypeForward), names(wildTypeReverse)), fixed = TRUE))) {
+    stop("'mutNameDelimiter' can not appear in the name of any of the provided wild type sequences.")
+  }
+  
   if (!is.logical(verbose) || length(verbose) != 1) {
     stop("'verbose' must be a logical scalar.")
   }
@@ -313,6 +328,7 @@ digestFastqs <- function(fastqForward, fastqReverse,
                          forbiddenMutatedCodonsReverse = forbiddenMutatedCodonsReverse,
                          mutatedPhredMinForward = mutatedPhredMinForward,
                          mutatedPhredMinReverse = mutatedPhredMinReverse,
+                         mutNameDelimiter = mutNameDelimiter,
                          verbose = verbose)
   
   ## Add package version and processing date

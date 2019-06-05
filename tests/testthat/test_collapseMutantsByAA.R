@@ -20,6 +20,7 @@ Ldef <- list(
   forbiddenMutatedCodonsForward = "NNW",
   forbiddenMutatedCodonsReverse = "NNW",
   mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+  mutNameDelimiter = ".",
   verbose = FALSE
 )
 Ldef1 <- c(

@@ -9,6 +9,7 @@
 
 #define BUFFER_SIZE 4096
 
+using namespace std::placeholders;
 using namespace Rcpp;
 
 // check if the last gzgets reached end of file
@@ -102,11 +103,22 @@ std::map<char,std::vector<char>> initializeIUPAC() {
   return IUPAC;
 }
 
+// split string by delimiter (code from https://www.fluentcpp.com/2017/04/21/how-to-split-a-string-in-c/)
+std::vector<std::string> split(const std::string& s, char delimiter) {
+  std::vector<std::string> tokens;
+  std::string token;
+  std::istringstream tokenStream(s);
+  while (std::getline(tokenStream, token, delimiter)) {
+    tokens.push_back(token);
+  }
+  return tokens;
+}
+
 // compare position of codons of the form (std::string)"x123NNN_"
 // [[Rcpp::export]]
-bool compareCodonPositions(std::string a, std::string b) {
-  int posa = std::stoi(a.substr(1, a.length() - 5));
-  int posb = std::stoi(b.substr(1, b.length() - 5));
+bool compareCodonPositions(std::string a, std::string b, const char mutNameDelimiter) {
+  int posa = std::stoi(split(a, mutNameDelimiter)[1]);
+  int posb = std::stoi(split(b, mutNameDelimiter)[1]);
   return (posa < posb);
 }
 
@@ -119,7 +131,7 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
                        const std::vector<int> varIntQual, const double mutatedPhredMin,
                        const unsigned int nbrMutatedCodonsMax, const std::set<std::string> &forbiddenCodons,
                        const std::string codonPrefix, int &nMutQualTooLow, int &nTooManyMutCodons,
-                       int &nForbiddenCodons, std::string &mutantName) {
+                       int &nForbiddenCodons, std::string &mutantName, const std::string mutNameDelimiter) {
   static std::set<std::string> mutatedCodons;
   static std::set<std::string>::iterator mutatedCodonIt;
   bool hasLowQualMutation, hasForbidden;
@@ -135,7 +147,8 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
         break;
       }
       // add codon to mutatedCodons
-      mutatedCodons.insert(codonPrefix + std::to_string((int)(i / 3) + 1) +
+      mutatedCodons.insert(codonPrefix + mutNameDelimiter + 
+        std::to_string((int)(i / 3) + 1) + mutNameDelimiter + 
         varSeq.substr((int)(i / 3) * 3, 3) +
         std::string("_"));
     }
@@ -163,7 +176,7 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
   }
   // create name for mutant
   std::vector<std::string> mutatedCodonsSorted(mutatedCodons.begin(), mutatedCodons.end());
-  std::sort (mutatedCodonsSorted.begin(), mutatedCodonsSorted.end(), compareCodonPositions);
+  std::sort(mutatedCodonsSorted.begin(), mutatedCodonsSorted.end(), std::bind(compareCodonPositions, _1, _2, *(mutNameDelimiter.c_str())));
   for (size_t i = 0; i < mutatedCodonsSorted.size(); i++) {
     mutantName += mutatedCodonsSorted[i];
   }
@@ -295,6 +308,7 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
                      CharacterVector forbiddenMutatedCodonsReverse = "NNW",
                      double mutatedPhredMinForward = 0.0,
                      double mutatedPhredMinReverse = 0.0,
+                     std::string mutNameDelimiter = ".",
                      bool verbose = false) {
 
   // Biostrings::IUPAC_CODE_MAP
@@ -447,7 +461,7 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
       if (compareToWildtype(varSeqForward, wtForward, varIntQualForward,
                             mutatedPhredMinForward, nbrMutatedCodonsMaxForward, forbiddenCodonsForward,
                             wtNameForward, nMutQualTooLow, 
-                            nTooManyMutCodons, nForbiddenCodons, mutantName)) {
+                            nTooManyMutCodons, nForbiddenCodons, mutantName, mutNameDelimiter)) {
         // read is to be filtered out
         continue;
       }
@@ -462,7 +476,7 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
       if (compareToWildtype(varSeqReverse, wtReverse, varIntQualReverse,
                             mutatedPhredMinReverse, nbrMutatedCodonsMaxReverse, forbiddenCodonsReverse,
                             wtNameReverse, nMutQualTooLow, 
-                            nTooManyMutCodons, nForbiddenCodons, mutantName)) {
+                            nTooManyMutCodons, nForbiddenCodons, mutantName, mutNameDelimiter)) {
         // read is to be filtered out
         continue;
       }
@@ -620,6 +634,7 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
   param.push_back(forbiddenCodonsUsedReverse, "forbiddenMutatedCodonsReverse");
   param.push_back(mutatedPhredMinForward, "mutatedPhredMinForward");
   param.push_back(mutatedPhredMinReverse, "mutatedPhredMinReverse");
+  param.push_back(mutNameDelimiter, "mutNameDelimiter");
   List L = List::create(Named("parameters") = param,
                         Named("filterSummary") = filt,
                         Named("summaryTable") = df,

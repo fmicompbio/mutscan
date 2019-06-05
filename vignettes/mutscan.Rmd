@@ -112,7 +112,7 @@ transInput <- digestFastqs(fastqForward = file.path(datadir, "transInput_1.fastq
                            wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
                            nbrMutatedCodonsMaxForward = 1, nbrMutatedCodonsMaxReverse = 1,
                            forbiddenMutatedCodonsForward = "NNW", forbiddenMutatedCodonsReverse = "NNW",
-                           verbose = FALSE)
+                           mutNameDelimiter = ".", verbose = FALSE)
 ```
 
 The `digestFastqs` function returns a list with four elements. The `parameters`
@@ -190,7 +190,7 @@ cisInput <- digestFastqs(fastqForward = file.path(datadir, "cisInput_1.fastq.gz"
                          wildTypeReverse = "", 
                          nbrMutatedCodonsMaxForward = 1, nbrMutatedCodonsMaxReverse = 1, 
                          forbiddenMutatedCodonsForward = "NNW", forbiddenMutatedCodonsReverse = "NNW",
-                         verbose = TRUE)
+                         mutNameDelimiter = ".", verbose = TRUE)
 ```
 
 ```{r}
@@ -235,7 +235,7 @@ transOutput <- digestFastqs(fastqForward = file.path(datadir, "transOutput_1.fas
                             wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
                             nbrMutatedCodonsMaxForward = 1, nbrMutatedCodonsMaxReverse = 1, 
                             forbiddenMutatedCodonsForward = "NNW", forbiddenMutatedCodonsReverse = "NNW",
-                            verbose = FALSE)
+                            mutNameDelimiter = ".", verbose = FALSE)
 se <- summarizeExperiment(x = list(sample1 = transInput,
                                    sample2 = transOutput),
                           coldata = data.frame(Name = c("sample1", "sample2"),

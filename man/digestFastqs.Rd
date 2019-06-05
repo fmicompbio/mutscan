@@ -15,7 +15,8 @@ digestFastqs(fastqForward, fastqReverse, mergeForwardReverse,
   nbrMutatedCodonsMaxForward = 1, nbrMutatedCodonsMaxReverse = 1,
   forbiddenMutatedCodonsForward = "NNW",
   forbiddenMutatedCodonsReverse = "NNW", mutatedPhredMinForward = 0,
-  mutatedPhredMinReverse = 0, verbose = FALSE)
+  mutatedPhredMinReverse = 0, mutNameDelimiter = ".",
+  verbose = FALSE)
 }
 \arguments{
 \item{fastqForward, fastqReverse}{character(1), paths to gzipped FASTQ files
@@ -76,6 +77,13 @@ mutated codon matching this pattern, it will be filtered out.}
 score of a mutated base for the read to be retained. If any mutated base
 has a Phred score lower than \code{mutatedPhredMin}, the read will be
 discarded.}
+
+\item{mutNameDelimiter}{character(1) Delimiter used in the naming of mutants.
+Generally, mutants will be named as XX{.}NN{.}AAA, where XX is the closest
+provided reference sequence, NN is the mutated codon number, and AAA is the
+mutated codon. Here, {.} is the provided \code{mutNameDelimiter}. The
+delimiter must be a single character, and can not appear in any of the
+provided reference sequence names.}
 
 \item{verbose}{logical(1), whether to print out progress messages.}
 }
