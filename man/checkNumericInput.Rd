@@ -7,6 +7,7 @@
 checkNumericInput(..., nonnegative)
 }
 \description{
-Check that input argument is numeric, length 1 and non-negative.
+Check that input argument is numeric, length 1 and non-negative (or -1, if
+negative values are allowed).
 }
 \keyword{internal}

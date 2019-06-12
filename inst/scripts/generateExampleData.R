@@ -40,14 +40,15 @@ allSamples <- mclapply(sampleIds, function(id) {
                         constantLengthReverse = 17, variableLengthForward = 96,
                         variableLengthReverse = 96, constantForward = "AACCGGAGGAGGGAGCTG",
                         constantReverse = "GAGTTCATCCTGGCAGC", adapterForward = "GGAAGAGCACACGTC", 
-                        adapterReverse = "GGAAGAGCGTCGTGT", 
+                        adapterReverse = "GGAAGAGCGTCGTGT", primerForward = "",
+                        primerReverse = "", 
                         avePhredMinForward = 20, avePhredMinReverse = 20,
                         variableNMaxForward = 0, variableNMaxReverse = 0, umiNMax = 0,
                         wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA", 
                         wildTypeReverse = "", 
                         nbrMutatedCodonsMaxForward = 1, nbrMutatedCodonsMaxReverse = 1,
                         forbiddenMutatedCodonsForward = "NNW", forbiddenMutatedCodonsReverse = "NNW", 
-                        verbose = TRUE)
+                        mutNameDelimiter = ".", verbose = TRUE)
 }, mc.cores = 6)
 se <- mutscan::summarizeExperiment(x = allSamples, coldata = meta, countType = "umis")
 seaa <- mutscan::collapseMutantsByAA(se)

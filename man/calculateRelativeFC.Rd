@@ -4,7 +4,7 @@
 \alias{calculateRelativeFC}
 \title{Calculate logFCs relative to WT using edgeR}
 \usage{
-calculateRelativeFC(se, design, coef, selAssay = "counts",
+calculateRelativeFC(se, design, coef, WTrow, selAssay = "counts",
   pseudocount = 1)
 }
 \arguments{

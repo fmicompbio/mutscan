@@ -55,6 +55,18 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
       !(countType %in% c("umis", "reads"))) {
     stop("'countType' must be either 'umis' or 'reads'")
   }
+  ## If no UMI sequences were given, then countType = "umis" should not be allowed
+  if (!(all(sapply(x, function(w) w$parameters$umiLengthForward != -1 || 
+                   w$parameters$umiLengthReverse != -1)))) {
+    stop("'countType' is set to 'umis', but no UMI sequences were provided when quantifying. ",
+         "Set 'countType' to 'reads' instead.")
+  }
+  ## Get the mutNameDelimiters, and make sure that they are the same
+  mutnamedel <- unique(sapply(x, function(w) w$parameters$mutNameDelimiter))
+  if (length(mutnamedel) > 1) {
+    stop("All samples must have the same 'mutNameDelimiter'")
+  }
+  
   coldata$Name <- as.character(coldata$Name)
 
   ## --------------------------------------------------------------------------
@@ -75,10 +87,11 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
   ## --------------------------------------------------------------------------
   ## Get all sequences, and all sample names
   ## --------------------------------------------------------------------------
-  allSequences <- do.call(
-    dplyr::bind_rows, 
-    lapply(x, function(w) w$summaryTable[, c("sequence", "mutantName")])) %>%
-    dplyr::distinct()
+  allSequences <- Reduce(function(...) dplyr::full_join(..., by = "mutantName"), 
+                         lapply(x, function(w) w$summaryTable[, c("mutantName", "sequence")])) %>%
+    replace(., is.na(.), "") %>%
+    tidyr::unite(sequence, -mutantName, sep = ",") %>%
+    dplyr::mutate(sequence = gsub("[,]+", ",", sequence))
   allSamples <- names(x)
   names(allSamples) <- allSamples
   
@@ -110,7 +123,9 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     assays = list(counts = countMat),
     colData = coldata[match(allSamples, coldata$Name), , drop = FALSE],
     rowData = S4Vectors::DataFrame(sequence = allSequences$sequence),
-    metadata = lapply(allSamples, function(w) x[[w]]$parameters)
+    metadata = list(parameters = lapply(allSamples, function(w) x[[w]]$parameters), 
+                    countType = countType,
+                    mutNameDelimiter = mutnamedel)
   )
   
   if (!any(allSequences$mutantName == "")) {

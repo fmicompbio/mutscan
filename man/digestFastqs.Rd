@@ -53,8 +53,10 @@ filtered read pairs are reported in the return value.}
 forward/reverse reads, respectively. Only read pairs that contain both the
 forward and reverse primers will be retained.}
 
-\item{wildTypeForward, wildTypeReverse}{character(1), the wild type sequence
-for the forward and reverse variable region.}
+\item{wildTypeForward, wildTypeReverse}{character(1) or named character
+vector, the wild type sequence for the forward and reverse variable region.
+If given as a single string, the reference sequence will be named 'f' (for
+forward) or 'r' (for reverse).}
 
 \item{constantForward, constantReverse}{character(1), the expected constant
 forward and reverse sequences.}
@@ -84,11 +86,11 @@ has a Phred score lower than \code{mutatedPhredMin}, the read will be
 discarded.}
 
 \item{mutNameDelimiter}{character(1) Delimiter used in the naming of mutants.
-Generally, mutants will be named as XX{.}NN{.}AAA, where XX is the closest
-provided reference sequence, NN is the mutated codon number, and AAA is the
+Generally, mutants will be named as XX{.}YY{.}NNN, where XX is the closest
+provided reference sequence, YY is the mutated codon number, and NNN is the
 mutated codon. Here, {.} is the provided \code{mutNameDelimiter}. The
-delimiter must be a single character, and can not appear in any of the
-provided reference sequence names.}
+delimiter must be a single character (not "_"), and can not appear in any
+of the provided reference sequence names.}
 
 \item{verbose}{logical(1), whether to print out progress messages.}
 }
@@ -96,13 +98,9 @@ provided reference sequence names.}
 A list with four entries:
 \describe{
 \item{summaryTable}{A \code{data.frame} that contains, for each observed
-variable region sequence (or pair of sequences, for trans experiments), a
-simplified "mutantName", the number of observed such sequences, and the
-number of unique UMIs obseved for the sequence. The "mutantName" for each
-mutated codon is of the form "{f/r}xxNNN", where f/r indicates
-forward/reverse read, xx indicates the mutated codon, and NNN is the observed
-sequence for the codon. In the case of multiple mutated codons, these are
-separated by underscores.}
+mutation combination, the corresponding variable region sequences (or pair of
+sequences), the number of observed such sequences, and the number of unique
+UMIs obseved for the sequence.}
 \item{filterSummary}{A \code{data.frame} that contains the number of input
 reads, the number of reads filtered out in the processing, and the number of
 retained reads. The filters are named according to the convention
@@ -122,7 +120,9 @@ processing.}
 \description{
 Read sequences for a pair of fastq files and digest them (extract umis,
 constant and variable parts, filter, extract mismatch information from
-constant and count the observed unique variable parts).
+constant and count the observed unique variable parts). Alternatively, primer
+sequences could be specified, in which case the sequence immediately
+following the primer will be considered the variable sequence.
 }
 \details{
 The processing of a read pair goes as follows:
@@ -130,30 +130,41 @@ The processing of a read pair goes as follows:
  \item Search for perfect matches to forward/reverse adapter sequences,
  filter out the read pair if a match is found in either the forward or
  reverse read.
- \item For "cis" experiment, collapse forward and reverse variable regions by
+ \item If primer sequences are provided, search for perfect matches, and
+ filter out the read pair if not all provided primer sequences can be found.
+ \item Extract the variable sequence from forward and reverse reads. If the
+ lengths of the UMI, constant and variable part of the read are given, they
+ will be used to extract the variable part. Otherwise, a primer sequence must
+ be provided, and the variable sequence is assumed to start immediately after
+ the primer.
+ \item If requested, collapse forward and reverse variable regions by
  retaining, for each position, the base with the highest reported base
  quality.
  \item Filter out read pair if the average quality in the variable region is
- below \code{avePhredMin} (for "trans" experiments, filter out a read pair if
- either the forward or reverse variable region falls below the quality
- threshold)
- \item Filter out read pair if the number of Ns in the variable region (for
- "trans" experiments, either the forward or reverse) exceeds
- \code{variableNMax}
+ below \code{avePhredMinForward}/\code{avePhredMinReverse}, in either the
+ forward or reverse read (or the merged read).
+ \item Filter out read pair if the number of Ns in the variable region
+ exceeds \code{variableNMaxForward}/\code{variableNMaxReverse}.
  \item Filter out read pair if the number of Ns in the combined forward and
  reverse UMI sequence exceeds \code{umiNMax}
- \item If a wild type sequence (for the variable region) is provided, find
- the mismatches between the (forward/reverse) variable region and the
- provided wild type sequence.
+ \item If one or more wild type sequences (for the variable region) are
+ provided, find the mismatches between the (forward/reverse) variable region
+ and the provided wild type sequence (if more than one wild type sequence is
+ provided, first find the one that is closest to the read).
  \item Filter out read pair if any mutated base has a quality below
- \code{mutatedPhredMin}
+ \code{mutatedPhredMinForward}/\code{mutatedPhredMinReverse}.
  \item Filter out read pair if the number of mutated codons exceeds
- \code{nbrMutatedCodonsMax}
+ \code{nbrMutatedCodonsMaxForward}/\code{nbrMutatedCodonsMaxReverse}.
  \item Filter out read pair if any of the mutated codons match any of the
- codons encoded by \code{forbiddenMutatedCodons}
+ codons encoded by
+ \code{forbiddenMutatedCodonsForward}/\code{forbiddenMutatedCodonsReverse}.
+ \item Assign a 'mutation name' to the read. This name is a combination of
+ parts of the form XX{.}YY{.}NNN, where XX is the name of the most similar
+ reference sequence, YY is the mutated codon number, and NNN is the mutated
+ codon. {.} is a delimiter, specified via \code{mutNameDelimiter}.
 }
 
 Based on the retained reads following this filtering process, count the
 number of reads, and the number of unique UMIs, for each variable sequence
-(or pair of variable sequences, for "trans" experiments).
+(or pair of variable sequences).
 }

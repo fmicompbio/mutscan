@@ -4,7 +4,7 @@
 \alias{calculatePPIScore}
 \title{Calculate protein-protein interaction scores (PPI).}
 \usage{
-calculatePPIScore(se, pairingCol, ODCols, comparison)
+calculatePPIScore(se, pairingCol, ODCols, comparison, WTrow)
 }
 \arguments{
 \item{se}{SummarizedExperiment object as returned by \code{\link{digestFastqs}}.}

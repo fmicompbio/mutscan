@@ -100,8 +100,8 @@ test_that("summarizeExperiment works as expected with reads output", {
                  coldata[2, cn])
   }
   
-  expect_equal(S4Vectors::metadata(se)[["sample1"]], out1$parameters)
-  expect_equal(S4Vectors::metadata(se)[["sample2"]], out2$parameters)
+  expect_equal(S4Vectors::metadata(se)$parameters[["sample1"]], out1$parameters)
+  expect_equal(S4Vectors::metadata(se)$parameters[["sample2"]], out2$parameters)
 })
 
 test_that("summarizeExperiment works as expected with umis output", {
@@ -129,8 +129,8 @@ test_that("summarizeExperiment works as expected with umis output", {
                  coldata[2, cn])
   }
   
-  expect_equal(S4Vectors::metadata(se)[["sample1"]], out1$parameters)
-  expect_equal(S4Vectors::metadata(se)[["sample2"]], out2$parameters)
+  expect_equal(S4Vectors::metadata(se)$parameters[["sample1"]], out1$parameters)
+  expect_equal(S4Vectors::metadata(se)$parameters[["sample2"]], out2$parameters)
 })
 
 test_that("summarizeExperiment orders samples equally in count matrix/colData", {

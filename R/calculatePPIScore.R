@@ -25,7 +25,7 @@
 #' @importFrom Matrix colSums
 #' 
 #' @export
-calculatePPIScore <- function(se, pairingCol, ODCols, comparison) {
+calculatePPIScore <- function(se, pairingCol, ODCols, comparison, WTrow) {
   ## --------------------------------------------------------------------------
   ## pre-flight checks
   ## --------------------------------------------------------------------------
@@ -60,10 +60,15 @@ calculatePPIScore <- function(se, pairingCol, ODCols, comparison) {
   }
   
   ## there is exactly one observation per pairing and condition
-  if(any(table(colData(se)[colData(se)[, comparison[1]] %in% comparison[2:3], pairingCol],
-               colData(se)[colData(se)[, comparison[1]] %in% comparison[2:3], comparison[1]]) != 1)) {
+  if (any(table(colData(se)[colData(se)[, comparison[1]] %in% comparison[2:3], pairingCol],
+                colData(se)[colData(se)[, comparison[1]] %in% comparison[2:3], comparison[1]]) != 1)) {
     stop("There must be exactly one sample for every replicate-condition combination ",
          "defined by 'pairingCol' and 'comparison'")
+  }
+  
+  ## WTrow exists in the SE
+  if (!(WTrow %in% rownames(se))) {
+    stop("There is no row named '", WTrow, "' in the SummarizedExperiment object.")
   }
   
   ## --------------------------------------------------------------------------
@@ -98,7 +103,7 @@ calculatePPIScore <- function(se, pairingCol, ODCols, comparison) {
   ## --------------------------------------------------------------------------
   ## calculate PPI = n_i / n_WT
   ## --------------------------------------------------------------------------
-  nWT <- n["WT", ]
+  nWT <- n[WTrow, ]
   PPI <- sweep(n, MARGIN = 2, STATS = nWT, FUN = "/")
   return(PPI)
 }

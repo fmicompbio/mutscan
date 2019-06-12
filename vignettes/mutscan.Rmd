@@ -283,10 +283,12 @@ SummarizedExperiment object generated as described above, for all the three CIS
 replicates fro [@Diss2018].
 
 ```{r}
-se_collapsed <- readRDS(file.path(datadir, "GSE102901_cis_se.rds"))
+se <- readRDS(file.path(datadir, "GSE102901_cis_se.rds"))
+se_collapsed <- collapseMutantsByAA(se)
 ppis <- calculatePPIScore(se = se_collapsed, pairingCol = "Replicate", 
                           ODCols = c("OD1", "OD2"),
-                          comparison = c("Condition", "cis_output", "cis_input"))
+                          comparison = c("Condition", "cis_output", "cis_input"),
+                          WTrow = "f.0.NA")
 head(ppis[order(abs(rowMeans(ppis)), decreasing = TRUE), , drop = FALSE])
 ```
 
@@ -302,7 +304,7 @@ at least two replicates are required.
 scores <- calculateRelativeFC(se = se_collapsed,
                               design = model.matrix(~ Replicate + Condition,
                                                     data = colData(se_collapsed)),
-                              coef = 3, pseudocount = 1)
+                              coef = 3, pseudocount = 1, WTrow = "f.0.NA")
 head(scores[order(scores$PValue), , drop = FALSE])
 ```
 

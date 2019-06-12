@@ -61,10 +61,14 @@ test_that("collapseMutantsByAA works as expected", {
   expect_equal(colnames(se), colnames(secoll))
   
   ## Number of unique amino acids/position combinations
-  aapos <- paste0(substr(rownames(se), start = 1, stop = nchar(rownames(se)) - 3), 
-                  GENETIC_CODE[substr(rownames(se), start = nchar(rownames(se)) - 2, 
-                                      stop = nchar(rownames(se)))])
-  aapos[aapos == "NA"] <- "WT"
+  unl <- base::strsplit(rownames(se), split = metadata(se)$mutNameDelimiter, fixed = TRUE)
+  unl <- lapply(unl, function(w) {
+    w[3] <- GENETIC_CODE[w[3]]
+    w
+  })
+  aapos <- sapply(unl, function(w) paste(w, collapse = metadata(se)$mutNameDelimiter))
+  
+  
   expect_equal(nrow(secoll), length(unique(aapos)))
   expect_equal(sort(rownames(secoll)), sort(unique(aapos)))
   

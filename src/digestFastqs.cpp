@@ -114,7 +114,7 @@ std::vector<std::string> split(const std::string& s, char delimiter) {
   return tokens;
 }
 
-// compare position of codons of the form (std::string)"x123NNN_"
+// compare position of codons of the form (std::string)"x.123.NNN_"
 // [[Rcpp::export]]
 bool compareCodonPositions(std::string a, std::string b, const char mutNameDelimiter) {
   int posa = std::stoi(split(a, mutNameDelimiter)[1]);
@@ -181,6 +181,11 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
     mutantName += mutatedCodonsSorted[i];
   }
   
+  // if no mutant codons, name as <codonPrefix>.0.WT
+  if (mutatedCodonsSorted.size() == 0) {
+    mutantName += codonPrefix + mutNameDelimiter + "0" + mutNameDelimiter + "WT_";
+  }
+  
   return false;
 }
 
@@ -203,9 +208,9 @@ bool tabulateBasesByQual(const std::string constSeq, const std::string constant,
 
 // stores information about retained mutants
 struct mutantInfo {
-  std::set<std::string> umi;   // set of unique UMIs observed for read pairs of that mutant
-  int nReads;                  // number of reads
-  std::string mutantName;      // name of the mutant
+  std::set<std::string> umi;      // set of unique UMIs observed for read pairs of that mutant
+  int nReads;                     // number of reads
+  std::set<std::string> sequence; // set of sequences for that mutant
 };
 
 // open fastq file and check if it worked
@@ -223,7 +228,7 @@ gzFile  openFastq(std::string filename) {
 }
 
 // given a vector of codons (potentially containing IUPAC ambiguous bases),
-// enumerate all non-ambiguious codons that match to them
+// enumerate all non-ambiguous codons that match to them
 std::set<std::string> enumerateCodonsFromIUPAC(CharacterVector forbiddenMutatedCodons,
                                                std::map<char,std::vector<char>> IUPAC, bool verbose) {
   std::set<std::string> forbiddenCodons;
@@ -262,6 +267,15 @@ bool mergeReadPair(std::string &varSeqForward, std::vector<int> &varIntQualForwa
   }
 
   return true;
+}
+
+void removeEOL(std::string &seq) {
+  if (seq.back() == '\n') {
+    seq.pop_back();
+  }
+  if (seq.back() == '\r') {
+    seq.pop_back();
+  }
 }
 
 // Find closest wild type sequence to a variable sequence
@@ -316,7 +330,6 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
   // Biostrings::IUPAC_CODE_MAP
   std::map<char,std::vector<char>> IUPAC = initializeIUPAC();
 
-  
   // --------------------------------------------------------------------------
   // open fastq files
   // --------------------------------------------------------------------------
@@ -405,8 +418,6 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
         // variable length not given - take the rest of the read
         varSeqForward = sseq1.substr(skipForward + umiLengthForward + constantLengthForward, sseq1.length());
         varQualForward = squal1.substr(skipForward + umiLengthForward + constantLengthForward, squal1.length());
-        varSeqForward.pop_back();
-        varQualForward.pop_back();
       }
     } else if (primerForward.compare("") != 0) {
       // otherwise, primer sequence should be given, and will be used as a trigger
@@ -419,13 +430,11 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
         // variable length not given - take the rest of the read
         varSeqForward = sseq1.substr(primerPosForward + primerForward.length(), sseq1.length());
         varQualForward = squal1.substr(primerPosForward + primerForward.length(), squal1.length());
-        varSeqForward.pop_back();
-        varQualForward.pop_back();
       }
     } else {
       stop("Either expected sequence lengths or a primer sequence must be provided (forward)");
     }
-    //reverse
+    // reverse
     if (skipReverse != (-1) && umiLengthReverse != (-1) && constantLengthReverse != (-1)) {
       // if skipReverse, umiLengthReverse, constantLengthReverse are all not -1, extract by position
       if (variableLengthReverse != (-1)) {
@@ -436,8 +445,6 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
         // variable length not given - take the rest of the read
         varSeqReverse = sseq2.substr(skipReverse + umiLengthReverse + constantLengthReverse, sseq2.length());
         varQualReverse = squal2.substr(skipReverse + umiLengthReverse + constantLengthReverse, squal2.length());
-        varSeqReverse.pop_back();
-        varQualReverse.pop_back();
       }
     } else if (primerReverse.compare("") != 0) {
       // otherwise, primer sequence should be given, and will be used as a trigger
@@ -450,15 +457,16 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
         // variable length not given - take the rest of the read
         varSeqReverse = sseq2.substr(primerPosReverse + primerReverse.length(), sseq2.length());
         varQualReverse = squal2.substr(primerPosReverse + primerReverse.length(), squal2.length());
-        varSeqReverse.pop_back();
-        varQualReverse.pop_back();
       }
     } else {
       stop("Either expected sequence lengths or a primer sequence must be provided (reverse)");
     }
 
-    // TODO
     // check if the last character(s) are new line, if so remove them
+    removeEOL(varSeqForward);
+    removeEOL(varQualForward);
+    removeEOL(varSeqReverse);
+    removeEOL(varQualReverse);
     
     // check that extracted sequences and qualities are of the right length 
     // (if the read is too short, substr() will just read until the end of it)
@@ -570,21 +578,23 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
         mutantName = "WT";
       }
     }
-    // ... check if mutant already exists in mutantSummary
+    
     if (!mergeForwardReverse) { // "trans" experiment
       varSeqForward += (std::string("_") + varSeqReverse);
     }
-    if ((mutantSummaryIt = mutantSummary.find(varSeqForward)) != mutantSummary.end()) {
+    // ... check if mutant already exists in mutantSummary
+    if ((mutantSummaryIt = mutantSummary.find(mutantName)) != mutantSummary.end()) {
       // ... ... update existing mutantInfo
       (*mutantSummaryIt).second.nReads++;
       (*mutantSummaryIt).second.umi.insert(umiSeq);
+      (*mutantSummaryIt).second.sequence.insert(varSeqForward);
     } else {
       // ... ... create mutantInfo instance for this mutant and add it to mutantSummary
       mutantInfo newMutant;
       newMutant.nReads = 1;
       newMutant.umi.insert(umiSeq);
-      newMutant.mutantName = mutantName;
-      mutantSummary.insert(std::pair<std::string,mutantInfo>(varSeqForward, newMutant));
+      newMutant.sequence.insert(varSeqForward);
+      mutantSummary.insert(std::pair<std::string,mutantInfo>(mutantName, newMutant));
     }
     
     // for retained reads, count numbers of (mis-)matching bases by Phred quality
@@ -657,24 +667,32 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
   std::vector<int> dfReads(dfLen, 0), dfUmis(dfLen, 0);
   int i = 0;
   for (mutantSummaryIt = mutantSummary.begin(); mutantSummaryIt != mutantSummary.end(); mutantSummaryIt++) {
-    dfSeq[i] = (*mutantSummaryIt).first;
-    dfName[i] = (*mutantSummaryIt).second.mutantName;
+    // collapse all sequences associated with the mutant
+    std::vector<std::string> sequenceVector((*mutantSummaryIt).second.sequence.begin(), 
+                                            (*mutantSummaryIt).second.sequence.end());
+    std::string collapsedSequence = "";
+    for (size_t i = 0; i < sequenceVector.size(); i++) {
+      collapsedSequence += sequenceVector[i] + ",";
+    }
+    collapsedSequence.pop_back(); // remove final ","
+    dfName[i] = (*mutantSummaryIt).first;
+    dfSeq[i] = collapsedSequence;
     dfReads[i] = (*mutantSummaryIt).second.nReads;
     dfUmis[i] = (*mutantSummaryIt).second.umi.size();
     i++;
   }
   DataFrame filt = DataFrame::create(Named("nbrTotal") = nTot,
                                      Named("f1_nbrAdapter") = nAdapter,
-                                     Named("f2_nNoPrimer") = nNoPrimer,
-                                     Named("f3_nAvgVarQualTooLow") = nAvgVarQualTooLow,
-                                     Named("f4_nTooManyNinVar") = nTooManyNinVar,
-                                     Named("f5_nTooManyNinUMI") = nTooManyNinUMI,
-                                     Named("f6_nMutQualTooLow") = nMutQualTooLow,
-                                     Named("f7_nTooManyMutCodons") = nTooManyMutCodons,
-                                     Named("f8_nForbiddenCodons") = nForbiddenCodons,
+                                     Named("f2_nbrNoPrimer") = nNoPrimer,
+                                     Named("f3_nbrAvgVarQualTooLow") = nAvgVarQualTooLow,
+                                     Named("f4_nbrTooManyNinVar") = nTooManyNinVar,
+                                     Named("f5_nbrTooManyNinUMI") = nTooManyNinUMI,
+                                     Named("f6_nbrMutQualTooLow") = nMutQualTooLow,
+                                     Named("f7_nbrTooManyMutCodons") = nTooManyMutCodons,
+                                     Named("f8_nbrForbiddenCodons") = nForbiddenCodons,
                                      Named("nbrRetained") = nRetain);
-  DataFrame df = DataFrame::create(Named("sequence") = dfSeq,
-                                   Named("mutantName") = dfName,
+  DataFrame df = DataFrame::create(Named("mutantName") = dfName,
+                                   Named("sequence") = dfSeq,
                                    Named("nbrReads") = dfReads,
                                    Named("nbrUmis") = dfUmis,
                                    Named("stringsAsFactors") = false);

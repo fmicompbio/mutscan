@@ -41,8 +41,14 @@ collapseMutantsByAA <- function(se) {
   ## Replace codon by corresponding amino acid
   tmp <- base::strsplit(rownames(se), split = "_", fixed = TRUE)
   unl <- base::unlist(tmp, use.names = FALSE)
-  unl <- paste0(base::substr(unl, 1, nchar(unl) - 3), 
-                GENETIC_CODE[base::substr(unl, nchar(unl) - 2, nchar(unl))])
+  unl <- base::strsplit(unl, split = metadata(se)$mutNameDelimiter, fixed = TRUE)
+  unl <- lapply(unl, function(w) {
+    w[3] <- GENETIC_CODE[w[3]]
+    w
+  })
+  unl <- sapply(unl, function(w) paste(w, collapse = metadata(se)$mutNameDelimiter))
+  # unl <- paste0(base::substr(unl, 1, nchar(unl) - 3), 
+  #               GENETIC_CODE[base::substr(unl, nchar(unl) - 2, nchar(unl))])
   tmp <- utils::relist(unl, skeleton = tmp)
   tmp <- S4Vectors::unstrsplit(tmp, sep = "_")
   tmp[rownames(se) == "WT"] <- "WT"

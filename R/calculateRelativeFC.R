@@ -15,10 +15,12 @@
 #' 
 #' @export
 #' 
-#' @importFrom edgeR DGEList scaleOffset estimateDisp glmQLFit glmQLFTest topTags predFC
+#' @importFrom edgeR DGEList scaleOffset estimateDisp glmQLFit glmQLFTest
+#'   topTags predFC
 #' @importFrom SummarizedExperiment colData assay assayNames
 #' 
-calculateRelativeFC <- function(se, design, coef, selAssay = "counts", pseudocount = 1) {
+calculateRelativeFC <- function(se, design, coef, WTrow, selAssay = "counts", 
+                                pseudocount = 1) {
   if (!is(se, "SummarizedExperiment")) {
     stop("'se' must be a SummarizedExperiment object.")
   }
@@ -36,8 +38,8 @@ calculateRelativeFC <- function(se, design, coef, selAssay = "counts", pseudocou
     }
   }
   
-  if (!("WT" %in% rownames(se))) {
-    stop("'se' must have a row named 'WT'.")
+  if (!(WTrow %in% rownames(se))) {
+    stop("'se' must have a row named '", WTrow, "'.")
   }
   
   if (nrow(design) != ncol(se)) {
@@ -51,7 +53,7 @@ calculateRelativeFC <- function(se, design, coef, selAssay = "counts", pseudocou
   
   dge <- edgeR::DGEList(counts = as.matrix(SummarizedExperiment::assay(se, selAssay)),
                         samples = SummarizedExperiment::colData(se))
-  offsets <- dge$counts["WT", ]
+  offsets <- dge$counts[WTrow, ]
   dge <- edgeR::scaleOffset(dge, log(offsets))
   dge <- edgeR::estimateDisp(dge, design = design)
   fit <- edgeR::glmQLFit(dge, design = design)

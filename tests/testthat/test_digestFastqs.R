@@ -206,13 +206,13 @@ test_that("digestFastqs works as expected for trans experiments", {
   
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
-  expect_equal(res$filterSummary$f2_nNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nAvgVarQualTooLow, 7L)
-  expect_equal(res$filterSummary$f4_nTooManyNinVar, 0L)
-  expect_equal(res$filterSummary$f5_nTooManyNinUMI, 0L)
-  expect_equal(res$filterSummary$f6_nMutQualTooLow, 0L)
-  expect_equal(res$filterSummary$f7_nTooManyMutCodons, 287L + 105L)
-  expect_equal(res$filterSummary$f8_nForbiddenCodons, 6L + 2L)
+  expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
+  expect_equal(res$filterSummary$f3_nbrAvgVarQualTooLow, 7L)
+  expect_equal(res$filterSummary$f4_nbrTooManyNinVar, 0L)
+  expect_equal(res$filterSummary$f5_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f6_nbrMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f7_nbrTooManyMutCodons, 287L + 105L)
+  expect_equal(res$filterSummary$f8_nbrForbiddenCodons, 6L + 2L)
   expect_equal(res$filterSummary$nbrRetained, 279L)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
@@ -222,7 +222,7 @@ test_that("digestFastqs works as expected for trans experiments", {
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
   expect_equal(sum(res$summaryTable$nbrReads == 2), 2L)
   expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
-               sort(c("f.13.GAG", "f.26.TAG_r.8.AGG")))
+               sort(c("f.13.GAG_r.0.WT", "f.26.TAG_r.8.AGG")))
   expect_true(all(res$summaryTable$nbrReads == res$summaryTable$nbrUmis))
   
   ## Check that mutant naming worked (compare to manual matching)
@@ -291,13 +291,13 @@ test_that("digestFastqs works as expected for trans experiments, when variable s
   
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
-  expect_equal(res$filterSummary$f2_nNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nAvgVarQualTooLow, 7L)
-  expect_equal(res$filterSummary$f4_nTooManyNinVar, 0L)
-  expect_equal(res$filterSummary$f5_nTooManyNinUMI, 0L)
-  expect_equal(res$filterSummary$f6_nMutQualTooLow, 0L)
-  expect_equal(res$filterSummary$f7_nTooManyMutCodons, 287L + 105L)
-  expect_equal(res$filterSummary$f8_nForbiddenCodons, 6L + 2L)
+  expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
+  expect_equal(res$filterSummary$f3_nbrAvgVarQualTooLow, 7L)
+  expect_equal(res$filterSummary$f4_nbrTooManyNinVar, 0L)
+  expect_equal(res$filterSummary$f5_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f6_nbrMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f7_nbrTooManyMutCodons, 287L + 105L)
+  expect_equal(res$filterSummary$f8_nbrForbiddenCodons, 6L + 2L)
   expect_equal(res$filterSummary$nbrRetained, 279L)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
@@ -307,7 +307,7 @@ test_that("digestFastqs works as expected for trans experiments, when variable s
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
   expect_equal(sum(res$summaryTable$nbrReads == 2), 2L)
   expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
-               sort(c("f.13.GAG", "f.26.TAG_r.8.AGG")))
+               sort(c("f.13.GAG_r.0.WT", "f.26.TAG_r.8.AGG")))
   expect_true(all(res$summaryTable$nbrReads == res$summaryTable$nbrUmis))
   
   ## Check that mutant naming worked (compare to manual matching)
@@ -378,13 +378,13 @@ test_that("digestFastqs works as expected for trans experiments when multiple re
   
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
-  expect_equal(res$filterSummary$f2_nNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nAvgVarQualTooLow, 88L)
-  expect_equal(res$filterSummary$f4_nTooManyNinVar, 0L)
-  expect_equal(res$filterSummary$f5_nTooManyNinUMI, 0L)
-  expect_equal(res$filterSummary$f6_nMutQualTooLow, 333L)
-  expect_equal(res$filterSummary$f7_nTooManyMutCodons, 10L + 59L)
-  expect_equal(res$filterSummary$f8_nForbiddenCodons, 1L + 2L)
+  expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
+  expect_equal(res$filterSummary$f3_nbrAvgVarQualTooLow, 88L)
+  expect_equal(res$filterSummary$f4_nbrTooManyNinVar, 0L)
+  expect_equal(res$filterSummary$f5_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f6_nbrMutQualTooLow, 333L)
+  expect_equal(res$filterSummary$f7_nbrTooManyMutCodons, 10L + 59L)
+  expect_equal(res$filterSummary$f8_nbrForbiddenCodons, 1L + 2L)
   expect_equal(res$filterSummary$nbrRetained, 193L)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
@@ -462,13 +462,13 @@ test_that("digestFastqs works as expected for cis experiments", {
   
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 126L)
-  expect_equal(res$filterSummary$f2_nNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nAvgVarQualTooLow, 0L)
-  expect_equal(res$filterSummary$f4_nTooManyNinVar, 44L)
-  expect_equal(res$filterSummary$f5_nTooManyNinUMI, 0L)
-  expect_equal(res$filterSummary$f6_nMutQualTooLow, 0L)
-  expect_equal(res$filterSummary$f7_nTooManyMutCodons, 581L)
-  expect_equal(res$filterSummary$f8_nForbiddenCodons, 82L)
+  expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
+  expect_equal(res$filterSummary$f3_nbrAvgVarQualTooLow, 0L)
+  expect_equal(res$filterSummary$f4_nbrTooManyNinVar, 44L)
+  expect_equal(res$filterSummary$f5_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f6_nbrMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f7_nbrTooManyMutCodons, 581L)
+  expect_equal(res$filterSummary$f8_nbrForbiddenCodons, 82L)
   expect_equal(res$filterSummary$nbrRetained, 167)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
@@ -592,13 +592,13 @@ test_that("digestFastqs works as expected for primer experiments", {
   
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 0L)
-  expect_equal(res$filterSummary$f2_nNoPrimer, 126L)
-  expect_equal(res$filterSummary$f3_nAvgVarQualTooLow, 0L)
-  expect_equal(res$filterSummary$f4_nTooManyNinVar, 76L)
-  expect_equal(res$filterSummary$f5_nTooManyNinUMI, 0L)
-  expect_equal(res$filterSummary$f6_nMutQualTooLow, 0L)
-  expect_equal(res$filterSummary$f7_nTooManyMutCodons, 58L + 137L)
-  expect_equal(res$filterSummary$f8_nForbiddenCodons, 3L)
+  expect_equal(res$filterSummary$f2_nbrNoPrimer, 126L)
+  expect_equal(res$filterSummary$f3_nbrAvgVarQualTooLow, 0L)
+  expect_equal(res$filterSummary$f4_nbrTooManyNinVar, 76L)
+  expect_equal(res$filterSummary$f5_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f6_nbrMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f7_nbrTooManyMutCodons, 58L + 137L)
+  expect_equal(res$filterSummary$f8_nbrForbiddenCodons, 3L)
   expect_equal(res$filterSummary$nbrRetained, 600L)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
@@ -606,7 +606,10 @@ test_that("digestFastqs works as expected for primer experiments", {
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
-  # expect_equal(sum(res$summaryTable$nbrReads == 2), 5L)
-  # expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
-  #              sort(c("f.13.GAG", "f.26.TAG_r.8.AGG")))
+  expect_equal(sum(res$summaryTable$nbrReads == 2), 11L)
+  expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
+               sort(c("BACH2.0.WT_r.6.CCC", "BATF2.0.WT_r.21.TGG", "BATF2.0.WT_r.7.GGG", "CEBPB.0.WT_r.12.CTC",
+                      "CEBPD.0.WT_r.13.CCC", "CEBPD.0.WT_r.23.GAG", "CREB3L3.0.WT_r.22.GGG",
+                      "FOSL1.0.WT_r.22.CCC", "FOSL2.0.WT_r.13.GGG", "JUNB.0.WT_r.0.WT", "XBP1.0.WT_r.0.WT")))
+  expect_equal(res$summaryTable$nbrUmis, rep(1L, nrow(res$summaryTable))) ## no UMIs in this experiment
 })
