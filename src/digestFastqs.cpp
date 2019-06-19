@@ -254,8 +254,10 @@ std::set<std::string> enumerateCodonsFromIUPAC(CharacterVector forbiddenMutatedC
   return forbiddenCodons;
 }
 
-// merge forward and reverse sequences
-// (keeping the base with maximal Phred quality)
+// merge forward and reverse sequences (completely overlapping)
+// - assume both reads have identical length and overlap completely
+// - merge the reads, at each position keeping the base with maximal Phred quality
+// - store the results into varSeqForward and varIntQualForward
 bool mergeReadPair(std::string &varSeqForward, std::vector<int> &varIntQualForward,
                    std::string &varSeqReverse, std::vector<int> &varIntQualReverse) {
   // merge reads (keep base with higher quality) and store in forward read
@@ -268,6 +270,102 @@ bool mergeReadPair(std::string &varSeqForward, std::vector<int> &varIntQualForwa
 
   return true;
 }
+
+
+// merge forward and reverse sequences (partially overlapping)
+// - don't count N's as a mismatch
+// - default values for minOverlap,maxOverlap are zero, which will:
+//      set minOverlap,maxOverlap to the length of the shorter read
+// - first find optimal overlap without indels
+//      for greedy = true, pick the longest overlap with less than maxMismatch errors
+//      for greedy = false, pick the one with the highest score := number of overlap bases - number of mismatches in overlap
+// - merge the reads, at each overlap position keeping the base with maximal Phred quality
+// - store the results into varSeqForward and varIntQualForward
+// - if no valid overlap is found within the scope of minOverlap/maxOverlap/maxMismatch, do nothing
+//   (varSeqForward and varIntQualForward still correspond to the input values)
+bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQualForward,
+                          std::string &varSeqReverse, std::vector<int> &varIntQualReverse,
+                          size_t minOverlap = 0, size_t maxOverlap = 0, size_t maxMismatch = 0,
+                          bool greedy = true) {
+  // initialize overlap parameters
+  size_t lenF = varSeqForward.length(), lenR = varSeqReverse.length();
+  if (minOverlap == 0) {
+    minOverlap = lenF;
+    if (minOverlap < lenR) {
+      minOverlap = lenR;
+    }
+  } else if (minOverlap > lenF || minOverlap > lenR) {
+    return true; //  no valid overlap possible
+  }
+  if (maxOverlap == 0) {
+    maxOverlap = lenF;
+    if (maxOverlap < lenR) {
+      maxOverlap = lenR;
+    }
+  } else if (maxOverlap < minOverlap) {
+    return true; //  no valid overlap possible
+  }
+
+  // find overlap (score := number of overlap bases - number of mismatches in overlap)
+  size_t o, i, j;
+  int bestScore = 0, bestO = -1, score;
+
+  for (o = maxOverlap; o >= minOverlap; o--) {
+    // calculate score for overlap of o bases
+    score = 0;
+    for (i = lenF - o, j = 0; i < lenF; i++, j++) {
+      if (varSeqForward[i] == varSeqReverse[j] || varSeqForward[i] == 'N' || varSeqReverse[j] == 'N') {
+        score++;
+      }
+    }
+    // if valid, store overlap
+    if (score >= (int)(o - maxMismatch) && score > bestScore) {
+      bestO = o;
+      bestScore = score;
+      // if greedy, stop checking for overlaps
+      if (greedy) {
+        break;
+      }
+    }
+  }
+
+  // if a valid overlap has been found, merge reads into varSeqForward, varIntQualForward
+  if (bestO > 0) {
+    // ... grow varSeqForward, varIntQualForward
+    varSeqForward.resize(lenF + lenR - bestO);
+    varIntQualForward.resize(lenF + lenR - bestO);
+    // ... at each overlap position, keep base with higher quality) and store in forward read
+    for (i = lenF - bestO, j = 0; i < lenF; i++, j++) {
+      if (varIntQualReverse[j] > varIntQualForward[i]) {
+        varSeqForward[i] = varSeqReverse[j];
+        varIntQualForward[i] = varIntQualReverse[j];
+      }
+    }
+    // ... add non-overlapping part of varSeqReverse, varIntQualReverse
+    for (i = lenF, j = bestO; i < lenF + lenR - bestO; i++, j++) {
+      varSeqForward[i] = varSeqReverse[j];
+      varIntQualForward[i] = varIntQualReverse[j];
+    }
+  }
+  
+  return true;
+}
+
+// wrapper around mergeReadPairPartial used in unit testing
+// (needed because mregeReadPairPartial merges in-place and returns only 'true',
+//  and R passes copies of the arguments, so that the results of the merging cannot be "seen")
+// [[Rcpp::export]]
+List test_mergeReadPairPartial(std::string seqF, std::vector<int> qualF,
+                               std::string seqR, std::vector<int> qualR,
+                               size_t minOverlap = 0, size_t maxOverlap = 0, size_t maxMismatch = 0,
+                               bool greedy = true) {
+  mergeReadPairPartial(seqF, qualF, seqR, qualR,
+                       minOverlap, maxOverlap, maxMismatch, greedy);
+  List L = List::create(Named("mergedSeq") = seqF,
+                        Named("mergedQual") = qualF);
+  return L;
+}
+
 
 void removeEOL(std::string &seq) {
   if (seq.back() == '\n') {

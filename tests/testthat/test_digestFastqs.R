@@ -4,6 +4,60 @@ test_that("compareCodonPositions works", {
   expect_true(compareCodonPositions("f.2.ACT_", "f.10.TCA_", "."))
 })
 
+test_that("mergeReadPairsPartial works", {
+  ## don't count N as mismatch, pick base with higher quality
+  sF1 <- "AAAANA"; qF1 <- rep(40L, nchar(sF1))
+  sR1 <- "AACCCC"; qR1 <- rep(42L, nchar(sR1))
+  res1a <- mutscan:::test_mergeReadPairPartial(sF1, qF1, sR1, qR1, 1, 6, 1, TRUE)
+  res1b <- mutscan:::test_mergeReadPairPartial(sF1, qF1, sR1, qR1, 1, 6, 1, FALSE)
+  res1c <- mutscan:::test_mergeReadPairPartial(sF1, qR1, sR1, qF1, 2, 2, 1, TRUE)
+  res1d <- mutscan:::test_mergeReadPairPartial(sF1, qF1, sR1, qR1, 2, 2, 0, TRUE)
+  expect_is(res1a, "list")
+  expect_is(res1b, "list")
+  expect_is(res1c, "list")
+  expect_is(res1d, "list")
+  expect_identical(res1a$mergedSeq, "AAAACCCC")
+  expect_identical(res1a$mergedQual, rep(c(40L, 42L), c(2, 6)))
+  expect_identical(res1a, res1b)
+  expect_identical(res1c$mergedSeq, "AAAANACCCC")
+  expect_identical(res1d$mergedSeq, "AAAAAACCCC")
+  
+  ## no valid overlap, multiple possible overlaps with single valid overlap
+  sF2 <- "TTACACG"; qF2 <- rep(10L, nchar(sF2))
+  sR2 <- "ACACACA"; qR2 <- rep(40L, nchar(sR2))
+  res2a <- mutscan:::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, maxMismatch = 3)
+  res2b <- mutscan:::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, 1, 7, 1)
+  expect_is(res2a, "list")
+  expect_is(res2b, "list")
+  expect_identical(res2a$mergedSeq, sR2)
+  expect_identical(res2a$mergedQual, qR2)
+  expect_identical(res2b$mergedSeq, "TTACACACA")
+  expect_identical(res2b$mergedQual, rep(c(10L,40L), c(2,7)))
+  
+  ## padded reads
+  for (i in 1:10) {
+    sF <- paste(rep(c("C","A"), c(i, 6)), collapse = "")
+    qF <- rep(30L, nchar(sF))
+    sR <- paste(rep(c("A","C"), c(6, i)), collapse = "")
+    qR <- rep(30L, nchar(sR))
+    res <- mutscan:::test_mergeReadPairPartial(sF, qF, sR, qR, 6, 6, 0)
+    expect_identical(res$mergedSeq, paste(rep(c("C","A","C"), c(i, 6, i)), collapse = ""))
+  }
+
+  ## reads of unequal length
+  sR <- paste(rep("A", 6), collapse = "")
+  qR <- rep(30L, nchar(sR))
+  for (i in 1:10) {
+    sF <- paste(rep(c("C","A"), c(i, 6)), collapse = "")
+    qF <- rep(30L, nchar(sF))
+    res <- mutscan:::test_mergeReadPairPartial(sF, qF, sR, qR, 6, 6, 0)
+    expect_identical(res$mergedSeq, sF)
+    res <- mutscan:::test_mergeReadPairPartial(sR, qR, sF, qF, 6, 6, 0)
+    expect_identical(res$mergedSeq, sR)
+  }
+})
+
+
 context("digestFastqs - inputs")
 test_that("digestFastqs fails with incorrect arguments", {
   ## example "trans" fastq files 
@@ -374,7 +428,7 @@ test_that("digestFastqs works as expected for trans experiments when multiple re
     verbose = TRUE
   )
   
-  res <- do.call(digestFastqs, Ldef)
+  expect_output(res <- do.call(digestFastqs, Ldef))
   
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
