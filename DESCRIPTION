@@ -25,7 +25,9 @@ Imports:
     edgeR,
     dplyr,
     Matrix,
-    Matrix.utils
+    Matrix.utils,
+    limma,
+    tidyr
 Suggests: 
     testthat,
     knitr,

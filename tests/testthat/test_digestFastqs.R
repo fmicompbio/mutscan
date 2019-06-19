@@ -95,6 +95,8 @@ test_that("digestFastqs fails with incorrect arguments", {
   for (var in c("mergeForwardReverse", "revComplForward", "revComplReverse")) {
     L <- Ldef; L[[var]] <- "str"
     expect_error(do.call(digestFastqs, L))
+    L <- Ldef; L[[var]] <- ""
+    expect_error(do.call(digestFastqs, L))
     L <- Ldef; L[[var]] <- c(TRUE, TRUE)
     expect_error(do.call(digestFastqs, L))
     L <- Ldef; L[[var]] <- c(TRUE, FALSE)
@@ -106,11 +108,21 @@ test_that("digestFastqs fails with incorrect arguments", {
   ## Nonexistent fastqForward/fastqReverse file
   L <- Ldef; L$fastqForward <- "nonexistent.fastq.gz"
   expect_error(do.call(digestFastqs, L))
+  L <- Ldef; L$fastqForward <- ""
+  expect_error(do.call(digestFastqs, L))
+  L <- Ldef; L$fastqForward <- NULL
+  expect_error(do.call(digestFastqs, L))
   L <- Ldef; L$fastqReverse <- "nonexistent.fastq.gz"
+  expect_error(do.call(digestFastqs, L))
+  L <- Ldef; L$fastqReverse <- ""
   expect_error(do.call(digestFastqs, L))
   L <- Ldef; L$fastqForward <- c(fqt1, fqt2)
   expect_error(do.call(digestFastqs, L))
   L <- Ldef; L$fastqReverse <- c(fqt1, fqt2)
+  expect_error(do.call(digestFastqs, L))
+  
+  ## No reverse reads if mergeForwardReverse is TRUE
+  L <- Ldef; L[["fastqReverse"]] <- NULL; L[["mergeForwardReverse"]] <- TRUE
   expect_error(do.call(digestFastqs, L))
   
   ## Wrong type of numeric argument
@@ -141,6 +153,17 @@ test_that("digestFastqs fails with incorrect arguments", {
     L <- Ldef; L[[var]] <- -1
     expect_error(do.call(digestFastqs, L))
   }
+  
+  ## If sequence part lengths are given, primers can not be (and opposite)
+  for (var in c("skip", "umiLength", "constantLength")) {
+    for (di in c("Forward", "Reverse")) {
+      L <- Ldef; L[[paste0("primer", di)]] <- "ACGT"
+      expect_error(do.call(digestFastqs, L))
+      L <- Ldef; L[[paste0(var, di)]] <- -1; L[[paste0("primer", di)]] <- ""
+      expect_error(do.call(digestFastqs, L))
+    }
+  }
+  
   
   ## Invalid sequences
   for (var in c("adapterForward", "adapterReverse", "wildTypeForward",
@@ -478,6 +501,77 @@ test_that("digestFastqs works as expected for trans experiments when multiple re
   expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 14], 6L)
   expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 27], 1L)
   expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 33], 1L)
+})
+
+context("digestFastqs - only forward read given")
+test_that("digestFastqs works as expected for experiments with only forward read", {
+  fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
+  fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
+  ## default arguments
+  Ldef <- list(
+    fastqForward = fqt1, fastqReverse = NULL, 
+    mergeForwardReverse = FALSE, revComplForward = FALSE, revComplReverse = FALSE,
+    skipForward = 1, skipReverse = 1, 
+    umiLengthForward = 10, umiLengthReverse = 8, 
+    constantLengthForward = 18, constantLengthReverse = 20, 
+    variableLengthForward = 96, variableLengthReverse = 96,
+    adapterForward = "GGAAGAGCACACGTC", 
+    adapterReverse = "GGAAGAGCGTCGTGT",
+    primerForward = "",
+    primerReverse = "",
+    wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+    wildTypeReverse = "", 
+    constantForward = "AACCGGAGGAGGGAGCTG", 
+    constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
+    avePhredMinForward = 20.0, avePhredMinReverse = 30.0,
+    variableNMaxForward = 0, variableNMaxReverse = 0, 
+    umiNMax = 0,
+    nbrMutatedCodonsMaxForward = 1,
+    nbrMutatedCodonsMaxReverse = 1,
+    forbiddenMutatedCodonsForward = "NNA",
+    forbiddenMutatedCodonsReverse = "NNW",
+    mutatedPhredMinForward = 25.0, mutatedPhredMinReverse = 0.0,
+    mutNameDelimiter = ".",
+    verbose = FALSE
+  )
+  
+  res <- do.call(digestFastqs, Ldef)
+  
+  expect_equal(res$filterSummary$nbrTotal, 1000L)
+  expect_equal(res$filterSummary$f1_nbrAdapter, 297L)
+  expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
+  expect_equal(res$filterSummary$f3_nbrAvgVarQualTooLow, 0L)
+  expect_equal(res$filterSummary$f4_nbrTooManyNinVar, 0L)
+  expect_equal(res$filterSummary$f5_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f6_nbrMutQualTooLow, 418L)
+  expect_equal(res$filterSummary$f7_nbrTooManyMutCodons, 12L)
+  expect_equal(res$filterSummary$f8_nbrForbiddenCodons, 1L)
+  expect_equal(res$filterSummary$nbrRetained, 272L)
+  
+  for (nm in setdiff(names(Ldef), c("fastqReverse", "forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
+    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+  }
+  expect_equivalent(res$parameters[["fastqReverse"]], "")
+  
+  expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
+  expect_equal(sum(res$summaryTable$nbrReads == 2), 29L)
+
+  ## Check that mutant naming worked (compare to manual matching)
+  example_seq <- paste0("ACTGATACAACCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTG", 
+                        "CAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")
+  expect_equal(res$summaryTable$mutantName[res$summaryTable$sequence == example_seq], 
+               "f.4.ACC")
+  
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 14], 187L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 22], 47L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 27], 314L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 33], 469L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 37], 3868L)
+  
+  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 14], 6L)
+  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 27], 4L)
+  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 37], 1L)
+  
 })
 
 context("digestFastqs - cis")

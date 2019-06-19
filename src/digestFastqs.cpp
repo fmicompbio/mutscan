@@ -436,8 +436,11 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
   // open fastq files
   // --------------------------------------------------------------------------
   gzFile file1 = openFastq(fastqForward);
-  gzFile file2 = openFastq(fastqReverse);
-
+  gzFile file2 = NULL;
+  if (fastqReverse.compare("") != 0) {
+    file2 = openFastq(fastqReverse);
+  }
+  
   // --------------------------------------------------------------------------
   // digest reads one by one
   // --------------------------------------------------------------------------
@@ -446,6 +449,7 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
   char seq2[BUFFER_SIZE];
   char qual2[BUFFER_SIZE];
   bool done = false;
+  bool noReverse;
   int nTot = 0, nAdapter = 0, nNoPrimer = 0, nAvgVarQualTooLow = 0, nTooManyNinVar = 0, nTooManyNinUMI = 0;
   int nTooManyMutCodons = 0, nForbiddenCodons = 0, nMutQualTooLow = 0, nRetain = 0;
   unsigned int primerPosForward, primerPosReverse;
@@ -470,7 +474,9 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
     
     // read sequence pair
     done = get_next_seq(file1, seq1, qual1);
-    done = (done || get_next_seq(file2, seq2, qual2));
+    if (fastqReverse.compare("") != 0) {
+      done = (done || get_next_seq(file2, seq2, qual2));
+    }
     
     // check if end-of-file was reached
     if (done) {
@@ -490,20 +496,23 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
 
     // convert C char* to C++ string
     std::string sseq1(seq1);
-    std::string sseq2(seq2);
     std::string squal1(qual1);
-    std::string squal2(qual2);
+    std::string sseq2, squal2;
+    if (fastqReverse.compare("") != 0) {
+      sseq2 = seq2;
+      squal2 = qual2;
+    }
     
     // search for adapter sequences and filter read pairs
     if ((adapterForward.compare("") != 0 && sseq1.find(adapterForward) != std::string::npos) ||
-        (adapterReverse.compare("") != 0 && sseq2.find(adapterReverse) != std::string::npos)) {
+        (fastqReverse.compare("") != 0 && adapterReverse.compare("") != 0 && sseq2.find(adapterReverse) != std::string::npos)) {
       nAdapter++;
       continue;
     }
     
     // search for primer sequences, exclude read pairs if not both primers are found
     if ((primerForward.compare("") != 0 && sseq1.find(primerForward) == std::string::npos) ||
-        (primerReverse.compare("") != 0 && sseq2.find(primerReverse) == std::string::npos)) {
+        (fastqReverse.compare("") != 0 && primerReverse.compare("") != 0 && sseq2.find(primerReverse) == std::string::npos)) {
       nNoPrimer++;
       continue;
     }
@@ -537,45 +546,49 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
       stop("Either expected sequence lengths or a primer sequence must be provided (forward)");
     }
     // reverse
-    if (skipReverse != (-1) && umiLengthReverse != (-1) && constantLengthReverse != (-1)) {
-      // if skipReverse, umiLengthReverse, constantLengthReverse are all not -1, extract by position
-      if (variableLengthReverse != (-1)) {
-        // variable length given
-        varSeqReverse = sseq2.substr(skipReverse + umiLengthReverse + constantLengthReverse, variableLengthReverse);
-        varQualReverse = squal2.substr(skipReverse + umiLengthReverse + constantLengthReverse, variableLengthReverse);
+    if (fastqReverse.compare("") != 0) {
+      if (skipReverse != (-1) && umiLengthReverse != (-1) && constantLengthReverse != (-1)) {
+        // if skipReverse, umiLengthReverse, constantLengthReverse are all not -1, extract by position
+        if (variableLengthReverse != (-1)) {
+          // variable length given
+          varSeqReverse = sseq2.substr(skipReverse + umiLengthReverse + constantLengthReverse, variableLengthReverse);
+          varQualReverse = squal2.substr(skipReverse + umiLengthReverse + constantLengthReverse, variableLengthReverse);
+        } else {
+          // variable length not given - take the rest of the read
+          varSeqReverse = sseq2.substr(skipReverse + umiLengthReverse + constantLengthReverse, sseq2.length());
+          varQualReverse = squal2.substr(skipReverse + umiLengthReverse + constantLengthReverse, squal2.length());
+        }
+      } else if (primerReverse.compare("") != 0) {
+        // otherwise, primer sequence should be given, and will be used as a trigger
+        primerPosReverse = sseq2.find(primerReverse);
+        if (variableLengthReverse != (-1)) {
+          // variable length given
+          varSeqReverse = sseq2.substr(primerPosReverse + primerReverse.length(), variableLengthReverse);
+          varQualReverse = squal2.substr(primerPosReverse + primerReverse.length(), variableLengthReverse);
+        } else {
+          // variable length not given - take the rest of the read
+          varSeqReverse = sseq2.substr(primerPosReverse + primerReverse.length(), sseq2.length());
+          varQualReverse = squal2.substr(primerPosReverse + primerReverse.length(), squal2.length());
+        }
       } else {
-        // variable length not given - take the rest of the read
-        varSeqReverse = sseq2.substr(skipReverse + umiLengthReverse + constantLengthReverse, sseq2.length());
-        varQualReverse = squal2.substr(skipReverse + umiLengthReverse + constantLengthReverse, squal2.length());
+        stop("Either expected sequence lengths or a primer sequence must be provided (reverse)");
       }
-    } else if (primerReverse.compare("") != 0) {
-      // otherwise, primer sequence should be given, and will be used as a trigger
-      primerPosReverse = sseq2.find(primerReverse);
-      if (variableLengthReverse != (-1)) {
-        // variable length given
-        varSeqReverse = sseq2.substr(primerPosReverse + primerReverse.length(), variableLengthReverse);
-        varQualReverse = squal2.substr(primerPosReverse + primerReverse.length(), variableLengthReverse);
-      } else {
-        // variable length not given - take the rest of the read
-        varSeqReverse = sseq2.substr(primerPosReverse + primerReverse.length(), sseq2.length());
-        varQualReverse = squal2.substr(primerPosReverse + primerReverse.length(), squal2.length());
-      }
-    } else {
-      stop("Either expected sequence lengths or a primer sequence must be provided (reverse)");
     }
-
+    
     // check if the last character(s) are new line, if so remove them
     removeEOL(varSeqForward);
     removeEOL(varQualForward);
-    removeEOL(varSeqReverse);
-    removeEOL(varQualReverse);
+    if (fastqReverse.compare("") != 0) {
+      removeEOL(varSeqReverse);
+      removeEOL(varQualReverse);
+    }
     
     // check that extracted sequences and qualities are of the right length 
     // (if the read is too short, substr() will just read until the end of it)
     if ((variableLengthForward != (-1) && varSeqForward.length() != (size_t) variableLengthForward) || 
-        (variableLengthReverse != (-1) && varSeqReverse.length() != (size_t) variableLengthReverse) || 
+        (fastqReverse.compare("") != 0 && variableLengthReverse != (-1) && varSeqReverse.length() != (size_t) variableLengthReverse) || 
         (variableLengthForward != (-1) && varQualForward.length() != (size_t) variableLengthForward) || 
-        (variableLengthReverse != (-1) && varQualReverse.length() != (size_t) variableLengthReverse)) {
+        (fastqReverse.compare("") != 0 && variableLengthReverse != (-1) && varQualReverse.length() != (size_t) variableLengthReverse)) {
       stop("The read is not long enough to extract a variable sequence of the indicated length");
     }
 
@@ -587,7 +600,7 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
       reverse(begin(varSeqForward), end(varSeqForward));
       reverse(begin(varQualForward), end(varQualForward));
     }
-    if (revComplReverse) {
+    if (fastqReverse.compare("") != 0 && revComplReverse) {
       transform(
         begin(varSeqReverse), end(varSeqReverse),
         begin(varSeqReverse), complement);
@@ -597,24 +610,32 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
     
     // convert qualities to int
     std::vector<int> varIntQualForward(varSeqForward.length(), 0);
-    std::vector<int> varIntQualReverse(varSeqReverse.length(), 0);
     for (size_t i = 0; i < varSeqForward.length(); i++) {
       varIntQualForward[i] = int(varQualForward[i]) - 33;
     }
-    for (size_t i = 0; i < varSeqReverse.length(); i++) {
-      varIntQualReverse[i] = int(varQualReverse[i]) - 33;
+    
+    std::vector<int> varIntQualReverse;
+    if (fastqReverse.compare("") != 0) {
+      varIntQualReverse.resize(varSeqReverse.length()); // set number of elements
+      std::fill(varIntQualReverse.begin(), varIntQualReverse.end(), 0); // fill with zero
+      for (size_t i = 0; i < varSeqReverse.length(); i++) {
+        varIntQualReverse[i] = int(varQualReverse[i]) - 33;
+      }
     }
-
+    
     // if requested, fuse forward and reverse reads
     if (mergeForwardReverse) {
       mergeReadPair(varSeqForward, varIntQualForward,
                     varSeqReverse, varIntQualReverse);
     }
+    // if no reverse sequence was provided, hereafter it is identical to the situation 
+    // where forward and reverse reads were merged
+    noReverse = mergeForwardReverse || fastqReverse.compare("") == 0;
     
     // filter if the average quality in variable region is too low
     if (std::accumulate(varIntQualForward.begin(), varIntQualForward.end(), 0.0) <
         avePhredMinForward * varSeqForward.length() ||
-        (!mergeForwardReverse && std::accumulate(varIntQualReverse.begin(), varIntQualReverse.end(), 0.0) <
+        (!noReverse && std::accumulate(varIntQualReverse.begin(), varIntQualReverse.end(), 0.0) <
           avePhredMinReverse * varSeqReverse.length())) {
       nAvgVarQualTooLow++;
       continue;
@@ -622,15 +643,19 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
     
     // filter if there are too many N's in variable regions
     if (std::count(varSeqForward.begin(), varSeqForward.end(), 'N') > variableNMaxForward ||
-        (!mergeForwardReverse && std::count(varSeqReverse.begin(), varSeqReverse.end(), 'N') > variableNMaxReverse)) {
+        (!noReverse && std::count(varSeqReverse.begin(), varSeqReverse.end(), 'N') > variableNMaxReverse)) {
       nTooManyNinVar++;
       continue;
     }
     
     // TODO: Allow UMI in only one of the reads?
     // extract UMIs and filter if there are too many N's
-    if (umiLengthForward != (-1) && umiLengthReverse != (-1)) {
-      umiSeq = sseq1.substr(skipForward, umiLengthForward) + sseq2.substr(skipReverse, umiLengthReverse);
+    if (umiLengthForward != (-1)) {
+      if (fastqReverse.compare("") != 0 && umiLengthReverse != (-1)) {
+        umiSeq = sseq1.substr(skipForward, umiLengthForward) + sseq2.substr(skipReverse, umiLengthReverse);
+      } else {
+        umiSeq = sseq1.substr(skipForward, umiLengthForward);
+      }
       if (std::count(umiSeq.begin(), umiSeq.end(), 'N') > umiNMax) {
         nTooManyNinUMI++;
         continue;
@@ -655,7 +680,7 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
     }
     
     // if wildTypeReverse is available...
-    if (!mergeForwardReverse && std::string(wildTypeReverse[0]).compare("") != 0) {
+    if (!noReverse && std::string(wildTypeReverse[0]).compare("") != 0) {
       std::vector<std::string> refNamesReverse = wildTypeReverse.attr("names");
       int idxReverse = findClosestRefSeq(varSeqReverse, wildTypeReverse);
       std::string wtReverse = std::string(wildTypeReverse[idxReverse]);
@@ -676,12 +701,12 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
       mutantName.pop_back(); // remove '_' at the end
     } else {
       if (std::string(wildTypeForward[0]).compare("") != 0 || 
-          (!mergeForwardReverse && std::string(wildTypeReverse[0]).compare("") != 0)) {
+          (!noReverse && std::string(wildTypeReverse[0]).compare("") != 0)) {
         mutantName = "WT";
       }
     }
     
-    if (!mergeForwardReverse) { // "trans" experiment
+    if (!noReverse) { // "trans" experiment
       varSeqForward += (std::string("_") + varSeqReverse);
     }
     // ... check if mutant already exists in mutantSummary
@@ -726,7 +751,8 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
       tabulateBasesByQual(constSeqForward, constantForward, constIntQualForward,
                           nPhredCorrectForward, nPhredMismatchForward);
     }
-    if (constantReverse.compare("") != 0) {
+    
+    if (fastqReverse.compare("") != 0 && constantReverse.compare("") != 0) {
       constSeqReverse = sseq2.substr(skipReverse + umiLengthReverse, constantLengthReverse);
       constQualReverse = squal2.substr(skipReverse + umiLengthReverse, constantLengthReverse);
       
@@ -761,7 +787,9 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
 
   // clean up
   gzclose(file1);
-  gzclose(file2);
+  if (fastqReverse.compare("") != 0) {
+    gzclose(file2);
+  }
 
   // return results
   size_t dfLen = mutantSummary.size();

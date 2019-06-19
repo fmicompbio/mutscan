@@ -178,9 +178,12 @@ digestFastqs <- function(fastqForward, fastqReverse,
   ## pre-flight checks
   ## --------------------------------------------------------------------------
   ## fastq files exist
-  if (length(fastqForward) != 1 || length(fastqReverse) != 1 || 
-      !file.exists(fastqForward) || !file.exists(fastqReverse)) {
+  if (length(fastqForward) != 1 || !file.exists(fastqForward) || 
+      !is.null(fastqReverse) && (length(fastqReverse) != 1 || !file.exists(fastqReverse))) {
     stop("'fastqForward' and 'fastqReverse' must point to single, existing files");
+  }
+  if (is.null(fastqReverse)) {
+    fastqReverse <- ""
   }
   
   ## merging/rev complementing arguments are ok
@@ -188,6 +191,10 @@ digestFastqs <- function(fastqForward, fastqReverse,
       any(c(length(mergeForwardReverse), length(revComplForward), 
             length(revComplReverse)) != 1)) {
     stop("'mergeForwardReverse', 'revComplForward' and 'revComplReverse' must be logical scalars. ")
+  }
+  if (fastqReverse == "" && mergeForwardReverse) {
+    stop("Both forward and reverse FASTQ files must be given in order to merge ",
+         "forward and reverse reads")
   }
   
   ## check numeric inputs
@@ -228,8 +235,33 @@ digestFastqs <- function(fastqForward, fastqReverse,
     primerReverse <- toupper(primerReverse)
   }
   
-  ## TODO:
   ## Check that a valid combination of sequence part lengths/primers is provided
+  ## If one of skip, umiLength, constantLength is provided (not -1), the others must be given too
+  if (any(c(skipForward, umiLengthForward, constantLengthForward) != (-1)) && 
+      !all(c(skipForward, umiLengthForward, constantLengthForward) != (-1))) {
+    stop("Either none or all of 'skipForward', 'umiLengthForward' and 'constantLengthForward' ",
+         "must be specified (> -1)")
+  }
+  if (any(c(skipReverse, umiLengthReverse, constantLengthReverse) != (-1)) && 
+      !all(c(skipReverse, umiLengthReverse, constantLengthReverse) != (-1))) {
+    stop("Either none or all of 'skipReverse', 'umiLengthReverse' and 'constantLengthReverse' ",
+         "must be specified (> -1)")
+  }
+  ## Now we know that either all or none of skip, umiLength, constantLength are set
+  ## If they are set (!= -1), primers can not be given
+  if (skipForward != (-1) && primerForward != "") {
+    stop("Both sequence component lengths and primer sequence can not be set (forward)")
+  }
+  if (skipReverse != (-1) && primerReverse != "") {
+    stop("Both sequence component lengths and primer sequence can not be set (reverse)")
+  }
+  ## If they are not set, primers must be given (unless the fastq file is not given)
+  if (skipForward == (-1) && primerForward == "") {
+    stop("Either sequence component lengths or primer sequence must be set (forward)")
+  }
+  if (fastqReverse != "" && skipReverse == (-1) && primerReverse == "") {
+    stop("Either sequence component lengths or primer sequence must be set (reverse)")
+  }
   
   ## if wild type sequence is a string, make it into a vector
   if (length(wildTypeForward) == 1) {
@@ -257,18 +289,17 @@ digestFastqs <- function(fastqForward, fastqReverse,
     wildTypeReverse <- toupper(wildTypeReverse)
   }
   
-  # if (nchar(wildTypeForward) == 0) {
-  #   message("'wildTypeForward' is missing, no comparisons to ", 
-  #           "wild type sequence will be done.")
-  # }
-  
   ## wild type sequence lengths must match variable sequence lengths
-  if (any(sapply(wildTypeForward, function(w) variableLengthForward != (-1) && nchar(w) > 0 && nchar(w) != variableLengthForward))) {
+  if (any(sapply(wildTypeForward, function(w) {
+    variableLengthForward != (-1) && nchar(w) > 0 && nchar(w) != variableLengthForward
+  }))) {
     stop("The lengths of the elements in 'wildTypeForward' (", paste(sapply(wildTypeForward, nchar), collapse = ","), 
          ") do not all correspond to the given 'variableLengthForward' (", 
          variableLengthForward, ")")
   }
-  if (any(sapply(wildTypeReverse, function(w) variableLengthReverse != (-1) && nchar(w) > 0 && nchar(w) != variableLengthReverse))) {
+  if (any(sapply(wildTypeReverse, function(w) {
+    variableLengthReverse != (-1) && nchar(w) > 0 && nchar(w) != variableLengthReverse
+  }))) {
     stop("The lengths of the elements in 'wildTypeReverse' (", paste(sapply(wildTypeReverse, nchar), collapse = ","), 
          ") do not all correspond to the given 'variableLengthReverse' (", 
          variableLengthReverse, ")")
@@ -276,7 +307,7 @@ digestFastqs <- function(fastqForward, fastqReverse,
   
   ## cis experiment - should not have wildTypeReverse
   if (mergeForwardReverse && any(sapply(wildTypeReverse, nchar) > 0)) {
-    warning("Ignoring 'wildTypeReverse' for CIS experiment")
+    warning("Ignoring 'wildTypeReverse' when forward and reverse reads are merged")
     wildTypeReverse <- c(r = "")
   }
   
@@ -318,7 +349,8 @@ digestFastqs <- function(fastqForward, fastqReverse,
   }
   
   ## mutNameDelimiter must be a single character, and can not appear in any of the WT sequence names
-  if (!is.character(mutNameDelimiter) || length(mutNameDelimiter) != 1 || nchar(mutNameDelimiter) != 1 || mutNameDelimiter == "_") {
+  if (!is.character(mutNameDelimiter) || length(mutNameDelimiter) != 1 || 
+      nchar(mutNameDelimiter) != 1 || mutNameDelimiter == "_") {
     stop("'mutNameDelimiter' must be a single-letter character scalar, not equal to '_'")
   }
   if (any(grepl(mutNameDelimiter, c(names(wildTypeForward), names(wildTypeReverse)), fixed = TRUE))) {
@@ -327,16 +359,6 @@ digestFastqs <- function(fastqForward, fastqReverse,
   
   if (!is.logical(verbose) || length(verbose) != 1) {
     stop("'verbose' must be a logical scalar.")
-  }
-  
-  ## If one of umiLength, constantLength, skip is not -1, all of them must be not -1
-  if (!(umiLengthForward != (-1) && constantLengthForward != (-1) && skipForward != (-1)) && 
-      !(umiLengthForward == (-1) && constantLengthForward == (-1) && skipForward == (-1))) {
-    stop("Either all or none of 'skipForward', 'umiLengthForward' and 'constantLengthForward' should be -1.")
-  }
-  if (!(umiLengthReverse != (-1) && constantLengthReverse != (-1) && skipReverse != (-1)) && 
-      !(umiLengthReverse == (-1) && constantLengthReverse == (-1) && skipReverse == (-1))) {
-    stop("Either all or none of 'skipReverse', 'umiLengthReverse' and 'constantLengthReverse' should be -1.")
   }
   
   ## If mergeForwardReverse is TRUE, forward and reverse sequence lengths must be set, and identical

@@ -5,6 +5,10 @@ compareCodonPositions <- function(a, b, mutNameDelimiter) {
     .Call(`_mutscan_compareCodonPositions`, a, b, mutNameDelimiter)
 }
 
+test_mergeReadPairPartial <- function(seqF, qualF, seqR, qualR, minOverlap = 0L, maxOverlap = 0L, maxMismatch = 0L, greedy = TRUE) {
+    .Call(`_mutscan_test_mergeReadPairPartial`, seqF, qualF, seqR, qualR, minOverlap, maxOverlap, maxMismatch, greedy)
+}
+
 digestFastqsCpp <- function(fastqForward, fastqReverse, mergeForwardReverse, revComplForward, revComplReverse, skipForward, skipReverse, umiLengthForward, umiLengthReverse, constantLengthForward, constantLengthReverse, variableLengthForward, variableLengthReverse, adapterForward, adapterReverse, primerForward, primerReverse, wildTypeForward, wildTypeReverse, constantForward, constantReverse, avePhredMinForward = 20.0, avePhredMinReverse = 20.0, variableNMaxForward = 0L, variableNMaxReverse = 0L, umiNMax = 0L, nbrMutatedCodonsMaxForward = 1L, nbrMutatedCodonsMaxReverse = 1L, forbiddenMutatedCodonsForward = "NNW", forbiddenMutatedCodonsReverse = "NNW", mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0, mutNameDelimiter = ".", verbose = FALSE) {
     .Call(`_mutscan_digestFastqsCpp`, fastqForward, fastqReverse, mergeForwardReverse, revComplForward, revComplReverse, skipForward, skipReverse, umiLengthForward, umiLengthReverse, constantLengthForward, constantLengthReverse, variableLengthForward, variableLengthReverse, adapterForward, adapterReverse, primerForward, primerReverse, wildTypeForward, wildTypeReverse, constantForward, constantReverse, avePhredMinForward, avePhredMinReverse, variableNMaxForward, variableNMaxReverse, umiNMax, nbrMutatedCodonsMaxForward, nbrMutatedCodonsMaxReverse, forbiddenMutatedCodonsForward, forbiddenMutatedCodonsReverse, mutatedPhredMinForward, mutatedPhredMinReverse, mutNameDelimiter, verbose)
 }
