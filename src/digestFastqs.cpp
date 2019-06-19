@@ -283,6 +283,7 @@ bool mergeReadPair(std::string &varSeqForward, std::vector<int> &varIntQualForwa
 // - store the results into varSeqForward and varIntQualForward
 // - if no valid overlap is found within the scope of minOverlap/maxOverlap/maxMismatch, do nothing
 //   (varSeqForward and varIntQualForward still correspond to the input values)
+// - return true if a valid merge was found and performed, and return false otherwise
 bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQualForward,
                           std::string &varSeqReverse, std::vector<int> &varIntQualReverse,
                           size_t minOverlap = 0, size_t maxOverlap = 0, size_t maxMismatch = 0,
@@ -291,7 +292,7 @@ bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQu
   size_t lenF = varSeqForward.length(), lenR = varSeqReverse.length();
   if (minOverlap == 0) {
     minOverlap = lenF;
-    if (minOverlap < lenR) {
+    if (minOverlap > lenR) {
       minOverlap = lenR;
     }
   } else if (minOverlap > lenF || minOverlap > lenR) {
@@ -299,7 +300,7 @@ bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQu
   }
   if (maxOverlap == 0) {
     maxOverlap = lenF;
-    if (maxOverlap < lenR) {
+    if (maxOverlap > lenR) {
       maxOverlap = lenR;
     }
   } else if (maxOverlap < minOverlap) {
@@ -346,9 +347,12 @@ bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQu
       varSeqForward[i] = varSeqReverse[j];
       varIntQualForward[i] = varIntQualReverse[j];
     }
-  }
+    
+    return true;
   
-  return true;
+  } else {
+    return false;
+  }
 }
 
 // wrapper around mergeReadPairPartial used in unit testing
