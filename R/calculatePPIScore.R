@@ -14,8 +14,14 @@
 #'   the comparison, e.g. \code{c("cond", "output", "input")} will look in the
 #'   \code{"cond"} column and calculate PPI for the ratio of \code{"output"} over
 #'   \code{"input"} counts.
+#' @param WTrows Vector of row names that will be used as the reference when
+#'   calculating PPI scores. If more than one value is provided, the average of
+#'   the corresponding PPI scores is used as a reference. If NULL, no division
+#'   by WT scores will be done.
 #'   
 #' @return A numeric vector with PPI scores.
+#' 
+#' @author Michael Stadler and Charlotte Soneson
 #' 
 #' @references "The genetic landscape of a physical interaction."
 #'   Diss G and Lehner B. Elife. 2018;7:e32472. doi: 10.7554/eLife.32472.
@@ -25,7 +31,7 @@
 #' @importFrom Matrix colSums
 #' 
 #' @export
-calculatePPIScore <- function(se, pairingCol, ODCols, comparison, WTrow) {
+calculatePPIScore <- function(se, pairingCol, ODCols, comparison, WTrows) {
   ## --------------------------------------------------------------------------
   ## pre-flight checks
   ## --------------------------------------------------------------------------
@@ -66,9 +72,9 @@ calculatePPIScore <- function(se, pairingCol, ODCols, comparison, WTrow) {
          "defined by 'pairingCol' and 'comparison'")
   }
   
-  ## WTrow exists in the SE
-  if (!(WTrow %in% rownames(se))) {
-    stop("There is no row named '", WTrow, "' in the SummarizedExperiment object.")
+  ## WTrows exist in the SE
+  if (!all(WTrows %in% rownames(se))) {
+    stop("Not all rows '", paste(WTrows, collapse = ", "), "' are present in the SummarizedExperiment object.")
   }
   
   ## --------------------------------------------------------------------------
@@ -103,7 +109,11 @@ calculatePPIScore <- function(se, pairingCol, ODCols, comparison, WTrow) {
   ## --------------------------------------------------------------------------
   ## calculate PPI = n_i / n_WT
   ## --------------------------------------------------------------------------
-  nWT <- n[WTrow, ]
+  if (is.null(WTrows)) {
+    nWT <- rep(1, ncol(n))
+  } else {
+    nWT <- colMeans(n[WTrows, , drop = FALSE])
+  }
   PPI <- sweep(n, MARGIN = 2, STATS = nWT, FUN = "/")
   return(PPI)
 }

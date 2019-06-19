@@ -4,8 +4,8 @@
 \alias{calculateRelativeFC}
 \title{Calculate logFCs relative to WT using edgeR}
 \usage{
-calculateRelativeFC(se, design, coef, WTrow, selAssay = "counts",
-  pseudocount = 1)
+calculateRelativeFC(se, design, coef, WTrows, selAssay = "counts",
+  pseudocount = 1, method = "edgeR")
 }
 \arguments{
 \item{se}{SummarizedExperiment object.}
@@ -15,9 +15,20 @@ same order as the columns in \code{se}.}
 
 \item{coef}{Coefficient(s) to test with edgeR.}
 
+\item{WTrows}{Vector of row names that will be used as the reference when
+calculating logFCs and statistics. If more than one value is provided, the
+sum of the corresponding counts is used to generate offsets. If NULL,
+offsets will be defined as the effective library sizes (using TMM
+normalization factors).}
+
 \item{selAssay}{Assay to select from \code{se} for the analysis.}
 
 \item{pseudocount}{Pseudocount to add when calculating log-fold changes.}
+
+\item{method}{Either 'edgeR' or 'limma'. If set to 'limma', voom is used to
+transform the counts and estimate observation weights before applying
+limma. In this case, the results also contain the standard errors of the
+logFCs.}
 }
 \description{
 Calculate logFCs and associated p-values for a given comparison, using the

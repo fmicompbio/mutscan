@@ -35,7 +35,8 @@
 #' @importFrom BiocGenerics paste
 #' @importFrom S4Vectors DataFrame
 #' @importFrom methods is new
-#' @importFrom dplyr bind_rows distinct left_join %>%
+#' @importFrom dplyr bind_rows distinct left_join %>% mutate
+#' @importFrom tidyr unite
 #' 
 summarizeExperiment <- function(x, coldata, countType = "umis") {
   ## --------------------------------------------------------------------------

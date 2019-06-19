@@ -4,7 +4,7 @@
 \alias{calculatePPIScore}
 \title{Calculate protein-protein interaction scores (PPI).}
 \usage{
-calculatePPIScore(se, pairingCol, ODCols, comparison, WTrow)
+calculatePPIScore(se, pairingCol, ODCols, comparison, WTrows)
 }
 \arguments{
 \item{se}{SummarizedExperiment object as returned by \code{\link{digestFastqs}}.}
@@ -21,6 +21,11 @@ with experimental conditions. \code{numerator} and \code{denominator} define
 the comparison, e.g. \code{c("cond", "output", "input")} will look in the
 \code{"cond"} column and calculate PPI for the ratio of \code{"output"} over
 \code{"input"} counts.}
+
+\item{WTrows}{Vector of row names that will be used as the reference when
+calculating PPI scores. If more than one value is provided, the average of
+the corresponding PPI scores is used as a reference. If NULL, no division
+by WT scores will be done.}
 }
 \value{
 A numeric vector with PPI scores.
@@ -32,4 +37,7 @@ interaction scores as described in Diss et al. 2018.
 \references{
 "The genetic landscape of a physical interaction."
   Diss G and Lehner B. Elife. 2018;7:e32472. doi: 10.7554/eLife.32472.
+}
+\author{
+Michael Stadler and Charlotte Soneson
 }

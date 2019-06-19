@@ -77,7 +77,7 @@ test_that("calculatePPIScore fails with incorrect arguments", {
 
 test_that("calculatePPIScore works as expected", {
   ppi <- calculatePPIScore(se = secoll, pairingCol = "Replicate", ODCols = "OD",
-                           comparison = c("Condition", "output", "input"), WTrow = "f.0.NA")
+                           comparison = c("Condition", "output", "input"), WTrows = "f.0.NA")
   
   expect_equal(nrow(ppi), nrow(secoll))
   expect_equal(rownames(ppi), rownames(secoll))
