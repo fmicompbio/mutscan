@@ -254,24 +254,6 @@ std::set<std::string> enumerateCodonsFromIUPAC(CharacterVector forbiddenMutatedC
   return forbiddenCodons;
 }
 
-// merge forward and reverse sequences (completely overlapping)
-// - assume both reads have identical length and overlap completely
-// - merge the reads, at each position keeping the base with maximal Phred quality
-// - store the results into varSeqForward and varIntQualForward
-bool mergeReadPair(std::string &varSeqForward, std::vector<int> &varIntQualForward,
-                   std::string &varSeqReverse, std::vector<int> &varIntQualReverse) {
-  // merge reads (keep base with higher quality) and store in forward read
-  for (size_t i = 0; i < varSeqForward.length(); i++) {
-    if (varIntQualReverse[i] > varIntQualForward[i]) {
-      varSeqForward[i] = varSeqReverse[i];
-      varIntQualForward[i] = varIntQualReverse[i];
-    }
-  }
-
-  return true;
-}
-
-
 // merge forward and reverse sequences (partially overlapping)
 // - don't count N's as a mismatch
 // - default values for minOverlap,maxOverlap are zero, which will:
@@ -385,6 +367,9 @@ void removeEOL(std::string &seq) {
 }
 
 // Find closest wild type sequence to a variable sequence
+// Here, 'closest' is defined as the sequence with the largest number of matching bases
+// Assumes that the start of varSeq coincides with the start of each wtSeq
+// [[Rcpp::export]]
 int findClosestRefSeq(std::string varSeq, Rcpp::StringVector wtSeq) {
   // return index of most similar sequence
   int idx = 0;

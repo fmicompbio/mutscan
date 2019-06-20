@@ -4,6 +4,13 @@ test_that("compareCodonPositions works", {
   expect_true(compareCodonPositions("f.2.ACT_", "f.10.TCA_", "."))
 })
 
+test_that("findClosestRefSeq works", {
+  expect_equal(findClosestRefSeq(varSeq = "ACGT", wtSeq = c("ATTT", "ACTT")), 1L)
+  expect_equal(findClosestRefSeq(varSeq = "ACGT", wtSeq = c("ACGT", "ACTT")), 0L)
+  expect_equal(findClosestRefSeq(varSeq = "ACGT", wtSeq = c("ACG", "ACGT")), 1L)
+  expect_equal(findClosestRefSeq(varSeq = "ACGT", wtSeq = c("AACGT", "ACCTA")), 1L)
+})
+
 test_that("mergeReadPairsPartial works", {
   ## don't count N as mismatch, pick base with higher quality
   sF1 <- "AAAANA"; qF1 <- rep(40L, nchar(sF1))
