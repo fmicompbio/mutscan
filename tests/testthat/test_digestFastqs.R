@@ -8,9 +8,9 @@ test_that("mergeReadPairsPartial works", {
   ## don't count N as mismatch, pick base with higher quality
   sF1 <- "AAAANA"; qF1 <- rep(40L, nchar(sF1))
   sR1 <- "AACCCC"; qR1 <- rep(42L, nchar(sR1))
-  res1a <- mutscan:::test_mergeReadPairPartial(sF1, qF1, sR1, qR1, 1, 6, 1, TRUE)
-  res1b <- mutscan:::test_mergeReadPairPartial(sF1, qF1, sR1, qR1, 1, 6, 1, FALSE)
-  res1c <- mutscan:::test_mergeReadPairPartial(sF1, qR1, sR1, qF1, 2, 2, 1, TRUE)
+  res1a <- mutscan:::test_mergeReadPairPartial(sF1, qF1, sR1, qR1, 1, 6, 1/4, TRUE)
+  res1b <- mutscan:::test_mergeReadPairPartial(sF1, qF1, sR1, qR1, 1, 6, 1/4, FALSE)
+  res1c <- mutscan:::test_mergeReadPairPartial(sF1, qR1, sR1, qF1, 2, 2, 1/4, TRUE)
   res1d <- mutscan:::test_mergeReadPairPartial(sF1, qF1, sR1, qR1, 2, 2, 0, TRUE)
   expect_is(res1a, "list")
   expect_is(res1b, "list")
@@ -25,8 +25,8 @@ test_that("mergeReadPairsPartial works", {
   ## no valid overlap, multiple possible overlaps with single valid overlap
   sF2 <- "TTACACG"; qF2 <- rep(10L, nchar(sF2))
   sR2 <- "ACACACA"; qR2 <- rep(40L, nchar(sR2))
-  res2a <- mutscan:::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, maxMismatch = 3)
-  res2b <- mutscan:::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, 1, 7, 1)
+  res2a <- mutscan:::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, maxFracMismatchOverlap = 3/7, TRUE)
+  res2b <- mutscan:::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, 1, 7, 1/5, TRUE)
   expect_is(res2a, "list")
   expect_is(res2b, "list")
   expect_identical(res2a$mergedSeq, sR2)
@@ -66,7 +66,9 @@ test_that("digestFastqs fails with incorrect arguments", {
   ## default arguments
   Ldef <- list(
     fastqForward = fqt1, fastqReverse = fqt2, 
-    mergeForwardReverse = FALSE, revComplForward = FALSE, revComplReverse = FALSE,
+    mergeForwardReverse = FALSE, 
+    minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
+    revComplForward = FALSE, revComplReverse = FALSE,
     skipForward = 1, skipReverse = 1, 
     umiLengthForward = 10, umiLengthReverse = 8, 
     constantLengthForward = 18, constantLengthReverse = 20, 
@@ -254,7 +256,9 @@ test_that("digestFastqs works as expected for trans experiments", {
   ## default arguments
   Ldef <- list(
     fastqForward = fqt1, fastqReverse = fqt2, 
-    mergeForwardReverse = FALSE, revComplForward = FALSE, revComplReverse = FALSE,
+    mergeForwardReverse = FALSE, 
+    minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
+    revComplForward = FALSE, revComplReverse = FALSE,
     skipForward = 1, skipReverse = 1, 
     umiLengthForward = 10, umiLengthReverse = 8, 
     constantLengthForward = 18, constantLengthReverse = 20, 
@@ -284,12 +288,13 @@ test_that("digestFastqs works as expected for trans experiments", {
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nbrAvgVarQualTooLow, 7L)
-  expect_equal(res$filterSummary$f4_nbrTooManyNinVar, 0L)
-  expect_equal(res$filterSummary$f5_nbrTooManyNinUMI, 0L)
-  expect_equal(res$filterSummary$f6_nbrMutQualTooLow, 0L)
-  expect_equal(res$filterSummary$f7_nbrTooManyMutCodons, 287L + 105L)
-  expect_equal(res$filterSummary$f8_nbrForbiddenCodons, 6L + 2L)
+  expect_equal(res$filterSummary$f3_nbrNoValidOverlap, 0L)
+  expect_equal(res$filterSummary$f4_nbrAvgVarQualTooLow, 7L)
+  expect_equal(res$filterSummary$f5_nbrTooManyNinVar, 0L)
+  expect_equal(res$filterSummary$f6_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f7_nbrMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f8_nbrTooManyMutCodons, 287L + 105L)
+  expect_equal(res$filterSummary$f9_nbrForbiddenCodons, 6L + 2L)
   expect_equal(res$filterSummary$nbrRetained, 279L)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
@@ -339,7 +344,9 @@ test_that("digestFastqs works as expected for trans experiments, when variable s
   ## default arguments
   Ldef <- list(
     fastqForward = fqt1, fastqReverse = fqt2, 
-    mergeForwardReverse = FALSE, revComplForward = FALSE, revComplReverse = FALSE,
+    mergeForwardReverse = FALSE, 
+    minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
+    revComplForward = FALSE, revComplReverse = FALSE,
     skipForward = 1, skipReverse = 1, 
     umiLengthForward = 10, umiLengthReverse = 8, 
     constantLengthForward = 18, constantLengthReverse = 20, 
@@ -369,12 +376,13 @@ test_that("digestFastqs works as expected for trans experiments, when variable s
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nbrAvgVarQualTooLow, 7L)
-  expect_equal(res$filterSummary$f4_nbrTooManyNinVar, 0L)
-  expect_equal(res$filterSummary$f5_nbrTooManyNinUMI, 0L)
-  expect_equal(res$filterSummary$f6_nbrMutQualTooLow, 0L)
-  expect_equal(res$filterSummary$f7_nbrTooManyMutCodons, 287L + 105L)
-  expect_equal(res$filterSummary$f8_nbrForbiddenCodons, 6L + 2L)
+  expect_equal(res$filterSummary$f3_nbrNoValidOverlap, 0L)
+  expect_equal(res$filterSummary$f4_nbrAvgVarQualTooLow, 7L)
+  expect_equal(res$filterSummary$f5_nbrTooManyNinVar, 0L)
+  expect_equal(res$filterSummary$f6_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f7_nbrMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f8_nbrTooManyMutCodons, 287L + 105L)
+  expect_equal(res$filterSummary$f9_nbrForbiddenCodons, 6L + 2L)
   expect_equal(res$filterSummary$nbrRetained, 279L)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
@@ -424,7 +432,9 @@ test_that("digestFastqs works as expected for trans experiments when multiple re
   ## default arguments
   Ldef <- list(
     fastqForward = fqt1, fastqReverse = fqt2, 
-    mergeForwardReverse = FALSE, revComplForward = FALSE, revComplReverse = FALSE,
+    mergeForwardReverse = FALSE, 
+    minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
+    revComplForward = FALSE, revComplReverse = FALSE,
     skipForward = 1, skipReverse = 1, 
     umiLengthForward = 10, umiLengthReverse = 8, 
     constantLengthForward = 18, constantLengthReverse = 20, 
@@ -456,12 +466,13 @@ test_that("digestFastqs works as expected for trans experiments when multiple re
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nbrAvgVarQualTooLow, 88L)
-  expect_equal(res$filterSummary$f4_nbrTooManyNinVar, 0L)
-  expect_equal(res$filterSummary$f5_nbrTooManyNinUMI, 0L)
-  expect_equal(res$filterSummary$f6_nbrMutQualTooLow, 333L)
-  expect_equal(res$filterSummary$f7_nbrTooManyMutCodons, 10L + 59L)
-  expect_equal(res$filterSummary$f8_nbrForbiddenCodons, 1L + 2L)
+  expect_equal(res$filterSummary$f3_nbrNoValidOverlap, 0L)
+  expect_equal(res$filterSummary$f4_nbrAvgVarQualTooLow, 88L)
+  expect_equal(res$filterSummary$f5_nbrTooManyNinVar, 0L)
+  expect_equal(res$filterSummary$f6_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f7_nbrMutQualTooLow, 333L)
+  expect_equal(res$filterSummary$f8_nbrTooManyMutCodons, 10L + 59L)
+  expect_equal(res$filterSummary$f9_nbrForbiddenCodons, 1L + 2L)
   expect_equal(res$filterSummary$nbrRetained, 193L)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
@@ -510,7 +521,9 @@ test_that("digestFastqs works as expected for experiments with only forward read
   ## default arguments
   Ldef <- list(
     fastqForward = fqt1, fastqReverse = NULL, 
-    mergeForwardReverse = FALSE, revComplForward = FALSE, revComplReverse = FALSE,
+    mergeForwardReverse = FALSE, 
+    minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
+    revComplForward = FALSE, revComplReverse = FALSE,
     skipForward = 1, skipReverse = 1, 
     umiLengthForward = 10, umiLengthReverse = 8, 
     constantLengthForward = 18, constantLengthReverse = 20, 
@@ -540,12 +553,13 @@ test_that("digestFastqs works as expected for experiments with only forward read
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 297L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nbrAvgVarQualTooLow, 0L)
-  expect_equal(res$filterSummary$f4_nbrTooManyNinVar, 0L)
-  expect_equal(res$filterSummary$f5_nbrTooManyNinUMI, 0L)
-  expect_equal(res$filterSummary$f6_nbrMutQualTooLow, 418L)
-  expect_equal(res$filterSummary$f7_nbrTooManyMutCodons, 12L)
-  expect_equal(res$filterSummary$f8_nbrForbiddenCodons, 1L)
+  expect_equal(res$filterSummary$f3_nbrNoValidOverlap, 0L)
+  expect_equal(res$filterSummary$f4_nbrAvgVarQualTooLow, 0L)
+  expect_equal(res$filterSummary$f5_nbrTooManyNinVar, 0L)
+  expect_equal(res$filterSummary$f6_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f7_nbrMutQualTooLow, 418L)
+  expect_equal(res$filterSummary$f8_nbrTooManyMutCodons, 12L)
+  expect_equal(res$filterSummary$f9_nbrForbiddenCodons, 1L)
   expect_equal(res$filterSummary$nbrRetained, 272L)
   
   for (nm in setdiff(names(Ldef), c("fastqReverse", "forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
@@ -581,7 +595,9 @@ test_that("digestFastqs works as expected for cis experiments", {
   ## default arguments
   Ldef <- list(
     fastqForward = fqc1, fastqReverse = fqc2, 
-    mergeForwardReverse = TRUE, revComplForward = FALSE, revComplReverse = TRUE,
+    mergeForwardReverse = TRUE, 
+    minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 1, greedyOverlap = TRUE, 
+    revComplForward = FALSE, revComplReverse = TRUE,
     skipForward = 1, skipReverse = 1, 
     umiLengthForward = 10, umiLengthReverse = 7, 
     constantLengthForward = 18, constantLengthReverse = 17, 
@@ -611,12 +627,13 @@ test_that("digestFastqs works as expected for cis experiments", {
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 126L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nbrAvgVarQualTooLow, 0L)
-  expect_equal(res$filterSummary$f4_nbrTooManyNinVar, 44L)
-  expect_equal(res$filterSummary$f5_nbrTooManyNinUMI, 0L)
-  expect_equal(res$filterSummary$f6_nbrMutQualTooLow, 0L)
-  expect_equal(res$filterSummary$f7_nbrTooManyMutCodons, 581L)
-  expect_equal(res$filterSummary$f8_nbrForbiddenCodons, 82L)
+  expect_equal(res$filterSummary$f3_nbrNoValidOverlap, 0L)
+  expect_equal(res$filterSummary$f4_nbrAvgVarQualTooLow, 0L)
+  expect_equal(res$filterSummary$f5_nbrTooManyNinVar, 44L)
+  expect_equal(res$filterSummary$f6_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f7_nbrMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f8_nbrTooManyMutCodons, 581L)
+  expect_equal(res$filterSummary$f9_nbrForbiddenCodons, 82L)
   expect_equal(res$filterSummary$nbrRetained, 167)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
@@ -712,7 +729,9 @@ test_that("digestFastqs works as expected for primer experiments", {
   ## default arguments
   Ldef <- list(
     fastqForward = fqt1, fastqReverse = fqt2, 
-    mergeForwardReverse = FALSE, revComplForward = FALSE, revComplReverse = FALSE,
+    mergeForwardReverse = FALSE, 
+    minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
+    revComplForward = FALSE, revComplReverse = FALSE,
     skipForward = -1, skipReverse = -1, 
     umiLengthForward = -1, umiLengthReverse = -1, 
     constantLengthForward = -1, constantLengthReverse = -1, 
@@ -741,12 +760,13 @@ test_that("digestFastqs works as expected for primer experiments", {
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 0L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 126L)
-  expect_equal(res$filterSummary$f3_nbrAvgVarQualTooLow, 0L)
-  expect_equal(res$filterSummary$f4_nbrTooManyNinVar, 76L)
-  expect_equal(res$filterSummary$f5_nbrTooManyNinUMI, 0L)
-  expect_equal(res$filterSummary$f6_nbrMutQualTooLow, 0L)
-  expect_equal(res$filterSummary$f7_nbrTooManyMutCodons, 58L + 137L)
-  expect_equal(res$filterSummary$f8_nbrForbiddenCodons, 3L)
+  expect_equal(res$filterSummary$f3_nbrNoValidOverlap, 0L)
+  expect_equal(res$filterSummary$f4_nbrAvgVarQualTooLow, 0L)
+  expect_equal(res$filterSummary$f5_nbrTooManyNinVar, 76L)
+  expect_equal(res$filterSummary$f6_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f7_nbrMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f8_nbrTooManyMutCodons, 58L + 137L)
+  expect_equal(res$filterSummary$f9_nbrForbiddenCodons, 3L)
   expect_equal(res$filterSummary$nbrRetained, 600L)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {

@@ -1,7 +1,9 @@
 context("PPI score calculations")
 
 Ldef <- list(
-  mergeForwardReverse = TRUE, revComplForward = FALSE, revComplReverse = TRUE,
+  mergeForwardReverse = TRUE, 
+  minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
+  revComplForward = FALSE, revComplReverse = TRUE,
   skipForward = 1, skipReverse = 1, 
   umiLengthForward = 10, umiLengthReverse = 7, 
   constantLengthForward = 18, constantLengthReverse = 17, 

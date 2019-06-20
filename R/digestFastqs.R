@@ -76,6 +76,17 @@ checkNumericInput <- function(..., nonnegative) {
 #'   corresponding to forward and reverse reads, respectively.
 #' @param mergeForwardReverse logical(1), whether to fuse the forward and
 #'   reverse variable sequences.
+#' @param minOverlap,maxOverlap numeric(1), the minimal and maximal allowed
+#'   overlap between the forward and reverse reads when merging. Only used if
+#'   \code{mergeForwardReverse} is \code{TRUE}. If set to 0, only overlaps
+#'   covering the full length of the shortest of the two reads will be
+#'   considered.
+#' @param maxFracMismatchOverlap numeric(1), maximal mismatch rate in the
+#'   overlap. Only used if \code{mergeForwardReverse} is \code{TRUE}.
+#' @param greedyOverlap logical(1). If \code{TRUE}, the first overlap satisfying
+#'   \code{minOverlap}, \code{maxOverlap} and \code{maxFracMismatchOverlap} will
+#'   be retained. If \code{FALSE}, all valid overlaps will be scored and the one
+#'   with the highest score (largest number of matches) will be retained.
 #' @param revComplForward,revComplReverse logical(1), whether to reverse
 #'   complement the forward/reverse reads, respectively.
 #' @param skipForward,skipReverse numeric(1), the number of bases to skip in the
@@ -152,7 +163,9 @@ checkNumericInput <- function(..., nonnegative) {
 #'
 #' @export
 digestFastqs <- function(fastqForward, fastqReverse,
-                         mergeForwardReverse, revComplForward, revComplReverse,
+                         mergeForwardReverse, minOverlap, maxOverlap, 
+                         maxFracMismatchOverlap, greedyOverlap = TRUE,
+                         revComplForward, revComplReverse,
                          skipForward, skipReverse,
                          umiLengthForward, umiLengthReverse,
                          constantLengthForward,
@@ -372,6 +385,10 @@ digestFastqs <- function(fastqForward, fastqReverse,
   res <- digestFastqsCpp(fastqForward = fastqForward, 
                          fastqReverse = fastqReverse,
                          mergeForwardReverse = mergeForwardReverse,
+                         minOverlap = minOverlap, 
+                         maxOverlap = maxOverlap, 
+                         maxFracMismatchOverlap = maxFracMismatchOverlap,
+                         greedyOverlap = greedyOverlap,
                          revComplForward = revComplForward,
                          revComplReverse = revComplReverse,
                          skipForward = skipForward, 

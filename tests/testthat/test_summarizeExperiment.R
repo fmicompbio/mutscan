@@ -1,7 +1,9 @@
 context("summarizeExperiment")
 
 Ldef <- list(
-  mergeForwardReverse = FALSE, revComplForward = FALSE, revComplReverse = FALSE,
+  mergeForwardReverse = FALSE, 
+  minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
+  revComplForward = FALSE, revComplReverse = FALSE,
   skipForward = 1, skipReverse = 1, 
   umiLengthForward = 10, umiLengthReverse = 8, 
   constantLengthForward = 18, constantLengthReverse = 20, 

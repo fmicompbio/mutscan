@@ -283,10 +283,11 @@ bool mergeReadPair(std::string &varSeqForward, std::vector<int> &varIntQualForwa
 // - store the results into varSeqForward and varIntQualForward
 // - if no valid overlap is found within the scope of minOverlap/maxOverlap/maxMismatch, do nothing
 //   (varSeqForward and varIntQualForward still correspond to the input values)
-// - return true if a valid merge was found and performed, and return false otherwise
+// - return false if a valid merge was found and performed, and return true otherwise
 bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQualForward,
                           std::string &varSeqReverse, std::vector<int> &varIntQualReverse,
-                          size_t minOverlap = 0, size_t maxOverlap = 0, size_t maxMismatch = 0,
+                          size_t minOverlap = 0, size_t maxOverlap = 0, 
+                          double maxFracMismatchOverlap = 0,
                           bool greedy = true) {
   // initialize overlap parameters
   size_t lenF = varSeqForward.length(), lenR = varSeqReverse.length();
@@ -310,6 +311,7 @@ bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQu
   // find overlap (score := number of overlap bases - number of mismatches in overlap)
   size_t o, i, j;
   int bestScore = 0, bestO = -1, score;
+  double fracmm;
 
   for (o = maxOverlap; o >= minOverlap; o--) {
     // calculate score for overlap of o bases
@@ -320,7 +322,8 @@ bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQu
       }
     }
     // if valid, store overlap
-    if (score >= (int)(o - maxMismatch) && score > bestScore) {
+    fracmm = ((double)o - (double)score)/(double)o;
+    if (fracmm <= maxFracMismatchOverlap && score > bestScore) {
       bestO = o;
       bestScore = score;
       // if greedy, stop checking for overlaps
@@ -348,10 +351,10 @@ bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQu
       varIntQualForward[i] = varIntQualReverse[j];
     }
     
-    return true;
+    return false;
   
   } else {
-    return false;
+    return true;
   }
 }
 
@@ -361,10 +364,11 @@ bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQu
 // [[Rcpp::export]]
 List test_mergeReadPairPartial(std::string seqF, std::vector<int> qualF,
                                std::string seqR, std::vector<int> qualR,
-                               size_t minOverlap = 0, size_t maxOverlap = 0, size_t maxMismatch = 0,
+                               size_t minOverlap = 0, size_t maxOverlap = 0, 
+                               double maxFracMismatchOverlap = 0,
                                bool greedy = true) {
   mergeReadPairPartial(seqF, qualF, seqR, qualR,
-                       minOverlap, maxOverlap, maxMismatch, greedy);
+                       minOverlap, maxOverlap, maxFracMismatchOverlap, greedy);
   List L = List::create(Named("mergedSeq") = seqF,
                         Named("mergedQual") = qualF);
   return L;
@@ -404,7 +408,10 @@ int findClosestRefSeq(std::string varSeq, Rcpp::StringVector wtSeq) {
 
 // [[Rcpp::export]]
 List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
-                     bool mergeForwardReverse, bool revComplForward, bool revComplReverse,
+                     bool mergeForwardReverse, 
+                     size_t minOverlap, size_t maxOverlap, 
+                     double maxFracMismatchOverlap, bool greedyOverlap,
+                     bool revComplForward, bool revComplReverse,
                      int skipForward, int skipReverse,
                      int umiLengthForward, int umiLengthReverse,
                      int constantLengthForward,
@@ -450,7 +457,7 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
   char qual2[BUFFER_SIZE];
   bool done = false;
   bool noReverse;
-  int nTot = 0, nAdapter = 0, nNoPrimer = 0, nAvgVarQualTooLow = 0, nTooManyNinVar = 0, nTooManyNinUMI = 0;
+  int nTot = 0, nAdapter = 0, nNoPrimer = 0, nNoValidOverlap = 0, nAvgVarQualTooLow = 0, nTooManyNinVar = 0, nTooManyNinUMI = 0;
   int nTooManyMutCodons = 0, nForbiddenCodons = 0, nMutQualTooLow = 0, nRetain = 0;
   unsigned int primerPosForward, primerPosReverse;
   std::string varSeqForward, varSeqReverse, varQualForward, varQualReverse, umiSeq;
@@ -625,8 +632,14 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
     
     // if requested, fuse forward and reverse reads
     if (mergeForwardReverse) {
-      mergeReadPair(varSeqForward, varIntQualForward,
-                    varSeqReverse, varIntQualReverse);
+      if (mergeReadPairPartial(varSeqForward, varIntQualForward,
+                               varSeqReverse, varIntQualReverse,
+                               minOverlap, maxOverlap, maxFracMismatchOverlap,
+                               greedyOverlap)) {
+        // read should be filtered out - no valid overlap found
+        nNoValidOverlap++;
+        continue;
+      }
     }
     // if no reverse sequence was provided, hereafter it is identical to the situation 
     // where forward and reverse reads were merged
@@ -814,12 +827,13 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
   DataFrame filt = DataFrame::create(Named("nbrTotal") = nTot,
                                      Named("f1_nbrAdapter") = nAdapter,
                                      Named("f2_nbrNoPrimer") = nNoPrimer,
-                                     Named("f3_nbrAvgVarQualTooLow") = nAvgVarQualTooLow,
-                                     Named("f4_nbrTooManyNinVar") = nTooManyNinVar,
-                                     Named("f5_nbrTooManyNinUMI") = nTooManyNinUMI,
-                                     Named("f6_nbrMutQualTooLow") = nMutQualTooLow,
-                                     Named("f7_nbrTooManyMutCodons") = nTooManyMutCodons,
-                                     Named("f8_nbrForbiddenCodons") = nForbiddenCodons,
+                                     Named("f3_nbrNoValidOverlap") = nNoValidOverlap,
+                                     Named("f4_nbrAvgVarQualTooLow") = nAvgVarQualTooLow,
+                                     Named("f5_nbrTooManyNinVar") = nTooManyNinVar,
+                                     Named("f6_nbrTooManyNinUMI") = nTooManyNinUMI,
+                                     Named("f7_nbrMutQualTooLow") = nMutQualTooLow,
+                                     Named("f8_nbrTooManyMutCodons") = nTooManyMutCodons,
+                                     Named("f9_nbrForbiddenCodons") = nForbiddenCodons,
                                      Named("nbrRetained") = nRetain);
   DataFrame df = DataFrame::create(Named("mutantName") = dfName,
                                    Named("sequence") = dfSeq,
@@ -837,6 +851,10 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
   param.push_back(fastqForward, "fastqForward");
   param.push_back(fastqReverse, "fastqReverse");
   param.push_back(mergeForwardReverse, "mergeForwardReverse");
+  param.push_back(minOverlap, "minOverlap");
+  param.push_back(maxOverlap, "maxOverlap");
+  param.push_back(maxFracMismatchOverlap, "maxFracMismatchOverlap");
+  param.push_back(greedyOverlap, "greedyOverlap");
   param.push_back(revComplForward, "revComplForward");
   param.push_back(revComplReverse, "revComplReverse");
   param.push_back(skipForward, "skipForward");
