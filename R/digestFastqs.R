@@ -137,6 +137,8 @@ checkNumericInput <- function(..., nonnegative) {
 #'   mutated codon. Here, {.} is the provided \code{mutNameDelimiter}. The
 #'   delimiter must be a single character (not "_"), and can not appear in any
 #'   of the provided reference sequence names.
+#' @param maxNReads integer(1) Maximal number of reads to process. If set to -1,
+#'   all reads will be processed.
 #' @param verbose logical(1), whether to print out progress messages.
 #'
 #' @return A list with four entries:
@@ -186,7 +188,7 @@ digestFastqs <- function(fastqForward, fastqReverse,
                          mutatedPhredMinForward = 0.0,
                          mutatedPhredMinReverse = 0.0,
                          mutNameDelimiter = ".",
-                         verbose = FALSE) {
+                         maxNReads = -1, verbose = FALSE) {
   ## --------------------------------------------------------------------------
   ## pre-flight checks
   ## --------------------------------------------------------------------------
@@ -419,6 +421,7 @@ digestFastqs <- function(fastqForward, fastqReverse,
                          mutatedPhredMinForward = mutatedPhredMinForward,
                          mutatedPhredMinReverse = mutatedPhredMinReverse,
                          mutNameDelimiter = mutNameDelimiter,
+                         maxNReads = maxNReads,
                          verbose = verbose)
   
   ## Add package version and processing date

@@ -57,7 +57,8 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     stop("'countType' must be either 'umis' or 'reads'")
   }
   ## If no UMI sequences were given, then countType = "umis" should not be allowed
-  if (!(all(sapply(x, function(w) w$parameters$umiLengthForward != -1 || 
+  if (countType == "umis" && 
+      !(all(sapply(x, function(w) w$parameters$umiLengthForward != -1 || 
                    w$parameters$umiLengthReverse != -1)))) {
     stop("'countType' is set to 'umis', but no UMI sequences were provided when quantifying. ",
          "Set 'countType' to 'reads' instead.")

@@ -418,7 +418,7 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
                      double mutatedPhredMinForward = 0.0,
                      double mutatedPhredMinReverse = 0.0,
                      std::string mutNameDelimiter = ".",
-                     bool verbose = false) {
+                     int maxNReads = -1, bool verbose = false) {
 
   
   // Biostrings::IUPAC_CODE_MAP
@@ -442,7 +442,7 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
   char qual2[BUFFER_SIZE];
   bool done = false;
   bool noReverse;
-  int nTot = 0, nAdapter = 0, nNoPrimer = 0, nNoValidOverlap = 0, nAvgVarQualTooLow = 0, nTooManyNinVar = 0, nTooManyNinUMI = 0;
+  int nTot = 0, nAdapter = 0, nNoPrimer = 0, nReadTooShort = 0, nNoValidOverlap = 0, nAvgVarQualTooLow = 0, nTooManyNinVar = 0, nTooManyNinUMI = 0;
   int nTooManyMutCodons = 0, nForbiddenCodons = 0, nMutQualTooLow = 0, nRetain = 0;
   unsigned int primerPosForward, primerPosReverse;
   std::string varSeqForward, varSeqReverse, varQualForward, varQualReverse, umiSeq;
@@ -470,6 +470,11 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
       done = (done || get_next_seq(file2, seq2, qual2));
     }
     
+    // if maxNReads has been reached, break
+    if (maxNReads != (-1) && nTot >= maxNReads) {
+      done = true;
+    }
+    
     // check if end-of-file was reached
     if (done) {
       break;
@@ -482,7 +487,7 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
       // ... and give an update
       if (verbose && nTot % 1000000 == 0) {
         Rcout << "    " << nTot << " read pairs read (" 
-              << std::setprecision(1) << (100*nRetain/nTot) << " retained)" << std::endl;
+              << std::setprecision(1) << (100*nRetain/nTot) << "% retained)" << std::endl;
       }
     }
 
@@ -577,11 +582,15 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
     
     // check that extracted sequences and qualities are of the right length 
     // (if the read is too short, substr() will just read until the end of it)
+    // if the read sequence is too short, discard the read pair
+    // don't raise an error, since this could cause unintended problems when extracting sequence parts based on primers
+    // (there may be a 'random' primer match in the middle of the read)
     if ((variableLengthForward != (-1) && varSeqForward.length() != (size_t) variableLengthForward) || 
         (fastqReverse.compare("") != 0 && variableLengthReverse != (-1) && varSeqReverse.length() != (size_t) variableLengthReverse) || 
         (variableLengthForward != (-1) && varQualForward.length() != (size_t) variableLengthForward) || 
         (fastqReverse.compare("") != 0 && variableLengthReverse != (-1) && varQualReverse.length() != (size_t) variableLengthReverse)) {
-      stop("The read is not long enough to extract a variable sequence of the indicated length");
+      nReadTooShort++;
+      continue;
     }
 
     // reverse complement if requested
@@ -812,13 +821,14 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
   DataFrame filt = DataFrame::create(Named("nbrTotal") = nTot,
                                      Named("f1_nbrAdapter") = nAdapter,
                                      Named("f2_nbrNoPrimer") = nNoPrimer,
-                                     Named("f3_nbrNoValidOverlap") = nNoValidOverlap,
-                                     Named("f4_nbrAvgVarQualTooLow") = nAvgVarQualTooLow,
-                                     Named("f5_nbrTooManyNinVar") = nTooManyNinVar,
-                                     Named("f6_nbrTooManyNinUMI") = nTooManyNinUMI,
-                                     Named("f7_nbrMutQualTooLow") = nMutQualTooLow,
-                                     Named("f8_nbrTooManyMutCodons") = nTooManyMutCodons,
-                                     Named("f9_nbrForbiddenCodons") = nForbiddenCodons,
+                                     Named("f3_nbrReadTooShort") = nReadTooShort,
+                                     Named("f4_nbrNoValidOverlap") = nNoValidOverlap,
+                                     Named("f5_nbrAvgVarQualTooLow") = nAvgVarQualTooLow,
+                                     Named("f6_nbrTooManyNinVar") = nTooManyNinVar,
+                                     Named("f7_nbrTooManyNinUMI") = nTooManyNinUMI,
+                                     Named("f8_nbrMutQualTooLow") = nMutQualTooLow,
+                                     Named("f9_nbrTooManyMutCodons") = nTooManyMutCodons,
+                                     Named("f10_nbrForbiddenCodons") = nForbiddenCodons,
                                      Named("nbrRetained") = nRetain);
   DataFrame df = DataFrame::create(Named("mutantName") = dfName,
                                    Named("sequence") = dfSeq,
@@ -870,6 +880,7 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
   param.push_back(mutatedPhredMinForward, "mutatedPhredMinForward");
   param.push_back(mutatedPhredMinReverse, "mutatedPhredMinReverse");
   param.push_back(mutNameDelimiter, "mutNameDelimiter");
+  param.push_back(maxNReads, "maxNReads");
   List L = List::create(Named("parameters") = param,
                         Named("filterSummary") = filt,
                         Named("summaryTable") = df,

@@ -17,7 +17,7 @@ digestFastqs(fastqForward, fastqReverse, mergeForwardReverse, minOverlap,
   nbrMutatedCodonsMaxForward = 1, nbrMutatedCodonsMaxReverse = 1,
   forbiddenMutatedCodonsForward = "NNW",
   forbiddenMutatedCodonsReverse = "NNW", mutatedPhredMinForward = 0,
-  mutatedPhredMinReverse = 0, mutNameDelimiter = ".",
+  mutatedPhredMinReverse = 0, mutNameDelimiter = ".", maxNReads = -1,
   verbose = FALSE)
 }
 \arguments{
@@ -106,6 +106,9 @@ provided reference sequence, YY is the mutated codon number, and NNN is the
 mutated codon. Here, {.} is the provided \code{mutNameDelimiter}. The
 delimiter must be a single character (not "_"), and can not appear in any
 of the provided reference sequence names.}
+
+\item{maxNReads}{integer(1) Maximal number of reads to process. If set to -1,
+all reads will be processed.}
 
 \item{verbose}{logical(1), whether to print out progress messages.}
 }
