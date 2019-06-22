@@ -1,6 +1,11 @@
 ---
 title: "mutscan"
-output: rmarkdown::html_vignette
+author: "Charlotte Soneson and Michael Stadler"
+date: "`r BiocStyle::doc_date()`"
+package: "`r BiocStyle::pkg_ver('mutscan')`"
+output: 
+  BiocStyle::html_document:
+    toc_float: true
 vignette: >
   %\VignetteIndexEntry{mutscan}
   %\VignetteEncoding{UTF-8}
@@ -16,67 +21,83 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Introduction
+# Introduction
 
 `mutscan` provides functionality for processing and visualization of Deep
 Mutational Scanning data, starting from paired-end FASTQ files. Both TRANS
-experiments (considering combinations of two proteins) and CIS experiments
-(studying a single protein) can be accommodated.
+experiments (considering pairs of proteins) and CIS experiments (studying a
+single protein) can be accommodated.
 
 ```{r setup, message = FALSE}
 library(SummarizedExperiment)
 library(mutscan)
 ```
 
-## Reading example data
+# Reading example data
 
-The `mutscan` package contains small example FASTQ files representing both TRANS
-and CIS experiments. Each of these FASTQ file pairs contains 1,000 reads from
-one of the replicates in [@Diss2018].
+The `mutscan` package contains several small example FASTQ files representing different types of experiments:
 
 ```{r readTrans}
 datadir <- system.file("extdata", package = "mutscan")
 dir(datadir)
 ```
 
-## Processing Deep Mutational Scanning data
+- `transInput_{1,2}.fastq.gz`, `transOutput_{1,2}.fastq.gz` - data from TRANS
+experiment in [@Diss2018]. The forward and reverse reads correspond to the
+mutated _FOS_ and _JUN_ sequences, respectively. Each read consists of a UMI
+sequence, followed by a constant sequence and the variable region.
+- `cisInput_{1,2}.fastq.gz`, `cisOutput_{1,2}.fastq.gz` - data from CIS
+experiment in [@Diss2018]. The forward and reverse reads both correspond to the
+mutated _FOS_ sequence. Each read consists of a UMI sequence, followed by a
+constant sequence and the variable region.
+- `GSE102901_cis_se.rds` - a `SummarizedExperiment` object obtained by
+processing the full CIS data from [@Diss2018].
+- `leujunt0_{1,2}.fastq.gz` - unpublished data; the forward read corresponds to
+an unmutated sequence of one of 46 leucine zipper sequences, and the reverse
+read corresponds to mutated _JUN_ sequences. Each read contains a
+(frame-shifted) primer sequence, followed by the variable region.
+
+# Processing Deep Mutational Scanning data
 
 The main function for processing the Deep Mutational Scanning FASTQ files is
-`digestFastqs`. This function requires the specification of the experiment type,
-paths to compressed FASTQ files, and the composition of the reads. For TRANS
-experiments, the two reads in a pair are expected to be of the form:
+`digestFastqs`. This function requires the specification of paths to compressed
+FASTQ file(s) and the composition of the reads in these files. The reads are
+expected to have one of the following compositions:
 
-read1: [skipped] - [UMI] - [constant sequence] - [variable region, protein 1, 5'-3']
+type1: [skipped] - [UMI] - [constant sequence] - [variable region] 
 
-read2: [skipped] - [UMI] - [constant sequence] - [variable region, protein 2, 5'-3']
+type2: [unknown] - [primer] - [variable region]
 
-For CIS experiments, the two reads are expected to be of the form:
+The forward and reverse reads can have different compositions. For type1 reads,
+the user specifies the length of the skipped, UMI and constant parts. The length
+of the variable region can either be set, or be assumed to make up the remainder
+of the read. For type2 reads, the variable region is assumed to start
+immediately after the primer. The length can either be set, or be assumed to
+make up the remainder of the read.
 
-read1: [skipped] - [UMI] - [constant sequence] - [variable region, protein 1, 5'-3']
+The user can also specify whether the variable parts of the forward and/or
+reverse reads should be reverse complemented before processing, and whether the
+variable regions of the forward and reverse reads should be merged into a single
+consensus sequence.
 
-read2: [skipped] - [UMI] - [constant sequence] - [variable region, protein 1, reverse complemented]
-
-The lengths of each of the constituent parts of the reads, and the expected
-constant and variable (wild type) sequences, are specified when calling
-`digestFastqs`.
-
-In addition to reading the FASTQ files, `digestFastqs` will perform a series of
-filtering steps, in the following order:
+In addition to reading the FASTQ files, the `digestFastqs` function will perform
+a series of filtering steps, in the following order:
 
 * Search for perfect matches to forward/reverse adapter sequences, filter out
 the read pair if a match is found in either the forward or reverse read.
-* For CIS experiment, collapse forward and reverse variable regions by
-retaining, for each position, the base with the highest reported base quality.
+* Search for perfect matches to forward/reverse primer sequences, filter out the
+read pair if not both are found.
+* Filter out reads where the variable region is shorter than the indicated
+length.
+* If forward and reverse variable regions should be merged, filter out read
+pairs where no valid overlap could be found.
 * Filter out read pair if the average quality in the variable region is below
-`avePhredMin` (for TRANS experiments, filter out a read pair if either the
-forward or reverse variable region falls below the quality threshold).
-* Filter out read pair if the number of Ns in the variable region (for TRANS
-experiments, either the forward or reverse) exceeds `variableNMax`.
+`avePhredMin` in either the forward or reverse read (or the consensus sequence
+if they are merged).
+* Filter out read pair if the number of Ns in the variable region exceeds
+`variableNMax`.
 * Filter out read pair if the number of Ns in the combined forward and reverse
-UMI sequence exceeds `umiNMax1`.
-* If a wild type sequence (for the variable region) is provided, find the
-mismatches between the (forward/reverse) variable region and the provided wild
-type sequence.
+UMI sequence exceeds `umiNMax`.
 * Filter out read pair if any mutated base has a quality below
 `mutatedPhredMin`.
 * Filter out read pair if the number of mutated codons exceeds
@@ -84,7 +105,7 @@ type sequence.
 * Filter out read pair if any of the mutated codons match any of the
 codons encoded by `forbiddenMutatedCodons`.
 
-## Reading TRANS data
+# Reading TRANS data
 
 Here, we illustrate the processing of the provided TRANS experiment example
 data. We filter out reads with any adapter match, an average phred quality below
@@ -116,7 +137,7 @@ transInput <- digestFastqs(fastqForward = file.path(datadir, "transInput_1.fastq
                            wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
                            nbrMutatedCodonsMaxForward = 1, nbrMutatedCodonsMaxReverse = 1,
                            forbiddenMutatedCodonsForward = "NNW", forbiddenMutatedCodonsReverse = "NNW",
-                           mutNameDelimiter = ".", verbose = FALSE)
+                           mutNameDelimiter = ".", maxNReads = -1, verbose = FALSE)
 ```
 
 The `digestFastqs` function returns a list with four elements. The `parameters`
@@ -139,9 +160,9 @@ transInput$filterSummary
 The `summaryTable` provides the number of reads and unique UMIs observed for
 each variable sequence pair. In addition, it contains a column `mutNames`, which
 provides a shorthand notation for each mutant. The format of the values in this
-column is a combination of `{f/r}xxNNN` (separated by `_`), where `f/r` refers
-to the forward/reverse read, `xx` indicates the mutated codon, and `NNN` gives
-the observed sequence for the mutated codon.
+column is a combination of `{f/r}.xx.NNN` (separated by `_`), where `f/r` refers
+to the forward/reverse read, `xx` indicates the mutated codon number, and `NNN`
+gives the observed sequence for the mutated codon.
 
 ```{r}
 head(transInput$summaryTable)
@@ -164,7 +185,7 @@ The `errorStatistics` output can be used to estimate the sequencing error rate:
    (transInput$parameters$constantLengthReverse * transInput$filterSummary$nbrRetained))
 ```
 
-## Reading CIS data
+# Reading CIS data
 
 Here, we illustrate the processing of the provided CIS experiment example data.
 As for the TRANS data, we filter out reads with any adapter match, an average
@@ -198,7 +219,7 @@ cisInput <- digestFastqs(fastqForward = file.path(datadir, "cisInput_1.fastq.gz"
                          wildTypeReverse = "", 
                          nbrMutatedCodonsMaxForward = 1, nbrMutatedCodonsMaxReverse = 1, 
                          forbiddenMutatedCodonsForward = "NNW", forbiddenMutatedCodonsReverse = "NNW",
-                         mutNameDelimiter = ".", verbose = TRUE)
+                         mutNameDelimiter = ".", maxNReads = -1, verbose = TRUE)
 ```
 
 ```{r}
@@ -214,7 +235,108 @@ each variable sequence, and all values in the `mutNames` column will start with 
 head(cisInput$summaryTable)
 ```
 
-## Combining samples
+# Reading TRANS data with primers
+
+Here, we illustrate the processing of the provided example data, where the first
+read corresponds to one of 46 leucine zipper sequences, and the second read is a
+mutated _JUN_ sequence. We first need to define the possible sequences for the
+forward read. If multiple wild type sequences are provided, `mutscan` will find
+the most similar one for each read.
+
+```{r}
+leu <- c(ATF2 = "GATCCTGATGAAAAAAGGAGAAAGTTTTTAGAGCGAAATAGAGCAGCAGCTTCAAGATGCCGACAAAAAAGGAAAGTCTGGGTTCAGTCTTTAGAGAAGAAAGCTGAAGACTTGAGTTCATTAAATGGTCAGCTGCAGAGTGAAGTCACCCTGCTGAGAAATGAAGTGGCACAGCTGAAACAGCTTCTTCTGGCT",
+         ATF7 = "GATCCAGATGAGCGACGGCAGCGCTTTCTGGAGCGCAACCGGGCTGCAGCCTCCCGCTGCCGCCAAAAGCGAAAGCTGTGGGTGTCCTCCCTAGAGAAGAAGGCCGAAGAACTCACTTCTCAGAACATTCAGCTGAGTAATGAAGTCACATTACTACGCAATGAGGTGGCCCAGTTGAAACAGCTACTGTTAGCT",
+         CREB5 = "GATCCGGACGAGAGGCGGCGGAAATTTCTGGAACGGAACCGGGCAGCTGCCACCCGCTGCAGACAGAAGAGGAAGGTCTGGGTGATGTCATTGGAAAAGAAAGCAGAAGAACTCACCCAGACAAACATGCAGCTTCAGAATGAAGTGTCTATGTTGAAAAATGAGGTGGCCCAGCTGAAACAGTTGTTGTTAACA",
+         ATF3 = "GAAGAAGATGAAAGGAAAAAGAGGCGACGAGAAAGAAATAAGATTGCAGCTGCAAAGTGCCGAAACAAGAAGAAGGAGAAGACGGAGTGCCTGCAGAAAGAGTCGGAGAAGCTGGAAAGTGTGAATGCTGAACTGAAGGCTCAGATTGAGGAGCTCAAGAACGAGAAGCAGCATTTGATATACATGCTCAACCTT",
+         JDP2 = "GAGGAAGAGGAGCGAAGGAAAAGGCGCCGGGAGAAGAACAAAGTCGCAGCAGCCCGATGCCGGAACAAGAAGAAGGAGCGCACGGAGTTTCTGCAGCGGGAATCCGAGCGGCTGGAACTCATGAACGCAGAGCTGAAGACCCAGATTGAGGAGCTGAAGCAGGAGCGGCAGCAGCTCATCCTGATGCTGAACCGA",
+         ATF4 = "GAGAAACTGGATAAGAAGCTGAAAAAAATGGAGCAAAACAAGACAGCAGCCACTAGGTACCGCCAGAAGAAGAGGGCGGAGCAGGAGGCTCTTACTGGTGAGTGCAAAGAGCTGGAAAAGAAGAACGAGGCTCTAAAAGAGAGGGCGGATTCCCTGGCCAAGGAGATCCAGTACCTGAAAGATTTGATAGAAGAG",
+         ATF5 = "ACCCGAGGGGACCGCAAGCAAAAGAAGAGAGACCAGAACAAGTCGGCGGCTCTGAGGTACCGCCAGCGGAAGCGGGCAGAGGGTGAGGCCCTGGAGGGCGAGTGCCAGGGGCTGGAGGCACGGAATCGCGAGCTGAAGGAACGGGCAGAGTCCGTGGAGCGCGAGATCCAGTACGTCAAGGACCTGCTCATCGAG",
+         CREBZF = "AGTCCCCGGAAGGCGGCGGCGGCCGCTGCCCGCCTTAATCGACTGAAGAAGAAGGAGTACGTGATGGGGCTGGAGAGTCGAGTCCGGGGTCTGGCAGCCGAGAACCAGGAGCTGCGGGCCGAGAATCGGGAGCTGGGCAAACGCGTACAGGCACTGCAGGAGGAGAGTCGCTACCTACGGGCAGTCTTAGCCAAC",
+         BATF2 = "CCCAAGGAGCAACAAAGGCAGCTGAAGAAGCAGAAGAACCGGGCAGCCGCCCAGCGAAGCCGGCAGAAGCACACAGACAAGGCAGACGCCCTGCACCAGCAGCACGAGTCTCTGGAAAAAGACAACCTCGCCCTGCGGAAGGAGATCCAGTCCCTGCAGGCCGAGCTGGCGTGGTGGAGCCGGACCCTGCACGTG",
+         BATF3 = "GAGGATGATGACAGGAAGGTCCGAAGGAGAGAAAAAAACCGAGTTGCTGCTCAGAGAAGTCGGAAGAAGCAGACCCAGAAGGCTGACAAGCTCCATGAGGAATATGAGAGCCTGGAGCAAGAAAACACCATGCTGCGGAGAGAGATCGGGAAGCTGACAGAGGAGCTGAAGCACCTGACAGAGGCACTGAAGGAG",
+         CEBPE = "AAAGATAGCCTTGAGTACCGGCTGAGGCGGGAGCGCAACAACATCGCCGTGCGCAAGAGCCGAGACAAGGCCAAGAGGCGCATTCTGGAGACGCAGCAGAAGGTGCTGGAGTACATGGCAGAGAACGAGCGCCTCCGCAGCCGCGTGGAGCAGCTCACCCAGGAGCTAGACACCCTCCGCAACCTCTTCCGCCAG",
+         BACH1 = "CTGGATTGTATCCATGATATTCGAAGAAGAAGTAAAAACAGAATTGCTGCACAGCGCTGTCGCAAGAGAAAACTTGACTGTATACAGAATCTTGAATCAGAAATTGAGAAGCTGCAAAGTGAAAAGGAGAGCTTGTTGAAGGAAAGAGATCACATTTTGTCAACTCTGGGTGAGACAAAGCAGAACCTAACTGGA",
+         BACH2 = "TTAGAGTTTATTCATGATGTCCGACGGCGCAGCAAGAACCGCATCGCGGCCCAGCGCTGCCGCAAAAGGAAACTGGACTGTATTCAGAATTTAGAATGTGAAATCCGCAAATTGGTGTGTGAGAAAGAGAAACTGTTGTCAGAGAGGAATCAACTGAAAGCATGCATGGGGGAACTGTTGGACAACTTCTCCTGC",
+         NFE2L1 = "CTGAGCCTCATCCGAGACATCCGGCGCCGGGGCAAGAACAAGATGGCGGCGCAGAACTGCCGCAAGCGCAAGCTGGACACCATCCTGAATCTGGAGCGTGATGTGGAGGACCTGCAGCGTGACAAAGCCCGGCTGCTGCGGGAGAAAGTGGAGTTCCTGCGCTCCCTGCGACAGATGAAGCAGAAGGTCCAGAGC",
+         NFE2 = "CTAGCGCTAGTCCGGGACATCCGACGACGGGGCAAAAACAAGGTGGCAGCCCAGAACTGCCGCAAGAGGAAGCTGGAAACCATTGTGCAGCTGGAGCGGGAGCTGGAGCGGCTGACCAATGAACGGGAGCGGCTTCTCAGGGCCCGCGGGGAGGCAGACCGGACCCTGGAGGTCATGCGCCAACAGCTGACAGAG",
+         NFIL3 = "AAGAAAGATGCTATGTATTGGGAAAAAAGGCGGAAAAATAATGAAGCTGCCAAAAGATCTCGTGAGAAGCGTCGACTGAATGACCTGGTTTTAGAGAACAAACTAATTGCACTGGGAGAAGAAAACGCCACTTTAAAAGCTGAGCTGCTTTCACTAAAATTAAAGTTTGGTTTAATTAGCTCCACAGCATATGCT",
+         FOS = "GAAGAAGAAGAGAAAAGGAGAATCCGAAGGGAAAGGAATAAGATGGCTGCAGCCAAATGCCGCAACCGGAGGAGGGAGCTGACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTAGAGTTCATCCTGGCAGCT",
+         FOSB = "GAGGAAGAGGAGAAGCGAAGGGTGCGCCGGGAACGAAATAAACTAGCAGCAGCTAAATGCAGGAACCGGCGGAGGGAGCTGACCGACCGACTCCAGGCGGAGACAGATCAGTTGGAGGAAGAAAAAGCAGAGCTGGAGTCGGAGATCGCCGAGCTCCAAAAGGAGAAGGAACGTCTGGAGTTTGTGCTGGTGGCC",
+         FOSL1 = "GAGGAAGAGGAGCGCCGCCGAGTAAGGCGCGAGCGGAACAAGCTGGCTGCGGCCAAGTGCAGGAACCGGAGGAAGGAACTGACCGACTTCCTGCAGGCGGAGACTGACAAACTGGAAGATGAGAAATCTGGGCTGCAGCGAGAGATTGAGGAGCTGCAGAAGCAGAAGGAGCGCCTAGAGCTGGTGCTGGAAGCC",
+         FOSL2 = "GAAGAGGAGGAGAAGCGTCGCATCCGGCGGGAGAGGAACAAGCTGGCTGCAGCCAAGTGCCGGAACCGACGCCGGGAGCTGACAGAGAAGCTGCAGGCGGAGACAGAGGAGCTGGAGGAGGAGAAGTCAGGCCTGCAGAAGGAGATTGCTGAGCTGCAGAAGGAGAAGGAGAAGCTGGAGTTCATGTTGGTGGCT",
+         MAFB = "GTGATCCGCCTGAAGCAGAAGCGGCGGACCCTGAAGAACCGGGGCTACGCCCAGTCTTGCAGGTATAAACGCGTCCAGCAGAAGCACCACCTGGAGAATGAGAAGACGCAGCTCATTCAGCAGGTGGAGCAGCTTAAGCAGGAGGTGTCCCGGCTGGCCCGCGAGAGAGACGCCTACAAGGTCAAGTGCGAGAAA",
+         JUN = "CAGGAGCGGATCAAGGCGGAGAGGAAGCGCATGAGGAACCGCATCGCTGCCTCCAAGTGCCGAAAAAGGAAGCTGGAGAGAATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTTAAACAGAAAGTCATGAAC",
+         JUNB = "CAAGAGCGCATCAAAGTGGAGCGCAAGCGGCTGCGGAACCGGCTGGCGGCCACCAAGTGCCGGAAGCGGAAGCTGGAGCGCATCGCGCGCCTGGAGGACAAGGTGAAGACGCTCAAGGCCGAGAACGCGGGGCTGTCGAGTACCGCCGGCCTCCTCCGGGAGCAGGTGGCCCAGCTCAAACAGAAGGTCATGACC",
+         JUND = "CAGGAGCGCATCAAGGCGGAGCGCAAGCGGCTGCGCAACCGCATCGCCGCCTCCAAGTGCCGCAAGCGCAAGCTGGAGCGCATCTCGCGCCTGGAAGAGAAAGTGAAGACCCTCAAGAGTCAGAACACGGAGCTGGCGTCCACGGCGAGCCTGCTGCGCGAGCAGGTGGCGCAGCTCAAGCAGAAAGTCCTCAGC",
+         CREB3 = "GAACAAATTCTGAAACGTGTGCGGAGGAAGATTCGAAATAAAAGATCTGCTCAAGAGAGCCGCAGGAAAAAGAAGGTGTATGTTGGGGGTTTAGAGAGCAGGGTCTTGAAATACACAGCCCAGAATATGGAGCTTCAGAACAAAGTACAGCTTCTGGAGGAACAGAATTTGTCCCTTCTAGATCAACTGAGGAAA",
+         HLF = "CTGAAGGATGACAAGTACTGGGCAAGGCGCAGAAAGAACAACATGGCAGCCAAGCGCTCCCGCGACGCCCGGAGGCTGAAAGAGAACCAGATCGCCATCCGGGCCTCGTTCCTGGAGAAGGAGAACTCGGCCCTCCGCCAGGAGGTGGCTGACTTGAGGAAGGAGCTGGGCAAATGCAAGAACATACTTGCCAAG",
+         MAFG = "ATCGTCCAGCTGAAGCAGCGCCGGCGCACGCTCAAGAACCGCGGCTACGCTGCCAGCTGCCGCGTGAAGCGGGTGACGCAGAAGGAGGAGCTGGAGAAGCAGAAGGCGGAGCTGCAGCAGGAGGTGGAGAAGCTGGCCTCAGAGAACGCCAGCATGAAGCTGGAGCTCGACGCGCTGCGCTCCAAGTACGAGGCG",
+         MAFK = "GTGACCCGCCTGAAGCAGCGTCGGCGCACACTCAAGAACCGCGGCTACGCGGCCAGCTGCCGCATCAAGCGGGTGACGCAGAAGGAGGAGCTGGAGCGGCAGCGCGTGGAGCTGCAGCAGGAGGTGGAGAAGCTGGCGCGTGAGAACAGCAGCATGCGGCTGGAGCTGGACGCCCTGCGCTCCAAGTACGAGGCG",
+         XBP1 = "AGCCCCGAGGAGAAGGCGCTGAGGAGGAAACTGAAAAACAGAGTAGCAGCTCAGACTGCCAGAGATCGAAAGAAGGCTCGAATGAGTGAGCTGGAACAGCAAGTGGTAGATTTAGAAGAAGAGAACCAAAAACTTTTGCTAGAAAATCAGCTTTTACGAGAGAAAACTCATGGCCTTGTAGTTGAGAACCAGGAG",
+         ATF6 = "ATTGCTGTGCTAAGGAGACAGCAACGTATGATAAAAAATCGAGAATCCGCTTGTCAGTCTCGCAAGAAGAAGAAAGAATATATGCTAGGGTTAGAGGCGAGATTAAAGGCTGCCCTCTCAGAAAACGAGCAACTGAAGAAAGAAAATGGAACACTGAAGCGGCAGCTGGATGAAGTTGTGTCAGAGAACCAGAGG",
+         ATF6B = "GCAAAGCTGCTGAAGCGGCAGCAGCGAATGATCAAGAACCGGGAGTCAGCCTGCCAGTCCCGGAGAAAGAAGAAAGAGTATCTGCAGGGACTGGAGGCTCGGCTGCAAGCAGTACTGGCTGACAACCAGCAGCTCCGCCGAGAGAATGCTGCCCTCCGGCGGCGGCTGGAGGCCCTGCTGGCTGAAAACAGCGAG",
+         CEBPA = "AAGAACAGCAACGAGTACCGGGTGCGGCGCGAGCGCAACAACATCGCGGTGCGCAAGAGCCGCGACAAGGCCAAGCAGCGCAACGTGGAGACGCAGCAGAAGGTGCTGGAGCTGACCAGTGACAATGACCGCCTGCGCAAGCGGGTGGAACAGCTGAGCCGCGAACTGGACACGCTGCGGGGCATCTTCCGCCAG",
+         CEBPB = "AAGCACAGCGACGAGTACAAGATCCGGCGCGAGCGCAACAACATCGCCGTGCGCAAGAGCCGCGACAAGGCCAAGATGCGCAACCTGGAGACGCAGCACAAGGTCCTGGAGCTCACGGCCGAGAACGAGCGGCTGCAGAAGAAGGTGGAGCAGCTGTCGCGCGAGCTCAGCACCCTGCGGAACTTGTTCAAGCAG",
+         CEBPD = "CGCGGCAGCCCCGAGTACCGGCAGCGGCGCGAGCGCAACAACATCGCCGTGCGCAAGAGCCGCGACAAGGCCAAGCGGCGCAACCAGGAGATGCAGCAGAAGTTGGTGGAGCTGTCGGCTGAGAACGAGAAGCTGCACCAGCGCGTGGAGCAGCTCACGCGGGACCTGGCCGGCCTCCGGCAGTTCTTCAAGCAG",
+         CEBPG = "CGAAACAGTGACGAGTATCGGCAACGCCGAGAGAGGAACAACATGGCTGTGAAAAAGAGCCGGTTGAAAAGCAAGCAGAAAGCACAAGACACACTGCAGAGAGTCAATCAGCTCAAAGAAGAGAATGAACGGTTGGAAGCAAAAATCAAATTGCTGACCAAGGAATTAAGTGTACTCAAAGATTTGTTTCTTGAG",
+         CREB1 = "GAAGCAGCACGAAAGAGAGAGGTCCGTCTAATGAAGAACAGGGAAGCAGCTCGAGAGTGTCGTAGAAAGAAGAAAGAATATGTGAAATGTTTAGAAAACAGAGTGGCAGTGCTTGAAAATCAAAACAAGACATTGATTGAGGAGCTAAAAGCACTTAAGGACCTTTACTGCCACAAATCAGAT",
+         CREB3L1 = "GAGAAGGCCTTGAAGAGAGTCCGGAGGAAAATCAAGAACAAGATCTCAGCCCAGGAGAGCCGTCGTAAGAAGAAGGAGTATGTGGAGTGTCTAGAAAAGAAGGTGGAGACATTTACATCTGAGAACAATGAACTGTGGAAGAAGGTGGAGACCCTGGAGAATGCCAACAGGACCCTGCTCCAGCAGCTGCAGAAA",
+         CREB3L2 = "GAGAAGGCCCTGAAGAAAATTCGGAGGAAGATCAAGAATAAGATTTCTGCTCAGGAAAGTAGGAGAAAGAAGAAAGAATACATGGACAGCCTGGAGAAAAAAGTGGAGTCTTGTTCAACTGAGAACTTGGAGCTTCGGAAGAAGGTAGAGGTTCTAGAGAACACTAATAGGACTCTCCTTCAGCAACTCCAGAAG",
+         CREB3L3 = "GAGCGAGTGCTGAAAAAAATCCGCCGGAAAATCCGGAACAAGCAGTCGGCGCAAGAAAGCAGGAAGAAGAAGAAGGAATATATCGATGGCCTGGAGACTCGGATGTCAGCTTGCACTGCTCAGAATCAGGAGTTACAGAGGAAAGTCTTGCATCTCGAGAAGCAAAACCTGTCCCTCTTGGAGCAACTGAAGAAA",
+         CREB3L4 = "GAGAGGGTCCTCAAGAAGGTCAGGAGGAAAATCCGTAACAAGCAGTCAGCTCAGGACAGTCGGCGGCGGAAGAAGGAGTACATTGATGGGCTGGAGAGCAGGGTGGCAGCCTGTTCTGCACAGAACCAAGAATTACAGAAAAAAGTCCAGGAGCTGGAGAGGCACAACATCTCCTTGGTAGCTCAGCTCCGCCAG",
+         CREBL2 = "CCAGCCAAAATTGACTTGAAAGCAAAACTTGAGAGGAGCCGGCAGAGTGCAAGAGAATGCCGAGCCCGAAAAAAGCTGAGATATCAGTATTTGGAAGAGTTGGTATCCAGTCGAGAAAGAGCTATATGTGCCCTCAGAGAGGAACTGGAAATGTACAAGCAGTGGTGCATGGCAATGGACCAAGGAAAAATCCCT",
+         CREBRF = "CCCTTAACAGCCCGACCAAGGTCAAGGAAGGAAAAAAATAAGCTGGCTTCCAGAGCTTGTCGGTTAAAGAAGAAAGCCCAGTATGAAGCTAATAAAGTGAAATTATGGGGCCTCAACACAGAATATGATAATTTATTGTTTGTAATCAACTCCATCAAGCAAGAGATTGTAAACCGGGTACAGAATCCAAGAGAT",
+         DBP = "CAGAAGGATGAGAAATACTGGAGCCGGCGGTACAAGAACAACGAGGCAGCCAAGCGGTCCCGTGACGCCCGGCGGCTCAAGGAGAACCAGATATCGGTGCGGGCGGCCTTCCTGGAGAAGGAGAACGCCCTGCTGCGGCAGGAAGTTGTGGCCGTGCGCCAGGAGCTGTCCCACTACCGCGCCGTGCTGTCCCGA",
+         NFE2L2 = "CTTGCATTAATTCGGGATATACGTAGGAGGGGTAAGAATAAAGTGGCTGCTCAGAATTGCAGAAAAAGAAAACTGGAAAATATAGTAGAACTAGAGCAAGATTTAGATCATTTGAAAGATGAAAAAGAAAAATTGCTCAAAGAAAAAGGAGAAAATGACAAAAGCCTTCACCTACTGAAAAAACAACTCAGCACC",
+         NFE2L3 = "GTCTCACTTATCCGTGACATCAGACGAAGAGGGAAAAATAAAGTTGCTGCGCAGAACTGTCGTAAACGCAAATTGGACATAATTTTGAATTTAGAAGATGATGTATGTAACTTGCAAGCAAAGAAGGAAACTCTTAAGAGAGAGCAAGCACAATGTAACAAAGCTATTAACATAATGAAACAGAAACTGCATGAC",
+         TEF = "CAGAAGGATGAAAAGTACTGGACAAGACGCAAGAAGAACAACGTGGCAGCTAAACGGTCACGGGATGCCCGGCGCCTGAAAGAGAATCAGATCACCATCCGGGCAGCCTTCCTGGAGAAGGAGAACACAGCCCTGCGGACGGAGGTGGCCGAGCTACGCAAGGAGGTGGGCAAGTGCAAGACCATCGTGTCCAAG"
+)
+```
+
+Next we process the data, not allowing any mismatches in the forward read, but 1
+mismatching codon in the reverse read. Now, we assume that the variable sequence
+starts immediately after the provided primers, and hence we don't specify any
+UMI/constant sequence lengths. For the forward read, the variable region is
+taken to be the remainder of the read (after the primer), whereas for the
+reverse read, we specify the variable sequence length to 96.
+
+```{r}
+leujunt0 <- digestFastqs(fastqForward = file.path(datadir, "leujunt0_1.fastq.gz"),
+                         fastqReverse = file.path(datadir, "leujunt0_2.fastq.gz"),
+                         mergeForwardReverse = FALSE, minOverlap = 0, maxOverlap = 0, 
+                         maxFracMismatchOverlap = 1, greedyOverlap = TRUE, 
+                         revComplForward = FALSE, revComplReverse = FALSE,
+                         skipForward = -1, skipReverse = -1, umiLengthForward = -1, 
+                         umiLengthReverse = -1, constantLengthForward = -1,
+                         constantLengthReverse = -1, variableLengthForward = -1,
+                         variableLengthReverse = 96, 
+                         constantForward = "", constantReverse = "", 
+                         adapterForward = "", adapterReverse = "", 
+                         primerForward = "GTCAGGTGGAGGCGGATCC", 
+                         primerReverse = "GAAAAAGGAAGCTGGAGAGA",
+                         avePhredMinForward = 20, avePhredMinReverse = 20, 
+                         variableNMaxForward = 0, variableNMaxReverse = 0, umiNMax = 0,
+                         wildTypeForward = leu, 
+                         wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
+                         nbrMutatedCodonsMaxForward = 0, 
+                         nbrMutatedCodonsMaxReverse = 1, 
+                         forbiddenMutatedCodonsForward = "",
+                         forbiddenMutatedCodonsReverse = "NNW",
+                         mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+                         mutNameDelimiter = ".", maxNReads = -1, verbose = TRUE)
+```
+
+```{r}
+leujunt0$parameters
+leujunt0$filterSummary
+leujunt0$errorStatistics[rowSums(leujunt0$errorStatistics[, -1]) != 0, ]
+```
+
+```{r}
+head(leujunt0$summaryTable)
+```
+
+# Combining samples
 
 The `digestFastqs` function processes each sample (pair of FASTQ files)
 separately. In order to prepare the data for statistical analysis, the
@@ -247,7 +369,7 @@ transOutput <- digestFastqs(fastqForward = file.path(datadir, "transOutput_1.fas
                             wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
                             nbrMutatedCodonsMaxForward = 1, nbrMutatedCodonsMaxReverse = 1, 
                             forbiddenMutatedCodonsForward = "NNW", forbiddenMutatedCodonsReverse = "NNW",
-                            mutNameDelimiter = ".", verbose = FALSE)
+                            mutNameDelimiter = ".", maxNReads = -1, verbose = FALSE)
 se <- summarizeExperiment(x = list(sample1 = transInput,
                                    sample2 = transOutput),
                           coldata = data.frame(Name = c("sample1", "sample2"),
@@ -260,7 +382,7 @@ head(rowData(se))
 colData(se)
 ```
 
-## Collapsing count matrix to amino acids
+# Collapsing count matrix to amino acids
 
 The \link{\code[SummarizedExperiment]{SummarizedExperiment}} object generated by
 `summarizeExperiment()` contains one row for each observed variant
@@ -275,7 +397,7 @@ Matrix::colSums(assay(se_collapsed, "counts"))
 colData(se_collapsed)
 ```
 
-## Calculating PPI scores
+# Calculating PPI scores
 
 The function `calculatePPIScore` can be used to calculate PPI scores as in
 [@Diss2018]. The function requires the user to specify a `pairingCol`,
@@ -301,21 +423,33 @@ ppis <- calculatePPIScore(se = se_collapsed, pairingCol = "Replicate",
 head(ppis[order(abs(rowMeans(ppis)), decreasing = TRUE), , drop = FALSE])
 ```
 
-## Scoring mutations with `edgeR`
+# Scoring mutations with `edgeR` or `limma`
 
 As an alternative to the PPI scoring, `edgeR` can be used to model the observed
-counts using a generalized linear model and estimate a logFC and a p-value for
-the enrichment of each variant betwen two conditions (or more generally, in
-association with any predictor) compared to the WT sequence. Note that for this,
-at least two replicates are required.
+counts using a generalized linear model (with `edgeR`) or a general linear model
+(with `limma`) and estimate a logFC and a p-value for the enrichment of each
+variant betwen two conditions (or more generally, in association with any
+predictor) compared to one or more WT sequences. Note that for this, at least
+two replicates are required.
 
 ```{r}
-scores <- calculateRelativeFC(se = se_collapsed,
-                              design = model.matrix(~ Replicate + Condition,
-                                                    data = colData(se_collapsed)),
-                              coef = 3, pseudocount = 1, WTrows = "f.0.NA",
-                              method = "edgeR")
-head(scores[order(scores$PValue), , drop = FALSE])
+## edgeR
+edger_scores <- calculateRelativeFC(
+  se = se_collapsed,
+  design = model.matrix(~ Replicate + Condition,
+                        data = colData(se_collapsed)),
+  coef = 3, pseudocount = 1, WTrows = "f.0.NA",
+  method = "edgeR")
+head(edger_scores[order(edger_scores$PValue), , drop = FALSE])
+
+## limma
+limma_scores <- calculateRelativeFC(
+  se = se_collapsed,
+  design = model.matrix(~ Replicate + Condition,
+                        data = colData(se_collapsed)),
+  coef = 3, pseudocount = 1, WTrows = "f.0.NA",
+  method = "limma")
+head(limma_scores[order(limma_scores$P.Value), , drop = FALSE])
 ```
 
 ## Session info

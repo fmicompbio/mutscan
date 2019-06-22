@@ -1,5 +1,6 @@
 suppressPackageStartupMessages({
   library(ShortRead)
+  library(BiocParallel)
 })
 
 ## Trans, Input
@@ -30,11 +31,12 @@ ShortRead::writeFastq(r2[1:1000], file = "cisOutput_2.fastq.gz", mode = "w", ful
 meta <- read.delim("../../../data/GSE102901/meta/GSE102901_cis_coldata.tsv", header = TRUE, as.is = TRUE)
 sampleIds <- meta$Name
 names(sampleIds) <- sampleIds
-allSamples <- mclapply(sampleIds, function(id) {
+allSamples <- bplapply(sampleIds, function(id) {
   print(id)
   mutscan::digestFastqs(fastqForward = paste0("../../../data/GSE102901/FASTQ/", id, "_1.fastq.gz"),
                         fastqReverse = paste0("../../../data/GSE102901/FASTQ/", id, "_2.fastq.gz"),
-                        mergeForwardReverse = TRUE, revComplForward = FALSE, revComplReverse = TRUE,
+                        mergeForwardReverse = TRUE, minOverlap = 0, maxOverlap = 0,
+                        maxFracMismatchOverlap = 1, greedyOverlap = TRUE, revComplForward = FALSE, revComplReverse = TRUE,
                         skipForward = 1, skipReverse = 1, umiLengthForward = 10, 
                         umiLengthReverse = 7, constantLengthForward = 18,
                         constantLengthReverse = 17, variableLengthForward = 96,
@@ -48,8 +50,8 @@ allSamples <- mclapply(sampleIds, function(id) {
                         wildTypeReverse = "", 
                         nbrMutatedCodonsMaxForward = 1, nbrMutatedCodonsMaxReverse = 1,
                         forbiddenMutatedCodonsForward = "NNW", forbiddenMutatedCodonsReverse = "NNW", 
-                        mutNameDelimiter = ".", verbose = TRUE)
-}, mc.cores = 6)
+                        mutNameDelimiter = ".", maxNReads = -1, verbose = TRUE)
+},BPPARAM = SnowParam(workers = 6, type = "SOCK"))
 se <- mutscan::summarizeExperiment(x = allSamples, coldata = meta, countType = "umis")
 seaa <- mutscan::collapseMutantsByAA(se)
 saveRDS(se, file = "GSE102901_cis_se.rds")

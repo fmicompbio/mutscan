@@ -1,6 +1,6 @@
 Package: mutscan
 Title: Preprocessing and Analysis of Deep Mutational Scanning Data
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
     c(person(given = "Charlotte",
              family = "Soneson",
@@ -30,6 +30,7 @@ Imports:
     tidyr
 Suggests: 
     testthat,
+    BiocStyle,
     knitr,
     rmarkdown
 License: GPL-2
