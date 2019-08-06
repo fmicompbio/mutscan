@@ -21,10 +21,10 @@ checkNumericInput <- function(..., nonnegative) {
   }
 }
   
-#' Read, filter and digest sequences from two fastq files.
+#' Read, filter and digest sequences from fastq file(s).
 #'
-#' Read sequences for a pair of fastq files and digest them (extract umis,
-#' constant and variable parts, filter, extract mismatch information from
+#' Read sequences for one or a pair of fastq files and digest them (extract
+#' umis, constant and variable parts, filter, extract mismatch information from
 #' constant and count the observed unique variable parts). Alternatively, primer
 #' sequences could be specified, in which case the sequence immediately
 #' following the primer will be considered the variable sequence.
@@ -205,7 +205,7 @@ digestFastqs <- function(fastqForward, fastqReverse,
   if (any(!is.logical(c(mergeForwardReverse, revComplForward, revComplReverse))) || 
       any(c(length(mergeForwardReverse), length(revComplForward), 
             length(revComplReverse)) != 1)) {
-    stop("'mergeForwardReverse', 'revComplForward' and 'revComplReverse' must be logical scalars. ")
+    stop("'mergeForwardReverse', 'revComplForward' and 'revComplReverse' must be logical scalars")
   }
   if (fastqReverse == "" && mergeForwardReverse) {
     stop("Both forward and reverse FASTQ files must be given in order to merge ",
@@ -235,7 +235,7 @@ digestFastqs <- function(fastqForward, fastqReverse,
   if (!is.character(adapterForward) || length(adapterForward) != 1 ||
       !grepl("^[AaCcGgTt]*$", adapterForward) || !is.character(adapterReverse) ||
       length(adapterReverse) != 1 || !grepl("^[AaCcGgTt]*$", adapterReverse)) {
-    stop("adapters must be character strings, only containing valid DNA characters")
+    stop("Adapters must be character strings, only containing valid DNA characters")
   } else {
     adapterForward <- toupper(adapterForward)
     adapterReverse <- toupper(adapterReverse)
@@ -244,7 +244,7 @@ digestFastqs <- function(fastqForward, fastqReverse,
   if (!is.character(primerForward) || length(primerForward) != 1 ||
       !grepl("^[AaCcGgTt]*$", primerForward) || !is.character(primerReverse) ||
       length(primerReverse) != 1 || !grepl("^[AaCcGgTt]*$", primerReverse)) {
-    stop("primers must be character strings, only containing valid DNA characters")
+    stop("Primers must be character strings, only containing valid DNA characters")
   } else {
     primerForward <- toupper(primerForward)
     primerReverse <- toupper(primerReverse)

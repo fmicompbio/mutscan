@@ -2,7 +2,7 @@
 % Please edit documentation in R/digestFastqs.R
 \name{digestFastqs}
 \alias{digestFastqs}
-\title{Read, filter and digest sequences from two fastq files.}
+\title{Read, filter and digest sequences from fastq file(s).}
 \usage{
 digestFastqs(fastqForward, fastqReverse, mergeForwardReverse, minOverlap,
   maxOverlap, maxFracMismatchOverlap, greedyOverlap = TRUE,
@@ -136,8 +136,8 @@ processing.}
 }
 }
 \description{
-Read sequences for a pair of fastq files and digest them (extract umis,
-constant and variable parts, filter, extract mismatch information from
+Read sequences for one or a pair of fastq files and digest them (extract
+umis, constant and variable parts, filter, extract mismatch information from
 constant and count the observed unique variable parts). Alternatively, primer
 sequences could be specified, in which case the sequence immediately
 following the primer will be considered the variable sequence.
