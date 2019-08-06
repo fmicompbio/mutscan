@@ -96,18 +96,18 @@ collapseMutantsByAA <- function(se, collapseSynonymous = FALSE) {
     for (nm in names(wtseqs$wildTypeForward)) {
       nch <- nchar(wtseqs$wildTypeForward[[nm]])
       synid <- paste(nm, seq_len(nch), strsplit(wtseqs$wildTypeForward[[nm]], "")[[1]], 
-                     sep = mutNameDelimiter)
+                     sep = wtseqs$mutNameDelimiter)
       idx <- which(unl %in% synid)
       replacedIdx <- c(replacedIdx, idx)
-      unl[idx] <- paste(nm, 0, NA, sep = mutNameDelimiter)
+      unl[idx] <- paste(nm, 0, NA, sep = wtseqs$mutNameDelimiter)
     }
     for (nm in names(wtseqs$wildTypeReverse)) {
       nch <- nchar(wtseqs$wildTypeReverse[[nm]])
       synid <- paste(nm, seq_len(nch), strsplit(wtseqs$wildTypeReverse[[nm]], "")[[1]], 
-                     sep = mutNameDelimiter)
+                     sep = wtseqs$mutNameDelimiter)
       idx <- which(unl %in% synid)
       replacedIdx <- c(replacedIdx, idx)
-      unl[idx] <- paste(nm, 0, NA, sep = mutNameDelimiter)
+      unl[idx] <- paste(nm, 0, NA, sep = wtseqs$mutNameDelimiter)
     }
     ## For all entries that have been replaced, check if there is another entry
     ## in the same row, with the same ref.sequence, that is not a WT sequence.
