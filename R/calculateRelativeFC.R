@@ -66,7 +66,12 @@ calculateRelativeFC <- function(se, design, coef, WTrows, selAssay = "counts",
   if (is.null(WTrows)) {
     offsets <- colSums(dge$counts) * edgeR::calcNormFactors(dge$counts)
   } else {
-    offsets <- colSums(dge$counts[WTrows, , drop = FALSE])
+    ## geometric mean
+    tmp0 <- dge$counts[WTrows, , drop = FALSE]
+    tmp0 <- tmp0[apply(tmp0, 1, min) > 0, , drop = FALSE]
+    offsets <- apply(tmp0, 2, function(s) exp(mean(log(s))))
+    ## sum
+    # offsets <- colSums(dge$counts[WTrows, , drop = FALSE])
   }
   dge <- edgeR::scaleOffset(dge, log(offsets))
   
