@@ -4,8 +4,15 @@
 \alias{calculateRelativeFC}
 \title{Calculate logFCs relative to WT using edgeR}
 \usage{
-calculateRelativeFC(se, design, coef, WTrows, selAssay = "counts",
-  pseudocount = 1, method = "edgeR")
+calculateRelativeFC(
+  se,
+  design,
+  coef,
+  WTrows,
+  selAssay = "counts",
+  pseudocount = 1,
+  method = "edgeR"
+)
 }
 \arguments{
 \item{se}{SummarizedExperiment object.}
