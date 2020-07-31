@@ -5,6 +5,59 @@
 
 using namespace Rcpp;
 
+// bk_add
+void bk_add(std::vector<std::string> seqs);
+RcppExport SEXP _mutscan_bk_add(SEXP seqsSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::vector<std::string> >::type seqs(seqsSEXP);
+    bk_add(seqs);
+    return R_NilValue;
+END_RCPP
+}
+// bk_remove
+void bk_remove(std::vector<std::string> seqs);
+RcppExport SEXP _mutscan_bk_remove(SEXP seqsSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::vector<std::string> >::type seqs(seqsSEXP);
+    bk_remove(seqs);
+    return R_NilValue;
+END_RCPP
+}
+// bk_print
+void bk_print();
+RcppExport SEXP _mutscan_bk_print() {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    bk_print();
+    return R_NilValue;
+END_RCPP
+}
+// bk_has
+bool bk_has(std::string seq, int tol);
+RcppExport SEXP _mutscan_bk_has(SEXP seqSEXP, SEXP tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type seq(seqSEXP);
+    Rcpp::traits::input_parameter< int >::type tol(tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(bk_has(seq, tol));
+    return rcpp_result_gen;
+END_RCPP
+}
+// bk_search
+std::vector<std::string> bk_search(std::string seq, int tol);
+RcppExport SEXP _mutscan_bk_search(SEXP seqSEXP, SEXP tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type seq(seqSEXP);
+    Rcpp::traits::input_parameter< int >::type tol(tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(bk_search(seq, tol));
+    return rcpp_result_gen;
+END_RCPP
+}
 // compareCodonPositions
 bool compareCodonPositions(std::string a, std::string b, const char mutNameDelimiter);
 RcppExport SEXP _mutscan_compareCodonPositions(SEXP aSEXP, SEXP bSEXP, SEXP mutNameDelimiterSEXP) {
@@ -99,6 +152,11 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_mutscan_bk_add", (DL_FUNC) &_mutscan_bk_add, 1},
+    {"_mutscan_bk_remove", (DL_FUNC) &_mutscan_bk_remove, 1},
+    {"_mutscan_bk_print", (DL_FUNC) &_mutscan_bk_print, 0},
+    {"_mutscan_bk_has", (DL_FUNC) &_mutscan_bk_has, 2},
+    {"_mutscan_bk_search", (DL_FUNC) &_mutscan_bk_search, 2},
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 3},
     {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 8},
     {"_mutscan_findClosestRefSeq", (DL_FUNC) &_mutscan_findClosestRefSeq, 2},
