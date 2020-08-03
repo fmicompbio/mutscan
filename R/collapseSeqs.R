@@ -39,6 +39,10 @@
 #'   grouped sequences, list names are the query sequences that defined the
 #'   group.
 #'
+#' @examples 
+#' seqs <- c("AAAA","AAAC", "TTTT", "TTTC")
+#' collapseSeqs(seqs, tol = 1)
+#' 
 #' @references Daniel Liu. "Algorithms for efficiently collapsing reads with
 #'   Unique Molecular Identifiers". PeerJ. 2019; 7: e8275.
 #'   doi: 10.7717/peerj.8275
@@ -57,17 +61,19 @@ collapseSeqs <- function(seqs,
   method = match.arg(method, several.ok = FALSE)
   stopifnot(exprs = {
     is.character(seqs)
-    lengths(seqs) > 0L
+    length(seqs) > 0L
     all(nchar(seqs) == nchar(seqs[1]))
     is.null(counts) || (is.numeric(counts) && length(counts) == length(seqs))
     is.numeric(tol)
     length(tol) == 1L
     tol >= 0
+    is.logical(verbose)
+    length(verbose) == 1L
   })
   
   ## calculate allowed number of mismatches
   if (tol < 1.0) {
-    tol <- ceiling(tol * nchar(seqs[1]))
+    tol <- round(tol * nchar(seqs[1]))
   } else {
     tol <- round(tol)
   }
@@ -77,7 +83,7 @@ collapseSeqs <- function(seqs,
   
   ## sort sequences
   if (!is.null(counts)) {
-    if (is.unsorted(counts)) {
+    if (is.unsorted(-counts)) {
       if (verbose)
         message("sorting 'seqs' according to 'counts'...", appendLF = FALSE)
       o <- order(counts, decreasing = TRUE)
