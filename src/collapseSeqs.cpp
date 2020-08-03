@@ -91,8 +91,16 @@ public:
     deleted.insert(str);
     size--;
     if (deleted.size() >= size/2) {
-      // deleted is now quite large -> rebuild tree and release memory
-      _rebuild();
+      if (size > 0) {
+        // deleted is now quite large -> rebuild tree and release memory
+        _rebuild();
+      } else {
+        // tree is empty now
+        delete root;
+        root = nullptr;
+        items.clear();
+        deleted.clear();
+      }
     }
   }
   
