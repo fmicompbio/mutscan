@@ -505,12 +505,23 @@ List greedy_clustering(int tol = 1, bool verbose = false) {
   std::vector<std::string> gseqs;
   
   // start querying in the order of tree.items (assume ordered in a meaningful way)
-  double start = (double)tree.size;
+  size_t start = (double)tree.size;
   while (tree.size > 0) {
     qseq = tree.first();
     gseqs = tree.search(qseq, tol);
     L.push_back(gseqs, qseq);
     bk_remove(gseqs, false);
+    
+    if ((start - tree.size) % 1000 == 0) { // every 2,000 queries (every ~1.8s)
+      Rcpp::checkUserInterrupt(); // ... check for user interrupt
+      // ... and give an update
+      if (verbose && (start - tree.size) % 2000 == 0) {
+        Rcout << "    " << std::setprecision(3) <<
+          (100.0 * (double)(start - tree.size) / (double)start) <<
+            "% done" << std::endl;
+      }
+    }
+    
   }
 
   return L;
