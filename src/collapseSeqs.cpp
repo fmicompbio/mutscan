@@ -9,7 +9,7 @@ using namespace Rcpp;
 
 // simple implementation of a BK tree (https://en.wikipedia.org/wiki/BK-tree)
 // for std::string elements and Hamming distance
-// based on code from:
+// based on:
 //   https://github.com/talhasaruhan/fuzzy-search/blob/master/bktree.hpp
 class BKtree {
 public:
@@ -82,8 +82,8 @@ public:
   // - string is only remembered as deleted, but not yet removed from the tree
   // - if too many deleted strings exist, rebuild whole tree from scratch
   void remove(string str) {
-    if(deleted.find(str) != deleted.end()) {
-      // string is already deleted, nothing to do
+    if(deleted.find(str) != deleted.end() || !has(str)) {
+      // string is already deleted or not in tree, nothing to do
       return;
     }
 
@@ -384,7 +384,7 @@ void bk_add(std::vector<std::string> seqs) {
   for (size_t i = 0; i < seqs.size(); i++) {
     tree.insert(seqs[i]);
   }
-  Rcout << "new size: " << tree.size << " (capacity: " << tree.capacity() << ")" << std::endl;
+    Rcout << "new size: " << tree.size << " (capacity: " << tree.capacity() << ")" << std::endl;
 }
 
 // [[Rcpp::export]]
@@ -392,7 +392,7 @@ void bk_remove(std::vector<std::string> seqs) {
   for (size_t i = 0; i < seqs.size(); i++) {
     tree.remove(seqs[i]);
   }
-  Rcout << "new size: " << tree.size << " (capacity: " << tree.capacity() << ")" << std::endl;
+    Rcout << "new size: " << tree.size << " (capacity: " << tree.capacity() << ")" << std::endl;
 }
 
 // [[Rcpp::export]]
@@ -409,7 +409,7 @@ bool bk_has(std::string seq, int tol = 0) {
 // [[Rcpp::export]]
 std::vector<std::string> bk_search(std::string seq, int tol = 1) {
   std::vector<std::string> res = tree.search(seq, tol);
-  Rcout << "found " << res.size() << " elements within distance " << tol << std::endl;
+    Rcout << "found " << res.size() << " elements within distance " << tol << std::endl;
   return res;
 }
 
