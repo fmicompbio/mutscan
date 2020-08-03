@@ -236,14 +236,15 @@ private:
           i--;
         }
       }
-      // TODO: truncate items in case some were duplicates?
+      // truncate items to unique items
+      items.resize(size);
     }
   }
   
   // rebuild tree from items and release elements stored in deleted
   void _rebuild() {
     // reorder items (move deleted items to the end)
-    int i = 0, j = items.size() - 1;
+    size_t i = 0, j = items.size() - 1;
     while (i <= j) {
       if (deleted.find(items[i]) != deleted.end()) {
         // item[i] is deleted -> move it to the end of items
