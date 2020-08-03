@@ -512,11 +512,11 @@ List greedy_clustering(int tol = 1, bool verbose = false) {
     L.push_back(gseqs, qseq);
     bk_remove(gseqs, false);
     
-    if ((start - tree.size) % 1000 == 0) { // every 2,000 queries (every ~1.8s)
+    if ((start - tree.size) % 2000 == 0) { // every 2,000 queries (every ~1-2s)
       Rcpp::checkUserInterrupt(); // ... check for user interrupt
       // ... and give an update
       if (verbose && (start - tree.size) % 2000 == 0) {
-        Rcout << "    " << std::setprecision(3) <<
+        Rcout << "    " << std::setprecision(4) <<
           (100.0 * (double)(start - tree.size) / (double)start) <<
             "% done" << std::endl;
       }
