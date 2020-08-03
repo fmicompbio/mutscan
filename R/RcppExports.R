@@ -9,6 +9,10 @@ bk_clear <- function() {
     .Call(`_mutscan_bk_clear`)
 }
 
+bk_new <- function(seqs, verbose = FALSE) {
+    .Call(`_mutscan_bk_new`, seqs, verbose)
+}
+
 bk_add <- function(seqs, verbose = FALSE) {
     .Call(`_mutscan_bk_add`, seqs, verbose)
 }
@@ -27,6 +31,10 @@ bk_has <- function(seq, tol = 0L) {
 
 bk_search <- function(seq, tol = 1L, verbose = FALSE) {
     .Call(`_mutscan_bk_search`, seq, tol, verbose)
+}
+
+greedy_clustering <- function(tol = 1L, verbose = FALSE) {
+    .Call(`_mutscan_greedy_clustering`, tol, verbose)
 }
 
 compareCodonPositions <- function(a, b, mutNameDelimiter) {

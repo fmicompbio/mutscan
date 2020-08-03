@@ -25,6 +25,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// bk_new
+size_t bk_new(std::vector<std::string> seqs, bool verbose);
+RcppExport SEXP _mutscan_bk_new(SEXP seqsSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::vector<std::string> >::type seqs(seqsSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(bk_new(seqs, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // bk_add
 size_t bk_add(std::vector<std::string> seqs, bool verbose);
 RcppExport SEXP _mutscan_bk_add(SEXP seqsSEXP, SEXP verboseSEXP) {
@@ -80,6 +92,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
     rcpp_result_gen = Rcpp::wrap(bk_search(seq, tol, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// greedy_clustering
+List greedy_clustering(int tol, bool verbose);
+RcppExport SEXP _mutscan_greedy_clustering(SEXP tolSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(greedy_clustering(tol, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -179,11 +203,13 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_mutscan_bk_size", (DL_FUNC) &_mutscan_bk_size, 0},
     {"_mutscan_bk_clear", (DL_FUNC) &_mutscan_bk_clear, 0},
+    {"_mutscan_bk_new", (DL_FUNC) &_mutscan_bk_new, 2},
     {"_mutscan_bk_add", (DL_FUNC) &_mutscan_bk_add, 2},
     {"_mutscan_bk_remove", (DL_FUNC) &_mutscan_bk_remove, 2},
     {"_mutscan_bk_print", (DL_FUNC) &_mutscan_bk_print, 0},
     {"_mutscan_bk_has", (DL_FUNC) &_mutscan_bk_has, 2},
     {"_mutscan_bk_search", (DL_FUNC) &_mutscan_bk_search, 3},
+    {"_mutscan_greedy_clustering", (DL_FUNC) &_mutscan_greedy_clustering, 2},
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 3},
     {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 8},
     {"_mutscan_findClosestRefSeq", (DL_FUNC) &_mutscan_findClosestRefSeq, 2},

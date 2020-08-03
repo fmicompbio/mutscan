@@ -414,52 +414,89 @@ private:
 BKtree tree;
 
 // accessor functions exported to R
+// get nuber of elements stored in tree
 // [[Rcpp::export]]
 size_t bk_size() {
   return tree.size;
 }
 
+// remove all elements from the tree
 // [[Rcpp::export]]
 size_t bk_clear() {
   tree.remove_all();
   return tree.size;
 }
 
+// create a new tree from a vector of elements
+// [[Rcpp::export]]
+size_t bk_new(std::vector<std::string> seqs, bool verbose = false) {
+  tree.remove_all();
+  tree = BKtree(seqs);
+  if (verbose)
+    Rcout << "new tree of size: " << tree.size << " (capacity: " << tree.capacity() << ")" << std::endl;
+  return tree.size;
+}
+
+// add one or several elements to the tree
 // [[Rcpp::export]]
 size_t bk_add(std::vector<std::string> seqs, bool verbose = false) {
+  size_t start = tree.size;
   for (size_t i = 0; i < seqs.size(); i++) {
     tree.insert(seqs[i]);
   }
   if (verbose)
-    Rcout << "new size: " << tree.size << " (capacity: " << tree.capacity() << ")" << std::endl;
+    Rcout << "added " << (tree.size - start) << " elements, new size: " << tree.size << " (capacity: " << tree.capacity() << ")" << std::endl;
   return tree.size;
 }
 
+// remove one or several elements from the tree (trigger a re-build if needed)
 // [[Rcpp::export]]
 size_t bk_remove(std::vector<std::string> seqs, bool verbose = false) {
+  size_t start = tree.size;
   for (size_t i = 0; i < seqs.size(); i++) {
     tree.remove(seqs[i]);
   }
   if (verbose)
-    Rcout << "new size: " << tree.size << " (capacity: " << tree.capacity() << ")" << std::endl;
+    Rcout << "removed " << (start - tree.size) << " elements, new size: " << tree.size << " (capacity: " << tree.capacity() << ")" << std::endl;
   return tree.size;
 }
 
+// print tree to console (including elements deleted since last rebuild, flagged by "D*" prefix)
 // [[Rcpp::export]]
 void bk_print() {
   Rcout << "current size: " << tree.size << " (capacity: " << tree.capacity() << ")" << std::endl;
   tree.print();
 }
 
+// check if tree contains element seq
 // [[Rcpp::export]]
 bool bk_has(std::string seq, int tol = 0) {
   return tree.has(seq, tol);
 }
 
+// search elements within tol of seq
 // [[Rcpp::export]]
 std::vector<std::string> bk_search(std::string seq, int tol = 1, bool verbose = false) {
   std::vector<std::string> res = tree.search(seq, tol);
   if (verbose)
     Rcout << "found " << res.size() << " elements within distance " << tol << std::endl;
   return res;
+}
+
+// group elements by "greedy_clustering"
+// [[Rcpp::export]]
+List greedy_clustering(int tol = 1, bool verbose = false) {
+  List L;
+  std::string qseq;
+  std::vector<std::string> gseqs;
+  
+  // start querying in the order of tree.items (assume ordered in a meaningful way)
+  while (tree.size > 0) {
+    qseq = tree.first();
+    gseqs = tree.search(qseq, tol);
+    L.push_back(gseqs, qseq);
+    bk_remove(gseqs, verbose);
+  }
+
+  return L;
 }
