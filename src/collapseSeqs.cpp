@@ -266,6 +266,8 @@ private:
   // rebuild tree from items and release elements stored in deleted
   void _rebuild() {
     // reorder items (move deleted items to the end)
+    // remark: this implementation perturbs the original order in items
+    /*
     size_t i = 0, j = items.size() - 1;
     while (i <= j) {
       if (deleted.find(items[i]) != deleted.end()) {
@@ -275,15 +277,27 @@ private:
         i++;
       }
     }
-    
     // truncate items to just the non-deleted elements
     items.resize(i);
+    */
+    
+    // alternative implementation (preserving order in items)
+    std::vector<std::string> newitems;
+    for (size_t i = 0; i < items.size(); i++) {
+      if (deleted.find(items[i]) == deleted.end()) {
+        // item[i] is not deleted -> copy to newitems
+        newitems.push_back(items[i]);
+      }
+    }
+    items.clear();
+    items = newitems;
+    
     // ... and empty deleted
     deleted.clear();
     
     // build up new tree from cleaned items
     delete root;
-    size = i;
+    size = items.size();
     _build_from_items(items);
   }
   
@@ -491,11 +505,12 @@ List greedy_clustering(int tol = 1, bool verbose = false) {
   std::vector<std::string> gseqs;
   
   // start querying in the order of tree.items (assume ordered in a meaningful way)
+  double start = (double)tree.size;
   while (tree.size > 0) {
     qseq = tree.first();
     gseqs = tree.search(qseq, tol);
     L.push_back(gseqs, qseq);
-    bk_remove(gseqs, verbose);
+    bk_remove(gseqs, false);
   }
 
   return L;
