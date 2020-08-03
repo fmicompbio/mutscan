@@ -13,10 +13,10 @@
 #' @param method A \code{character} scalar selecting the collapsing method.
 #'   One of: greedy_clustering.
 #' @param tol A \code{numeric} scalar defining the tolerance for similar
-#'   sequences. If \code{tol} is in [0, 1), it is interpreted as the fraction
-#'   of allowed mismatch bases (\code{ceiling(tol * nchar(seqs[1]))}). A value
-#'   greater or equal to 1 is rounded and interpreted as the maximum allowed
-#'   Hamming distance.
+#'   sequences. If \code{tol} is in [0, 1), it defines the maximal Hamming
+#'   distance in terms of a fraction of sequence length:
+#'   (\code{round(tol * nchar(seqs[1]))}). A value greater or equal to 1 is
+#'   rounded and directly used as the maximum allowed Hamming distance.
 #' @param verbose A \code{logical} scalar. If \code{TRUE}, report on progress on
 #'   the R console.
 #' 
