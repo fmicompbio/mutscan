@@ -35,7 +35,7 @@ Suggests:
     rmarkdown
 License: GPL-2
 Encoding: UTF-8
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 LinkingTo: 
     Rcpp

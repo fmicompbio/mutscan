@@ -3,6 +3,7 @@
 export(calculatePPIScore)
 export(calculateRelativeFC)
 export(collapseMutantsByAA)
+export(collapseSeqs)
 export(digestFastqs)
 export(summarizeExperiment)
 importFrom(BiocGenerics,paste)
