@@ -135,6 +135,20 @@ public:
     return _has(str, tol, root); // start  recursive search at the root
   }
   
+  // get first non-deleted element (in the order of items)
+  std::string first() {
+    std::string res = "";
+    if (size > 0) {
+      for (size_t i = 0; i < size; i++) {
+        if (deleted.find(items[i]) == deleted.end()) {
+          res = items[i];
+          break;
+        }
+      }
+    }
+    return res;
+  }
+
   // print tree on stdout
   void print(node* r = nullptr, node* n = nullptr, int depth = 0) {
     Rcout << size << "\n";
