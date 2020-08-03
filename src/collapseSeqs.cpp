@@ -388,23 +388,39 @@ private:
 };
 
 
-// play with BK tree
+// global instance of BK tree
 BKtree tree;
 
+// accessor functions exported to R
 // [[Rcpp::export]]
-void bk_add(std::vector<std::string> seqs) {
-  for (size_t i = 0; i < seqs.size(); i++) {
-    tree.insert(seqs[i]);
-  }
-    Rcout << "new size: " << tree.size << " (capacity: " << tree.capacity() << ")" << std::endl;
+size_t bk_size() {
+  return tree.size;
 }
 
 // [[Rcpp::export]]
-void bk_remove(std::vector<std::string> seqs) {
+size_t bk_clear() {
+  tree.remove_all();
+  return tree.size;
+}
+
+// [[Rcpp::export]]
+size_t bk_add(std::vector<std::string> seqs, bool verbose = false) {
+  for (size_t i = 0; i < seqs.size(); i++) {
+    tree.insert(seqs[i]);
+  }
+  if (verbose)
+    Rcout << "new size: " << tree.size << " (capacity: " << tree.capacity() << ")" << std::endl;
+  return tree.size;
+}
+
+// [[Rcpp::export]]
+size_t bk_remove(std::vector<std::string> seqs, bool verbose = false) {
   for (size_t i = 0; i < seqs.size(); i++) {
     tree.remove(seqs[i]);
   }
+  if (verbose)
     Rcout << "new size: " << tree.size << " (capacity: " << tree.capacity() << ")" << std::endl;
+  return tree.size;
 }
 
 // [[Rcpp::export]]
@@ -419,36 +435,9 @@ bool bk_has(std::string seq, int tol = 0) {
 }
 
 // [[Rcpp::export]]
-std::vector<std::string> bk_search(std::string seq, int tol = 1) {
+std::vector<std::string> bk_search(std::string seq, int tol = 1, bool verbose = false) {
   std::vector<std::string> res = tree.search(seq, tol);
+  if (verbose)
     Rcout << "found " << res.size() << " elements within distance " << tol << std::endl;
   return res;
 }
-
-/*
-bool play(std::vector<std::string> seqs) {
-  Rcout << "building tree" << std::endl;
-  BKtree tree(seqs);
-  Rcout << "done" << std::endl;
-  
-  tree.print();
-  
-  return true;
-}
-*/
-
-/*
-// expose the class to R
-RCPP_MODULE(BKtree_module) {
-  class_<BKtree>( "BKtree" )
-  .constructor()
-  .field( "size", &BKtree::size )
-  .method( "insert", &BKtree::insert )
-  .method( "remove", &BKtree::remove )
-  .method( "search", &BKtree::search )
-  .method( "has", &BKtree::has )
-  .method( "print", &BKtree::print )
-  .method( "capacity", &BKtree::capacity )
-  ;
-}
-*/

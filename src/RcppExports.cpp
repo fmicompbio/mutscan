@@ -5,24 +5,48 @@
 
 using namespace Rcpp;
 
-// bk_add
-void bk_add(std::vector<std::string> seqs);
-RcppExport SEXP _mutscan_bk_add(SEXP seqsSEXP) {
+// bk_size
+size_t bk_size();
+RcppExport SEXP _mutscan_bk_size() {
 BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(bk_size());
+    return rcpp_result_gen;
+END_RCPP
+}
+// bk_clear
+size_t bk_clear();
+RcppExport SEXP _mutscan_bk_clear() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(bk_clear());
+    return rcpp_result_gen;
+END_RCPP
+}
+// bk_add
+size_t bk_add(std::vector<std::string> seqs, bool verbose);
+RcppExport SEXP _mutscan_bk_add(SEXP seqsSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::vector<std::string> >::type seqs(seqsSEXP);
-    bk_add(seqs);
-    return R_NilValue;
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(bk_add(seqs, verbose));
+    return rcpp_result_gen;
 END_RCPP
 }
 // bk_remove
-void bk_remove(std::vector<std::string> seqs);
-RcppExport SEXP _mutscan_bk_remove(SEXP seqsSEXP) {
+size_t bk_remove(std::vector<std::string> seqs, bool verbose);
+RcppExport SEXP _mutscan_bk_remove(SEXP seqsSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::vector<std::string> >::type seqs(seqsSEXP);
-    bk_remove(seqs);
-    return R_NilValue;
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(bk_remove(seqs, verbose));
+    return rcpp_result_gen;
 END_RCPP
 }
 // bk_print
@@ -47,14 +71,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // bk_search
-std::vector<std::string> bk_search(std::string seq, int tol);
-RcppExport SEXP _mutscan_bk_search(SEXP seqSEXP, SEXP tolSEXP) {
+std::vector<std::string> bk_search(std::string seq, int tol, bool verbose);
+RcppExport SEXP _mutscan_bk_search(SEXP seqSEXP, SEXP tolSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type seq(seqSEXP);
     Rcpp::traits::input_parameter< int >::type tol(tolSEXP);
-    rcpp_result_gen = Rcpp::wrap(bk_search(seq, tol));
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(bk_search(seq, tol, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -152,11 +177,13 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_mutscan_bk_add", (DL_FUNC) &_mutscan_bk_add, 1},
-    {"_mutscan_bk_remove", (DL_FUNC) &_mutscan_bk_remove, 1},
+    {"_mutscan_bk_size", (DL_FUNC) &_mutscan_bk_size, 0},
+    {"_mutscan_bk_clear", (DL_FUNC) &_mutscan_bk_clear, 0},
+    {"_mutscan_bk_add", (DL_FUNC) &_mutscan_bk_add, 2},
+    {"_mutscan_bk_remove", (DL_FUNC) &_mutscan_bk_remove, 2},
     {"_mutscan_bk_print", (DL_FUNC) &_mutscan_bk_print, 0},
     {"_mutscan_bk_has", (DL_FUNC) &_mutscan_bk_has, 2},
-    {"_mutscan_bk_search", (DL_FUNC) &_mutscan_bk_search, 2},
+    {"_mutscan_bk_search", (DL_FUNC) &_mutscan_bk_search, 3},
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 3},
     {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 8},
     {"_mutscan_findClosestRefSeq", (DL_FUNC) &_mutscan_findClosestRefSeq, 2},
