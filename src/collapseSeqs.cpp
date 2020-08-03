@@ -96,6 +96,17 @@ public:
     }
   }
   
+  // remove all elements from tree
+  void remove_all() {
+    if (size > 0) {
+      delete root;
+      root = nullptr;
+      size = 0;
+      items.clear();
+      deleted.clear();
+    }
+  }
+
   // search elements within distance tol
   vector<string> search(string str, int tol) {
     if (size <= 0) {
