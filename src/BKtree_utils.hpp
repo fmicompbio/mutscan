@@ -424,79 +424,72 @@ private:
 };
 
 
+
+
+// The BKtree wrappers are for unit testing BKtree from R
+ 
 // global instance of BK tree
-BKtree tree;
+BKtree global_tree;
 
 // accessor functions exported to R
-// get nuber of elements stored in tree
+// get nuber of elements stored in global_tree
 // [[Rcpp::export]]
 size_t bk_size() {
-  return tree.size;
+  return global_tree.size;
 }
 
-// remove all elements from the tree
+// remove all elements from the global_tree
 // [[Rcpp::export]]
 size_t bk_clear() {
-  tree.remove_all();
-  return tree.size;
+  global_tree.remove_all();
+  return global_tree.size;
 }
 
-// create a new tree from a vector of elements
+// create a new global_tree from a vector of elements
 // [[Rcpp::export]]
-size_t bk_new(std::vector<std::string> seqs, bool verbose = false) {
-  tree.remove_all();
-  tree = BKtree(seqs);
-  if (verbose)
-    Rcout << "new tree of size: " << tree.size << " (capacity: " << tree.capacity() << ")" << std::endl;
-  return tree.size;
+size_t bk_new(std::vector<std::string> seqs) {
+  global_tree.remove_all();
+  global_tree = BKtree(seqs);
+  return global_tree.size;
 }
 
-// add one or several elements to the tree
+// add one or several elements to the global_tree
 // [[Rcpp::export]]
-size_t bk_add(std::vector<std::string> seqs, bool verbose = false) {
-  size_t start = tree.size;
+size_t bk_add(std::vector<std::string> seqs) {
   for (size_t i = 0; i < seqs.size(); i++) {
-    tree.insert(seqs[i]);
+    global_tree.insert(seqs[i]);
   }
-  if (verbose)
-    Rcout << "added " << (tree.size - start) << " elements, new size: " << tree.size << " (capacity: " << tree.capacity() << ")" << std::endl;
-  return tree.size;
+  return global_tree.size;
 }
 
-// remove one or several elements from the tree (trigger a re-build if needed)
+// remove one or several elements from the global_tree (trigger a re-build if needed)
 // [[Rcpp::export]]
-size_t bk_remove(std::vector<std::string> seqs, bool verbose = false) {
-  size_t start = tree.size;
+size_t bk_remove(std::vector<std::string> seqs) {
   for (size_t i = 0; i < seqs.size(); i++) {
-    tree.remove(seqs[i]);
+    global_tree.remove(seqs[i]);
   }
-  if (verbose)
-    Rcout << "removed " << (start - tree.size) << " elements, new size: " << tree.size << " (capacity: " << tree.capacity() << ")" << std::endl;
-  return tree.size;
+  return global_tree.size;
 }
 
-// print tree to console (including elements deleted since last rebuild, flagged by "D*" prefix)
+// print global_tree to console (including elements deleted since last rebuild, flagged by "D*" prefix)
 // [[Rcpp::export]]
 void bk_print() {
-  Rcout << "current size: " << tree.size << " (capacity: " << tree.capacity() << ")" << std::endl;
-  tree.print();
+  global_tree.print();
 }
 
-// check if tree contains element seq
+// check if global_tree contains element seq
 // [[Rcpp::export]]
 bool bk_has(std::string seq, int tol = 0) {
-  return tree.has(seq, tol);
+  return global_tree.has(seq, tol);
 }
 
 // search elements within tol of seq
 // [[Rcpp::export]]
-std::vector<std::string> bk_search(std::string seq, int tol = 1, bool verbose = false) {
-  std::vector<std::string> res = tree.search(seq, tol);
-  if (verbose)
-    Rcout << "found " << res.size() << " elements within distance " << tol << std::endl;
-  return res;
+std::vector<std::string> bk_search(std::string seq, int tol = 1) {
+  return global_tree.search(seq, tol);
 }
 
+/*
 // group elements by "greedy_clustering"
 // [[Rcpp::export]]
 List greedy_clustering(int tol = 1, bool verbose = false) {
@@ -504,20 +497,20 @@ List greedy_clustering(int tol = 1, bool verbose = false) {
   std::string qseq;
   std::vector<std::string> gseqs;
   
-  // start querying in the order of tree.items (assume ordered in a meaningful way)
-  size_t start = (double)tree.size;
-  while (tree.size > 0) {
-    qseq = tree.first();
-    gseqs = tree.search(qseq, tol);
+  // start querying in the order of global_tree.items (assume ordered in a meaningful way)
+  size_t start = (double)global_tree.size;
+  while (global_tree.size > 0) {
+    qseq = global_tree.first();
+    gseqs = global_tree.search(qseq, tol);
     L.push_back(gseqs, qseq);
     bk_remove(gseqs, false);
     
-    if ((start - tree.size) % 2000 == 0) { // every 2,000 queries (every ~1-2s)
+    if ((start - global_tree.size) % 2000 == 0) { // every 2,000 queries (every ~1-2s)
       Rcpp::checkUserInterrupt(); // ... check for user interrupt
       // ... and give an update
-      if (verbose && (start - tree.size) % 2000 == 0) {
+      if (verbose && (start - global_tree.size) % 2000 == 0) {
         Rcout << "    " << std::setprecision(4) <<
-          (100.0 * (double)(start - tree.size) / (double)start) <<
+          (100.0 * (double)(start - global_tree.size) / (double)start) <<
             "% done" << std::endl;
       }
     }
@@ -526,3 +519,4 @@ List greedy_clustering(int tol = 1, bool verbose = false) {
 
   return L;
 }
+*/
