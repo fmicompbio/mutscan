@@ -137,6 +137,15 @@ checkNumericInput <- function(..., nonnegative) {
 #'   mutated codon. Here, {.} is the provided \code{mutNameDelimiter}. The
 #'   delimiter must be a single character (not "_"), and can not appear in any
 #'   of the provided reference sequence names.
+#' @param variableCollapseMaxDist,umiCollapseMaxDist A \code{numeric} scalar
+#'   defining the tolerances for collapsing similar variable (forward + reverse,
+#'   if any) or UMI sequences. If the value is in [0, 1), it defines the maximal
+#'   Hamming distance in terms of a fraction of sequence length:
+#'   (\code{round(variableCollapseMaxDist * nchar(variableSeq))}).
+#'   A value greater or equal to 1 is rounded and directly used as the maximum
+#'   allowed Hamming distance. Note that variable sequences can only be
+#'   collapsed if they are all of the same length and no wild type sequences
+#'   (\code{wildTypeForward} or \code{wildTypeReverse}) have been given.
 #' @param maxNReads integer(1) Maximal number of reads to process. If set to -1,
 #'   all reads will be processed.
 #' @param verbose logical(1), whether to print out progress messages.
@@ -188,6 +197,8 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          mutatedPhredMinForward = 0.0,
                          mutatedPhredMinReverse = 0.0,
                          mutNameDelimiter = ".",
+                         variableCollapseMaxDist = 0.0,
+                         umiCollapseMaxDist = 0.0,
                          maxNReads = -1, verbose = FALSE) {
   ## --------------------------------------------------------------------------
   ## pre-flight checks
@@ -230,6 +241,8 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
   checkNumericInput(nbrMutatedCodonsMaxReverse, nonnegative = TRUE)
   checkNumericInput(mutatedPhredMinForward, nonnegative = TRUE)
   checkNumericInput(mutatedPhredMinReverse, nonnegative = TRUE)
+  checkNumericInput(variableCollapseMaxDist, nonnegative = TRUE)
+  checkNumericInput(umiCollapseMaxDist, nonnegative = TRUE)
   
   ## adapters and primers must be strings, valid DNA characters
   if (!is.character(adapterForward) || length(adapterForward) != 1 ||
@@ -421,6 +434,8 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          mutatedPhredMinForward = mutatedPhredMinForward,
                          mutatedPhredMinReverse = mutatedPhredMinReverse,
                          mutNameDelimiter = mutNameDelimiter,
+                         variableCollapseMaxDist = variableCollapseMaxDist,
+                         umiCollapseMaxDist = umiCollapseMaxDist,
                          maxNReads = maxNReads,
                          verbose = verbose)
   

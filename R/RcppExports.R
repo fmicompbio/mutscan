@@ -9,16 +9,16 @@ bk_clear <- function() {
     .Call(`_mutscan_bk_clear`)
 }
 
-bk_new <- function(seqs, verbose = FALSE) {
-    .Call(`_mutscan_bk_new`, seqs, verbose)
+bk_new <- function(seqs) {
+    .Call(`_mutscan_bk_new`, seqs)
 }
 
-bk_add <- function(seqs, verbose = FALSE) {
-    .Call(`_mutscan_bk_add`, seqs, verbose)
+bk_add <- function(seqs) {
+    .Call(`_mutscan_bk_add`, seqs)
 }
 
-bk_remove <- function(seqs, verbose = FALSE) {
-    .Call(`_mutscan_bk_remove`, seqs, verbose)
+bk_remove <- function(seqs) {
+    .Call(`_mutscan_bk_remove`, seqs)
 }
 
 bk_print <- function() {
@@ -29,12 +29,8 @@ bk_has <- function(seq, tol = 0L) {
     .Call(`_mutscan_bk_has`, seq, tol)
 }
 
-bk_search <- function(seq, tol = 1L, verbose = FALSE) {
-    .Call(`_mutscan_bk_search`, seq, tol, verbose)
-}
-
-greedy_clustering <- function(tol = 1L, verbose = FALSE) {
-    .Call(`_mutscan_greedy_clustering`, tol, verbose)
+bk_search <- function(seq, tol = 1L) {
+    .Call(`_mutscan_bk_search`, seq, tol)
 }
 
 compareCodonPositions <- function(a, b, mutNameDelimiter) {
@@ -49,7 +45,7 @@ findClosestRefSeq <- function(varSeq, wtSeq) {
     .Call(`_mutscan_findClosestRefSeq`, varSeq, wtSeq)
 }
 
-digestFastqsCpp <- function(fastqForward, fastqReverse, mergeForwardReverse, minOverlap, maxOverlap, maxFracMismatchOverlap, greedyOverlap, revComplForward, revComplReverse, skipForward, skipReverse, umiLengthForward, umiLengthReverse, constantLengthForward, constantLengthReverse, variableLengthForward, variableLengthReverse, adapterForward, adapterReverse, primerForward, primerReverse, wildTypeForward, wildTypeReverse, constantForward, constantReverse, avePhredMinForward = 20.0, avePhredMinReverse = 20.0, variableNMaxForward = 0L, variableNMaxReverse = 0L, umiNMax = 0L, nbrMutatedCodonsMaxForward = 1L, nbrMutatedCodonsMaxReverse = 1L, forbiddenMutatedCodonsForward = "NNW", forbiddenMutatedCodonsReverse = "NNW", mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0, mutNameDelimiter = ".", maxNReads = -1L, verbose = FALSE) {
-    .Call(`_mutscan_digestFastqsCpp`, fastqForward, fastqReverse, mergeForwardReverse, minOverlap, maxOverlap, maxFracMismatchOverlap, greedyOverlap, revComplForward, revComplReverse, skipForward, skipReverse, umiLengthForward, umiLengthReverse, constantLengthForward, constantLengthReverse, variableLengthForward, variableLengthReverse, adapterForward, adapterReverse, primerForward, primerReverse, wildTypeForward, wildTypeReverse, constantForward, constantReverse, avePhredMinForward, avePhredMinReverse, variableNMaxForward, variableNMaxReverse, umiNMax, nbrMutatedCodonsMaxForward, nbrMutatedCodonsMaxReverse, forbiddenMutatedCodonsForward, forbiddenMutatedCodonsReverse, mutatedPhredMinForward, mutatedPhredMinReverse, mutNameDelimiter, maxNReads, verbose)
+digestFastqsCpp <- function(fastqForward, fastqReverse, mergeForwardReverse, minOverlap, maxOverlap, maxFracMismatchOverlap, greedyOverlap, revComplForward, revComplReverse, skipForward, skipReverse, umiLengthForward, umiLengthReverse, constantLengthForward, constantLengthReverse, variableLengthForward, variableLengthReverse, adapterForward, adapterReverse, primerForward, primerReverse, wildTypeForward, wildTypeReverse, constantForward, constantReverse, avePhredMinForward = 20.0, avePhredMinReverse = 20.0, variableNMaxForward = 0L, variableNMaxReverse = 0L, umiNMax = 0L, nbrMutatedCodonsMaxForward = 1L, nbrMutatedCodonsMaxReverse = 1L, forbiddenMutatedCodonsForward = "NNW", forbiddenMutatedCodonsReverse = "NNW", mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0, mutNameDelimiter = ".", variableCollapseMaxDist = 0.0, umiCollapseMaxDist = 0.0, maxNReads = -1L, verbose = FALSE) {
+    .Call(`_mutscan_digestFastqsCpp`, fastqForward, fastqReverse, mergeForwardReverse, minOverlap, maxOverlap, maxFracMismatchOverlap, greedyOverlap, revComplForward, revComplReverse, skipForward, skipReverse, umiLengthForward, umiLengthReverse, constantLengthForward, constantLengthReverse, variableLengthForward, variableLengthReverse, adapterForward, adapterReverse, primerForward, primerReverse, wildTypeForward, wildTypeReverse, constantForward, constantReverse, avePhredMinForward, avePhredMinReverse, variableNMaxForward, variableNMaxReverse, umiNMax, nbrMutatedCodonsMaxForward, nbrMutatedCodonsMaxReverse, forbiddenMutatedCodonsForward, forbiddenMutatedCodonsReverse, mutatedPhredMinForward, mutatedPhredMinReverse, mutNameDelimiter, variableCollapseMaxDist, umiCollapseMaxDist, maxNReads, verbose)
 }
 

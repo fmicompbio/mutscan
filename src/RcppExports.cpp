@@ -26,38 +26,35 @@ BEGIN_RCPP
 END_RCPP
 }
 // bk_new
-size_t bk_new(std::vector<std::string> seqs, bool verbose);
-RcppExport SEXP _mutscan_bk_new(SEXP seqsSEXP, SEXP verboseSEXP) {
+size_t bk_new(std::vector<std::string> seqs);
+RcppExport SEXP _mutscan_bk_new(SEXP seqsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::vector<std::string> >::type seqs(seqsSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(bk_new(seqs, verbose));
+    rcpp_result_gen = Rcpp::wrap(bk_new(seqs));
     return rcpp_result_gen;
 END_RCPP
 }
 // bk_add
-size_t bk_add(std::vector<std::string> seqs, bool verbose);
-RcppExport SEXP _mutscan_bk_add(SEXP seqsSEXP, SEXP verboseSEXP) {
+size_t bk_add(std::vector<std::string> seqs);
+RcppExport SEXP _mutscan_bk_add(SEXP seqsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::vector<std::string> >::type seqs(seqsSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(bk_add(seqs, verbose));
+    rcpp_result_gen = Rcpp::wrap(bk_add(seqs));
     return rcpp_result_gen;
 END_RCPP
 }
 // bk_remove
-size_t bk_remove(std::vector<std::string> seqs, bool verbose);
-RcppExport SEXP _mutscan_bk_remove(SEXP seqsSEXP, SEXP verboseSEXP) {
+size_t bk_remove(std::vector<std::string> seqs);
+RcppExport SEXP _mutscan_bk_remove(SEXP seqsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::vector<std::string> >::type seqs(seqsSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(bk_remove(seqs, verbose));
+    rcpp_result_gen = Rcpp::wrap(bk_remove(seqs));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -83,27 +80,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // bk_search
-std::vector<std::string> bk_search(std::string seq, int tol, bool verbose);
-RcppExport SEXP _mutscan_bk_search(SEXP seqSEXP, SEXP tolSEXP, SEXP verboseSEXP) {
+std::vector<std::string> bk_search(std::string seq, int tol);
+RcppExport SEXP _mutscan_bk_search(SEXP seqSEXP, SEXP tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type seq(seqSEXP);
     Rcpp::traits::input_parameter< int >::type tol(tolSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(bk_search(seq, tol, verbose));
-    return rcpp_result_gen;
-END_RCPP
-}
-// greedy_clustering
-List greedy_clustering(int tol, bool verbose);
-RcppExport SEXP _mutscan_greedy_clustering(SEXP tolSEXP, SEXP verboseSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type tol(tolSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(greedy_clustering(tol, verbose));
+    rcpp_result_gen = Rcpp::wrap(bk_search(seq, tol));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -151,8 +135,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // digestFastqsCpp
-List digestFastqsCpp(std::string fastqForward, std::string fastqReverse, bool mergeForwardReverse, size_t minOverlap, size_t maxOverlap, double maxFracMismatchOverlap, bool greedyOverlap, bool revComplForward, bool revComplReverse, int skipForward, int skipReverse, int umiLengthForward, int umiLengthReverse, int constantLengthForward, int constantLengthReverse, int variableLengthForward, int variableLengthReverse, std::string adapterForward, std::string adapterReverse, std::string primerForward, std::string primerReverse, Rcpp::StringVector wildTypeForward, Rcpp::StringVector wildTypeReverse, std::string constantForward, std::string constantReverse, double avePhredMinForward, double avePhredMinReverse, int variableNMaxForward, int variableNMaxReverse, int umiNMax, unsigned int nbrMutatedCodonsMaxForward, unsigned int nbrMutatedCodonsMaxReverse, CharacterVector forbiddenMutatedCodonsForward, CharacterVector forbiddenMutatedCodonsReverse, double mutatedPhredMinForward, double mutatedPhredMinReverse, std::string mutNameDelimiter, int maxNReads, bool verbose);
-RcppExport SEXP _mutscan_digestFastqsCpp(SEXP fastqForwardSEXP, SEXP fastqReverseSEXP, SEXP mergeForwardReverseSEXP, SEXP minOverlapSEXP, SEXP maxOverlapSEXP, SEXP maxFracMismatchOverlapSEXP, SEXP greedyOverlapSEXP, SEXP revComplForwardSEXP, SEXP revComplReverseSEXP, SEXP skipForwardSEXP, SEXP skipReverseSEXP, SEXP umiLengthForwardSEXP, SEXP umiLengthReverseSEXP, SEXP constantLengthForwardSEXP, SEXP constantLengthReverseSEXP, SEXP variableLengthForwardSEXP, SEXP variableLengthReverseSEXP, SEXP adapterForwardSEXP, SEXP adapterReverseSEXP, SEXP primerForwardSEXP, SEXP primerReverseSEXP, SEXP wildTypeForwardSEXP, SEXP wildTypeReverseSEXP, SEXP constantForwardSEXP, SEXP constantReverseSEXP, SEXP avePhredMinForwardSEXP, SEXP avePhredMinReverseSEXP, SEXP variableNMaxForwardSEXP, SEXP variableNMaxReverseSEXP, SEXP umiNMaxSEXP, SEXP nbrMutatedCodonsMaxForwardSEXP, SEXP nbrMutatedCodonsMaxReverseSEXP, SEXP forbiddenMutatedCodonsForwardSEXP, SEXP forbiddenMutatedCodonsReverseSEXP, SEXP mutatedPhredMinForwardSEXP, SEXP mutatedPhredMinReverseSEXP, SEXP mutNameDelimiterSEXP, SEXP maxNReadsSEXP, SEXP verboseSEXP) {
+List digestFastqsCpp(std::string fastqForward, std::string fastqReverse, bool mergeForwardReverse, size_t minOverlap, size_t maxOverlap, double maxFracMismatchOverlap, bool greedyOverlap, bool revComplForward, bool revComplReverse, int skipForward, int skipReverse, int umiLengthForward, int umiLengthReverse, int constantLengthForward, int constantLengthReverse, int variableLengthForward, int variableLengthReverse, std::string adapterForward, std::string adapterReverse, std::string primerForward, std::string primerReverse, Rcpp::StringVector wildTypeForward, Rcpp::StringVector wildTypeReverse, std::string constantForward, std::string constantReverse, double avePhredMinForward, double avePhredMinReverse, int variableNMaxForward, int variableNMaxReverse, int umiNMax, unsigned int nbrMutatedCodonsMaxForward, unsigned int nbrMutatedCodonsMaxReverse, CharacterVector forbiddenMutatedCodonsForward, CharacterVector forbiddenMutatedCodonsReverse, double mutatedPhredMinForward, double mutatedPhredMinReverse, std::string mutNameDelimiter, double variableCollapseMaxDist, double umiCollapseMaxDist, int maxNReads, bool verbose);
+RcppExport SEXP _mutscan_digestFastqsCpp(SEXP fastqForwardSEXP, SEXP fastqReverseSEXP, SEXP mergeForwardReverseSEXP, SEXP minOverlapSEXP, SEXP maxOverlapSEXP, SEXP maxFracMismatchOverlapSEXP, SEXP greedyOverlapSEXP, SEXP revComplForwardSEXP, SEXP revComplReverseSEXP, SEXP skipForwardSEXP, SEXP skipReverseSEXP, SEXP umiLengthForwardSEXP, SEXP umiLengthReverseSEXP, SEXP constantLengthForwardSEXP, SEXP constantLengthReverseSEXP, SEXP variableLengthForwardSEXP, SEXP variableLengthReverseSEXP, SEXP adapterForwardSEXP, SEXP adapterReverseSEXP, SEXP primerForwardSEXP, SEXP primerReverseSEXP, SEXP wildTypeForwardSEXP, SEXP wildTypeReverseSEXP, SEXP constantForwardSEXP, SEXP constantReverseSEXP, SEXP avePhredMinForwardSEXP, SEXP avePhredMinReverseSEXP, SEXP variableNMaxForwardSEXP, SEXP variableNMaxReverseSEXP, SEXP umiNMaxSEXP, SEXP nbrMutatedCodonsMaxForwardSEXP, SEXP nbrMutatedCodonsMaxReverseSEXP, SEXP forbiddenMutatedCodonsForwardSEXP, SEXP forbiddenMutatedCodonsReverseSEXP, SEXP mutatedPhredMinForwardSEXP, SEXP mutatedPhredMinReverseSEXP, SEXP mutNameDelimiterSEXP, SEXP variableCollapseMaxDistSEXP, SEXP umiCollapseMaxDistSEXP, SEXP maxNReadsSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -193,9 +177,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type mutatedPhredMinForward(mutatedPhredMinForwardSEXP);
     Rcpp::traits::input_parameter< double >::type mutatedPhredMinReverse(mutatedPhredMinReverseSEXP);
     Rcpp::traits::input_parameter< std::string >::type mutNameDelimiter(mutNameDelimiterSEXP);
+    Rcpp::traits::input_parameter< double >::type variableCollapseMaxDist(variableCollapseMaxDistSEXP);
+    Rcpp::traits::input_parameter< double >::type umiCollapseMaxDist(umiCollapseMaxDistSEXP);
     Rcpp::traits::input_parameter< int >::type maxNReads(maxNReadsSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(digestFastqsCpp(fastqForward, fastqReverse, mergeForwardReverse, minOverlap, maxOverlap, maxFracMismatchOverlap, greedyOverlap, revComplForward, revComplReverse, skipForward, skipReverse, umiLengthForward, umiLengthReverse, constantLengthForward, constantLengthReverse, variableLengthForward, variableLengthReverse, adapterForward, adapterReverse, primerForward, primerReverse, wildTypeForward, wildTypeReverse, constantForward, constantReverse, avePhredMinForward, avePhredMinReverse, variableNMaxForward, variableNMaxReverse, umiNMax, nbrMutatedCodonsMaxForward, nbrMutatedCodonsMaxReverse, forbiddenMutatedCodonsForward, forbiddenMutatedCodonsReverse, mutatedPhredMinForward, mutatedPhredMinReverse, mutNameDelimiter, maxNReads, verbose));
+    rcpp_result_gen = Rcpp::wrap(digestFastqsCpp(fastqForward, fastqReverse, mergeForwardReverse, minOverlap, maxOverlap, maxFracMismatchOverlap, greedyOverlap, revComplForward, revComplReverse, skipForward, skipReverse, umiLengthForward, umiLengthReverse, constantLengthForward, constantLengthReverse, variableLengthForward, variableLengthReverse, adapterForward, adapterReverse, primerForward, primerReverse, wildTypeForward, wildTypeReverse, constantForward, constantReverse, avePhredMinForward, avePhredMinReverse, variableNMaxForward, variableNMaxReverse, umiNMax, nbrMutatedCodonsMaxForward, nbrMutatedCodonsMaxReverse, forbiddenMutatedCodonsForward, forbiddenMutatedCodonsReverse, mutatedPhredMinForward, mutatedPhredMinReverse, mutNameDelimiter, variableCollapseMaxDist, umiCollapseMaxDist, maxNReads, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -203,17 +189,16 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_mutscan_bk_size", (DL_FUNC) &_mutscan_bk_size, 0},
     {"_mutscan_bk_clear", (DL_FUNC) &_mutscan_bk_clear, 0},
-    {"_mutscan_bk_new", (DL_FUNC) &_mutscan_bk_new, 2},
-    {"_mutscan_bk_add", (DL_FUNC) &_mutscan_bk_add, 2},
-    {"_mutscan_bk_remove", (DL_FUNC) &_mutscan_bk_remove, 2},
+    {"_mutscan_bk_new", (DL_FUNC) &_mutscan_bk_new, 1},
+    {"_mutscan_bk_add", (DL_FUNC) &_mutscan_bk_add, 1},
+    {"_mutscan_bk_remove", (DL_FUNC) &_mutscan_bk_remove, 1},
     {"_mutscan_bk_print", (DL_FUNC) &_mutscan_bk_print, 0},
     {"_mutscan_bk_has", (DL_FUNC) &_mutscan_bk_has, 2},
-    {"_mutscan_bk_search", (DL_FUNC) &_mutscan_bk_search, 3},
-    {"_mutscan_greedy_clustering", (DL_FUNC) &_mutscan_greedy_clustering, 2},
+    {"_mutscan_bk_search", (DL_FUNC) &_mutscan_bk_search, 2},
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 3},
     {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 8},
     {"_mutscan_findClosestRefSeq", (DL_FUNC) &_mutscan_findClosestRefSeq, 2},
-    {"_mutscan_digestFastqsCpp", (DL_FUNC) &_mutscan_digestFastqsCpp, 39},
+    {"_mutscan_digestFastqsCpp", (DL_FUNC) &_mutscan_digestFastqsCpp, 41},
     {NULL, NULL, 0}
 };
 

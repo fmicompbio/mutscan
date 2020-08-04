@@ -6,6 +6,7 @@
 #include <numeric>
 #include <map>
 #include <algorithm>    // std::sort
+#include "BKtree_utils.hpp"
 
 #define BUFFER_SIZE 4096
 
@@ -418,6 +419,8 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
                      double mutatedPhredMinForward = 0.0,
                      double mutatedPhredMinReverse = 0.0,
                      std::string mutNameDelimiter = ".",
+                     double variableCollapseMaxDist = 0.0,
+                     double umiCollapseMaxDist = 0.0,
                      int maxNReads = -1, bool verbose = false) {
 
   
@@ -684,6 +687,8 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
         // read is to be filtered out
         continue;
       }
+    } else if (varSeqForward.length() > 0) { // variable seq, but no reference -> add variable seq to mutantName
+      mutantName += (varSeqForward + std::string("_"));
     }
     
     // if wildTypeReverse is available...
@@ -699,12 +704,14 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
         // read is to be filtered out
         continue;
       }
+    } else if (!noReverse && varSeqReverse.length() > 0) { // variable seq, but no reference -> add variable seq to mutantName
+      mutantName += (varSeqReverse + std::string("_"));
     }
     
     // store the read pair
     nRetain++;
     // ... create final mutant name
-    if (mutantName.length() > 0) { // we have a least one mutation
+    if (mutantName.length() > 0) { // we have a least one mutation, or sequence-based name
       mutantName.pop_back(); // remove '_' at the end
     } else {
       if (std::string(wildTypeForward[0]).compare("") != 0 || 
@@ -788,14 +795,152 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
     
   } // iterate over individual sequence pairs
   if (verbose) {
-    Rcout << "done reading sequences" << std::endl << "    collapsed to " <<
-             mutantSummary.size() << " elements" << std::endl;
+    Rcout << "done reading sequences (retained " <<
+             mutantSummary.size() << " unique features)" << std::endl;
   }
 
   // clean up
   gzclose(file1);
   if (fastqReverse.compare("") != 0) {
     gzclose(file2);
+  }
+
+  // collapse similar variable sequences in mutantSummary
+  if (variableCollapseMaxDist > 0.0) {
+    if (std::string(wildTypeForward[0]).compare("") != 0 ||
+        std::string(wildTypeReverse[0]).compare("") != 0) {
+      warning("Skipping variable sequence collapsing because wildtype reference sequence(s) are given");
+    } else {
+      // get sequence length
+      mutantSummaryIt = mutantSummary.begin();
+      size_t seqlen = (*mutantSummaryIt).first.length();
+
+      // calculate Hamming distance tolerance
+      int tol;
+      if (variableCollapseMaxDist >= 1.0) {
+        tol = (int)variableCollapseMaxDist;
+      } else {
+        tol = (int)(variableCollapseMaxDist *
+          ((*mutantSummaryIt).first.find("_") != std::string::npos ? seqlen-1 : seqlen));
+      }
+
+      if (verbose) {
+        Rcout << "start collapsing variable sequences (tolerance: " << tol << ")...";
+      }
+
+      // sort mutantSummary decreasingly by read count
+      // ... create an empty intermediate vector
+      std::vector<std::pair<std::string,mutantInfo>> vec;
+      std::vector<std::pair<std::string,mutantInfo>>::iterator vecIt;
+      // copy key-value pairs from mutantSummary to vec
+      std::copy(mutantSummary.begin(), mutantSummary.end(),
+                std::back_inserter<std::vector<std::pair<std::string,mutantInfo>>>(vec));
+      // ... sort vec by decreasing order of pair.second.nReads
+      //     (if second values are equal, order by the pair's first value)
+      std::sort(vec.begin(), vec.end(),
+                [](const std::pair<std::string,mutantInfo>& l,
+                   const std::pair<std::string,mutantInfo>& r) {
+                  if (l.second.nReads != r.second.nReads)
+                    return l.second.nReads > r.second.nReads;
+                  return l.first < r.first;
+                  });
+
+      // store sequences (from names) in BK tree
+      BKtree tree;
+      for (vecIt = vec.begin(); vecIt != vec.end(); vecIt++) {
+        if ((*vecIt).first.length() != seqlen) {
+          warning("Skipping variable sequence collapsing because reads are not all of the same length");
+          tree.remove_all();
+          break;
+        } else {
+          tree.insert((*vecIt).first);
+        }
+      }
+      vec.clear(); // remove temporary vector
+
+      if (tree.size > 0) {
+        std::string querySeq, collapsedName;
+        std::vector<std::string> simSeqs;
+        std::map<std::string, std::string> single2collapsed;
+        
+        // start querying in the order of tree.items (ordered decreasingly by nReads)
+        while (tree.size > 0) {
+          querySeq = tree.first();
+          simSeqs = tree.search(querySeq, tol);
+          for (size_t i = 0; i < simSeqs.size(); i++) {
+            single2collapsed[simSeqs[i]] = querySeq;
+            tree.remove(simSeqs[i]);
+          }
+        }
+
+        // group into sets of similar sequences
+        std::map<std::string, mutantInfo> collapsedMutantSummary;
+        std::map<std::string, mutantInfo>::iterator collapsedMutantSummaryIt;
+        for (mutantSummaryIt = mutantSummary.begin(); mutantSummaryIt != mutantSummary.end(); mutantSummaryIt++) {
+          collapsedName = single2collapsed[(*mutantSummaryIt).first];
+          if ((collapsedMutantSummaryIt = collapsedMutantSummary.find(collapsedName)) != collapsedMutantSummary.end()) {
+            // ... fuse with existing mutantInfo
+            (*collapsedMutantSummaryIt).second.nReads += (*mutantSummaryIt).second.nReads;
+            (*collapsedMutantSummaryIt).second.umi.insert((*mutantSummaryIt).second.umi.begin(),
+                                                          (*mutantSummaryIt).second.umi.end());
+            (*collapsedMutantSummaryIt).second.sequence.insert((*mutantSummaryIt).second.sequence.begin(),
+                                                               (*mutantSummaryIt).second.sequence.end());
+          } else {
+            // ... insert first mutantInfo
+            collapsedMutantSummary.insert(std::pair<std::string,mutantInfo>(collapsedName, (*mutantSummaryIt).second));
+          }
+        }
+        if (verbose) {
+          Rcout << "done (reduced from " << mutantSummary.size() << " to " << collapsedMutantSummary.size() << ")" << std::endl;
+        }
+        mutantSummary = collapsedMutantSummary;
+      }
+    }
+  }
+  
+  // collapse similar UMI sequences in each variable sequence mutantSummary
+  if (umiCollapseMaxDist > 0.0) {
+    // calculate Hamming distance tolerance
+    int tol;
+    if (umiCollapseMaxDist >= 1.0) {
+      tol = (int)umiCollapseMaxDist;
+    } else {
+      tol = (int)(umiCollapseMaxDist * (*(*mutantSummary.begin()).second.umi.begin()).length());
+    }
+    
+    if (verbose) {
+      Rcout << "start collapsing UMIs (tolerance: " << tol << ")...";
+    }
+
+    // store sequences (from names) in BK tree
+    BKtree tree;
+    std::set<std::string>::iterator umiIt;
+    for (mutantSummaryIt = mutantSummary.begin(); mutantSummaryIt != mutantSummary.end(); mutantSummaryIt++) {
+      if ((*mutantSummaryIt).second.umi.size() == 1) {
+        continue;
+      } else {
+        tree.remove_all();
+        for (umiIt = (*mutantSummaryIt).second.umi.begin(); umiIt != (*mutantSummaryIt).second.umi.end(); umiIt++) {
+          tree.insert((*umiIt));
+        }
+
+        std::vector<std::string> simSeqs;
+        std::set<std::string> collapsedUmis;
+        while (tree.size > 0) {
+          simSeqs = tree.search(tree.first(), tol);
+          collapsedUmis.insert(tree.first());
+          for (size_t i = 0; i < simSeqs.size(); i++) {
+            tree.remove(simSeqs[i]);
+          }
+        }
+        
+        (*mutantSummaryIt).second.umi = collapsedUmis;
+      }
+    }
+    
+    if (verbose) {
+      Rcout << "done" << std::endl;
+    }
   }
 
   // return results
@@ -880,6 +1025,8 @@ List digestFastqsCpp(std::string fastqForward, std::string fastqReverse,
   param.push_back(mutatedPhredMinForward, "mutatedPhredMinForward");
   param.push_back(mutatedPhredMinReverse, "mutatedPhredMinReverse");
   param.push_back(mutNameDelimiter, "mutNameDelimiter");
+  param.push_back(variableCollapseMaxDist, "variableCollapseMaxDist");
+  param.push_back(umiCollapseMaxDist, "umiCollapseMaxDist");
   param.push_back(maxNReads, "maxNReads");
   List L = List::create(Named("parameters") = param,
                         Named("filterSummary") = filt,
