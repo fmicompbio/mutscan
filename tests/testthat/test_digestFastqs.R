@@ -599,6 +599,181 @@ test_that("digestFastqs works as expected for experiments with only forward read
   
 })
 
+context("digestFastqs - trans - collapsing")
+test_that("digestFastqs works as expected for trans experiments, when similar sequences are collapsed", {
+  fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
+  fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
+  ## default arguments
+  Ldef <- list(
+    fastqForward = fqt1, fastqReverse = fqt2, 
+    mergeForwardReverse = FALSE, 
+    minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
+    revComplForward = FALSE, revComplReverse = FALSE,
+    skipForward = 1, skipReverse = 1, 
+    umiLengthForward = 10, umiLengthReverse = 8, 
+    constantLengthForward = 18, constantLengthReverse = 20, 
+    variableLengthForward = 96, variableLengthReverse = 96,
+    adapterForward = "GGAAGAGCACACGTC", 
+    adapterReverse = "GGAAGAGCGTCGTGT",
+    primerForward = "",
+    primerReverse = "",
+    wildTypeForward = "",
+    wildTypeReverse = "", 
+    constantForward = "AACCGGAGGAGGGAGCTG", 
+    constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
+    avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+    variableNMaxForward = 0, variableNMaxReverse = 0, 
+    umiNMax = 0,
+    nbrMutatedCodonsMaxForward = 1,
+    nbrMutatedCodonsMaxReverse = 1,
+    forbiddenMutatedCodonsForward = "NNW",
+    forbiddenMutatedCodonsReverse = "NNW",
+    mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+    mutNameDelimiter = ".",
+    variableCollapseMaxDist = 6, umiCollapseMaxDist = 4,
+    maxNReads = -1, verbose = FALSE
+  )
+  
+  res <- do.call(digestFastqs, Ldef)
+  
+  expect_equal(res$filterSummary$nbrTotal, 1000L)
+  expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
+  expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
+  expect_equal(res$filterSummary$f3_nbrReadTooShort, 0L)
+  expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
+  expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 7L)
+  expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 0L)
+  expect_equal(res$filterSummary$f7_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f8_nbrMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f9_nbrTooManyMutCodons, 0L)
+  expect_equal(res$filterSummary$f10_nbrForbiddenCodons, 0L)
+  expect_equal(res$filterSummary$nbrRetained, 679L)
+  
+  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
+    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+  }
+  
+  expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
+  expect_equal(nrow(res$summaryTable), 294L)
+  expect_equal(sum(res$summaryTable$nbrUmis), 677)
+})
+
+test_that("digestFastqs works as expected for trans experiments, when similar sequences are collapsed - extreme case", {
+  fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
+  fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
+  ## default arguments
+  Ldef <- list(
+    fastqForward = fqt1, fastqReverse = fqt2, 
+    mergeForwardReverse = FALSE, 
+    minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
+    revComplForward = FALSE, revComplReverse = FALSE,
+    skipForward = 1, skipReverse = 1, 
+    umiLengthForward = 10, umiLengthReverse = 8, 
+    constantLengthForward = 18, constantLengthReverse = 20, 
+    variableLengthForward = 96, variableLengthReverse = 96,
+    adapterForward = "GGAAGAGCACACGTC", 
+    adapterReverse = "GGAAGAGCGTCGTGT",
+    primerForward = "",
+    primerReverse = "",
+    wildTypeForward = "",
+    wildTypeReverse = "", 
+    constantForward = "AACCGGAGGAGGGAGCTG", 
+    constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
+    avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+    variableNMaxForward = 0, variableNMaxReverse = 0, 
+    umiNMax = 0,
+    nbrMutatedCodonsMaxForward = 1,
+    nbrMutatedCodonsMaxReverse = 1,
+    forbiddenMutatedCodonsForward = "NNW",
+    forbiddenMutatedCodonsReverse = "NNW",
+    mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+    mutNameDelimiter = ".",
+    variableCollapseMaxDist = 500, umiCollapseMaxDist = 100,
+    maxNReads = -1, verbose = FALSE
+  )
+  
+  res <- do.call(digestFastqs, Ldef)
+  
+  expect_equal(res$filterSummary$nbrTotal, 1000L)
+  expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
+  expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
+  expect_equal(res$filterSummary$f3_nbrReadTooShort, 0L)
+  expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
+  expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 7L)
+  expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 0L)
+  expect_equal(res$filterSummary$f7_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f8_nbrMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f9_nbrTooManyMutCodons, 0L)
+  expect_equal(res$filterSummary$f10_nbrForbiddenCodons, 0L)
+  expect_equal(res$filterSummary$nbrRetained, 679L)
+  
+  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
+    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+  }
+  
+  expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
+  expect_equal(nrow(res$summaryTable), 1L)
+  expect_equal(sum(res$summaryTable$nbrUmis), 1)
+})
+
+test_that("digestFastqs works as expected for trans experiments, when similar sequences are collapsed - only forward read", {
+  fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
+  fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
+  ## default arguments
+  Ldef <- list(
+    fastqForward = fqt1, fastqReverse = NULL, 
+    mergeForwardReverse = FALSE, 
+    minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
+    revComplForward = FALSE, revComplReverse = FALSE,
+    skipForward = 1, skipReverse = 1, 
+    umiLengthForward = 10, umiLengthReverse = 8, 
+    constantLengthForward = 18, constantLengthReverse = 20, 
+    variableLengthForward = 96, variableLengthReverse = 96,
+    adapterForward = "GGAAGAGCACACGTC", 
+    adapterReverse = "GGAAGAGCGTCGTGT",
+    primerForward = "",
+    primerReverse = "",
+    wildTypeForward = "",
+    wildTypeReverse = "", 
+    constantForward = "AACCGGAGGAGGGAGCTG", 
+    constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
+    avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+    variableNMaxForward = 0, variableNMaxReverse = 0, 
+    umiNMax = 0,
+    nbrMutatedCodonsMaxForward = 1,
+    nbrMutatedCodonsMaxReverse = 1,
+    forbiddenMutatedCodonsForward = "NNW",
+    forbiddenMutatedCodonsReverse = "NNW",
+    mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+    mutNameDelimiter = ".",
+    variableCollapseMaxDist = 10, umiCollapseMaxDist = 5,
+    maxNReads = -1, verbose = FALSE
+  )
+  
+  res <- do.call(digestFastqs, Ldef)
+  
+  expect_equal(res$filterSummary$nbrTotal, 1000L)
+  expect_equal(res$filterSummary$f1_nbrAdapter, 297L)
+  expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
+  expect_equal(res$filterSummary$f3_nbrReadTooShort, 0L)
+  expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
+  expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 0L)
+  expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 0L)
+  expect_equal(res$filterSummary$f7_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f8_nbrMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f9_nbrTooManyMutCodons, 0L)
+  expect_equal(res$filterSummary$f10_nbrForbiddenCodons, 0L)
+  expect_equal(res$filterSummary$nbrRetained, 703L)
+  
+  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
+    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+  }
+  
+  expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
+  expect_equal(nrow(res$summaryTable), 52L)
+  expect_equal(sum(res$summaryTable$nbrUmis), 97)
+})
+
 context("digestFastqs - cis")
 test_that("digestFastqs works as expected for cis experiments", {
   fqc1 <- system.file("extdata/cisInput_1.fastq.gz", package = "mutscan")
