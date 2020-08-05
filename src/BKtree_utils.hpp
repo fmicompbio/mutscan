@@ -42,16 +42,16 @@ public:
   size_t size; // number of strings in tree
   
   // tree constructors
-  BKtree(string str): size(1) { // from a string
-    items.push_back(str);
-    root = new node(0);
-  }
-
   BKtree(): size(0){ // empty tree
     root = nullptr;
   }
   
-  BKtree(const vector<string>& v) { // from a vector of strings
+  BKtree(const std::string str): size(1) { // from a string
+    items.push_back(str);
+    root = new node(0);
+  }
+
+  BKtree(const std::vector<std::string>& v) { // from a vector of strings
     items = v;
     size = v.size();
     _build_from_items(v);
