@@ -500,7 +500,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         // ... and give an update
         if (verbose && nTot % 1000000 == 0) {
           Rcout << "    " << nTot << " read pairs read ("
-                << std::setprecision(1) << (100*nRetain/nTot) << "% retained)" << std::endl;
+                << std::setprecision(1) << (100*(nRetain/nTot)) << "% retained)" << std::endl;
         }
       }
 
