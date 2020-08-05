@@ -217,18 +217,6 @@ test_that("digestFastqs fails with incorrect arguments", {
     expect_error(do.call(digestFastqs, L))
   }
   
-  ## mergeForwardReverse=TRUE requires equal-length fwd/rev variable sequences
-  L <- Ldef; L[["mergeForwardReverse"]] <- TRUE; L[["variableLengthForward"]] <- -1; L[["wildTypeReverse"]] <- ""
-  expect_error(do.call(digestFastqs, L))
-  L <- Ldef; L[["mergeForwardReverse"]] <- TRUE; L[["variableLengthReverse"]] <- -1; L[["wildTypeReverse"]] <- ""
-  expect_error(do.call(digestFastqs, L))
-  L <- Ldef; L[["mergeForwardReverse"]] <- TRUE; L[["variableLengthForward"]] <- 10; L[["wildTypeReverse"]] <- ""
-  L[["wildTypeForward"]] <- substr(L[["wildTypeForward"]], 1, 10)
-  expect_error(do.call(digestFastqs, L))
-  L <- Ldef; L[["mergeForwardReverse"]] <- TRUE; L[["variableLengthReverse"]] <- 10; L[["wildTypeReverse"]] <- ""
-  L[["wildTypeReverse"]] <- substr(L[["wildTypeReverse"]], 1, 10)
-  expect_error(do.call(digestFastqs, L))
-  
   ## Invalid forbidden codons
   L <- Ldef; L[["forbiddenMutatedCodonsForward"]] <- c("EFI")
   expect_error(do.call(digestFastqs, L))

@@ -389,14 +389,6 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     stop("'verbose' must be a logical scalar.")
   }
   
-  # ## If mergeForwardReverse is TRUE, forward and reverse sequence lengths must be set, and identical
-  # if (mergeForwardReverse && (variableLengthForward == (-1) || variableLengthReverse == (-1))) {
-  #   stop("If 'mergeForwardReverse' is set to TRUE, the variable sequence lengths must be specified.")
-  # }
-  # if (mergeForwardReverse && variableLengthForward != variableLengthReverse) {
-  #   stop("If 'mergeForwardReverse' is set to TRUE, 'variableLengthForward' must be equal to 'variableLengthReverse'.")
-  # }
-  
   res <- digestFastqsCpp(fastqForward = fastqForward, 
                          fastqReverse = fastqReverse,
                          mergeForwardReverse = mergeForwardReverse,
