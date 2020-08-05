@@ -141,14 +141,16 @@ test_that("digestFastqs fails with incorrect arguments", {
                 "avePhredMinForward", "avePhredMinReverse", "variableNMaxForward",
                 "variableNMaxReverse", "umiNMax", 
                 "nbrMutatedCodonsMaxForward", "nbrMutatedCodonsMaxReverse", 
-                "mutatedPhredMinForward", "mutatedPhredMinReverse")) {
+                "mutatedPhredMinForward", "mutatedPhredMinReverse",
+                "variableCollapseMaxDist", "umiCollapseMaxDist")) {
     L <- Ldef; L[[var]] <- "str"
     expect_error(do.call(digestFastqs, L))
     L <- Ldef; L[[var]] <- c(1, 2)
     expect_error(do.call(digestFastqs, L))
     if (!(var %in% c("skipForward", "skipReverse", "umiLengthForward",
                      "umiLengthReverse", "constantLengthForward",
-                     "constantLengthReverse", "variableLengthForward", "variableLengthReverse"))) {
+                     "constantLengthReverse", "variableLengthForward", "variableLengthReverse",
+                     "variableCollapseMaxDist", "umiCollapseMaxDist"))) {
       L <- Ldef; L[[var]] <- -1
       expect_error(do.call(digestFastqs, L))
     }
@@ -753,7 +755,7 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   expect_equal(res$filterSummary$f10_nbrForbiddenCodons, 0L)
   expect_equal(res$filterSummary$nbrRetained, 703L)
   
-  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
+  for (nm in setdiff(names(Ldef), c("fastqReverse", "forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
     expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
   }
   

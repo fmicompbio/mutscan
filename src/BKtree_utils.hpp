@@ -4,7 +4,6 @@
 #include <vector>
 #include <bits/stdc++.h>
 
-using namespace std;
 using namespace Rcpp;
 
 // simple implementation of a BK tree (https://en.wikipedia.org/wiki/BK-tree)
@@ -18,12 +17,12 @@ public:
   class node {
   public:
     int index; // items[index] in tree contains string of this node
-    unordered_map<int, node*> children;
+    std::unordered_map<int, node*> children;
 
     // node constructor / destructor
     node(int i): index(i) {}
     ~node() {
-      for (const pair<int, node*>&p : children) {
+      for (const std::pair<int, node*>&p : children) {
         delete p.second;
       }
     }
@@ -32,7 +31,7 @@ public:
     int capacity(){
       int sz = sizeof(index);
       sz += ((sizeof(int) + sizeof(node*)) * children.size()) + sizeof(children);
-      for (pair<const int, node*>&child : children) {
+      for (std::pair<const int, node*>&child : children) {
         sz += child.second->capacity();
       }
       return sz;
@@ -58,7 +57,7 @@ public:
   }
 
   // add a new string into to tree
-  void insert(string str) {
+  void insert(std::string str) {
     size++;
     
     // remove it from deleted map if necessary
@@ -81,7 +80,7 @@ public:
   // remove a string from the tree
   // - string is only remembered as deleted, but not yet removed from the tree
   // - if too many deleted strings exist, rebuild whole tree from scratch
-  void remove(string str) {
+  void remove(std::string str) {
     if(deleted.find(str) != deleted.end() || !has(str)) {
       // string is already deleted or not in tree, nothing to do
       return;
@@ -116,18 +115,18 @@ public:
   }
 
   // search elements within distance tol
-  vector<string> search(string str, int tol) {
+  std::vector<std::string> search(std::string str, int tol) {
     if (size <= 0) {
       // tree is empty, nothing to return
-      return vector<string>(0);
+      return std::vector<std::string>(0);
     }
-    vector<string> vec; // results vector
+    std::vector<std::string> vec; // results vector
     _search(str, tol, root, vec); // start recursive search at the root
     return vec;
   }
   
   // does the tree contain a string within distance tol of str?
-  bool has(string str, int tol = 0) {
+  bool has(std::string str, int tol = 0) {
     if (size <= 0) {
       // tree is empty, return false
       return false;
@@ -150,7 +149,8 @@ public:
   }
 
   // print tree on stdout
-  void print(node* r = nullptr, node* n = nullptr, int depth = 0) {
+  // void print(node* r = nullptr, node* n = nullptr, int depth = 0) {
+  void print() {
     Rcout << size << "\n";
     if (size > 0) {
       _print(root, root, 0); // recursive node printing starting from root at zero identation
@@ -160,10 +160,10 @@ public:
   // tree capacity (memory consumption of tree plus root node and its children)    
   int capacity() {
     int sz = sizeof(size) + sizeof(node*) + sizeof(items) + sizeof(deleted);
-    for (string &s: items) {
+    for (std::string &s: items) {
       sz += s.size() * sizeof(char);
     }
-    for (const string &s: deleted) {
+    for (const std::string &s: deleted) {
       sz += s.size() * sizeof(char);
     }
     if (size > 0) {
@@ -173,7 +173,7 @@ public:
   }
   
   // calculate levenshtein distance between pair of strings
-  static int levenshtein_distance(string str1, string str2){
+  static int levenshtein_distance(std::string str1, std::string str2){
     int m = str1.length(), n = str2.length();
     
     int** dn = new int*[m + 1];
@@ -193,10 +193,10 @@ public:
           dn[i][j] = dn[i-1][j-1];
 
         } else { // mismatch between str1[i-1] and str2[j-1] -> find minimal source
-          dn[i][j] = 1 + min(
+          dn[i][j] = 1 + std::min(
             dn[i-1][j], // deletion in str1
-                   min(dn[i][j-1], // deletion in str2
-                       dn[i-1][j-1]) // mismatch
+                   std::min(dn[i][j-1], // deletion in str2
+                            dn[i-1][j-1]) // mismatch
           );
         }
       }
@@ -212,7 +212,7 @@ public:
   }
   
   // calculate hamming distance between pair of strings of equal lengths
-  static int hamming_distance(string str1, string str2){
+  static int hamming_distance(std::string str1, std::string str2){
     int d = 0;
     
     for (size_t i = 0; i <= str1.length(); i++) {
@@ -224,18 +224,18 @@ public:
     return d;
   }
   
-  inline vector<string>::iterator begin() noexcept { return items.begin(); }
-  inline vector<string>::const_iterator cbegin() const noexcept { return items.cbegin(); }
-  inline vector<string>::iterator end() noexcept { return items.end(); }
-  inline vector<string>::const_iterator cend() const noexcept { return items.end(); }
+  inline std::vector<std::string>::iterator begin() noexcept { return items.begin(); }
+  inline std::vector<std::string>::const_iterator cbegin() const noexcept { return items.cbegin(); }
+  inline std::vector<std::string>::iterator end() noexcept { return items.end(); }
+  inline std::vector<std::string>::const_iterator cend() const noexcept { return items.end(); }
   
 private:
-  vector<string> items;
+  std::vector<std::string> items;
   node* root;
-  unordered_set<string> deleted;
+  std::unordered_set<std::string> deleted;
   
   // build new tree from string elements in vector v
-  void _build_from_items(const vector<string>& v) {
+  void _build_from_items(const std::vector<std::string>& v) {
     if (size < 1) {
       // empty vector, just create an empty tree
       root = nullptr;
@@ -290,7 +290,8 @@ private:
       }
     }
     items.clear();
-    items = newitems;
+    items.insert(items.begin(), newitems.begin(), newitems.end());
+    // items = newitems;
     
     // ... and empty deleted
     deleted.clear();
@@ -303,7 +304,7 @@ private:
   
   // add items[index] as a new node to tree
   bool _add_from_items(int index) {
-    string str = items[index];
+    std::string str = items[index];
     bool res = false;
     
     if(root == nullptr) { // tree is empty -> make it root
@@ -329,7 +330,7 @@ private:
       
       // t now points to a node without children at distance dist
       if (dist > 0) { // non-zero distance -> insert new string as child at distance dist
-        t->children.insert(pair<int, node*>(dist, new_node));
+        t->children.insert(std::pair<int, node*>(dist, new_node));
         res = true;
 
       } else { // zero distance -> found new string already in the tree: don't insert and return false
@@ -341,8 +342,8 @@ private:
   }
   
   // recursively search for elements within tol of str in subtree of node r, add results to vec
-  void _search(string str, int tol, node* r, vector<string>& vec) {
-    string r_val = items[r->index];
+  void _search(std::string str, int tol, node* r, std::vector<std::string>& vec) {
+    std::string r_val = items[r->index];
     // int dist = levenshtein_distance(r_val, str);
     int dist = hamming_distance(r_val, str);
     
@@ -357,7 +358,7 @@ private:
     // calculate boundaries for potential further hits relative to current hit
     int gte = dist - tol, lte = dist + tol;
     
-    for (const pair<int, node*>& p: r->children) {
+    for (const std::pair<int, node*>& p: r->children) {
       if(p.first >= gte && p.first <= lte) {
         // ... and recurse search on children in that range
         _search(str, tol, p.second, vec);
@@ -366,8 +367,8 @@ private:
   }
   
   // recursively check if subtree of node r has an element within tol of str
-  bool _has(string str, int tol, node* r) {
-    string r_val = items[r->index];
+  bool _has(std::string str, int tol, node* r) {
+    std::string r_val = items[r->index];
     // int dist = levenshtein_distance(r_val, str);
     int dist = hamming_distance(r_val, str);
     
@@ -382,7 +383,7 @@ private:
     // calculate boundaries for potential further hits relative to current hit
     int gte = dist - tol, lte = dist + tol;
     
-    for (const pair<int, node*>&p: r->children) {
+    for (const std::pair<int, node*>&p: r->children) {
       if (p.first >= gte && p.first <= lte) {
         // ... and start recursive search on children in that range
         if (_has(str, tol, p.second)) {
@@ -409,14 +410,14 @@ private:
       Rcout << "\t";
     }
     
-    string n_val = items[n->index], r_val = items[r->index];
+    std::string n_val = items[n->index], r_val = items[r->index];
     if(deleted.find(n_val) != deleted.end()) {
       // if node n is deleted, prefix it with D*
       Rcout << "D*";
     }
-    // Rcout << n_val << ", " << levenshtein_distance(r_val, n_val) << endl;
-    Rcout << n_val << ", " << hamming_distance(r_val, n_val) << endl;
-    for (const pair<int, node*>&x: n->children) {
+    // Rcout << levenshtein_distance(r_val, n_val) << ": " << n_val << std::endl;
+    Rcout << hamming_distance(r_val, n_val) << ": " << n_val << std::endl;
+    for (const std::pair<int, node*>&x: n->children) {
       // recursively print all children of n
       _print(n, x.second, depth + 1);
     }
@@ -425,6 +426,32 @@ private:
 
 
 
+// exposing the BKtree class to R using Rcpp-modules
+// currently only used for unit testing
+RCPP_MODULE(mod_BKtree) {
+  class_<BKtree>( "BKtree" )
+
+  .constructor()
+  .constructor<std::string>()
+  .constructor<std::vector<std::string>>()
+
+  .field_readonly( "size", &BKtree::size, "number of elements stored in tree" )
+
+  .method( "insert", &BKtree::insert, "insert a new element into tree" )
+  .method( "remove", &BKtree::remove, "remove an element from tree" )
+  .method( "remove_all", &BKtree::remove_all, "remove all elements from tree" )
+  .method( "print", &BKtree::print, "print tree on console" )
+  .method( "search", &BKtree::search, "search for elements within distance tolerance" )
+  .method( "has", &BKtree::has, "check if there are elements within distance toelrance" )
+  .method( "first", &BKtree::first, "get first (non-deleted) element from tree" )
+  .method( "capacity", &BKtree::capacity, "calculate tree memory usage" )
+
+  ;
+}
+
+
+
+/*
 
 // The BKtree wrappers are for unit testing BKtree from R
  
@@ -489,7 +516,7 @@ std::vector<std::string> bk_search(std::string seq, int tol = 1) {
   return global_tree.search(seq, tol);
 }
 
-/*
+
 // group elements by "greedy_clustering"
 // [[Rcpp::export]]
 List greedy_clustering(int tol = 1, bool verbose = false) {

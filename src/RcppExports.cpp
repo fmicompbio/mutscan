@@ -5,92 +5,6 @@
 
 using namespace Rcpp;
 
-// bk_size
-size_t bk_size();
-RcppExport SEXP _mutscan_bk_size() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(bk_size());
-    return rcpp_result_gen;
-END_RCPP
-}
-// bk_clear
-size_t bk_clear();
-RcppExport SEXP _mutscan_bk_clear() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(bk_clear());
-    return rcpp_result_gen;
-END_RCPP
-}
-// bk_new
-size_t bk_new(std::vector<std::string> seqs);
-RcppExport SEXP _mutscan_bk_new(SEXP seqsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::vector<std::string> >::type seqs(seqsSEXP);
-    rcpp_result_gen = Rcpp::wrap(bk_new(seqs));
-    return rcpp_result_gen;
-END_RCPP
-}
-// bk_add
-size_t bk_add(std::vector<std::string> seqs);
-RcppExport SEXP _mutscan_bk_add(SEXP seqsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::vector<std::string> >::type seqs(seqsSEXP);
-    rcpp_result_gen = Rcpp::wrap(bk_add(seqs));
-    return rcpp_result_gen;
-END_RCPP
-}
-// bk_remove
-size_t bk_remove(std::vector<std::string> seqs);
-RcppExport SEXP _mutscan_bk_remove(SEXP seqsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::vector<std::string> >::type seqs(seqsSEXP);
-    rcpp_result_gen = Rcpp::wrap(bk_remove(seqs));
-    return rcpp_result_gen;
-END_RCPP
-}
-// bk_print
-void bk_print();
-RcppExport SEXP _mutscan_bk_print() {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    bk_print();
-    return R_NilValue;
-END_RCPP
-}
-// bk_has
-bool bk_has(std::string seq, int tol);
-RcppExport SEXP _mutscan_bk_has(SEXP seqSEXP, SEXP tolSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type seq(seqSEXP);
-    Rcpp::traits::input_parameter< int >::type tol(tolSEXP);
-    rcpp_result_gen = Rcpp::wrap(bk_has(seq, tol));
-    return rcpp_result_gen;
-END_RCPP
-}
-// bk_search
-std::vector<std::string> bk_search(std::string seq, int tol);
-RcppExport SEXP _mutscan_bk_search(SEXP seqSEXP, SEXP tolSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type seq(seqSEXP);
-    Rcpp::traits::input_parameter< int >::type tol(tolSEXP);
-    rcpp_result_gen = Rcpp::wrap(bk_search(seq, tol));
-    return rcpp_result_gen;
-END_RCPP
-}
 // compareCodonPositions
 bool compareCodonPositions(std::string a, std::string b, const char mutNameDelimiter);
 RcppExport SEXP _mutscan_compareCodonPositions(SEXP aSEXP, SEXP bSEXP, SEXP mutNameDelimiterSEXP) {
@@ -186,19 +100,14 @@ BEGIN_RCPP
 END_RCPP
 }
 
+RcppExport SEXP _rcpp_module_boot_mod_BKtree();
+
 static const R_CallMethodDef CallEntries[] = {
-    {"_mutscan_bk_size", (DL_FUNC) &_mutscan_bk_size, 0},
-    {"_mutscan_bk_clear", (DL_FUNC) &_mutscan_bk_clear, 0},
-    {"_mutscan_bk_new", (DL_FUNC) &_mutscan_bk_new, 1},
-    {"_mutscan_bk_add", (DL_FUNC) &_mutscan_bk_add, 1},
-    {"_mutscan_bk_remove", (DL_FUNC) &_mutscan_bk_remove, 1},
-    {"_mutscan_bk_print", (DL_FUNC) &_mutscan_bk_print, 0},
-    {"_mutscan_bk_has", (DL_FUNC) &_mutscan_bk_has, 2},
-    {"_mutscan_bk_search", (DL_FUNC) &_mutscan_bk_search, 2},
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 3},
     {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 8},
     {"_mutscan_findClosestRefSeq", (DL_FUNC) &_mutscan_findClosestRefSeq, 2},
     {"_mutscan_digestFastqsCpp", (DL_FUNC) &_mutscan_digestFastqsCpp, 41},
+    {"_rcpp_module_boot_mod_BKtree", (DL_FUNC) &_rcpp_module_boot_mod_BKtree, 0},
     {NULL, NULL, 0}
 };
 

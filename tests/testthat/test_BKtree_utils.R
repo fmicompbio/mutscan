@@ -1,6 +1,7 @@
-context("collapse sequences by similarity")
+context("BKtree_utils")
 
-test_that("low-level BK tree functions work as expected", {
+# using Rcpp-module that exposes the BKtree class to R
+test_that("low-level BKtree wrapper functions work as expected", {
   # create random k-mers
   set.seed(42)
   k <- 30L
@@ -12,36 +13,103 @@ test_that("low-level BK tree functions work as expected", {
   seqs <- c(seqs, paste0(setdiff(alph, substr(seqs[1], 1, 1)),
                          substr(seqs[1], 2, k)))
   
-  # add sequences
-  expect_equal(mutscan:::bk_add(seqs), n)
-  expect_equal(mutscan:::bk_add(seqs[1]), n)
-  expect_equal(mutscan:::bk_new(seqs), n)
-  expect_equal(mutscan:::bk_size(), n)
+  # load module and create tree instance
+  bk <- Rcpp::Module("mod_BKtree", PACKAGE = "mutscan")
+  BKtree <- bk$BKtree
+  tree <- new(BKtree)
+  expect_is(bk, "Module")
+  expect_is(BKtree, "C++Class")
+  expect_is(tree, "Rcpp_BKtree")
   
-  # check presence
-  expect_true(mutscan:::bk_has(seqs[1]))
-  expect_false(mutscan:::bk_has("non_existing"))
+  # add sequences
+  expect_equal(tree$size, 0)
+  for (s in seqs)
+    tree$insert(s)
+  expect_equal(tree$size, n)
+  tree$insert(seqs[1])
+  expect_equal(tree$size, n)
 
+  # check presence
+  expect_true(tree$has(seqs[1], 0))
+  expect_true(tree$has(seqs[1], k))
+  expect_false(tree$has("non_existing", 0))
+  
+  # get first element
+  expect_identical(tree$first(), seqs[1])
+  
+  # memory size
+  m <- tree$capacity()
+  expect_is(m, "integer")
+  expect_true(m > 0 && m < n * k * 8)
+  
   # print tree
-  expect_output(mutscan:::bk_print(),
-                paste0("current size: ", n, ".+", n, ".+", seqs[1], ", 0"))
+  expect_output(tree$print(), paste0("^", n, ".+0: ", seqs[1]))
+
   # search  similar sequences
-  res00 <- mutscan:::bk_search(seqs[1], tol = 0)
-  res01 <- mutscan:::bk_search(seqs[1], tol = 1)
-  res24 <- mutscan:::bk_search(seqs[1], tol = 24)
+  res00 <- tree$search(seqs[1], 0)
+  res01 <- tree$search(seqs[1], 1)
+  res24 <- tree$search(seqs[1], 24)
   expect_is(res00, "character")
   # ground truth e.g. from:
   # sum(stringdist::stringdist(seqs[1], seqs, method = "hamming") <= 24)
   expect_length(res00, 1L)
   expect_length(res01, 5L)
   expect_length(res24, 14L)
-
+  
   # remove sequences
-  expect_equal(mutscan:::bk_remove("non_existing"), n)
+  tree$remove("non_existing")
+  expect_equal(tree$size, n)
   r <- ceiling(n * 0.7)
-  expect_equal(mutscan:::bk_remove(seqs[seq_len(r)]), n - r)
-  expect_equal(mutscan:::bk_clear(), 0L)
+  for (i in seq_len(r))
+    tree$remove(seqs[i])
+  expect_equal(tree$size, n - r)
+  tree$remove_all()
+  expect_equal(tree$size, 0)
 })
+
+# using Rcpp wrapper function and tree instance global_tree (global variable)
+# test_that("low-level BKtree wrapper functions work as expected", {
+#   # create random k-mers
+#   set.seed(42)
+#   k <- 30L
+#   n <- 20L
+#   alph <- c("A","C","G","T","N")
+#   seqs <- unlist(lapply(seq_len(n - length(alph) + 1),
+#                         function(i) paste(sample(alph, size = k, replace = TRUE),
+#                                           collapse = "")))
+#   seqs <- c(seqs, paste0(setdiff(alph, substr(seqs[1], 1, 1)),
+#                          substr(seqs[1], 2, k)))
+#   
+#   # add sequences
+#   expect_equal(mutscan:::bk_add(seqs), n)
+#   expect_equal(mutscan:::bk_add(seqs[1]), n)
+#   expect_equal(mutscan:::bk_new(seqs), n)
+#   expect_equal(mutscan:::bk_size(), n)
+#   
+#   # check presence
+#   expect_true(mutscan:::bk_has(seqs[1]))
+#   expect_false(mutscan:::bk_has("non_existing"))
+# 
+#   # print tree
+#   expect_output(mutscan:::bk_print(),
+#                 paste0("current size: ", n, ".+", n, ".+", seqs[1], ", 0"))
+#   # search  similar sequences
+#   res00 <- mutscan:::bk_search(seqs[1], tol = 0)
+#   res01 <- mutscan:::bk_search(seqs[1], tol = 1)
+#   res24 <- mutscan:::bk_search(seqs[1], tol = 24)
+#   expect_is(res00, "character")
+#   # ground truth e.g. from:
+#   # sum(stringdist::stringdist(seqs[1], seqs, method = "hamming") <= 24)
+#   expect_length(res00, 1L)
+#   expect_length(res01, 5L)
+#   expect_length(res24, 14L)
+# 
+#   # remove sequences
+#   expect_equal(mutscan:::bk_remove("non_existing"), n)
+#   r <- ceiling(n * 0.7)
+#   expect_equal(mutscan:::bk_remove(seqs[seq_len(r)]), n - r)
+#   expect_equal(mutscan:::bk_clear(), 0L)
+# })
 
 
 # test_that("collapseSeqs works as expected", {
