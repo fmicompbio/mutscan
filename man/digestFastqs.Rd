@@ -49,8 +49,10 @@ digestFastqs(
 )
 }
 \arguments{
-\item{fastqForward, fastqReverse}{character(1), paths to gzipped FASTQ files
-corresponding to forward and reverse reads, respectively.}
+\item{fastqForward, fastqReverse}{character vector, paths to gzipped FASTQ files
+corresponding to forward and reverse reads, respectively. If more than one
+forward/reverse sequence file is given, they need to be provided in the
+same order.}
 
 \item{mergeForwardReverse}{logical(1), whether to fuse the forward and
 reverse variable sequences.}

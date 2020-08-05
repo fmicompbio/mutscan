@@ -72,8 +72,10 @@ checkNumericInput <- function(..., nonnegative) {
 #' number of reads, and the number of unique UMIs, for each variable sequence
 #' (or pair of variable sequences).
 #'
-#' @param fastqForward,fastqReverse character(1), paths to gzipped FASTQ files
-#'   corresponding to forward and reverse reads, respectively.
+#' @param fastqForward,fastqReverse character vector, paths to gzipped FASTQ files
+#'   corresponding to forward and reverse reads, respectively. If more than one
+#'   forward/reverse sequence file is given, they need to be provided in the
+#'   same order.
 #' @param mergeForwardReverse logical(1), whether to fuse the forward and
 #'   reverse variable sequences.
 #' @param minOverlap,maxOverlap numeric(1), the minimal and maximal allowed
@@ -204,12 +206,13 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
   ## pre-flight checks
   ## --------------------------------------------------------------------------
   ## fastq files exist
-  if (length(fastqForward) != 1 || !file.exists(fastqForward) || 
-      !is.null(fastqReverse) && (length(fastqReverse) != 1 || !file.exists(fastqReverse))) {
-    stop("'fastqForward' and 'fastqReverse' must point to single, existing files");
+  if (length(fastqForward) < 1 || !all(file.exists(fastqForward)) || 
+      (!is.null(fastqReverse) && (length(fastqReverse) != length(fastqForward) ||
+                                 !all(file.exists(fastqReverse))))) {
+    stop("'fastqForward' and 'fastqReverse' must point to one or several matching existing files");
   }
   if (is.null(fastqReverse)) {
-    fastqReverse <- ""
+    fastqReverse <- rep("", length(fastqForward))
   }
   
   ## merging/rev complementing arguments are ok
@@ -389,8 +392,8 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     stop("'verbose' must be a logical scalar.")
   }
   
-  res <- digestFastqsCpp(fastqForward = fastqForward, 
-                         fastqReverse = fastqReverse,
+  res <- digestFastqsCpp(fastqForwardVect = fastqForward, 
+                         fastqReverseVect = fastqReverse,
                          mergeForwardReverse = mergeForwardReverse,
                          minOverlap = minOverlap, 
                          maxOverlap = maxOverlap, 

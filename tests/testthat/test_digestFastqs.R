@@ -281,6 +281,9 @@ test_that("digestFastqs works as expected for trans experiments", {
   )
   
   res <- do.call(digestFastqs, Ldef)
+
+  L <- Ldef; L$fastqForward <- c(fqt1, fqt1); L$fastqReverse <- c(fqt2, fqt2)
+  res2 <- do.call(digestFastqs, L)
   
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
@@ -294,6 +297,10 @@ test_that("digestFastqs works as expected for trans experiments", {
   expect_equal(res$filterSummary$f9_nbrTooManyMutCodons, 287L + 105L)
   expect_equal(res$filterSummary$f10_nbrForbiddenCodons, 6L + 2L)
   expect_equal(res$filterSummary$nbrRetained, 279L)
+  
+  expect_equal(res$filterSummary * 2, res2$filterSummary)
+  expect_equal(res$summaryTable$nbrReads * 2, res2$summaryTable$nbrReads)
+  expect_equal(res$summaryTable$nbrUmis, res2$summaryTable$nbrUmis)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
     expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
@@ -549,6 +556,9 @@ test_that("digestFastqs works as expected for experiments with only forward read
   )
   
   res <- do.call(digestFastqs, Ldef)
+
+  L <- Ldef; L$fastqForward <- c(fqt1, fqt1); L$fastqReverse <- NULL
+  res2 <- do.call(digestFastqs, L)
   
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 297L)
@@ -562,6 +572,10 @@ test_that("digestFastqs works as expected for experiments with only forward read
   expect_equal(res$filterSummary$f9_nbrTooManyMutCodons, 12L)
   expect_equal(res$filterSummary$f10_nbrForbiddenCodons, 1L)
   expect_equal(res$filterSummary$nbrRetained, 272L)
+  
+  expect_equal(res$filterSummary * 2, res2$filterSummary)
+  expect_equal(res$summaryTable$nbrReads * 2, res2$summaryTable$nbrReads)
+  expect_equal(res$summaryTable$nbrUmis, res2$summaryTable$nbrUmis)
   
   for (nm in setdiff(names(Ldef), c("fastqReverse", "forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
     expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
