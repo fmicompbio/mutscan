@@ -877,12 +877,24 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         std::map<std::string, std::string> single2collapsed;
         
         // start querying in the order of tree.items (ordered decreasingly by nReads)
+        size_t start_size = (double)tree.size;
         while (tree.size > 0) {
           querySeq = tree.first();
           simSeqs = tree.search(querySeq, tol);
           for (size_t i = 0; i < simSeqs.size(); i++) {
             single2collapsed[simSeqs[i]] = querySeq;
             tree.remove(simSeqs[i]);
+          }
+          
+          // check for user interruption and print progress
+          if ((start_size - tree.size) % 2000 == 0) { // every 2,000 queries (every ~1-2s)
+            Rcpp::checkUserInterrupt(); // ... check for user interrupt
+            // ... and give an update
+            if (verbose && (start_size - tree.size) % 2000 == 0) {
+              Rcout << "    " << std::setprecision(4) <<
+                (100.0 * ((double)(start_size - tree.size) / (double)start_size)) <<
+                  "% done" << std::endl;
+            }
           }
         }
 
@@ -928,6 +940,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     // store sequences (from names) in BK tree
     BKtree tree;
     std::set<std::string>::iterator umiIt;
+    int mutCounter = 0;
     for (mutantSummaryIt = mutantSummary.begin(); mutantSummaryIt != mutantSummary.end(); mutantSummaryIt++) {
       if ((*mutantSummaryIt).second.umi.size() == 1) {
         continue;
@@ -948,6 +961,11 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         }
         
         (*mutantSummaryIt).second.umi = collapsedUmis;
+      }
+      mutCounter++;
+      // check for user interruption and print progress
+      if (mutCounter % 200 == 0) { // every 200 queries
+        Rcpp::checkUserInterrupt(); // ... check for user interrupt
       }
     }
     
