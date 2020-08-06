@@ -65,6 +65,19 @@ test_that("low-level BKtree wrapper functions work as expected", {
   expect_equal(tree$size, n - r)
   tree$remove_all()
   expect_equal(tree$size, 0)
+
+  # check existing elements
+  tree$remove_all()
+  for (s in seqs)
+    tree$insert(s)
+  res <- tree$get_all()
+  expect_identical(seqs, res)
+  set.seed(43)
+  i <- sample(length(seqs), round(length(seqs) / 3))
+  for (ii in i)
+    tree$remove(seqs[ii])
+  res <- tree$get_all()
+  expect_identical(seqs[-i], res)
 })
 
 # using Rcpp wrapper function and tree instance global_tree (global variable)

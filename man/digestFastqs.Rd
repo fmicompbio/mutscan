@@ -43,6 +43,7 @@ digestFastqs(
   mutatedPhredMinReverse = 0,
   mutNameDelimiter = ".",
   variableCollapseMaxDist = 0,
+  variableCollapseMinReads = 0,
   umiCollapseMaxDist = 0,
   maxNReads = -1,
   verbose = FALSE
@@ -146,6 +147,10 @@ A value greater or equal to 1 is rounded and directly used as the maximum
 allowed Hamming distance. Note that variable sequences can only be
 collapsed if they are all of the same length and no wild type sequences
 (\code{wildTypeForward} or \code{wildTypeReverse}) have been given.}
+
+\item{variableCollapseMinReads}{A \code{numeric} scalar. Indicates the minimum
+number of reads for the read to be considered for collapsing with similar
+sequences.}
 
 \item{maxNReads}{integer(1) Maximal number of reads to process. If set to -1,
 all reads will be processed.}

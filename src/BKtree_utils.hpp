@@ -113,6 +113,18 @@ public:
       deleted.clear();
     }
   }
+  
+  // get all (non-deleted) elements from the tree
+  std::vector<std::string> get_all() {
+    std::vector<std::string> all;
+    for (size_t i = 0; i < items.size(); i++) {
+      if (deleted.find(items[i]) == deleted.end()) {
+        // item[i] is not deleted -> copy to all
+        all.push_back(items[i]);
+      }
+    }
+    return all;
+  }
 
   // search elements within distance tol
   std::vector<std::string> search(std::string str, int tol) {
@@ -440,6 +452,7 @@ RCPP_MODULE(mod_BKtree) {
   .method( "insert", &BKtree::insert, "insert a new element into tree" )
   .method( "remove", &BKtree::remove, "remove an element from tree" )
   .method( "remove_all", &BKtree::remove_all, "remove all elements from tree" )
+  .method( "get_all", &BKtree::get_all, "get all elements stored in tree" )
   .method( "print", &BKtree::print, "print tree on console" )
   .method( "search", &BKtree::search, "search for elements within distance tolerance" )
   .method( "has", &BKtree::has, "check if there are elements within distance toelrance" )

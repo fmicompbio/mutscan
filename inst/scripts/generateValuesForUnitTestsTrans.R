@@ -4,14 +4,19 @@ suppressPackageStartupMessages({
   library(dplyr)
 })
 
-collapse_seqs <- function(seqs, umis, maxdist, umimaxdist) {
+collapse_seqs <- function(seqs, umis, reads, maxdist, umimaxdist, minreads) {
   tokeep <- list()
   while (length(seqs) > 0) {
-    d <- stringdist::stringdist(seqs[1], seqs, method = "hamming")
-    w <- which(d <= maxdist)
+    if (reads[1] >= minreads) {
+      d <- stringdist::stringdist(seqs[1], seqs, method = "hamming")
+      w <- which(d <= maxdist)
+    } else {
+      w <- 1
+    }
     tokeep[[seqs[1]]] <- paste(umis[w], collapse = ",")
     seqs <- seqs[-w]
     umis <- umis[-w]
+    reads <- reads[-w]
   }
   tokeep <- lapply(tokeep, function(tk) {
     tk <- sort(unique(strsplit(tk, ",")[[1]]))
@@ -167,7 +172,9 @@ processReadsTrans <- function(Ldef) {
       paste0("f", unlist(uniqueMutCodons), unlist(splitMutCodons)), 
       uniqueMutCodons),
       sep = "_")
-  }    
+  } else {
+    encodedMutCodonsForward <- ""
+  }
   
   ## Compare to wildtype, reverse
   if (!is.null(Ldef$fastqReverse) && Ldef$wildTypeReverse != "") {
@@ -326,7 +333,9 @@ processReadsTrans <- function(Ldef) {
     for (i in seq_len(nrow(tbl))) {
       tbl$umis[i] <- paste(umis[fqseq == tbl$fqseq[i]], collapse = ",")
     }
-    collseqs <- collapse_seqs(tbl$fqseq, tbl$umis, maxdist = Ldef$variableCollapseMaxDist, umimaxdist = Ldef$umiCollapseMaxDist)
+    collseqs <- collapse_seqs(tbl$fqseq, tbl$umis, tbl$Freq, 
+                              maxdist = Ldef$variableCollapseMaxDist, umimaxdist = Ldef$umiCollapseMaxDist,
+                              minreads = Ldef$variableCollapseMinReads)
     message("Number of unique sequences: ", nrow(tbl))
     message("Number of collapsed sequences: ", length(collseqs))
     message("Total UMI count: ", length(unlist(collseqs)))
@@ -359,7 +368,7 @@ Ldef <- list(
   forbiddenMutatedCodonsForward = "NNW",
   forbiddenMutatedCodonsReverse = "NNW",
   mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
-  variableCollapseMaxDist = 0, umiCollapseMaxDist = 0,
+  variableCollapseMaxDist = 0, umiCollapseMaxDist = 0, variableCollapseMinReads = 0,
   verbose = FALSE
 )
 processReadsTrans(Ldef)
@@ -389,7 +398,7 @@ Ldef <- list(
   forbiddenMutatedCodonsForward = "NNA",
   forbiddenMutatedCodonsReverse = "NNW",
   mutatedPhredMinForward = 25.0, mutatedPhredMinReverse = 0.0,
-  variableCollapseMaxDist = 0, umiCollapseMaxDist = 0,
+  variableCollapseMaxDist = 0, umiCollapseMaxDist = 0, variableCollapseMinReads = 0,
   verbose = FALSE
 )
 processReadsTrans(Ldef)
@@ -419,7 +428,7 @@ Ldef <- list(
   forbiddenMutatedCodonsForward = "NNA",
   forbiddenMutatedCodonsReverse = "NNW",
   mutatedPhredMinForward = 25.0, mutatedPhredMinReverse = 0.0,
-  variableCollapseMaxDist = 0, umiCollapseMaxDist = 0,
+  variableCollapseMaxDist = 0, umiCollapseMaxDist = 0, variableCollapseMinReads = 0,
   verbose = FALSE
 )
 processReadsTrans(Ldef)
@@ -454,7 +463,7 @@ Ldef <- list(
   forbiddenMutatedCodonsReverse = "NNW",
   mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
   mutNameDelimiter = ".",
-  maxNReads = -1, variableCollapseMaxDist = 6, umiCollapseMaxDist = 4,
+  maxNReads = -1, variableCollapseMaxDist = 6, umiCollapseMaxDist = 4, variableCollapseMinReads = 0,
   verbose = FALSE
 )
 processReadsTrans(Ldef)
@@ -488,7 +497,42 @@ Ldef <- list(
   forbiddenMutatedCodonsReverse = "NNW",
   mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
   mutNameDelimiter = ".",
-  variableCollapseMaxDist = 10, umiCollapseMaxDist = 5,
+  variableCollapseMaxDist = 10, umiCollapseMaxDist = 5, variableCollapseMinReads = 0,
   maxNReads = -1, verbose = FALSE
+)
+processReadsTrans(Ldef)
+
+## Collapse only highly abundant features
+fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
+fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
+## default arguments
+Ldef <- list(
+  fastqForward = fqt1, fastqReverse = fqt2, 
+  mergeForwardReverse = FALSE, 
+  minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
+  revComplForward = FALSE, revComplReverse = FALSE,
+  skipForward = 1, skipReverse = 1, 
+  umiLengthForward = 10, umiLengthReverse = 8, 
+  constantLengthForward = 18, constantLengthReverse = 20, 
+  variableLengthForward = 96, variableLengthReverse = 96,
+  adapterForward = "GGAAGAGCACACGTC", 
+  adapterReverse = "GGAAGAGCGTCGTGT",
+  primerForward = "",
+  primerReverse = "",
+  wildTypeForward = "",
+  wildTypeReverse = "", 
+  constantForward = "AACCGGAGGAGGGAGCTG", 
+  constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
+  avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+  variableNMaxForward = 0, variableNMaxReverse = 0, 
+  umiNMax = 0,
+  nbrMutatedCodonsMaxForward = 1,
+  nbrMutatedCodonsMaxReverse = 1,
+  forbiddenMutatedCodonsForward = "NNW",
+  forbiddenMutatedCodonsReverse = "NNW",
+  mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+  mutNameDelimiter = ".",
+  maxNReads = -1, variableCollapseMaxDist = 2, umiCollapseMaxDist = 0, variableCollapseMinReads = 2,
+  verbose = FALSE
 )
 processReadsTrans(Ldef)

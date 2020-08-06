@@ -142,15 +142,14 @@ test_that("digestFastqs fails with incorrect arguments", {
                 "variableNMaxReverse", "umiNMax", 
                 "nbrMutatedCodonsMaxForward", "nbrMutatedCodonsMaxReverse", 
                 "mutatedPhredMinForward", "mutatedPhredMinReverse",
-                "variableCollapseMaxDist", "umiCollapseMaxDist")) {
+                "variableCollapseMaxDist", "umiCollapseMaxDist", "variableCollapseMinReads")) {
     L <- Ldef; L[[var]] <- "str"
     expect_error(do.call(digestFastqs, L))
     L <- Ldef; L[[var]] <- c(1, 2)
     expect_error(do.call(digestFastqs, L))
     if (!(var %in% c("skipForward", "skipReverse", "umiLengthForward",
                      "umiLengthReverse", "constantLengthForward",
-                     "constantLengthReverse", "variableLengthForward", "variableLengthReverse",
-                     "variableCollapseMaxDist", "umiCollapseMaxDist"))) {
+                     "constantLengthReverse", "variableLengthForward", "variableLengthReverse"))) {
       L <- Ldef; L[[var]] <- -1
       expect_error(do.call(digestFastqs, L))
     }
@@ -307,6 +306,7 @@ test_that("digestFastqs works as expected for trans experiments", {
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
+  expect_equal(res$summaryTable$nbrReads, res$summaryTable$maxNbrReads)
   expect_equal(sum(res$summaryTable$nbrReads == 2), 2L)
   expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
                sort(c("f.13.GAG_r.0.WT", "f.26.TAG_r.8.AGG")))
@@ -396,6 +396,7 @@ test_that("digestFastqs works as expected for trans experiments, when variable s
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
+  expect_equal(res$summaryTable$nbrReads, res$summaryTable$maxNbrReads)
   expect_equal(sum(res$summaryTable$nbrReads == 2), 2L)
   expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
                sort(c("f.13.GAG_r.0.WT", "f.26.TAG_r.8.AGG")))
@@ -487,6 +488,7 @@ test_that("digestFastqs works as expected for trans experiments when multiple re
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
+  expect_equal(res$summaryTable$nbrReads, res$summaryTable$maxNbrReads)
   expect_equal(sum(res$summaryTable$nbrReads == 2), 1L)
   expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
                sort(c("forward=26=TAG_reverse1=8=AGG")))
@@ -583,6 +585,7 @@ test_that("digestFastqs works as expected for experiments with only forward read
   expect_equivalent(res$parameters[["fastqReverse"]], "")
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
+  expect_equal(res$summaryTable$nbrReads, res$summaryTable$maxNbrReads)
   expect_equal(sum(res$summaryTable$nbrReads == 2), 29L)
 
   ## Check that mutant naming worked (compare to manual matching)
@@ -634,11 +637,15 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     forbiddenMutatedCodonsReverse = "NNW",
     mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
     mutNameDelimiter = ".",
-    variableCollapseMaxDist = 6, umiCollapseMaxDist = 4,
+    variableCollapseMaxDist = 6, umiCollapseMaxDist = 4, variableCollapseMinReads = 0,
     maxNReads = -1, verbose = FALSE
   )
   
   res <- do.call(digestFastqs, Ldef)
+  
+  L <- Ldef; L$variableCollapseMaxDist = 0; L$umiCollapseMaxDist = 0; res0 <- do.call(digestFastqs, L)
+  expect_equal(res$summaryTable$maxNbrReads, res0$summaryTable$nbrReads[match(res$summaryTable$mutantName, 
+                                                                              res0$summaryTable$mutantName)])
   
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
@@ -692,7 +699,7 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     forbiddenMutatedCodonsReverse = "NNW",
     mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
     mutNameDelimiter = ".",
-    variableCollapseMaxDist = 500, umiCollapseMaxDist = 100,
+    variableCollapseMaxDist = 500, umiCollapseMaxDist = 100, variableCollapseMinReads = 0,
     maxNReads = -1, verbose = FALSE
   )
   
@@ -750,7 +757,7 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     forbiddenMutatedCodonsReverse = "NNW",
     mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
     mutNameDelimiter = ".",
-    variableCollapseMaxDist = 10, umiCollapseMaxDist = 5,
+    variableCollapseMaxDist = 10, umiCollapseMaxDist = 5, variableCollapseMinReads = 0,
     maxNReads = -1, verbose = FALSE
   )
   
@@ -776,6 +783,73 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
   expect_equal(nrow(res$summaryTable), 52L)
   expect_equal(sum(res$summaryTable$nbrUmis), 97)
+})
+
+test_that("digestFastqs works as expected for trans experiments, when similar sequences are collapsed (only abundant ones)", {
+  fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
+  fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
+  ## default arguments
+  Ldef <- list(
+    fastqForward = fqt1, fastqReverse = fqt2, 
+    mergeForwardReverse = FALSE, 
+    minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
+    revComplForward = FALSE, revComplReverse = FALSE,
+    skipForward = 1, skipReverse = 1, 
+    umiLengthForward = 10, umiLengthReverse = 8, 
+    constantLengthForward = 18, constantLengthReverse = 20, 
+    variableLengthForward = 96, variableLengthReverse = 96,
+    adapterForward = "GGAAGAGCACACGTC", 
+    adapterReverse = "GGAAGAGCGTCGTGT",
+    primerForward = "",
+    primerReverse = "",
+    wildTypeForward = "",
+    wildTypeReverse = "", 
+    constantForward = "AACCGGAGGAGGGAGCTG", 
+    constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
+    avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+    variableNMaxForward = 0, variableNMaxReverse = 0, 
+    umiNMax = 0,
+    nbrMutatedCodonsMaxForward = 1,
+    nbrMutatedCodonsMaxReverse = 1,
+    forbiddenMutatedCodonsForward = "NNW",
+    forbiddenMutatedCodonsReverse = "NNW",
+    mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+    mutNameDelimiter = ".",
+    variableCollapseMaxDist = 2, umiCollapseMaxDist = 0,
+    variableCollapseMinReads = 1.5,
+    maxNReads = -1, verbose = FALSE
+  )
+  
+  res <- do.call(digestFastqs, Ldef)
+  
+  L <- Ldef; L$variableCollapseMaxDist = 0; L$umiCollapseMaxDist = 0; res0 <- do.call(digestFastqs, L)
+  expect_equal(res$summaryTable$maxNbrReads, res0$summaryTable$nbrReads[match(res$summaryTable$mutantName, 
+                                                                              res0$summaryTable$mutantName)])
+  
+  expect_equal(res$filterSummary$nbrTotal, 1000L)
+  expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
+  expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
+  expect_equal(res$filterSummary$f3_nbrReadTooShort, 0L)
+  expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
+  expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 7L)
+  expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 0L)
+  expect_equal(res$filterSummary$f7_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f8_nbrMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f9_nbrTooManyMutCodons, 0L)
+  expect_equal(res$filterSummary$f10_nbrForbiddenCodons, 0L)
+  expect_equal(res$filterSummary$nbrRetained, 679L)
+  
+  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
+    if (nm == "variableCollapseMinReads") {
+      expect_equivalent(res$parameters[[nm]], as.integer(ceiling(Ldef[[nm]])))
+    } else {
+      expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+    }
+  }
+  
+  expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
+  expect_equal(nrow(res$summaryTable), 673L)
+  expect_equal(sum(res$summaryTable$nbrUmis), 679)
 })
 
 context("digestFastqs - cis")

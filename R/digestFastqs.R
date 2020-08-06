@@ -148,6 +148,9 @@ checkNumericInput <- function(..., nonnegative) {
 #'   allowed Hamming distance. Note that variable sequences can only be
 #'   collapsed if they are all of the same length and no wild type sequences
 #'   (\code{wildTypeForward} or \code{wildTypeReverse}) have been given.
+#' @param variableCollapseMinReads A \code{numeric} scalar. Indicates the minimum
+#'   number of reads for the read to be considered for collapsing with similar
+#'   sequences.
 #' @param maxNReads integer(1) Maximal number of reads to process. If set to -1,
 #'   all reads will be processed.
 #' @param verbose logical(1), whether to print out progress messages.
@@ -200,6 +203,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          mutatedPhredMinReverse = 0.0,
                          mutNameDelimiter = ".",
                          variableCollapseMaxDist = 0.0,
+                         variableCollapseMinReads = 0,
                          umiCollapseMaxDist = 0.0,
                          maxNReads = -1, verbose = FALSE) {
   ## --------------------------------------------------------------------------
@@ -245,6 +249,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
   checkNumericInput(mutatedPhredMinForward, nonnegative = TRUE)
   checkNumericInput(mutatedPhredMinReverse, nonnegative = TRUE)
   checkNumericInput(variableCollapseMaxDist, nonnegative = TRUE)
+  checkNumericInput(variableCollapseMinReads, nonnegative = TRUE)
   checkNumericInput(umiCollapseMaxDist, nonnegative = TRUE)
   
   ## adapters and primers must be strings, valid DNA characters
@@ -430,6 +435,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          mutatedPhredMinReverse = mutatedPhredMinReverse,
                          mutNameDelimiter = mutNameDelimiter,
                          variableCollapseMaxDist = variableCollapseMaxDist,
+                         variableCollapseMinReads = as.integer(ceiling(variableCollapseMinReads)),
                          umiCollapseMaxDist = umiCollapseMaxDist,
                          maxNReads = maxNReads,
                          verbose = verbose)

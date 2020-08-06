@@ -211,6 +211,8 @@ bool tabulateBasesByQual(const std::string constSeq, const std::string constant,
 struct mutantInfo {
   std::set<std::string> umi;      // set of unique UMIs observed for read pairs of that mutant
   int nReads;                     // number of reads
+  int maxNReads;                  // maximum number of reads for an individual mutant, in case of collapsing multiple
+                                  // mutants into one entry
   std::set<std::string> sequence; // set of sequences for that mutant
 };
 
@@ -421,6 +423,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                      double mutatedPhredMinReverse = 0.0,
                      std::string mutNameDelimiter = ".",
                      double variableCollapseMaxDist = 0.0,
+                     int variableCollapseMinReads = 0,
                      double umiCollapseMaxDist = 0.0,
                      int maxNReads = -1, bool verbose = false) {
 
@@ -668,7 +671,6 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         continue;
       }
       
-      // TODO: Allow UMI in only one of the reads?
       // extract UMIs and filter if there are too many N's
       if (umiLengthForward != (-1)) {
         if (fastqReverse.compare("") != 0 && umiLengthReverse != (-1)) {
@@ -737,12 +739,14 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
       if ((mutantSummaryIt = mutantSummary.find(mutantName)) != mutantSummary.end()) {
         // ... ... update existing mutantInfo
         (*mutantSummaryIt).second.nReads++;
+        (*mutantSummaryIt).second.maxNReads++;
         (*mutantSummaryIt).second.umi.insert(umiSeq);
         (*mutantSummaryIt).second.sequence.insert(varSeqForward);
       } else {
         // ... ... create mutantInfo instance for this mutant and add it to mutantSummary
         mutantInfo newMutant;
         newMutant.nReads = 1;
+        newMutant.maxNReads = 1;
         newMutant.umi.insert(umiSeq);
         newMutant.sequence.insert(varSeqForward);
         mutantSummary.insert(std::pair<std::string,mutantInfo>(mutantName, newMutant));
@@ -880,20 +884,36 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         size_t start_size = (double)tree.size;
         while (tree.size > 0) {
           querySeq = tree.first();
-          simSeqs = tree.search(querySeq, tol);
-          for (size_t i = 0; i < simSeqs.size(); i++) {
-            single2collapsed[simSeqs[i]] = querySeq;
-            tree.remove(simSeqs[i]);
-          }
+          // check in mutantSummary if nReads for querySeq is < variableCollapseMinReads
+          if (variableCollapseMinReads > 0 &&
+              (mutantSummaryIt = mutantSummary.find(querySeq)) != mutantSummary.end() &&
+              (*mutantSummaryIt).second.nReads < variableCollapseMinReads) {
+                // in that case, nReads < variableCollapseMinReads for all other 
+                // sequences in the tree as well
+                // if so, extract all remaining sequences in the tree and 
+                // add them to single2collapsed, each mapping to itself
+                std::vector<std::string> rest = tree.get_all();
+                for (size_t i = 0; i < rest.size(); i++) {
+                  single2collapsed[rest[i]] = rest[i];
+                }
+                tree.remove_all();
+                // after that, tree.size = 0 so the loop will stop
+          } else {
+            simSeqs = tree.search(querySeq, tol);
+            for (size_t i = 0; i < simSeqs.size(); i++) {
+              single2collapsed[simSeqs[i]] = querySeq;
+              tree.remove(simSeqs[i]);
+            }
           
-          // check for user interruption and print progress
-          if ((start_size - tree.size) % 2000 == 0) { // every 2,000 queries (every ~1-2s)
-            Rcpp::checkUserInterrupt(); // ... check for user interrupt
-            // ... and give an update
-            if (verbose && (start_size - tree.size) % 2000 == 0) {
-              Rcout << "    " << std::setprecision(4) <<
-                (100.0 * ((double)(start_size - tree.size) / (double)start_size)) <<
-                  "% done" << std::endl;
+            // check for user interruption and print progress
+            if ((start_size - tree.size) % 2000 == 0) { // every 2,000 queries (every ~1-2s)
+              Rcpp::checkUserInterrupt(); // ... check for user interrupt
+              // ... and give an update
+              if (verbose && (start_size - tree.size) % 2000 == 0) {
+                Rcout << "    " << std::setprecision(4) <<
+                  (100.0 * ((double)(start_size - tree.size) / (double)start_size)) <<
+                    "% done" << std::endl;
+              }
             }
           }
         }
@@ -906,6 +926,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           if ((collapsedMutantSummaryIt = collapsedMutantSummary.find(collapsedName)) != collapsedMutantSummary.end()) {
             // ... fuse with existing mutantInfo
             (*collapsedMutantSummaryIt).second.nReads += (*mutantSummaryIt).second.nReads;
+            (*collapsedMutantSummaryIt).second.maxNReads = std::max((*collapsedMutantSummaryIt).second.maxNReads,
+                                                                    (*mutantSummaryIt).second.nReads);
             (*collapsedMutantSummaryIt).second.umi.insert((*mutantSummaryIt).second.umi.begin(),
                                                           (*mutantSummaryIt).second.umi.end());
             (*collapsedMutantSummaryIt).second.sequence.insert((*mutantSummaryIt).second.sequence.begin(),
@@ -977,7 +999,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   // return results
   size_t dfLen = mutantSummary.size();
   std::vector<std::string> dfSeq(dfLen, ""), dfName(dfLen, "");
-  std::vector<int> dfReads(dfLen, 0), dfUmis(dfLen, 0);
+  std::vector<int> dfReads(dfLen, 0), dfUmis(dfLen, 0), dfMaxReads(dfLen, 0);
   int i = 0;
   for (mutantSummaryIt = mutantSummary.begin(); mutantSummaryIt != mutantSummary.end(); mutantSummaryIt++) {
     // collapse all sequences associated with the mutant
@@ -991,6 +1013,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     dfName[i] = (*mutantSummaryIt).first;
     dfSeq[i] = collapsedSequence;
     dfReads[i] = (*mutantSummaryIt).second.nReads;
+    dfMaxReads[i] = (*mutantSummaryIt).second.maxNReads;
     dfUmis[i] = (*mutantSummaryIt).second.umi.size();
     i++;
   }
@@ -1009,6 +1032,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   DataFrame df = DataFrame::create(Named("mutantName") = dfName,
                                    Named("sequence") = dfSeq,
                                    Named("nbrReads") = dfReads,
+                                   Named("maxNbrReads") = dfMaxReads,
                                    Named("nbrUmis") = dfUmis,
                                    Named("stringsAsFactors") = false);
   DataFrame err = DataFrame::create(Named("PhredQuality") = seq_len(100) - 1,
@@ -1057,6 +1081,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   param.push_back(mutatedPhredMinReverse, "mutatedPhredMinReverse");
   param.push_back(mutNameDelimiter, "mutNameDelimiter");
   param.push_back(variableCollapseMaxDist, "variableCollapseMaxDist");
+  param.push_back(variableCollapseMinReads, "variableCollapseMinReads");
   param.push_back(umiCollapseMaxDist, "umiCollapseMaxDist");
   param.push_back(maxNReads, "maxNReads");
   List L = List::create(Named("parameters") = param,
