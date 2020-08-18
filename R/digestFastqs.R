@@ -36,11 +36,8 @@ checkNumericInput <- function(..., nonnegative) {
 #'  reverse read.
 #'  \item If primer sequences are provided, search for perfect matches, and
 #'  filter out the read pair if not all provided primer sequences can be found.
-#'  \item Extract the variable sequence from forward and reverse reads. If the
-#'  lengths of the UMI, constant and variable part of the read are given, they
-#'  will be used to extract the variable part. Otherwise, a primer sequence must
-#'  be provided, and the variable sequence is assumed to start immediately after
-#'  the primer.
+#'  \item Extract the UMI, constant and variable sequence from forward and 
+#'  reverse reads, based on the definition of the respective read composition.
 #'  \item If requested, collapse forward and reverse variable regions by
 #'  retaining, for each position, the base with the highest reported base
 #'  quality.
@@ -65,7 +62,9 @@ checkNumericInput <- function(..., nonnegative) {
 #'  \item Assign a 'mutation name' to the read. This name is a combination of
 #'  parts of the form XX{.}YY{.}NNN, where XX is the name of the most similar
 #'  reference sequence, YY is the mutated codon number, and NNN is the mutated
-#'  codon. {.} is a delimiter, specified via \code{mutNameDelimiter}.
+#'  codon. {.} is a delimiter, specified via \code{mutNameDelimiter}. If no 
+#'  wildtype sequences are provided, the read sequence will be used as the 
+#'  'mutation name'.
 #'}
 #' 
 #' Based on the retained reads following this filtering process, count the
@@ -75,7 +74,8 @@ checkNumericInput <- function(..., nonnegative) {
 #' @param fastqForward,fastqReverse character vector, paths to gzipped FASTQ files
 #'   corresponding to forward and reverse reads, respectively. If more than one
 #'   forward/reverse sequence file is given, they need to be provided in the
-#'   same order.
+#'   same order. Note that if multiple fastq files are provided, they are all 
+#'   assumed to correspond to the same sample, and will effectively be concatenated.
 #' @param mergeForwardReverse logical(1), whether to fuse the forward and
 #'   reverse variable sequences.
 #' @param minOverlap,maxOverlap numeric(1), the minimal and maximal allowed
@@ -90,25 +90,31 @@ checkNumericInput <- function(..., nonnegative) {
 #'   be retained. If \code{FALSE}, all valid overlaps will be scored and the one
 #'   with the highest score (largest number of matches) will be retained.
 #' @param revComplForward,revComplReverse logical(1), whether to reverse
-#'   complement the forward/reverse reads, respectively.
-#' @param skipForward,skipReverse numeric(1), the number of bases to skip in the
-#'   start of each forward and reverse read, respectively.
-#' @param umiLengthForward,umiLengthReverse numeric(1), the length of the
-#'   barcode (UMI) sequence in the forward/reverse reads, respectively, not
-#'   including the skipped bases (defined by
-#'   \code{skipForward}/\code{skipReverse}).
-#' @param constantLengthForward,constantLengthReverse numeric(1), the length of
-#'   the constant sequence in the forward/reverse reads, respectively.
-#' @param variableLengthForward,variableLengthReverse numeric(1), the length of
-#'   the variable sequence in the forward/reverse reads, respectively.
+#'   complement the forward/reverse variable and constant sequences, respectively.
+#' @param elementsForward,elementsReverse Character strings representing the 
+#'   composition of the forward and reverse reads, respectively. The strings should
+#'   consist only of the letters S (skip), C (constant), U (umi), P (primer), 
+#'   V (variable), and cover the full extent of the read. Most combinations 
+#'   are allowed (and a given letter can appear multiple times), but there 
+#'   can be at most one occurrence of P. If a given letter is included 
+#'   multiple times, the corresponding sequences will be concatenated in the output. 
+#' @param elementLengthsForward,elementLengthsReverse Numeric vectors containing 
+#'   the lengths of each read component from \code{elementsForward}/\code{elementsReverse},
+#'   respectively. If the length of one element is set to -1, it will be inferred 
+#'   from the other lengths (as the remainder of the read). At most one number 
+#'   (or one number on each side of the primer P) can be set to -1. The indicated 
+#'   length of the primer is not used (instead it's inferred from the provided primer
+#'   sequence) and can also be set to -1.
 #' @param adapterForward,adapterReverse character(1), the adapter sequence for
 #'   forward/reverse reads, respectively. If a forward/reverse read contains the
 #'   corresponding adapter sequence, the sequence pair will be filtered out.
 #'   If set to \code{NULL}, no adapter filtering is performed. The number of
 #'   filtered read pairs are reported in the return value.
-#' @param primerForward,primerReverse character(1), the primer sequence for
-#'   forward/reverse reads, respectively. Only read pairs that contain both the
-#'   forward and reverse primers will be retained.
+#' @param primerForward,primerReverse Character vectors, representing the primer 
+#'   sequence(s) for forward/reverse reads, respectively. Only read pairs that 
+#'   contain perfect matches to both the forward and reverse primers (if given) 
+#'   will be retained. Multiple primers can be specified - they will be 
+#'   considered in order and the first match will be used.
 #' @param wildTypeForward,wildTypeReverse character(1) or named character
 #'   vector, the wild type sequence for the forward and reverse variable region.
 #'   If given as a single string, the reference sequence will be named 'f' (for
@@ -126,7 +132,7 @@ checkNumericInput <- function(..., nonnegative) {
 #' @param nbrMutatedCodonsMaxForward,nbrMutatedCodonsMaxReverse numeric(1)
 #'   Maximum number of mutated codons that are allowed.
 #' @param forbiddenMutatedCodonsForward,forbiddenMutatedCodonsReverse character
-#'   vector. Codons (can contain ambiguous IUPAC characters, see
+#'   vector of codons (can contain ambiguous IUPAC characters, see
 #'   \code{\link[Biostrings]{IUPAC_CODE_MAP}}). If a read pair contains a
 #'   mutated codon matching this pattern, it will be filtered out.
 #' @param mutatedPhredMinForward,mutatedPhredMinReverse numeric(1) Minimum Phred
@@ -160,7 +166,10 @@ checkNumericInput <- function(..., nonnegative) {
 #' \item{summaryTable}{A \code{data.frame} that contains, for each observed
 #' mutation combination, the corresponding variable region sequences (or pair of
 #' sequences), the number of observed such sequences, and the number of unique
-#' UMIs obseved for the sequence.}
+#' UMIs observed for the sequence. It also has a column named 'maxNbrReads', 
+#' which contains the number of reads for the most frequent observed sequence 
+#' represented by the feature (only relevant if similar variable regions are 
+#' collapsed).}
 #' \item{filterSummary}{A \code{data.frame} that contains the number of input
 #' reads, the number of reads filtered out in the processing, and the number of
 #' retained reads. The filters are named according to the convention
@@ -182,16 +191,14 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          mergeForwardReverse = FALSE, minOverlap = 0, maxOverlap = 0, 
                          maxFracMismatchOverlap = 1, greedyOverlap = TRUE,
                          revComplForward = FALSE, revComplReverse = FALSE,
-                         skipForward = 0, skipReverse = -1,
-                         umiLengthForward = 0, umiLengthReverse = -1,
-                         constantLengthForward = 0,
-                         constantLengthReverse = -1,
-                         variableLengthForward,
-                         variableLengthReverse = -1,
                          adapterForward = "", adapterReverse = "",
-                         primerForward = "", primerReverse = "",
+                         elementsForward = "",
+                         elementLengthsForward = numeric(0),
+                         elementsReverse = "",
+                         elementLengthsReverse = numeric(0),
+                         primerForward = c(""), primerReverse = c(""),
                          wildTypeForward = "", wildTypeReverse = "", 
-                         constantForward = "", constantReverse = "", 
+                         constantForward = "", constantReverse = "",
                          avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
                          variableNMaxForward = 0, variableNMaxReverse = 0, 
                          umiNMax = 0,
@@ -225,20 +232,18 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
             length(revComplReverse)) != 1)) {
     stop("'mergeForwardReverse', 'revComplForward' and 'revComplReverse' must be logical scalars")
   }
-  if (fastqReverse == "" && mergeForwardReverse) {
+  if (any(fastqReverse == "") && mergeForwardReverse) {
     stop("Both forward and reverse FASTQ files must be given in order to merge ",
          "forward and reverse reads")
   }
   
   ## check numeric inputs
-  checkNumericInput(skipForward, nonnegative = FALSE)
-  checkNumericInput(skipReverse, nonnegative = FALSE)
-  checkNumericInput(umiLengthForward, nonnegative = FALSE)
-  checkNumericInput(umiLengthReverse, nonnegative = FALSE)
-  checkNumericInput(constantLengthForward, nonnegative = FALSE)
-  checkNumericInput(constantLengthReverse, nonnegative = FALSE)
-  checkNumericInput(variableLengthForward, nonnegative = FALSE)
-  checkNumericInput(variableLengthReverse, nonnegative = FALSE)
+  for (i in elementLengthsForward) {
+    checkNumericInput(i, nonnegative = FALSE)
+  }
+  for (i in elementLengthsReverse) {
+    checkNumericInput(i, nonnegative = FALSE)
+  }
   checkNumericInput(avePhredMinForward, nonnegative = TRUE)
   checkNumericInput(avePhredMinReverse, nonnegative = TRUE)
   checkNumericInput(variableNMaxForward, nonnegative = TRUE)
@@ -252,7 +257,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
   checkNumericInput(variableCollapseMinReads, nonnegative = TRUE)
   checkNumericInput(umiCollapseMaxDist, nonnegative = TRUE)
   
-  ## adapters and primers must be strings, valid DNA characters
+  ## adapters must be strings, valid DNA characters
   if (!is.character(adapterForward) || length(adapterForward) != 1 ||
       !grepl("^[AaCcGgTt]*$", adapterForward) || !is.character(adapterReverse) ||
       length(adapterReverse) != 1 || !grepl("^[AaCcGgTt]*$", adapterReverse)) {
@@ -262,41 +267,79 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     adapterReverse <- toupper(adapterReverse)
   }
   
-  if (!is.character(primerForward) || length(primerForward) != 1 ||
-      !grepl("^[AaCcGgTt]*$", primerForward) || !is.character(primerReverse) ||
-      length(primerReverse) != 1 || !grepl("^[AaCcGgTt]*$", primerReverse)) {
-    stop("Primers must be character strings, only containing valid DNA characters")
-  } else {
-    primerForward <- toupper(primerForward)
-    primerReverse <- toupper(primerReverse)
+  ## Check provided read composition
+  if (!(length(elementsForward) == 1 && is.character(elementsForward))) {
+    stop("'elementsForward' must be a character scalar")
+  }
+  if (!(length(elementsReverse) == 1 && is.character(elementsReverse))) {
+    stop("'elementsReverse' must be a character scalar")
   }
   
-  ## Check that a valid combination of sequence part lengths/primers is provided
-  ## If one of skip, umiLength, constantLength is provided (not -1), the others must be given too
-  if (any(c(skipForward, umiLengthForward, constantLengthForward) != (-1)) && 
-      !all(c(skipForward, umiLengthForward, constantLengthForward) != (-1))) {
-    stop("Either none or all of 'skipForward', 'umiLengthForward' and 'constantLengthForward' ",
-         "must be specified (> -1)")
+  if (nchar(elementsForward) == 0) {
+    stop("'elementsForward' must be a non-empty character scalar")
   }
-  if (any(c(skipReverse, umiLengthReverse, constantLengthReverse) != (-1)) && 
-      !all(c(skipReverse, umiLengthReverse, constantLengthReverse) != (-1))) {
-    stop("Either none or all of 'skipReverse', 'umiLengthReverse' and 'constantLengthReverse' ",
-         "must be specified (> -1)")
+  if (any(fastqReverse != "") && nchar(elementsReverse) == 0) {
+    stop("'elementsReverse' must be a non-empty character scalar")
   }
-  ## Now we know that either all or none of skip, umiLength, constantLength are set
-  ## If they are set (!= -1), primers can not be given
-  if (skipForward != (-1) && primerForward != "") {
-    stop("Both sequence component lengths and primer sequence can not be set (forward)")
+  
+  if (!all(strsplit(elementsForward, "")[[1]] %in% c("C", "U", "S", "V", "P"))) {
+    stop("'elementsForward' can only contain letters 'CUSVP'")
   }
-  if (skipReverse != (-1) && primerReverse != "") {
-    stop("Both sequence component lengths and primer sequence can not be set (reverse)")
+  if (!all(strsplit(elementsReverse, "")[[1]] %in% c("C", "U", "S", "V", "P"))) {
+    stop("'elementsReverse' can only contain letters 'CUSVP'")
   }
-  ## If they are not set, primers must be given (unless the fastq file is not given)
-  if (skipForward == (-1) && primerForward == "") {
-    stop("Either sequence component lengths or primer sequence must be set (forward)")
+  
+  if (nchar(elementsForward) != length(elementLengthsForward)) {
+    stop("'elementsForward' and 'elementsLengthsForward' must have the same length")
   }
-  if (fastqReverse != "" && skipReverse == (-1) && primerReverse == "") {
-    stop("Either sequence component lengths or primer sequence must be set (reverse)")
+  if (nchar(elementsReverse) != length(elementLengthsReverse)) {
+    stop("'elementsReverse' and 'elementsLengthsReverse' must have the same length")
+  }
+  
+  ## Max one 'P'
+  PposFwd <- gregexpr(pattern = "P", elementsForward, fixed = TRUE)[[1]]
+  PposRev <- gregexpr(pattern = "P", elementsReverse, fixed = TRUE)[[1]]
+
+  if (length(PposFwd) > 1) {
+    stop("'elementsForward' can contain max one 'P'")
+  }
+  if (length(PposRev) > 1) {
+    stop("'elementsReverse' can contain max one 'P'")
+  }
+  
+  ## If no 'P', max one -1 length
+  if (length(PposFwd) == 1 && PposFwd == -1 && 
+      sum(elementLengthsForward == -1) > 1) {
+    stop("Max one element length (forward) can be -1")
+  }
+  if (length(PposRev) == 1 && PposRev == -1 &&  
+      sum(elementLengthsReverse == -1) > 1) {
+    stop("Max one element length (reverse) can be -1")
+  }
+  
+  ## If a 'P', max one -1 length on each side
+  if (length(PposFwd) == 1 && PposFwd != -1) {
+    if ((PposFwd != 1 && sum(elementLengthsForward[1:(PposFwd - 1)] == -1) > 1) || 
+        (PposFwd != nchar(elementsForward) && 
+         sum(elementLengthsForward[(PposFwd + 1):nchar(elementsForward)] == -1) > 1)) {
+      stop("Max one element length (forward) on each side of the primer can be -1")
+    }
+  }
+  if (length(PposRev) == 1 && PposRev != -1) {
+    if ((PposRev != 1 && sum(elementLengthsReverse[1:(PposRev - 1)] == -1) > 1) || 
+        (PposRev != nchar(elementsReverse) && 
+         sum(elementLengthsReverse[(PposRev + 1):nchar(elementsReverse)] == -1) > 1)) {
+      stop("Max one element length (reverse) on each side of the primer can be -1")
+    }
+  }
+  
+  if (!is.character(primerForward) || length(primerForward) < 1 ||
+      !all(grepl("^[AaCcGgTt]*$", primerForward)) || !is.character(primerReverse) ||
+      length(primerReverse) < 1 || !all(grepl("^[AaCcGgTt]*$", primerReverse))) {
+    stop("Primers must be character vectors, only containing valid DNA characters")
+  } else {
+    primerForward <- vapply(primerForward, toupper, "")
+    primerReverse <- vapply(primerReverse, toupper, "")
   }
   
   ## if wild type sequence is a string, make it into a vector
@@ -325,22 +368,6 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     wildTypeReverse <- toupper(wildTypeReverse)
   }
   
-  ## wild type sequence lengths must match variable sequence lengths
-  if (any(sapply(wildTypeForward, function(w) {
-    variableLengthForward != (-1) && nchar(w) > 0 && nchar(w) != variableLengthForward
-  }))) {
-    stop("The lengths of the elements in 'wildTypeForward' (", paste(sapply(wildTypeForward, nchar), collapse = ","), 
-         ") do not all correspond to the given 'variableLengthForward' (", 
-         variableLengthForward, ")")
-  }
-  if (any(sapply(wildTypeReverse, function(w) {
-    variableLengthReverse != (-1) && nchar(w) > 0 && nchar(w) != variableLengthReverse
-  }))) {
-    stop("The lengths of the elements in 'wildTypeReverse' (", paste(sapply(wildTypeReverse, nchar), collapse = ","), 
-         ") do not all correspond to the given 'variableLengthReverse' (", 
-         variableLengthReverse, ")")
-  }
-  
   ## cis experiment - should not have wildTypeReverse
   if (mergeForwardReverse && any(sapply(wildTypeReverse, nchar) > 0)) {
     warning("Ignoring 'wildTypeReverse' when forward and reverse reads are merged")
@@ -360,14 +387,20 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     constantReverse <- toupper(constantReverse)
   }
   
-  if (nchar(constantForward) > 0 && nchar(constantForward) != constantLengthForward) {
-    stop("'constantLengthForward' (", constantLengthForward, 
-         ") does not correspond to the length of the given 'constantForward' (", 
+  CposFwd <- gregexpr(pattern = "C", elementsForward)[[1]]
+  if (nchar(constantForward) > 0 &&
+      sum(elementLengthsForward[CposFwd]) != nchar(constantForward)) {
+    stop("The sum of the constant sequence lengths in elementsForward (",
+         sum(elementLengthsForward[CposFwd]),
+         ") does not correspond to the length of the given 'constantForward' (",
          nchar(constantForward), ")")
   }
-  if (nchar(constantReverse) > 0 && nchar(constantReverse) != constantLengthReverse) {
-    stop("'constantLengthReverse' (", constantLengthReverse, 
-         ") does not correspond to the length of the given 'constantReverse' (", 
+  CposRev <- gregexpr(pattern = "C", elementsReverse)[[1]]
+  if (nchar(constantReverse) > 0 &&
+      sum(elementLengthsReverse[CposRev]) != nchar(constantReverse)) {
+    stop("The sum of the constant sequence lengths in elementsReverse (",
+         sum(elementLengthsReverse[CposRev]),
+         ") does not correspond to the length of the given 'constantReverse' (",
          nchar(constantReverse), ")")
   }
   
@@ -406,14 +439,10 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          greedyOverlap = greedyOverlap,
                          revComplForward = revComplForward,
                          revComplReverse = revComplReverse,
-                         skipForward = skipForward, 
-                         skipReverse = skipReverse,
-                         umiLengthForward = umiLengthForward, 
-                         umiLengthReverse = umiLengthReverse,
-                         constantLengthForward = constantLengthForward,
-                         constantLengthReverse = constantLengthReverse,
-                         variableLengthForward = variableLengthForward,
-                         variableLengthReverse = variableLengthReverse,
+                         elementsForward = elementsForward,
+                         elementLengthsForward = as.numeric(elementLengthsForward),
+                         elementsReverse = elementsReverse,
+                         elementLengthsReverse = as.numeric(elementLengthsReverse),
                          adapterForward = adapterForward, 
                          adapterReverse = adapterReverse,
                          primerForward = primerForward,
@@ -421,7 +450,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          wildTypeForward = wildTypeForward, 
                          wildTypeReverse = wildTypeReverse, 
                          constantForward = constantForward, 
-                         constantReverse = constantReverse, 
+                         constantReverse = constantReverse,
                          avePhredMinForward = avePhredMinForward,
                          avePhredMinReverse = avePhredMinReverse,
                          variableNMaxForward = variableNMaxForward,

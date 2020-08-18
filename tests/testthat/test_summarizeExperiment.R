@@ -4,10 +4,9 @@ Ldef <- list(
   mergeForwardReverse = FALSE, 
   minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
   revComplForward = FALSE, revComplReverse = FALSE,
-  skipForward = 1, skipReverse = 1, 
-  umiLengthForward = 10, umiLengthReverse = 8, 
-  constantLengthForward = 18, constantLengthReverse = 20, 
-  variableLengthForward = 96, variableLengthReverse = 96,
+  elementsForward = "SUCV", elementsReverse = "SUCV",
+  elementLengthsForward = c(1, 10, 18, 96),
+  elementLengthsReverse = c(1, 8, 20, 96),
   adapterForward = "GGAAGAGCACACGTC", 
   adapterReverse = "GGAAGAGCGTCGTGT",
   primerForward = "",
@@ -147,7 +146,15 @@ test_that("summarizeExperiment orders samples equally in count matrix/colData", 
                SummarizedExperiment::assay(m2, "counts"))
 })
 
-
+test_that("summarizeExperiment recognizes the presence of UMI counts correctly", {
+  L1 <- Ldef1; L1$elementsForward <- "SSCV"; L1$elementsReverse <- "SSCV"
+  L2 <- Ldef2; L2$elementsForward <- "SSCV"; L2$elementsReverse <- "SSCV"
+  outl1 <- do.call(digestFastqs, L1)
+  outl2 <- do.call(digestFastqs, L2)
+  expect_error(summarizeExperiment(x = list(sample1 = outl1, sample2 = outl2),
+                                   coldata = coldata, countType = "umis"))
+  
+})
 
 
 

@@ -24,9 +24,9 @@ knitr::opts_chunk$set(
 # Introduction
 
 `mutscan` provides functionality for processing and visualization of Deep
-Mutational Scanning data, starting from paired-end FASTQ files. Both TRANS
-experiments (considering pairs of proteins) and CIS experiments (studying a
-single protein) can be accommodated.
+Mutational Scanning and other similar data, starting from (paired-end) 
+FASTQ files. Both TRANS experiments (considering pairs of proteins) and 
+CIS experiments (studying a single protein) can be accommodated.
 
 ```{r setup, message = FALSE}
 library(SummarizedExperiment)
@@ -35,7 +35,8 @@ library(mutscan)
 
 # Reading example data
 
-The `mutscan` package contains several small example FASTQ files representing different types of experiments:
+The `mutscan` package contains several small example FASTQ files 
+representing different types of experiments:
 
 ```{r readTrans}
 datadir <- system.file("extdata", package = "mutscan")
@@ -61,21 +62,31 @@ read corresponds to mutated _JUN_ sequences. Each read contains a
 
 The main function for processing the Deep Mutational Scanning FASTQ files is
 `digestFastqs`. This function requires the specification of paths to compressed
-FASTQ file(s) and the composition of the reads in these files. The reads are
-expected to have one of the following compositions:
+FASTQ file(s) and the composition of the reads in these files. The composition 
+is specified by the user, and is given in the form of a character string 
+indicating the parts constituting the respective read, and an integer vector 
+specifying the lengths of the individual parts. For example, a read with the 
+following composition:
 
-type1: [skipped] - [UMI] - [constant sequence] - [variable region] 
+[1 skipped nt] - [10 nt UMI] - [18 nt constant sequence] - [96 nt variable region] 
 
-type2: [unknown] - [primer] - [variable region]
+would be represented by an elements string `"SUCV"`, and an element length
+vector `c(1, 10, 18, 96)`. 
 
-The forward and reverse reads can have different compositions. For type1 reads,
-the user specifies the length of the skipped, UMI and constant parts. The length
-of the variable region can either be set, or be assumed to make up the remainder
-of the read. For type2 reads, the variable region is assumed to start
-immediately after the primer. The length can either be set, or be assumed to
-make up the remainder of the read.
+The package can also accommodate designs with primer sequences. In this situation, 
+the primer acts as an 'anchor', and the read composition before and after the 
+primer is specified. For example, a read with the following composition:
 
-The user can also specify whether the variable parts of the forward and/or
+[unknown sequence] - [10 nt primer] - [variable region, constituting the remainder of the read]
+
+would be represented by an elements string `"SPV"`, and an element length 
+vector `c(-1, 10, -1)`, where the -1 indicates that the corresponding read part
+consists of the remaining part of the read, not accounted for by any of the other 
+specified parts. In addition, the sequence of the primer must be specified, and 
+any read where the primer is not present will be discarded. 
+
+The forward and reverse reads can have different compositions. The user can 
+also specify whether the variable parts of the forward and/or
 reverse reads should be reverse complemented before processing, and whether the
 variable regions of the forward and reverse reads should be merged into a single
 consensus sequence.
@@ -87,8 +98,7 @@ a series of filtering steps, in the following order:
 the read pair if a match is found in either the forward or reverse read.
 * Search for perfect matches to forward/reverse primer sequences, filter out the
 read pair if not both are found.
-* Filter out reads where the variable region is shorter than the indicated
-length.
+* Filter out reads whose length is not compatible with the indicated composition.
 * If forward and reverse variable regions should be merged, filter out read
 pairs where no valid overlap could be found.
 * Filter out read pair if the average quality in the variable region is below
@@ -120,12 +130,9 @@ transInput <- digestFastqs(fastqForward = file.path(datadir, "transInput_1.fastq
                            minOverlap = 0, maxOverlap = 0, 
                            maxFracMismatchOverlap = 1, greedyOverlap = TRUE, 
                            revComplForward = FALSE, revComplReverse = FALSE,
-                           skipForward = 1, skipReverse = 1, 
-                           umiLengthForward = 10, umiLengthReverse = 8, 
-                           constantLengthForward = 18,
-                           constantLengthReverse = 20, 
-                           variableLengthForward = 96,
-                           variableLengthReverse = 96, 
+                           elementsForward = "SUCV", elementsReverse = "SUCV",
+                           elementLengthsForward = c(1, 10, 18, 96),
+                           elementLengthsReverse = c(1, 8, 20, 96),
                            constantForward = "AACCGGAGGAGGGAGCTG",
                            constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
                            adapterForward = "GGAAGAGCACACGTC", 
@@ -137,7 +144,11 @@ transInput <- digestFastqs(fastqForward = file.path(datadir, "transInput_1.fastq
                            wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
                            nbrMutatedCodonsMaxForward = 1, nbrMutatedCodonsMaxReverse = 1,
                            forbiddenMutatedCodonsForward = "NNW", forbiddenMutatedCodonsReverse = "NNW",
-                           mutNameDelimiter = ".", maxNReads = -1, verbose = FALSE)
+                           mutNameDelimiter = ".", 
+                           variableCollapseMaxDist = 0.0,
+                           variableCollapseMinReads = 0,
+                           umiCollapseMaxDist = 0.0,
+                           maxNReads = -1, verbose = FALSE)
 ```
 
 The `digestFastqs` function returns a list with four elements. The `parameters`
@@ -179,10 +190,10 @@ transInput$errorStatistics[rowSums(transInput$errorStatistics[, -1]) != 0, ]
 The `errorStatistics` output can be used to estimate the sequencing error rate:
 
 ```{r errStats}
-(propErrorsConstantF <- sum(transInput$errorStatistics$nbrMismatchForward)/
-   (transInput$parameters$constantLengthForward * transInput$filterSummary$nbrRetained))
-(propErrorsConstantR <- sum(transInput$errorStatistics$nbrMismatchReverse)/
-   (transInput$parameters$constantLengthReverse * transInput$filterSummary$nbrRetained))
+(propErrorsConstantF <- sum(transInput$errorStatistics$nbrMismatchForward) /
+   (nchar(transInput$parameters$constantForward) * transInput$filterSummary$nbrRetained))
+(propErrorsConstantR <- sum(transInput$errorStatistics$nbrMismatchReverse) /
+   (nchar(transInput$parameters$constantReverse) * transInput$filterSummary$nbrRetained))
 ```
 
 # Reading CIS data
@@ -202,12 +213,9 @@ cisInput <- digestFastqs(fastqForward = file.path(datadir, "cisInput_1.fastq.gz"
                          minOverlap = 0, maxOverlap = 0, 
                          maxFracMismatchOverlap = 1, greedyOverlap = TRUE, 
                          revComplForward = FALSE, revComplReverse = TRUE,
-                         skipForward = 1, skipReverse = 1, 
-                         umiLengthForward = 10, umiLengthReverse = 7, 
-                         constantLengthForward = 18,
-                         constantLengthReverse = 17, 
-                         variableLengthForward = 96,
-                         variableLengthReverse = 96, 
+                         elementsForward = "SUCV", elementsReverse = "SUCVS",
+                         elementLengthsForward = c(1, 10, 18, 96),
+                         elementLengthsReverse = c(1, 7, 17, 96, -1),
                          constantForward = "AACCGGAGGAGGGAGCTG",
                          constantReverse = "GAGTTCATCCTGGCAGC", 
                          adapterForward = "GGAAGAGCACACGTC", 
@@ -219,7 +227,11 @@ cisInput <- digestFastqs(fastqForward = file.path(datadir, "cisInput_1.fastq.gz"
                          wildTypeReverse = "", 
                          nbrMutatedCodonsMaxForward = 1, nbrMutatedCodonsMaxReverse = 1, 
                          forbiddenMutatedCodonsForward = "NNW", forbiddenMutatedCodonsReverse = "NNW",
-                         mutNameDelimiter = ".", maxNReads = -1, verbose = TRUE)
+                         mutNameDelimiter = ".", 
+                         variableCollapseMaxDist = 0.0,
+                         variableCollapseMinReads = 0,
+                         umiCollapseMaxDist = 0.0,
+                         maxNReads = -1, verbose = TRUE)
 ```
 
 ```{r}
@@ -306,10 +318,9 @@ leujunt0 <- digestFastqs(fastqForward = file.path(datadir, "leujunt0_1.fastq.gz"
                          mergeForwardReverse = FALSE, minOverlap = 0, maxOverlap = 0, 
                          maxFracMismatchOverlap = 1, greedyOverlap = TRUE, 
                          revComplForward = FALSE, revComplReverse = FALSE,
-                         skipForward = -1, skipReverse = -1, umiLengthForward = -1, 
-                         umiLengthReverse = -1, constantLengthForward = -1,
-                         constantLengthReverse = -1, variableLengthForward = -1,
-                         variableLengthReverse = 96, 
+                         elementsForward = "SPV", elementsReverse = "SPVS",
+                         elementLengthsForward = c(-1, 19, -1),
+                         elementLengthsReverse = c(-1, 20, 96, -1),
                          constantForward = "", constantReverse = "", 
                          adapterForward = "", adapterReverse = "", 
                          primerForward = "GTCAGGTGGAGGCGGATCC", 
@@ -323,13 +334,16 @@ leujunt0 <- digestFastqs(fastqForward = file.path(datadir, "leujunt0_1.fastq.gz"
                          forbiddenMutatedCodonsForward = "",
                          forbiddenMutatedCodonsReverse = "NNW",
                          mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
-                         mutNameDelimiter = ".", maxNReads = -1, verbose = TRUE)
+                         mutNameDelimiter = ".", 
+                         variableCollapseMaxDist = 0.0,
+                         variableCollapseMinReads = 0,
+                         umiCollapseMaxDist = 0.0,
+                         maxNReads = -1, verbose = TRUE)
 ```
 
 ```{r}
 leujunt0$parameters
 leujunt0$filterSummary
-leujunt0$errorStatistics[rowSums(leujunt0$errorStatistics[, -1]) != 0, ]
 ```
 
 ```{r}
@@ -352,12 +366,9 @@ transOutput <- digestFastqs(fastqForward = file.path(datadir, "transOutput_1.fas
                             minOverlap = 0, maxOverlap = 0, 
                             maxFracMismatchOverlap = 1, greedyOverlap = TRUE, 
                             revComplForward = FALSE, revComplReverse = FALSE,
-                            skipForward = 1, skipReverse = 1, 
-                            umiLengthForward = 10, umiLengthReverse = 8, 
-                            constantLengthForward = 18,
-                            constantLengthReverse = 20, 
-                            variableLengthForward = 96,
-                            variableLengthReverse = 96, 
+                            elementsForward = "SUCV", elementsReverse = "SUCV",
+                            elementLengthsForward = c(1, 10, 18, 96),
+                            elementLengthsReverse = c(1, 8, 20, 96),
                             constantForward = "AACCGGAGGAGGGAGCTG",
                             constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
                             adapterForward = "GGAAGAGCACACGTC", 
@@ -369,7 +380,11 @@ transOutput <- digestFastqs(fastqForward = file.path(datadir, "transOutput_1.fas
                             wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
                             nbrMutatedCodonsMaxForward = 1, nbrMutatedCodonsMaxReverse = 1, 
                             forbiddenMutatedCodonsForward = "NNW", forbiddenMutatedCodonsReverse = "NNW",
-                            mutNameDelimiter = ".", maxNReads = -1, verbose = FALSE)
+                            mutNameDelimiter = ".", 
+                            variableCollapseMaxDist = 0.0,
+                            variableCollapseMinReads = 0,
+                            umiCollapseMaxDist = 0.0,
+                            maxNReads = -1, verbose = FALSE)
 se <- summarizeExperiment(x = list(sample1 = transInput,
                                    sample2 = transOutput),
                           coldata = data.frame(Name = c("sample1", "sample2"),

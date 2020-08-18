@@ -1,3 +1,12 @@
+.hasReadComponent <- function(composition, component) {
+  tmp <- gregexpr(pattern = component, text = composition, fixed = TRUE)[[1]]
+  if (length(tmp) == 1 && tmp == -1) {
+    FALSE
+  } else {
+    TRUE
+  }
+}
+
 #' Summarize and collapse multiple mutational scanning experiments
 #' 
 #' Combine multiple sequence lists (as returned by \code{\link{digestFastqs}}
@@ -58,8 +67,8 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
   }
   ## If no UMI sequences were given, then countType = "umis" should not be allowed
   if (countType == "umis" && 
-      !(all(sapply(x, function(w) w$parameters$umiLengthForward != -1 || 
-                   w$parameters$umiLengthReverse != -1)))) {
+      !(all(sapply(x, function(w) .hasReadComponent(w$parameters$elementsForward, "U") || 
+                   .hasReadComponent(w$parameters$elementsReverse, "U"))))) {
     stop("'countType' is set to 'umis', but no UMI sequences were provided when quantifying. ",
          "Set 'countType' to 'reads' instead.")
   }

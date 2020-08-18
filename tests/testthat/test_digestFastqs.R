@@ -11,6 +11,230 @@ test_that("findClosestRefSeq works", {
   expect_equal(findClosestRefSeq(varSeq = "ACGT", wtSeq = c("AACGT", "ACCTA")), 1L)
 })
 
+test_that("decomposeRead works", {
+  ## All element lengths specified, no primer
+  res <- mutscan:::test_decomposeRead(
+    sseq = "ACGTTAAAGCCTGG", squal = "abcdefgABCDEFG", elements = "USCVCUSV", 
+    elementLengths = c(2, 1, 3, 3, 1, 2, 1, 1), primerSeqs = "", 
+    varSeq = "", varQual = "", umiSeq = "", constSeq = "", constQual = "", 
+    nNoPrimer = 0, nReadWrongLength = 0)
+  expect_equal(res$umiSeq, "ACCT")
+  expect_equal(res$varSeq, "AAGG")
+  expect_equal(res$varQual, "gABG")
+  expect_equal(res$constSeq, "TTAC")
+  expect_equal(res$constQual, "defC")
+  expect_equal(res$nNoPrimer, 0)
+  expect_equal(res$nReadWrongLength, 0)
+  
+  ## All element lengths specified, no primer, 0 lengths included
+  res <- mutscan:::test_decomposeRead(
+    sseq = "ACGTTAAAGCCTG", squal = "abcdefgABCDEF", elements = "SUSCVUCUS", 
+    elementLengths = c(0, 2, 1, 3, 3, 0, 1, 2, 1), primerSeqs = "", 
+    varSeq = "", varQual = "", umiSeq = "", constSeq = "", constQual = "", 
+    nNoPrimer = 0, nReadWrongLength = 0)
+  expect_equal(res$umiSeq, "ACCT")
+  expect_equal(res$varSeq, "AAG")
+  expect_equal(res$varQual, "gAB")
+  expect_equal(res$constSeq, "TTAC")
+  expect_equal(res$constQual, "defC")
+  expect_equal(res$nNoPrimer, 0)
+  expect_equal(res$nReadWrongLength, 0)
+  
+  ## Derive variable length from other lengths
+  res <- mutscan:::test_decomposeRead(
+    sseq = "ACGTTAAAGCCTG", squal = "abcdefgABCDEF", elements = "USCVCUS", 
+    elementLengths = c(2, 1, 3, -1, 1, 2, 1), primerSeqs = "", 
+    varSeq = "", varQual = "", umiSeq = "", constSeq = "", constQual = "", 
+    nNoPrimer = 0, nReadWrongLength = 0)
+  expect_equal(res$umiSeq, "ACCT")
+  expect_equal(res$varSeq, "AAG")
+  expect_equal(res$varQual, "gAB")
+  expect_equal(res$constSeq, "TTAC")
+  expect_equal(res$constQual, "defC")
+  expect_equal(res$nNoPrimer, 0)
+  expect_equal(res$nReadWrongLength, 0)
+  
+  ## Primer
+  res <- mutscan:::test_decomposeRead(
+    sseq = "ACGTTAAAGCCTGG", squal = "abcdefgABCDEFG", elements = "USCVPS", 
+    elementLengths = c(2, 1, 3, 3, 3, -1), primerSeqs = c("CCT"), 
+    varSeq = "", varQual = "", umiSeq = "", constSeq = "", constQual = "", 
+    nNoPrimer = 0, nReadWrongLength = 0)
+  expect_equal(res$umiSeq, "AC")
+  expect_equal(res$varSeq, "AAG")
+  expect_equal(res$varQual, "gAB")
+  expect_equal(res$constSeq, "TTA")
+  expect_equal(res$constQual, "def")
+  expect_equal(res$nNoPrimer, 0)
+  expect_equal(res$nReadWrongLength, 0)
+
+  ## Only variable sequence
+  res <- mutscan:::test_decomposeRead(
+    sseq = "ACGTTAAAGCCTGG", squal = "abcdefgABCDEFG", elements = "V", 
+    elementLengths = -1, primerSeqs = c("CCT"), 
+    varSeq = "", varQual = "", umiSeq = "", constSeq = "", constQual = "", 
+    nNoPrimer = 0, nReadWrongLength = 0)
+  expect_equal(res$umiSeq, "")
+  expect_equal(res$varSeq, "ACGTTAAAGCCTGG")
+  expect_equal(res$varQual, "abcdefgABCDEFG")
+  expect_equal(res$constSeq, "")
+  expect_equal(res$constQual, "")
+  expect_equal(res$nNoPrimer, 0)
+  expect_equal(res$nReadWrongLength, 0)
+
+  ## Primer + variable sequence
+  res <- mutscan:::test_decomposeRead(
+    sseq = "ACGTTAAAGCCTGG", squal = "abcdefgABCDEFG", elements = "PV", 
+    elementLengths = c(-1, -1), primerSeqs = c("ACG"), 
+    varSeq = "", varQual = "", umiSeq = "", constSeq = "", constQual = "", 
+    nNoPrimer = 0, nReadWrongLength = 0)
+  expect_equal(res$umiSeq, "")
+  expect_equal(res$varSeq, "TTAAAGCCTGG")
+  expect_equal(res$varQual, "defgABCDEFG")
+  expect_equal(res$constSeq, "")
+  expect_equal(res$constQual, "")
+  expect_equal(res$nNoPrimer, 0)
+  expect_equal(res$nReadWrongLength, 0)
+
+  ## Variable sequence + primer
+  res <- mutscan:::test_decomposeRead(
+    sseq = "ACGTTAAAGCCTGG", squal = "abcdefgABCDEFG", elements = "VP", 
+    elementLengths = c(-1, -1), primerSeqs = c("ACG"), 
+    varSeq = "A", varQual = "E", umiSeq = "", constSeq = "", constQual = "", 
+    nNoPrimer = 0, nReadWrongLength = 0)
+  expect_equal(res$umiSeq, "")
+  expect_equal(res$varSeq, "A")
+  expect_equal(res$varQual, "E")
+  expect_equal(res$constSeq, "")
+  expect_equal(res$constQual, "")
+  expect_equal(res$nNoPrimer, 0)
+  expect_equal(res$nReadWrongLength, 0)
+  
+  ## Primer, not the right length of sequence
+  res <- mutscan:::test_decomposeRead(
+    sseq = "ACGTTAAAGCCTGG", squal = "abcdefgABCDEFG", elements = "VPU", 
+    elementLengths = c(10, 3, 2), primerSeqs = c("CCT"), 
+    varSeq = "", varQual = "", umiSeq = "", constSeq = "", constQual = "", 
+    nNoPrimer = 0, nReadWrongLength = 0)
+  expect_equal(res$umiSeq, "")
+  expect_equal(res$varSeq, "")
+  expect_equal(res$varQual, "")
+  expect_equal(res$constSeq, "")
+  expect_equal(res$constQual, "")
+  expect_equal(res$nNoPrimer, 0)
+  expect_equal(res$nReadWrongLength, 1)
+
+  res <- mutscan:::test_decomposeRead(
+    sseq = "ACGTTAAAGCCTGG", squal = "abcdefgABCDEFG", elements = "VPU", 
+    elementLengths = c(8, 3, 2), primerSeqs = c("CCT"), 
+    varSeq = "", varQual = "", umiSeq = "", constSeq = "", constQual = "", 
+    nNoPrimer = 0, nReadWrongLength = 0)
+  expect_equal(res$umiSeq, "")
+  expect_equal(res$varSeq, "")
+  expect_equal(res$varQual, "")
+  expect_equal(res$constSeq, "")
+  expect_equal(res$constQual, "")
+  expect_equal(res$nNoPrimer, 0)
+  expect_equal(res$nReadWrongLength, 1)
+  
+  res <- mutscan:::test_decomposeRead(
+    sseq = "ACGTTAAAGCCTGG", squal = "abcdefgABCDEFG", elements = "CVPU", 
+    elementLengths = c(10, -1, 3, 2), primerSeqs = c("CCT"), 
+    varSeq = "", varQual = "", umiSeq = "", constSeq = "", constQual = "", 
+    nNoPrimer = 0, nReadWrongLength = 0)
+  expect_equal(res$umiSeq, "")
+  expect_equal(res$varSeq, "")
+  expect_equal(res$varQual, "")
+  expect_equal(res$constSeq, "")
+  expect_equal(res$constQual, "")
+  expect_equal(res$nNoPrimer, 0)
+  expect_equal(res$nReadWrongLength, 1)
+  
+  ## Primer, but don't explicitly specify that the part after the primer should be skipped
+  res <- mutscan:::test_decomposeRead(
+    sseq = "ACGTTAAAGCCTGG", squal = "abcdefgABCDEFG", elements = "USCVP", 
+    elementLengths = c(2, 1, 3, 3, 3), primerSeqs = c("CCT"), 
+    varSeq = "", varQual = "", umiSeq = "", constSeq = "", constQual = "", 
+    nNoPrimer = 0, nReadWrongLength = 0)
+  expect_equal(res$umiSeq, "AC")
+  expect_equal(res$varSeq, "AAG")
+  expect_equal(res$varQual, "gAB")
+  expect_equal(res$constSeq, "TTA")
+  expect_equal(res$constQual, "def")
+  expect_equal(res$nNoPrimer, 0)
+  expect_equal(res$nReadWrongLength, 0)
+
+  ## Multiple primers, only one present
+  res <- mutscan:::test_decomposeRead(
+    sseq = "ACGTTAAAGCCTGG", squal = "abcdefgABCDEFG", elements = "USCVP", 
+    elementLengths = c(2, 1, 3, 3, 3), primerSeqs = c("TTT", "CCT"), 
+    varSeq = "", varQual = "", umiSeq = "", constSeq = "", constQual = "", 
+    nNoPrimer = 0, nReadWrongLength = 0)
+  expect_equal(res$umiSeq, "AC")
+  expect_equal(res$varSeq, "AAG")
+  expect_equal(res$varQual, "gAB")
+  expect_equal(res$constSeq, "TTA")
+  expect_equal(res$constQual, "def")
+  expect_equal(res$nNoPrimer, 0)
+  expect_equal(res$nReadWrongLength, 0)
+
+  ## Multiple primers, none present
+  res <- mutscan:::test_decomposeRead(
+    sseq = "ACGTTAAAGCCTGG", squal = "abcdefgABCDEFG", elements = "USCVP", 
+    elementLengths = c(2, 1, 3, 3, 3), primerSeqs = c("TTT", "GGG"), 
+    varSeq = "", varQual = "", umiSeq = "", constSeq = "", constQual = "", 
+    nNoPrimer = 0, nReadWrongLength = 0)
+  expect_equal(res$umiSeq, "")
+  expect_equal(res$varSeq, "")
+  expect_equal(res$varQual, "")
+  expect_equal(res$constSeq, "")
+  expect_equal(res$constQual, "")
+  expect_equal(res$nNoPrimer, 1)
+  expect_equal(res$nReadWrongLength, 0)
+  
+  ## Multiple primers, all present (use the first one)
+  res <- mutscan:::test_decomposeRead(
+    sseq = "ACGTTAAAGCCTGG", squal = "abcdefgABCDEFG", elements = "USCVP", 
+    elementLengths = c(2, 1, 3, 3, 3), primerSeqs = c("CCT", "TTA"), 
+    varSeq = "", varQual = "", umiSeq = "", constSeq = "", constQual = "", 
+    nNoPrimer = 0, nReadWrongLength = 0)
+  expect_equal(res$umiSeq, "AC")
+  expect_equal(res$varSeq, "AAG")
+  expect_equal(res$varQual, "gAB")
+  expect_equal(res$constSeq, "TTA")
+  expect_equal(res$constQual, "def")
+  expect_equal(res$nNoPrimer, 0)
+  expect_equal(res$nReadWrongLength, 0)
+  
+  ## Primer, infer length of sequences
+  res <- mutscan:::test_decomposeRead(
+    sseq = "ACGTTAAAGCCTGG", squal = "abcdefgABCDEFG", elements = "UPV", 
+    elementLengths = c(-1, 3, -1), primerSeqs = c("CCT"), 
+    varSeq = "", varQual = "", umiSeq = "", constSeq = "", constQual = "", 
+    nNoPrimer = 0, nReadWrongLength = 0)
+  expect_equal(res$umiSeq, "ACGTTAAAG")
+  expect_equal(res$varSeq, "GG")
+  expect_equal(res$varQual, "FG")
+  expect_equal(res$constSeq, "")
+  expect_equal(res$constQual, "")
+  expect_equal(res$nNoPrimer, 0)
+  expect_equal(res$nReadWrongLength, 0)
+  
+  ## Primer, don't specify primer length
+  res <- mutscan:::test_decomposeRead(
+    sseq = "ACGTTAAAGCCTGG", squal = "abcdefgABCDEFG", elements = "UPV", 
+    elementLengths = c(-1, -1, -1), primerSeqs = c("CCT"), 
+    varSeq = "", varQual = "", umiSeq = "", constSeq = "", constQual = "", 
+    nNoPrimer = 0, nReadWrongLength = 0)
+  expect_equal(res$umiSeq, "ACGTTAAAG")
+  expect_equal(res$varSeq, "GG")
+  expect_equal(res$varQual, "FG")
+  expect_equal(res$constSeq, "")
+  expect_equal(res$constQual, "")
+  expect_equal(res$nNoPrimer, 0)
+  expect_equal(res$nReadWrongLength, 0)
+})
+
 test_that("mergeReadPairsPartial works", {
   ## don't count N as mismatch, pick base with higher quality
   sF1 <- "AAAANA"; qF1 <- rep(40L, nchar(sF1))
@@ -76,14 +300,13 @@ test_that("digestFastqs fails with incorrect arguments", {
     mergeForwardReverse = FALSE, 
     minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
     revComplForward = FALSE, revComplReverse = FALSE,
-    skipForward = 1, skipReverse = 1, 
-    umiLengthForward = 10, umiLengthReverse = 8, 
-    constantLengthForward = 18, constantLengthReverse = 20, 
-    variableLengthForward = 96, variableLengthReverse = 96,
+    elementsForward = "SUCV", elementsReverse = "SUCV",
+    elementLengthsForward = c(1, 10, 18, 96),
+    elementLengthsReverse = c(1, 8, 20, 96),
     adapterForward = "GGAAGAGCACACGTC", 
     adapterReverse = "GGAAGAGCGTCGTGT",
-    primerForward = "",
-    primerReverse = "",
+    primerForward = c(""),
+    primerReverse = c(""),
     wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
     wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
     constantForward = "AACCGGAGGAGGGAGCTG", 
@@ -135,10 +358,7 @@ test_that("digestFastqs fails with incorrect arguments", {
   expect_error(do.call(digestFastqs, L))
   
   ## Wrong type of numeric argument
-  for (var in c("skipForward", "skipReverse", "umiLengthForward", 
-                "umiLengthReverse", "constantLengthForward", "constantLengthReverse",
-                "variableLengthForward", "variableLengthReverse", 
-                "avePhredMinForward", "avePhredMinReverse", "variableNMaxForward",
+  for (var in c("avePhredMinForward", "avePhredMinReverse", "variableNMaxForward",
                 "variableNMaxReverse", "umiNMax", 
                 "nbrMutatedCodonsMaxForward", "nbrMutatedCodonsMaxReverse", 
                 "mutatedPhredMinForward", "mutatedPhredMinReverse",
@@ -147,33 +367,45 @@ test_that("digestFastqs fails with incorrect arguments", {
     expect_error(do.call(digestFastqs, L))
     L <- Ldef; L[[var]] <- c(1, 2)
     expect_error(do.call(digestFastqs, L))
-    if (!(var %in% c("skipForward", "skipReverse", "umiLengthForward",
-                     "umiLengthReverse", "constantLengthForward",
-                     "constantLengthReverse", "variableLengthForward", "variableLengthReverse"))) {
-      L <- Ldef; L[[var]] <- -1
-      expect_error(do.call(digestFastqs, L))
-    }
     L <- Ldef; L[[var]] <- TRUE
     expect_error(do.call(digestFastqs, L))
   }
   
-  ## Either all or none of the sequence lengths must be specified
-  for (var in c("skipForward", "skipReverse", "umiLengthForward",
-                "umiLengthReverse", "constantLengthForward", "constantLengthReverse")) {
-    L <- Ldef; L[[var]] <- -1
+  for (var in c("elementLengthsForward", "elementLengthsReverse")) {
+    L <- Ldef; L[[var]] <- as.character(L[[var]])
+    expect_error(do.call(digestFastqs, L))
+    L <- Ldef; L[[var]] <- as.logical(L[[var]])
     expect_error(do.call(digestFastqs, L))
   }
   
-  ## If sequence part lengths are given, primers can not be (and opposite)
-  for (var in c("skip", "umiLength", "constantLength")) {
-    for (di in c("Forward", "Reverse")) {
-      L <- Ldef; L[[paste0("primer", di)]] <- "ACGT"
-      expect_error(do.call(digestFastqs, L))
-      L <- Ldef; L[[paste0(var, di)]] <- -1; L[[paste0("primer", di)]] <- ""
-      expect_error(do.call(digestFastqs, L))
-    }
+  for (var in c("elementsForward", "elementsReverse")) {
+    L <- Ldef; L[[var]] <- "ABC"
+    expect_error(do.call(digestFastqs, L))
+    L <- Ldef; L[[var]] <- "UPPV"
+    expect_error(do.call(digestFastqs, L))
+    L <- Ldef; L[[var]] <- c("UPV", "CUS")
+    expect_error(do.call(digestFastqs, L))
   }
   
+  for (var in c("Forward", "Reverse")) {
+    L <- Ldef; L[[paste0("elements", var)]] <- "CUV"
+    L[[paste0("elementLengths", var)]] <- c(-1, -1, 4)
+    expect_error(do.call(digestFastqs, L))
+    L[[paste0("elementLengths", var)]] <- c(1, 4)
+    expect_error(do.call(digestFastqs, L))
+    
+    L <- Ldef; L[[paste0("elements", var)]] <- ""
+    L[[paste0("elementLengths", var)]] <- c()
+    expect_error(do.call(digestFastqs, L))
+    
+    L <- Ldef; L[[paste0("elements", var)]] <- "CUVPUV"
+    L[[paste0("elementLengths", var)]] <- c(-1, -1, 4, 4, -1, 2)
+    expect_error(do.call(digestFastqs, L))
+    L[[paste0("elementLengths", var)]] <- c(-1, 1, 4, 4, -1, -1)
+    expect_error(do.call(digestFastqs, L))
+    L[[paste0("elementLengths", var)]] <- c(1, 4)
+    expect_error(do.call(digestFastqs, L))
+  }
   
   ## Invalid sequences
   for (var in c("adapterForward", "adapterReverse", "wildTypeForward",
@@ -188,35 +420,46 @@ test_that("digestFastqs fails with incorrect arguments", {
     expect_error(do.call(digestFastqs, L))
   }
   
+  for (var in c("primerForward", "primerReverse")) {
+    L <- Ldef; L[[var]] <- 1
+    expect_error(do.call(digestFastqs, L))
+    L <- Ldef; L[[var]] <- "EF"
+    expect_error(do.call(digestFastqs, L))
+    L <- Ldef; L[[var]] <- c("ACGT", "EF")
+    expect_error(do.call(digestFastqs, L))
+    L <- Ldef; L[[var]] <- "ACGT "
+    expect_error(do.call(digestFastqs, L))
+  }
+  
   ## Wild type sequence not in named vector (or unnamed string)
   L <- Ldef
   L$wildTypeForward <- c("ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA", 
                          "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT")
   expect_error(do.call(digestFastqs, L))
   
-  ## Wild type sequence of wrong length
-  for (var in c("wildTypeForward", "wildTypeReverse")) {
-    L <- Ldef; L[[var]] <- substr(L[[var]], 1, 10)
-    expect_error(do.call(digestFastqs, L))
-  }
-  for (var in c("variableLengthForward", "variableLengthReverse")) {
-    L <- Ldef; L[[var]] <- 10
-    expect_error(do.call(digestFastqs, L))
-  }
-  L <- Ldef; L[["mergeForwardReverse"]] <- TRUE
-  expect_warning(do.call(digestFastqs, L))
+  # ## Wild type sequence of wrong length
+  # for (var in c("wildTypeForward", "wildTypeReverse")) {
+  #   L <- Ldef; L[[var]] <- substr(L[[var]], 1, 10)
+  #   expect_error(do.call(digestFastqs, L))
+  # }
+  # for (var in c("variableLengthForward", "variableLengthReverse")) {
+  #   L <- Ldef; L[[var]] <- 10
+  #   expect_error(do.call(digestFastqs, L))
+  # }
+  # L <- Ldef; L[["mergeForwardReverse"]] <- TRUE
+  # expect_warning(do.call(digestFastqs, L))
   
   ## Constant sequence of wrong length
   for (var in c("constantForward", "constantReverse")) {
     L <- Ldef; L[[var]] <- substr(L[[var]], 1, 10)
     expect_error(do.call(digestFastqs, L))
   }
-  for (var in c("constantLengthForward", "constantLengthReverse")) {
-    L <- Ldef; L[[var]] <- 10
-    expect_error(do.call(digestFastqs, L))
-    L <- Ldef; L[[var]] <- -1
-    expect_error(do.call(digestFastqs, L))
-  }
+  # for (var in c("constantLengthForward", "constantLengthReverse")) {
+  #   L <- Ldef; L[[var]] <- 10
+  #   expect_error(do.call(digestFastqs, L))
+  #   L <- Ldef; L[[var]] <- -1
+  #   expect_error(do.call(digestFastqs, L))
+  # }
   
   ## Invalid forbidden codons
   L <- Ldef; L[["forbiddenMutatedCodonsForward"]] <- c("EFI")
@@ -255,10 +498,9 @@ test_that("digestFastqs works as expected for trans experiments", {
     mergeForwardReverse = FALSE, 
     minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
     revComplForward = FALSE, revComplReverse = FALSE,
-    skipForward = 1, skipReverse = 1, 
-    umiLengthForward = 10, umiLengthReverse = 8, 
-    constantLengthForward = 18, constantLengthReverse = 20, 
-    variableLengthForward = 96, variableLengthReverse = 96,
+    elementsForward = "SUCV", elementsReverse = "SUCV",
+    elementLengthsForward = c(1, 10, 18, 96),
+    elementLengthsReverse = c(1, 8, 20, 96),
     adapterForward = "GGAAGAGCACACGTC", 
     adapterReverse = "GGAAGAGCGTCGTGT",
     primerForward = "",
@@ -287,7 +529,7 @@ test_that("digestFastqs works as expected for trans experiments", {
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nbrReadTooShort, 0L)
+  expect_equal(res$filterSummary$f3_nbrReadWrongLength, 0L)
   expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
   expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 7L)
   expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 0L)
@@ -342,8 +584,7 @@ test_that("digestFastqs works as expected for trans experiments", {
   
 })
 
-context("digestFastqs - trans - do not specify variable sequence length")
-test_that("digestFastqs works as expected for trans experiments, when variable sequence length is not given", {
+test_that("digestFastqs works as expected for trans experiments - no UMI specified", {
   fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
   fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
   ## default arguments
@@ -352,10 +593,9 @@ test_that("digestFastqs works as expected for trans experiments, when variable s
     mergeForwardReverse = FALSE, 
     minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
     revComplForward = FALSE, revComplReverse = FALSE,
-    skipForward = 1, skipReverse = 1, 
-    umiLengthForward = 10, umiLengthReverse = 8, 
-    constantLengthForward = 18, constantLengthReverse = 20, 
-    variableLengthForward = -1, variableLengthReverse = -1,
+    elementsForward = "SSCV", elementsReverse = "SSCV",
+    elementLengthsForward = c(1, 10, 18, 96),
+    elementLengthsReverse = c(1, 8, 20, 96),
     adapterForward = "GGAAGAGCACACGTC", 
     adapterReverse = "GGAAGAGCGTCGTGT",
     primerForward = "",
@@ -381,7 +621,58 @@ test_that("digestFastqs works as expected for trans experiments, when variable s
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nbrReadTooShort, 0L)
+  expect_equal(res$filterSummary$f3_nbrReadWrongLength, 0L)
+  expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
+  expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 7L)
+  expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 0L)
+  expect_equal(res$filterSummary$f7_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f8_nbrMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f9_nbrTooManyMutCodons, 287L + 105L)
+  expect_equal(res$filterSummary$f10_nbrForbiddenCodons, 6L + 2L)
+  expect_equal(res$filterSummary$nbrRetained, 279L)
+  
+  expect_equal(res$summaryTable$nbrUmis, rep(0, nrow(res$summaryTable)))
+})
+
+context("digestFastqs - trans - do not specify variable sequence length")
+test_that("digestFastqs works as expected for trans experiments, when variable sequence length is not given", {
+  fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
+  fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
+  ## default arguments
+  Ldef <- list(
+    fastqForward = fqt1, fastqReverse = fqt2, 
+    mergeForwardReverse = FALSE, 
+    minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
+    revComplForward = FALSE, revComplReverse = FALSE,
+    elementsForward = "SUCV", elementsReverse = "SUCV",
+    elementLengthsForward = c(1, 10, 18, -1),
+    elementLengthsReverse = c(1, 8, 20, -1),
+    adapterForward = "GGAAGAGCACACGTC", 
+    adapterReverse = "GGAAGAGCGTCGTGT",
+    primerForward = "",
+    primerReverse = "",
+    wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+    wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
+    constantForward = "AACCGGAGGAGGGAGCTG", 
+    constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
+    avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+    variableNMaxForward = 0, variableNMaxReverse = 0, 
+    umiNMax = 0,
+    nbrMutatedCodonsMaxForward = 1,
+    nbrMutatedCodonsMaxReverse = 1,
+    forbiddenMutatedCodonsForward = "NNW",
+    forbiddenMutatedCodonsReverse = "NNW",
+    mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+    mutNameDelimiter = ".",
+    maxNReads = -1, verbose = FALSE
+  )
+  
+  res <- do.call(digestFastqs, Ldef)
+  
+  expect_equal(res$filterSummary$nbrTotal, 1000L)
+  expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
+  expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
+  expect_equal(res$filterSummary$f3_nbrReadWrongLength, 0L)
   expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
   expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 7L)
   expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 0L)
@@ -442,10 +733,9 @@ test_that("digestFastqs works as expected for trans experiments when multiple re
     mergeForwardReverse = FALSE, 
     minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
     revComplForward = FALSE, revComplReverse = FALSE,
-    skipForward = 1, skipReverse = 1, 
-    umiLengthForward = 10, umiLengthReverse = 8, 
-    constantLengthForward = 18, constantLengthReverse = 20, 
-    variableLengthForward = 96, variableLengthReverse = 96,
+    elementsForward = "SUCV", elementsReverse = "SUCV",
+    elementLengthsForward = c(1, 10, 18, 96),
+    elementLengthsReverse = c(1, 8, 20, 96),
     adapterForward = "GGAAGAGCACACGTC", 
     adapterReverse = "GGAAGAGCGTCGTGT",
     primerForward = "",
@@ -473,7 +763,7 @@ test_that("digestFastqs works as expected for trans experiments when multiple re
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nbrReadTooShort, 0L)
+  expect_equal(res$filterSummary$f3_nbrReadWrongLength, 0L)
   expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
   expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 88L)
   expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 0L)
@@ -533,18 +823,17 @@ test_that("digestFastqs works as expected for experiments with only forward read
     mergeForwardReverse = FALSE, 
     minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
     revComplForward = FALSE, revComplReverse = FALSE,
-    skipForward = 1, skipReverse = 1, 
-    umiLengthForward = 10, umiLengthReverse = 8, 
-    constantLengthForward = 18, constantLengthReverse = 20, 
-    variableLengthForward = 96, variableLengthReverse = 96,
+    elementsForward = "SUCV", elementsReverse = "",
+    elementLengthsForward = c(1, 10, 18, 96),
+    elementLengthsReverse = c(),
     adapterForward = "GGAAGAGCACACGTC", 
-    adapterReverse = "GGAAGAGCGTCGTGT",
+    adapterReverse = "",
     primerForward = "",
     primerReverse = "",
     wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
     wildTypeReverse = "", 
     constantForward = "AACCGGAGGAGGGAGCTG", 
-    constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
+    constantReverse = "", 
     avePhredMinForward = 20.0, avePhredMinReverse = 30.0,
     variableNMaxForward = 0, variableNMaxReverse = 0, 
     umiNMax = 0,
@@ -565,7 +854,7 @@ test_that("digestFastqs works as expected for experiments with only forward read
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 297L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nbrReadTooShort, 0L)
+  expect_equal(res$filterSummary$f3_nbrReadWrongLength, 0L)
   expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
   expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 0L)
   expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 0L)
@@ -579,7 +868,9 @@ test_that("digestFastqs works as expected for experiments with only forward read
   expect_equal(res$summaryTable$nbrReads * 2, res2$summaryTable$nbrReads)
   expect_equal(res$summaryTable$nbrUmis, res2$summaryTable$nbrUmis)
   
-  for (nm in setdiff(names(Ldef), c("fastqReverse", "forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
+  for (nm in setdiff(names(Ldef), c("fastqReverse", "forbiddenMutatedCodonsForward",
+                                    "forbiddenMutatedCodonsReverse", "verbose",
+                                    "elementLengthsReverse"))) {
     expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
   }
   expect_equivalent(res$parameters[["fastqReverse"]], "")
@@ -616,10 +907,9 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     mergeForwardReverse = FALSE, 
     minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
     revComplForward = FALSE, revComplReverse = FALSE,
-    skipForward = 1, skipReverse = 1, 
-    umiLengthForward = 10, umiLengthReverse = 8, 
-    constantLengthForward = 18, constantLengthReverse = 20, 
-    variableLengthForward = 96, variableLengthReverse = 96,
+    elementsForward = "SUCV", elementsReverse = "SUCV",
+    elementLengthsForward = c(1, 10, 18, 96),
+    elementLengthsReverse = c(1, 8, 20, 96),
     adapterForward = "GGAAGAGCACACGTC", 
     adapterReverse = "GGAAGAGCGTCGTGT",
     primerForward = "",
@@ -650,7 +940,7 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nbrReadTooShort, 0L)
+  expect_equal(res$filterSummary$f3_nbrReadWrongLength, 0L)
   expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
   expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 7L)
   expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 0L)
@@ -678,10 +968,9 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     mergeForwardReverse = FALSE, 
     minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
     revComplForward = FALSE, revComplReverse = FALSE,
-    skipForward = 1, skipReverse = 1, 
-    umiLengthForward = 10, umiLengthReverse = 8, 
-    constantLengthForward = 18, constantLengthReverse = 20, 
-    variableLengthForward = 96, variableLengthReverse = 96,
+    elementsForward = "SUCV", elementsReverse = "SUCV",
+    elementLengthsForward = c(1, 10, 18, 96),
+    elementLengthsReverse = c(1, 8, 20, 96),
     adapterForward = "GGAAGAGCACACGTC", 
     adapterReverse = "GGAAGAGCGTCGTGT",
     primerForward = "",
@@ -708,7 +997,7 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nbrReadTooShort, 0L)
+  expect_equal(res$filterSummary$f3_nbrReadWrongLength, 0L)
   expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
   expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 7L)
   expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 0L)
@@ -736,10 +1025,9 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     mergeForwardReverse = FALSE, 
     minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
     revComplForward = FALSE, revComplReverse = FALSE,
-    skipForward = 1, skipReverse = 1, 
-    umiLengthForward = 10, umiLengthReverse = 8, 
-    constantLengthForward = 18, constantLengthReverse = 20, 
-    variableLengthForward = 96, variableLengthReverse = 96,
+    elementsForward = "SUCV", elementsReverse = "SUCV",
+    elementLengthsForward = c(1, 10, 18, 96),
+    elementLengthsReverse = c(1, 8, 20, 96),
     adapterForward = "GGAAGAGCACACGTC", 
     adapterReverse = "GGAAGAGCGTCGTGT",
     primerForward = "",
@@ -766,7 +1054,7 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 297L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nbrReadTooShort, 0L)
+  expect_equal(res$filterSummary$f3_nbrReadWrongLength, 0L)
   expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
   expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 0L)
   expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 0L)
@@ -794,10 +1082,9 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     mergeForwardReverse = FALSE, 
     minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
     revComplForward = FALSE, revComplReverse = FALSE,
-    skipForward = 1, skipReverse = 1, 
-    umiLengthForward = 10, umiLengthReverse = 8, 
-    constantLengthForward = 18, constantLengthReverse = 20, 
-    variableLengthForward = 96, variableLengthReverse = 96,
+    elementsForward = "SUCV", elementsReverse = "SUCV",
+    elementLengthsForward = c(1, 10, 18, 96),
+    elementLengthsReverse = c(1, 8, 20, 96),
     adapterForward = "GGAAGAGCACACGTC", 
     adapterReverse = "GGAAGAGCGTCGTGT",
     primerForward = "",
@@ -829,7 +1116,7 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nbrReadTooShort, 0L)
+  expect_equal(res$filterSummary$f3_nbrReadWrongLength, 0L)
   expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
   expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 7L)
   expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 0L)
@@ -862,10 +1149,9 @@ test_that("digestFastqs works as expected for cis experiments", {
     mergeForwardReverse = TRUE, 
     minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 1, greedyOverlap = TRUE, 
     revComplForward = FALSE, revComplReverse = TRUE,
-    skipForward = 1, skipReverse = 1, 
-    umiLengthForward = 10, umiLengthReverse = 7, 
-    constantLengthForward = 18, constantLengthReverse = 17, 
-    variableLengthForward = 96, variableLengthReverse = 96,
+    elementsForward = "SUCV", elementsReverse = "SUCVS",
+    elementLengthsForward = c(1, 10, 18, 96),
+    elementLengthsReverse = c(1, 7, 17, 96, -1),
     adapterForward = "GGAAGAGCACACGTC", 
     adapterReverse = "GGAAGAGCGTCGTGT",
     primerForward = "",
@@ -891,7 +1177,7 @@ test_that("digestFastqs works as expected for cis experiments", {
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 126L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
-  expect_equal(res$filterSummary$f3_nbrReadTooShort, 0L)
+  expect_equal(res$filterSummary$f3_nbrReadWrongLength, 0L)
   expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
   expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 0L)
   expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 44L)
@@ -997,10 +1283,9 @@ test_that("digestFastqs works as expected for primer experiments", {
     mergeForwardReverse = FALSE, 
     minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
     revComplForward = FALSE, revComplReverse = FALSE,
-    skipForward = -1, skipReverse = -1, 
-    umiLengthForward = -1, umiLengthReverse = -1, 
-    constantLengthForward = -1, constantLengthReverse = -1, 
-    variableLengthForward = -1, variableLengthReverse = 96,
+    elementsForward = "SPV", elementsReverse = "SPVS",
+    elementLengthsForward = c(-1, -1, -1),
+    elementLengthsReverse = c(-1, -1, 96, -1),
     adapterForward = "", 
     adapterReverse = "",
     primerForward = "GTCAGGTGGAGGCGGATCC",
@@ -1025,7 +1310,7 @@ test_that("digestFastqs works as expected for primer experiments", {
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 0L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 126L)
-  expect_equal(res$filterSummary$f3_nbrReadTooShort, 0L)
+  expect_equal(res$filterSummary$f3_nbrReadWrongLength, 0L)
   expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
   expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 0L)
   expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 76L)
@@ -1045,5 +1330,5 @@ test_that("digestFastqs works as expected for primer experiments", {
                sort(c("BACH2.0.WT_r.6.CCC", "BATF2.0.WT_r.21.TGG", "BATF2.0.WT_r.7.GGG", "CEBPB.0.WT_r.12.CTC",
                       "CEBPD.0.WT_r.13.CCC", "CEBPD.0.WT_r.23.GAG", "CREB3L3.0.WT_r.22.GGG",
                       "FOSL1.0.WT_r.22.CCC", "FOSL2.0.WT_r.13.GGG", "JUNB.0.WT_r.0.WT", "XBP1.0.WT_r.0.WT")))
-  expect_equal(res$summaryTable$nbrUmis, rep(1L, nrow(res$summaryTable))) ## no UMIs in this experiment
+  expect_equal(res$summaryTable$nbrUmis, rep(0L, nrow(res$summaryTable))) ## no UMIs in this experiment
 })
