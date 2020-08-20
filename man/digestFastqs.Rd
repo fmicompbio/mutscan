@@ -24,8 +24,8 @@ digestFastqs(
   primerReverse = c(""),
   wildTypeForward = "",
   wildTypeReverse = "",
-  constantForward = "",
-  constantReverse = "",
+  constantForward = c(""),
+  constantReverse = c(""),
   avePhredMinForward = 20,
   avePhredMinReverse = 20,
   variableNMaxForward = 0,
@@ -38,9 +38,13 @@ digestFastqs(
   mutatedPhredMinForward = 0,
   mutatedPhredMinReverse = 0,
   mutNameDelimiter = ".",
+  constantMaxDistForward = -1,
+  constantMaxDistReverse = -1,
   variableCollapseMaxDist = 0,
   variableCollapseMinReads = 0,
   umiCollapseMaxDist = 0,
+  filteredReadsFastqForward = "",
+  filteredReadsFastqReverse = "",
   maxNReads = -1,
   verbose = FALSE
 )
@@ -105,8 +109,9 @@ vector, the wild type sequence for the forward and reverse variable region.
 If given as a single string, the reference sequence will be named 'f' (for
 forward) or 'r' (for reverse).}
 
-\item{constantForward, constantReverse}{character(1), the expected constant
-forward and reverse sequences.}
+\item{constantForward, constantReverse}{character(1) or character vector, 
+the expected constant forward and reverse sequences. If a vector, all 
+elements must have the same length.}
 
 \item{avePhredMinForward, avePhredMinReverse}{numeric(1) Minimum average Phred
 score in the variable region for a read to be retained. If L contains both
@@ -139,6 +144,12 @@ mutated codon. Here, {.} is the provided \code{mutNameDelimiter}. The
 delimiter must be a single character (not "_"), and can not appear in any
 of the provided reference sequence names.}
 
+\item{constantMaxDistForward, constantMaxDistReverse}{numeric(1) maximum 
+allowed Hamming distance between the extracted and expected constant sequence.
+If multiple constant sequences are provided, the most similar one is used.
+Reads with a larger distance to the expected constant sequence are 
+discarded. If set to -1, no filtering is done.}
+
 \item{variableCollapseMaxDist, umiCollapseMaxDist}{A \code{numeric} scalar
 defining the tolerances for collapsing similar variable (forward + reverse,
 if any) or UMI sequences. If the value is in [0, 1), it defines the maximal
@@ -152,6 +163,11 @@ collapsed if they are all of the same length and no wild type sequences
 \item{variableCollapseMinReads}{A \code{numeric} scalar. Indicates the minimum
 number of reads for the read to be considered for collapsing with similar
 sequences.}
+
+\item{filteredReadsFastqForward, filteredReadsFastqReverse}{character(1), the 
+name of a (pair of) FASTQ file(s) where filtered-out reads will be written.
+The name(s) should end in .gz (the output will always be compressed). If 
+empty, filtered reads will not be written to a file.}
 
 \item{maxNReads}{integer(1) Maximal number of reads to process. If set to -1,
 all reads will be processed.}

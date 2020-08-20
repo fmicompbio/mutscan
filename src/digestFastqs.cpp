@@ -217,8 +217,8 @@ struct mutantInfo {
 };
 
 // open fastq file and check if it worked
-gzFile  openFastq(std::string filename) {
-  gzFile file = gzopen(filename.c_str(), "rb");   
+gzFile  openFastq(std::string filename, const char* mode = "rb") {
+  gzFile file = gzopen(filename.c_str(), mode);   
   if (!file) {
     if (errno) {
       stop("Failed to open file '", filename,  "': ",
@@ -510,7 +510,7 @@ void removeEOL(std::string &seq) {
 // Here, 'closest' is defined as the sequence with the largest number of matching bases
 // Assumes that the start of varSeq coincides with the start of each wtSeq
 // [[Rcpp::export]]
-int findClosestRefSeq(std::string varSeq, Rcpp::StringVector wtSeq) {
+int findClosestRefSeq(std::string varSeq, Rcpp::StringVector wtSeq, int &sim) {
   // return index of most similar sequence
   int idx = 0;
   int maxsim = 0;
@@ -528,7 +528,45 @@ int findClosestRefSeq(std::string varSeq, Rcpp::StringVector wtSeq) {
       maxsim = currsim;
     }
   }
+  sim = maxsim;
   return idx;
+}
+
+// Write one (pair of) filtered reads to output fastq file(s)
+bool write_seq(gzFile file1, gzFile file2, const char* s1, const char* q1, 
+               const char* s2, const char* q2, const int n, const char* label) {
+  if (file1 != NULL) {
+    std::string read_id = "@S" + std::to_string(n) + "_" + label + " 1\n";
+    if (gzputs(file1, read_id.c_str()) == (-1)) {
+      return false;
+    }
+    if (gzputs(file1, s1) == (-1)) {
+      return false;
+    }
+    if (gzputs(file1, "+\n") == (-1)) {
+      return false;
+    }
+    if (gzputs(file1, q1) == (-1)) {
+      return false;
+    }
+  }
+  
+  if (file2 != NULL) {
+    std::string read_id = "@S" + std::to_string(n) + "_" + label + " 2\n";
+    if (gzputs(file2, read_id.c_str()) == (-1)) {
+      return false;
+    }
+    if (gzputs(file2, s2) == (-1)) {
+      return false;
+    }
+    if (gzputs(file2, "+\n") == (-1)) {
+      return false;
+    }
+    if (gzputs(file2, q2) == (-1)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 // [[Rcpp::export]]
@@ -547,7 +585,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                      std::vector<std::string> primerReverse,
                      Rcpp::StringVector wildTypeForward, 
                      Rcpp::StringVector wildTypeReverse, 
-                     std::string constantForward, std::string constantReverse, 
+                     Rcpp::StringVector constantForward, 
+                     Rcpp::StringVector constantReverse, 
                      double avePhredMinForward = 20.0, double avePhredMinReverse = 20.0,
                      int variableNMaxForward = 0, int variableNMaxReverse = 0, 
                      int umiNMax = 0,
@@ -558,9 +597,13 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                      double mutatedPhredMinForward = 0.0,
                      double mutatedPhredMinReverse = 0.0,
                      std::string mutNameDelimiter = ".",
+                     int constantMaxDistForward = -1,
+                     int constantMaxDistReverse = -1,
                      double variableCollapseMaxDist = 0.0,
                      int variableCollapseMinReads = 0,
                      double umiCollapseMaxDist = 0.0,
+                     std::string filteredReadsFastqForward = "",
+                     std::string filteredReadsFastqReverse = "",
                      int maxNReads = -1, bool verbose = false) {
 
   
@@ -575,10 +618,10 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   char seq2[BUFFER_SIZE];
   char qual2[BUFFER_SIZE];
   bool noReverse;
-  int nTot = 0, nAdapter = 0, nNoPrimer = 0, nReadWrongLength = 0;
+  int nTot = 0, nAdapter = 0, nNoPrimer = 0, nReadWrongLength = 0, nTooManyMutConstant = 0;
   int nNoValidOverlap = 0, nAvgVarQualTooLow = 0, nTooManyNinVar = 0, nTooManyNinUMI = 0;
   int nTooManyMutCodons = 0, nForbiddenCodons = 0, nMutQualTooLow = 0, nRetain = 0;
-  int constantLengthForward, constantLengthReverse;
+  int constantLengthForward, constantLengthReverse, maxSim;
   std::string varSeqForward, varSeqReverse, varQualForward, varQualReverse, umiSeq;
   std::string constSeqForward, constSeqReverse, constQualForward, constQualReverse;
   std::string mutantName;
@@ -591,6 +634,15 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   std::set<std::string> forbiddenCodonsForward = enumerateCodonsFromIUPAC(forbiddenMutatedCodonsForward, IUPAC, verbose);
   std::set<std::string> forbiddenCodonsReverse = enumerateCodonsFromIUPAC(forbiddenMutatedCodonsReverse, IUPAC, verbose);
 
+  // open files for outputting filtered reads
+  gzFile outfile1 = NULL, outfile2 = NULL;
+  if (filteredReadsFastqForward.compare("") != 0) {
+    outfile1 = openFastq(filteredReadsFastqForward, "wb");
+    if (filteredReadsFastqReverse.compare("") != 0) {
+      outfile2 = openFastq(filteredReadsFastqReverse, "wb");
+    }
+  }
+  
   // --------------------------------------------------------------------------
   // iterate over fastq files
   // --------------------------------------------------------------------------
@@ -602,10 +654,10 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     // --------------------------------------------------------------------------
     // open fastq files
     // --------------------------------------------------------------------------
-    gzFile file1 = openFastq(fastqForward);
+    gzFile file1 = openFastq(fastqForward, "rb");
     gzFile file2 = NULL;
     if (fastqReverse.compare("") != 0) {
-      file2 = openFastq(fastqReverse);
+      file2 = openFastq(fastqReverse, "rb");
     }
     
     // iterate over sequences
@@ -663,6 +715,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
       if ((adapterForward.compare("") != 0 && sseq1.find(adapterForward) != std::string::npos) ||
           (fastqReverse.compare("") != 0 && adapterReverse.compare("") != 0 && sseq2.find(adapterReverse) != std::string::npos)) {
         nAdapter++;
+        write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "adapter");
         continue;
       }
       
@@ -680,12 +733,14 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
       if (!decomposeRead(sseq1, squal1, elementsForward, elementLengthsForward,
                          primerForward, umiSeq, varSeqForward, varQualForward,
                          constSeqForward, constQualForward, nNoPrimer, nReadWrongLength)) {
+        write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "noPrimer_readWrongLength");
         continue;
       }
       if (fastqReverse.compare("") != 0 && 
           !decomposeRead(sseq2, squal2, elementsReverse, elementLengthsReverse,
                          primerReverse, umiSeq, varSeqReverse, varQualReverse,
                          constSeqReverse, constQualReverse, nNoPrimer, nReadWrongLength)) {
+        write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "noPrimer_readWrongLength");
         continue;
       }
       
@@ -728,6 +783,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                                  greedyOverlap)) {
           // read should be filtered out - no valid overlap found
           nNoValidOverlap++;
+          write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "noValidOverlap");
           continue;
         }
       }
@@ -741,6 +797,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           (!noReverse && std::accumulate(varIntQualReverse.begin(), varIntQualReverse.end(), 0.0) <
             avePhredMinReverse * varSeqReverse.length())) {
         nAvgVarQualTooLow++;
+        write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "avgVarQualTooLow");
         continue;
       }
       
@@ -748,18 +805,20 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
       if (std::count(varSeqForward.begin(), varSeqForward.end(), 'N') > variableNMaxForward ||
           (!noReverse && std::count(varSeqReverse.begin(), varSeqReverse.end(), 'N') > variableNMaxReverse)) {
         nTooManyNinVar++;
+        write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyNinVar");
         continue;
       }
       
       if (umiSeq != "" && std::count(umiSeq.begin(), umiSeq.end(), 'N') > umiNMax) {
         nTooManyNinUMI++;
+        write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyNinUMI");
         continue;
       }
 
       // if wildTypeForward is available...
       if (std::string(wildTypeForward[0]).compare("") != 0) {
         std::vector<std::string> refNamesForward = wildTypeForward.attr("names");
-        int idxForward = findClosestRefSeq(varSeqForward, wildTypeForward);
+        int idxForward = findClosestRefSeq(varSeqForward, wildTypeForward, maxSim);
         std::string wtForward = std::string(wildTypeForward[idxForward]);
         std::string wtNameForward = std::string(refNamesForward[idxForward]);
         if (compareToWildtype(varSeqForward, wtForward, varIntQualForward,
@@ -767,6 +826,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                               wtNameForward, nMutQualTooLow, 
                               nTooManyMutCodons, nForbiddenCodons, mutantName, mutNameDelimiter)) {
           // read is to be filtered out
+          write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
           continue;
         }
       } else if (varSeqForward.length() > 0) { // variable seq, but no reference -> add variable seq to mutantName
@@ -776,7 +836,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
       // if wildTypeReverse is available...
       if (!noReverse && std::string(wildTypeReverse[0]).compare("") != 0) {
         std::vector<std::string> refNamesReverse = wildTypeReverse.attr("names");
-        int idxReverse = findClosestRefSeq(varSeqReverse, wildTypeReverse);
+        int idxReverse = findClosestRefSeq(varSeqReverse, wildTypeReverse, maxSim);
         std::string wtReverse = std::string(wildTypeReverse[idxReverse]);
         std::string wtNameReverse = std::string(refNamesReverse[idxReverse]);
         if (compareToWildtype(varSeqReverse, wtReverse, varIntQualReverse,
@@ -784,10 +844,88 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                               wtNameReverse, nMutQualTooLow, 
                               nTooManyMutCodons, nForbiddenCodons, mutantName, mutNameDelimiter)) {
           // read is to be filtered out
+          write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
           continue;
         }
       } else if (!noReverse && varSeqReverse.length() > 0) { // variable seq, but no reference -> add variable seq to mutantName
         mutantName += (varSeqReverse + std::string("_"));
+      }
+      
+      // for retained reads, count numbers of (mis-)matching bases in constant seq by Phred quality
+      constantLengthForward = (int) constSeqForward.length();
+      constantLengthReverse = (int) constSeqReverse.length();
+      std::vector<int> constIntQualForward(constantLengthForward, 0);
+      std::vector<int> constIntQualReverse(constantLengthReverse,0);
+      int idxConstForward = 0;
+      int idxConstReverse = 0;
+      
+      if (std::string(constantForward[0]).compare("") != 0) {
+        // reverse complement if requested
+        if (revComplForward) {
+          transform(begin(constSeqForward), end(constSeqForward),
+                    begin(constSeqForward), complement);
+          reverse(constSeqForward.begin(), constSeqForward.end());
+          reverse(constQualForward.begin(), constQualForward.end());
+        }
+        
+        // populate an integer vector of base qualities
+        for (size_t i = 0; i < (size_t) constantLengthForward; i++) {
+          constIntQualForward[i] = int(constQualForward[i]) - 33;
+        }
+        
+        // find closest constant sequence and tabulate mismatches by quality
+        maxSim = 0;
+        idxConstForward = findClosestRefSeq(constSeqForward, constantForward, maxSim);
+        if (constantMaxDistForward != (-1) && 
+            constantLengthForward - maxSim > constantMaxDistForward) {
+          nTooManyMutConstant++;
+          write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyMutConstant");
+          continue;
+        }
+        // tabulateBasesByQual(constSeqForward, std::string(constantForward[idxConstForward]), 
+        //                     constIntQualForward,
+        //                     nPhredCorrectForward, nPhredMismatchForward);
+      }
+      
+      if (fastqReverse.compare("") != 0 && 
+          std::string(constantReverse[0]).compare("") != 0) {
+        // reverse (complement) sequence and quality string
+        if (revComplReverse) {
+          transform(begin(constSeqReverse), end(constSeqReverse),
+                    begin(constSeqReverse), complement);
+          reverse(constSeqReverse.begin(), constSeqReverse.end());
+          reverse(constQualReverse.begin(), constQualReverse.end());
+        }
+        
+        // populate an integer vector of base qualities
+        for (size_t i = 0; i < (size_t) constantLengthReverse; i++) {
+          constIntQualReverse[i] = int(constQualReverse[i]) - 33;
+        }
+        
+        // find closest constant sequence and tabulate mismatches by quality
+        maxSim = 0;
+        idxConstReverse = findClosestRefSeq(constSeqReverse, constantReverse, maxSim);
+        if (constantMaxDistReverse != (-1) && 
+            constantLengthReverse - maxSim > constantMaxDistReverse) {
+          nTooManyMutConstant++;
+          write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyMutConstant");
+          continue;
+        }
+        // tabulateBasesByQual(constSeqReverse, std::string(constantReverse[idxConstReverse]), 
+        //                     constIntQualReverse,
+        //                     nPhredCorrectReverse, nPhredMismatchReverse);
+      }
+      
+      if (std::string(constantForward[0]).compare("") != 0) {
+        tabulateBasesByQual(constSeqForward, std::string(constantForward[idxConstForward]), 
+                            constIntQualForward,
+                            nPhredCorrectForward, nPhredMismatchForward);
+      }
+      if (fastqReverse.compare("") != 0 && 
+          std::string(constantReverse[0]).compare("") != 0) {
+        tabulateBasesByQual(constSeqReverse, std::string(constantReverse[idxConstReverse]), 
+                            constIntQualReverse,
+                            nPhredCorrectReverse, nPhredMismatchReverse);
       }
       
       // store the read pair
@@ -826,50 +964,18 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         mutantSummary.insert(std::pair<std::string,mutantInfo>(mutantName, newMutant));
       }
       
-      // for retained reads, count numbers of (mis-)matching bases by Phred quality
-      if (constantForward.compare("") != 0) {
-        // reverse complement if requested
-        if (revComplForward) {
-          transform(begin(constSeqForward), end(constSeqForward),
-                    begin(constSeqForward), complement);
-          reverse(constSeqForward.begin(), constSeqForward.end());
-          reverse(constQualForward.begin(), constQualForward.end());
-        }
-        
-        // populate an integer vector of base qualities
-        constantLengthForward = (int) constSeqForward.length();
-        std::vector<int> constIntQualForward(constantLengthForward, 0);
-        for (size_t i = 0; i < (size_t) constantLengthForward; i++) {
-          constIntQualForward[i] = int(constQualForward[i]) - 33;
-        }
-        tabulateBasesByQual(constSeqForward, constantForward, constIntQualForward,
-                            nPhredCorrectForward, nPhredMismatchForward);
-      }
-      
-      if (fastqReverse.compare("") != 0 && constantReverse.compare("") != 0) {
-        // reverse (complement) sequence and quality string
-        if (revComplReverse) {
-          transform(begin(constSeqReverse), end(constSeqReverse),
-                    begin(constSeqReverse), complement);
-          reverse(constSeqReverse.begin(), constSeqReverse.end());
-          reverse(constQualReverse.begin(), constQualReverse.end());
-        }
-        
-        // populate an integer vector of base qualities
-        constantLengthReverse = (int) constSeqReverse.length();
-        std::vector<int> constIntQualReverse(constantLengthReverse,0);
-        for (size_t i = 0; i < (size_t) constantLengthReverse; i++) {
-          constIntQualReverse[i] = int(constQualReverse[i]) - 33;
-        }
-        tabulateBasesByQual(constSeqReverse, constantReverse, constIntQualReverse,
-                            nPhredCorrectReverse, nPhredMismatchReverse);
-      }
     } // iterate over individual sequence pairs
 
     // clean up
     gzclose(file1);
     if (fastqReverse.compare("") != 0) {
       gzclose(file2);
+    }
+    if (outfile1 != NULL) {
+      gzclose(outfile1);
+    }
+    if (outfile2 != NULL) {
+      gzclose(outfile2);
     }
     
     if (verbose) {
@@ -1086,6 +1192,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                                      Named("f8_nbrMutQualTooLow") = nMutQualTooLow,
                                      Named("f9_nbrTooManyMutCodons") = nTooManyMutCodons,
                                      Named("f10_nbrForbiddenCodons") = nForbiddenCodons,
+                                     Named("f11_nbrTooManyMutConstant") = nTooManyMutConstant,
                                      Named("nbrRetained") = nRetain);
   DataFrame df = DataFrame::create(Named("mutantName") = dfName,
                                    Named("sequence") = dfSeq,
@@ -1134,9 +1241,13 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   param.push_back(mutatedPhredMinForward, "mutatedPhredMinForward");
   param.push_back(mutatedPhredMinReverse, "mutatedPhredMinReverse");
   param.push_back(mutNameDelimiter, "mutNameDelimiter");
+  param.push_back(constantMaxDistForward, "constantMaxDistForward");
+  param.push_back(constantMaxDistReverse, "constantMaxDistReverse");
   param.push_back(variableCollapseMaxDist, "variableCollapseMaxDist");
   param.push_back(variableCollapseMinReads, "variableCollapseMinReads");
   param.push_back(umiCollapseMaxDist, "umiCollapseMaxDist");
+  param.push_back(filteredReadsFastqForward, "filteredReadsFastqForward");
+  param.push_back(filteredReadsFastqReverse, "filteredReadsFastqReverse");
   param.push_back(maxNReads, "maxNReads");
   List L = List::create(Named("parameters") = param,
                         Named("filterSummary") = filt,

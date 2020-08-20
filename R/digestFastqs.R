@@ -119,8 +119,9 @@ checkNumericInput <- function(..., nonnegative) {
 #'   vector, the wild type sequence for the forward and reverse variable region.
 #'   If given as a single string, the reference sequence will be named 'f' (for
 #'   forward) or 'r' (for reverse).
-#' @param constantForward,constantReverse character(1), the expected constant
-#'   forward and reverse sequences.
+#' @param constantForward,constantReverse character(1) or character vector, 
+#'   the expected constant forward and reverse sequences. If a vector, all 
+#'   elements must have the same length.
 #' @param avePhredMinForward,avePhredMinReverse numeric(1) Minimum average Phred
 #'   score in the variable region for a read to be retained. If L contains both
 #'   forward and reverse variable regions, the minimum average Phred score has
@@ -145,6 +146,11 @@ checkNumericInput <- function(..., nonnegative) {
 #'   mutated codon. Here, {.} is the provided \code{mutNameDelimiter}. The
 #'   delimiter must be a single character (not "_"), and can not appear in any
 #'   of the provided reference sequence names.
+#' @param constantMaxDistForward,constantMaxDistReverse numeric(1) maximum 
+#'   allowed Hamming distance between the extracted and expected constant sequence.
+#'   If multiple constant sequences are provided, the most similar one is used.
+#'   Reads with a larger distance to the expected constant sequence are 
+#'   discarded. If set to -1, no filtering is done.
 #' @param variableCollapseMaxDist,umiCollapseMaxDist A \code{numeric} scalar
 #'   defining the tolerances for collapsing similar variable (forward + reverse,
 #'   if any) or UMI sequences. If the value is in [0, 1), it defines the maximal
@@ -157,6 +163,10 @@ checkNumericInput <- function(..., nonnegative) {
 #' @param variableCollapseMinReads A \code{numeric} scalar. Indicates the minimum
 #'   number of reads for the read to be considered for collapsing with similar
 #'   sequences.
+#' @param filteredReadsFastqForward,filteredReadsFastqReverse character(1), the 
+#'   name of a (pair of) FASTQ file(s) where filtered-out reads will be written.
+#'   The name(s) should end in .gz (the output will always be compressed). If 
+#'   empty, filtered reads will not be written to a file.
 #' @param maxNReads integer(1) Maximal number of reads to process. If set to -1,
 #'   all reads will be processed.
 #' @param verbose logical(1), whether to print out progress messages.
@@ -198,7 +208,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          elementLengthsReverse = numeric(0),
                          primerForward = c(""), primerReverse = c(""),
                          wildTypeForward = "", wildTypeReverse = "", 
-                         constantForward = "", constantReverse = "",
+                         constantForward = c(""), constantReverse = c(""),
                          avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
                          variableNMaxForward = 0, variableNMaxReverse = 0, 
                          umiNMax = 0,
@@ -209,9 +219,13 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          mutatedPhredMinForward = 0.0,
                          mutatedPhredMinReverse = 0.0,
                          mutNameDelimiter = ".",
+                         constantMaxDistForward = -1,
+                         constantMaxDistReverse = -1,
                          variableCollapseMaxDist = 0.0,
                          variableCollapseMinReads = 0,
                          umiCollapseMaxDist = 0.0,
+                         filteredReadsFastqForward = "",
+                         filteredReadsFastqReverse = "",
                          maxNReads = -1, verbose = FALSE) {
   ## --------------------------------------------------------------------------
   ## pre-flight checks
@@ -253,9 +267,12 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
   checkNumericInput(nbrMutatedCodonsMaxReverse, nonnegative = TRUE)
   checkNumericInput(mutatedPhredMinForward, nonnegative = TRUE)
   checkNumericInput(mutatedPhredMinReverse, nonnegative = TRUE)
+  checkNumericInput(constantMaxDistForward, nonnegative = FALSE)
+  checkNumericInput(constantMaxDistReverse, nonnegative = FALSE)
   checkNumericInput(variableCollapseMaxDist, nonnegative = TRUE)
   checkNumericInput(variableCollapseMinReads, nonnegative = TRUE)
   checkNumericInput(umiCollapseMaxDist, nonnegative = TRUE)
+  checkNumericInput(maxNReads, nonnegative = FALSE)
   
   ## adapters must be strings, valid DNA characters
   if (!is.character(adapterForward) || length(adapterForward) != 1 ||
@@ -377,9 +394,9 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
   ## if both constantForward and constantLengthForward are given, check that
   ## the lengths inferred from the two are consistent
   if (!is.character(constantForward) || !is.character(constantReverse) ||
-      length(constantForward) != 1 || length(constantReverse) != 1 ||
-      !grepl("^[AaCcGgTt]*$", constantForward) || 
-      !grepl("^[AaCcGgTt]*$", constantReverse)) {
+      length(constantForward) < 1 || length(constantReverse) < 1 ||
+      !all(grepl("^[AaCcGgTt]*$", constantForward)) || 
+      !all(grepl("^[AaCcGgTt]*$", constantReverse))) {
     stop("constant sequences must be character strings, ", 
          "only containing valid DNA characters.")
   } else {
@@ -387,21 +404,26 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     constantReverse <- toupper(constantReverse)
   }
   
+  if (!all(vapply(constantForward, nchar, 0L) == nchar(constantForward[1])) || 
+      !all(vapply(constantReverse, nchar, 0L) == nchar(constantReverse[1]))) {
+    stop("All constant sequences must be of the same length")
+  }
+  
   CposFwd <- gregexpr(pattern = "C", elementsForward)[[1]]
-  if (nchar(constantForward) > 0 &&
-      sum(elementLengthsForward[CposFwd]) != nchar(constantForward)) {
+  if (nchar(constantForward[1]) > 0 &&
+      sum(elementLengthsForward[CposFwd]) != nchar(constantForward[1])) {
     stop("The sum of the constant sequence lengths in elementsForward (",
          sum(elementLengthsForward[CposFwd]),
          ") does not correspond to the length of the given 'constantForward' (",
-         nchar(constantForward), ")")
+         nchar(constantForward[1]), ")")
   }
   CposRev <- gregexpr(pattern = "C", elementsReverse)[[1]]
-  if (nchar(constantReverse) > 0 &&
-      sum(elementLengthsReverse[CposRev]) != nchar(constantReverse)) {
+  if (nchar(constantReverse[1]) > 0 &&
+      sum(elementLengthsReverse[CposRev]) != nchar(constantReverse[1])) {
     stop("The sum of the constant sequence lengths in elementsReverse (",
          sum(elementLengthsReverse[CposRev]),
          ") does not correspond to the length of the given 'constantReverse' (",
-         nchar(constantReverse), ")")
+         nchar(constantReverse[1]), ")")
   }
   
   if (!all(is.character(forbiddenMutatedCodonsForward)) || 
@@ -424,6 +446,20 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
   }
   if (any(grepl(mutNameDelimiter, c(names(wildTypeForward), names(wildTypeReverse)), fixed = TRUE))) {
     stop("'mutNameDelimiter' can not appear in the name of any of the provided wild type sequences.")
+  }
+  
+  if (!is.character(filteredReadsFastqForward) || !is.character(filteredReadsFastqReverse) ||
+      length(filteredReadsFastqForward) != 1 || length(filteredReadsFastqReverse) != 1 ||
+      (filteredReadsFastqForward != "" && !grepl("\\.gz$", filteredReadsFastqForward)) ||
+      (filteredReadsFastqReverse != "" && !grepl("\\.gz$", filteredReadsFastqReverse))) {
+    stop("'filteredReadsFastqForward' and 'filteredReadsFastqReverse' must be character ",
+         "scalars ending with .gz.")
+  }
+  
+  if ((any(fastqReverse == "") && filteredReadsFastqReverse != "") ||
+      (all(fastqReverse != "") && filteredReadsFastqForward != "" && filteredReadsFastqReverse == "") ||
+      (all(fastqForward != "") && filteredReadsFastqForward == "" && filteredReadsFastqReverse != "")) {
+    stop("The pairing of the output FASTQ files must be compatible with that of the input files.")
   }
   
   if (!is.logical(verbose) || length(verbose) != 1) {
@@ -463,9 +499,13 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          mutatedPhredMinForward = mutatedPhredMinForward,
                          mutatedPhredMinReverse = mutatedPhredMinReverse,
                          mutNameDelimiter = mutNameDelimiter,
+                         constantMaxDistForward = constantMaxDistForward,
+                         constantMaxDistReverse = constantMaxDistReverse,
                          variableCollapseMaxDist = variableCollapseMaxDist,
                          variableCollapseMinReads = as.integer(ceiling(variableCollapseMinReads)),
                          umiCollapseMaxDist = umiCollapseMaxDist,
+                         filteredReadsFastqForward = filteredReadsFastqForward,
+                         filteredReadsFastqReverse = filteredReadsFastqReverse,
                          maxNReads = maxNReads,
                          verbose = verbose)
   

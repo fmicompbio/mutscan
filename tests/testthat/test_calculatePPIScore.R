@@ -24,6 +24,11 @@ Ldef <- list(
   forbiddenMutatedCodonsReverse = "NNW",
   mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
   mutNameDelimiter = ".",
+  constantMaxDistForward = -1,
+  constantMaxDistReverse = -1,
+  variableCollapseMaxDist = 0,
+  variableCollapseMinReads = 0,
+  umiCollapseMaxDist = 0,
   verbose = FALSE
 )
 Ldef1 <- c(

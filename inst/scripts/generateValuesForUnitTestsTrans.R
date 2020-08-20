@@ -238,8 +238,43 @@ processReadsTrans <- function(Ldef) {
   } else {
     mutNames <- encodedMutCodonsForward
   }
+  
+  ## Constant sequence filtering
+  keep <- rep(TRUE, length(fq1))
+  if (!all(Ldef$constantForward == "") && Ldef$constantMaxDistForward > (-1)) {
+    constForward <- Biostrings::subseq(fq1, start = Ldef$skipForward + Ldef$umiLengthForward + 1, 
+                                       width = Ldef$constantLengthForward)
+    dists <- as.matrix(Biostrings::stringDist(
+      c(DNAStringSet(structure(Ldef$constantForward, 
+                               names = paste0("C", length(Ldef$constantForward)))),
+        DNAStringSet(constForward)
+      )
+    ))
+    dists <- dists[-(1:length(Ldef$constantForward)), 1:length(Ldef$constantForward), drop = FALSE]
+    keep <- keep & (apply(dists, 1, min) <= Ldef$constantMaxDistForward)
+  }
+  if (!all(Ldef$constantReverse == "") && Ldef$constantMaxDistReverse > (-1)) {
+    constReverse <- Biostrings::subseq(fq2, start = Ldef$skipReverse + Ldef$umiLengthReverse + 1, 
+                                       width = Ldef$constantLengthReverse)
+    dists <- as.matrix(Biostrings::stringDist(
+      c(DNAStringSet(structure(Ldef$constantReverse, 
+                               names = paste0("C", length(Ldef$constantReverse)))),
+        DNAStringSet(constReverse)
+      )
+    ))
+    dists <- dists[-(1:length(Ldef$constantReverse)), 1:length(Ldef$constantReverse), drop = FALSE]
+    keep <- keep & (apply(dists, 1, min) <= Ldef$constantMaxDistReverse)
+  }
+  message("Number of reads with too many mismatches in constant seq: ", sum(!keep))
+  fq1 <- fq1[keep]
+  fq2 <- fq2[keep]
+  mutCodons <- mutCodons[keep]
+  uniqueMutCodons <- uniqueMutCodons[keep]
+  mutNames <- mutNames[keep]
+  
+
   mutNames <- gsub("^_", "", gsub("_$", "", mutNames))
-  mutNames[mutNames <- ""] <- "WT"
+  mutNames[mutNames == ""] <- "WT"
   message("Number of variants seen twice: ", sum(table(mutNames) == 2))  ## 2
   message("Variants seen twice: ")
   print(which(table(mutNames) == 2))
@@ -249,41 +284,43 @@ processReadsTrans <- function(Ldef) {
   
   ## Error statistics
   ## Forward
-  constForward <- Biostrings::subseq(fq1, start = Ldef$skipForward + Ldef$umiLengthForward + 1, 
-                                     width = Ldef$constantLengthForward)
-  p <- DNAStringSet(rep(Ldef$constantForward, length(constForward)))
-  pattern_width <- width(p)
-  subject_width <- width(constForward)
-  
-  unlisted_ans <- which(as.raw(unlist(p)) != as.raw(unlist(constForward)))
-  breakpoints <- cumsum(pattern_width)
-  ans_eltlens <- tabulate(findInterval(unlisted_ans - 1L,
-                                       breakpoints) + 1L,
-                          nbins = length(p))
-  skeleton <- IRanges::PartitioningByEnd(cumsum(ans_eltlens))
-  nucleotideMismatches <- BiocGenerics::relist(unlisted_ans, skeleton)
-  offsets <- c(0L, breakpoints[-length(breakpoints)])
-  mismatchPositions <- nucleotideMismatches - offsets
-  mismatchQualities <- unlist(as(quality(constForward)[mismatchPositions], "IntegerList"))
-  
-  unlisted_ans <- which(as.raw(unlist(p)) == as.raw(unlist(constForward)))
-  breakpoints <- cumsum(pattern_width)
-  ans_eltlens <- tabulate(findInterval(unlisted_ans - 1L,
-                                       breakpoints) + 1L,
-                          nbins = length(p))
-  skeleton <- IRanges::PartitioningByEnd(cumsum(ans_eltlens))
-  nucleotideMatches <- BiocGenerics::relist(unlisted_ans, skeleton)
-  offsets <- c(0L, breakpoints[-length(breakpoints)])
-  matchPositions <- nucleotideMatches - offsets
-  matchQualities <- unlist(as(quality(constForward)[matchPositions], "IntegerList"))
-  
-  message("Match qualities, forward:")
-  print(table(matchQualities))
-  message("Mismatch qualities, forward:")
-  print(table(mismatchQualities))
+  if (length(Ldef$constantForward) == 1) {
+    constForward <- Biostrings::subseq(fq1, start = Ldef$skipForward + Ldef$umiLengthForward + 1, 
+                                       width = Ldef$constantLengthForward)
+    p <- DNAStringSet(rep(Ldef$constantForward, length(constForward)))
+    pattern_width <- width(p)
+    subject_width <- width(constForward)
+    
+    unlisted_ans <- which(as.raw(unlist(p)) != as.raw(unlist(constForward)))
+    breakpoints <- cumsum(pattern_width)
+    ans_eltlens <- tabulate(findInterval(unlisted_ans - 1L,
+                                         breakpoints) + 1L,
+                            nbins = length(p))
+    skeleton <- IRanges::PartitioningByEnd(cumsum(ans_eltlens))
+    nucleotideMismatches <- BiocGenerics::relist(unlisted_ans, skeleton)
+    offsets <- c(0L, breakpoints[-length(breakpoints)])
+    mismatchPositions <- nucleotideMismatches - offsets
+    mismatchQualities <- unlist(as(quality(constForward)[mismatchPositions], "IntegerList"))
+    
+    unlisted_ans <- which(as.raw(unlist(p)) == as.raw(unlist(constForward)))
+    breakpoints <- cumsum(pattern_width)
+    ans_eltlens <- tabulate(findInterval(unlisted_ans - 1L,
+                                         breakpoints) + 1L,
+                            nbins = length(p))
+    skeleton <- IRanges::PartitioningByEnd(cumsum(ans_eltlens))
+    nucleotideMatches <- BiocGenerics::relist(unlisted_ans, skeleton)
+    offsets <- c(0L, breakpoints[-length(breakpoints)])
+    matchPositions <- nucleotideMatches - offsets
+    matchQualities <- unlist(as(quality(constForward)[matchPositions], "IntegerList"))
+    
+    message("Match qualities, forward:")
+    print(table(matchQualities))
+    message("Mismatch qualities, forward:")
+    print(table(mismatchQualities))
+  }
   
   ## Reverse
-  if (!is.null(Ldef$fastqReverse)) {
+  if (!is.null(Ldef$fastqReverse) && length(Ldef$constantReverse) == 1) {
     constReverse <- Biostrings::subseq(fq2, start = Ldef$skipReverse + Ldef$umiLengthReverse + 1,
                                        width = Ldef$constantLengthReverse)
     #constReverse <- Biostrings::reverseComplement(constReverse)
@@ -369,6 +406,7 @@ Ldef <- list(
   forbiddenMutatedCodonsReverse = "NNW",
   mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
   variableCollapseMaxDist = 0, umiCollapseMaxDist = 0, variableCollapseMinReads = 0,
+  constantMaxDistForward = -1, constantMaxDistReverse = -1,
   verbose = FALSE
 )
 processReadsTrans(Ldef)
@@ -533,6 +571,90 @@ Ldef <- list(
   mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
   mutNameDelimiter = ".",
   maxNReads = -1, variableCollapseMaxDist = 2, umiCollapseMaxDist = 0, variableCollapseMinReads = 2,
+  verbose = FALSE
+)
+processReadsTrans(Ldef)
+
+## filter based on constant sequences
+Ldef <- list(
+  fastqForward = fqt1, fastqReverse = fqt2, 
+  mergeForwardReverse = FALSE, revComplForward = FALSE, revComplReverse = FALSE,
+  skipForward = 1, skipReverse = 1, 
+  umiLengthForward = 10, umiLengthReverse = 8, 
+  constantLengthForward = 18, constantLengthReverse = 20, 
+  variableLengthForward = 96, variableLengthReverse = 96,
+  adapterForward = "GGAAGAGCACACGTC", 
+  adapterReverse = "GGAAGAGCGTCGTGT",
+  wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+  wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
+  constantForward = "AACCGGAGGAGGGAGCTG", 
+  constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
+  avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+  variableNMaxForward = 0, variableNMaxReverse = 0, 
+  umiNMax = 0,
+  nbrMutatedCodonsMaxForward = 1,
+  nbrMutatedCodonsMaxReverse = 1,
+  forbiddenMutatedCodonsForward = "NNW",
+  forbiddenMutatedCodonsReverse = "NNW",
+  mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+  variableCollapseMaxDist = 0, umiCollapseMaxDist = 0, variableCollapseMinReads = 0,
+  constantMaxDistForward = 0, constantMaxDistReverse = 0,
+  verbose = FALSE
+)
+processReadsTrans(Ldef)
+
+## 1 mismatch
+Ldef <- list(
+  fastqForward = fqt1, fastqReverse = fqt2, 
+  mergeForwardReverse = FALSE, revComplForward = FALSE, revComplReverse = FALSE,
+  skipForward = 1, skipReverse = 1, 
+  umiLengthForward = 10, umiLengthReverse = 8, 
+  constantLengthForward = 18, constantLengthReverse = 20, 
+  variableLengthForward = 96, variableLengthReverse = 96,
+  adapterForward = "GGAAGAGCACACGTC", 
+  adapterReverse = "GGAAGAGCGTCGTGT",
+  wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+  wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
+  constantForward = "AACCGGAGGAGGGAGCTG", 
+  constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
+  avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+  variableNMaxForward = 0, variableNMaxReverse = 0, 
+  umiNMax = 0,
+  nbrMutatedCodonsMaxForward = 1,
+  nbrMutatedCodonsMaxReverse = 1,
+  forbiddenMutatedCodonsForward = "NNW",
+  forbiddenMutatedCodonsReverse = "NNW",
+  mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+  variableCollapseMaxDist = 0, umiCollapseMaxDist = 0, variableCollapseMinReads = 0,
+  constantMaxDistForward = 1, constantMaxDistReverse = 1,
+  verbose = FALSE
+)
+processReadsTrans(Ldef)
+
+## Multiple constant sequences
+Ldef <- list(
+  fastqForward = fqt1, fastqReverse = fqt2, 
+  mergeForwardReverse = FALSE, revComplForward = FALSE, revComplReverse = FALSE,
+  skipForward = 1, skipReverse = 1, 
+  umiLengthForward = 10, umiLengthReverse = 8, 
+  constantLengthForward = 18, constantLengthReverse = 20, 
+  variableLengthForward = 96, variableLengthReverse = 96,
+  adapterForward = "GGAAGAGCACACGTC", 
+  adapterReverse = "GGAAGAGCGTCGTGT",
+  wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+  wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
+  constantForward = c("AACCGGAGGAGGGAGCTG", "AACCGGCGGAGGGAGCTG"), 
+  constantReverse = "GAAAAAGGAAGCTGGAGAGA", 
+  avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+  variableNMaxForward = 0, variableNMaxReverse = 0, 
+  umiNMax = 0,
+  nbrMutatedCodonsMaxForward = 1,
+  nbrMutatedCodonsMaxReverse = 1,
+  forbiddenMutatedCodonsForward = "NNW",
+  forbiddenMutatedCodonsReverse = "NNW",
+  mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+  variableCollapseMaxDist = 0, umiCollapseMaxDist = 0, variableCollapseMinReads = 0,
+  constantMaxDistForward = 0, constantMaxDistReverse = 0,
   verbose = FALSE
 )
 processReadsTrans(Ldef)
