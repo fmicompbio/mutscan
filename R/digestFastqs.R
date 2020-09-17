@@ -163,6 +163,11 @@ checkNumericInput <- function(..., nonnegative) {
 #' @param variableCollapseMinReads A \code{numeric} scalar. Indicates the minimum
 #'   number of reads for the read to be considered for collapsing with similar
 #'   sequences.
+#' @param variableCollapseMinRatio A \code{numeric} scalar. During collapsing of 
+#'   similar variable sequences, a low-frequency sequence will be collapsed with
+#'   a higher-frequency sequence only if the ratio between the high-frequency 
+#'   and the low-frequency sequences is at least this high. The default value 
+#'   of 0 indicates that no such check is performed.
 #' @param filteredReadsFastqForward,filteredReadsFastqReverse character(1), the 
 #'   name of a (pair of) FASTQ file(s) where filtered-out reads will be written.
 #'   The name(s) should end in .gz (the output will always be compressed). If 
@@ -223,6 +228,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          constantMaxDistReverse = -1,
                          variableCollapseMaxDist = 0.0,
                          variableCollapseMinReads = 0,
+                         variableCollapseMinRatio = 0,
                          umiCollapseMaxDist = 0.0,
                          filteredReadsFastqForward = "",
                          filteredReadsFastqReverse = "",
@@ -271,6 +277,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
   checkNumericInput(constantMaxDistReverse, nonnegative = FALSE)
   checkNumericInput(variableCollapseMaxDist, nonnegative = TRUE)
   checkNumericInput(variableCollapseMinReads, nonnegative = TRUE)
+  checkNumericInput(variableCollapseMinRatio, nonnegative = TRUE)
   checkNumericInput(umiCollapseMaxDist, nonnegative = TRUE)
   checkNumericInput(maxNReads, nonnegative = FALSE)
   
@@ -503,6 +510,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          constantMaxDistReverse = constantMaxDistReverse,
                          variableCollapseMaxDist = variableCollapseMaxDist,
                          variableCollapseMinReads = as.integer(ceiling(variableCollapseMinReads)),
+                         variableCollapseMinRatio = variableCollapseMinRatio,
                          umiCollapseMaxDist = umiCollapseMaxDist,
                          filteredReadsFastqForward = filteredReadsFastqForward,
                          filteredReadsFastqReverse = filteredReadsFastqReverse,

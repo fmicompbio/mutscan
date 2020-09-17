@@ -42,6 +42,7 @@ digestFastqs(
   constantMaxDistReverse = -1,
   variableCollapseMaxDist = 0,
   variableCollapseMinReads = 0,
+  variableCollapseMinRatio = 0,
   umiCollapseMaxDist = 0,
   filteredReadsFastqForward = "",
   filteredReadsFastqReverse = "",
@@ -163,6 +164,12 @@ collapsed if they are all of the same length and no wild type sequences
 \item{variableCollapseMinReads}{A \code{numeric} scalar. Indicates the minimum
 number of reads for the read to be considered for collapsing with similar
 sequences.}
+
+\item{variableCollapseMinRatio}{A \code{numeric} scalar. During collapsing of 
+similar variable sequences, a low-frequency sequence will be collapsed with
+a higher-frequency sequence only if the ratio between the high-frequency 
+and the low-frequency sequences is at least this high. The default value 
+of 0 indicates that no such check is performed.}
 
 \item{filteredReadsFastqForward, filteredReadsFastqReverse}{character(1), the 
 name of a (pair of) FASTQ file(s) where filtered-out reads will be written.
