@@ -5,8 +5,8 @@ suppressPackageStartupMessages({
 
 processReadsCis <- function(Ldef) {
   ## Read data
-  fq1 <- Biostrings::readQualityScaledDNAStringSet(fqc1)
-  fq2 <- Biostrings::readQualityScaledDNAStringSet(fqc2)
+  fq1 <- Biostrings::readQualityScaledDNAStringSet(Ldef$fastqForward)
+  fq2 <- Biostrings::readQualityScaledDNAStringSet(Ldef$fastqReverse)
   
   ## Number of reads
   message("Number of reads: ", length(fq1))  ## 1000
@@ -85,35 +85,52 @@ processReadsCis <- function(Ldef) {
   fq2 <- fq2[!lowqualmm]
   mismatchPositions <- mismatchPositions[!lowqualmm]
   varForward <- varForward[!lowqualmm]
-  ## Number of mutated codons
-  codonMismatches <- (mismatchPositions - 1) %/% 3 + 1
-  nbrMutCodons <- S4Vectors::elementNROWS(unique(codonMismatches))
-  toomanycodons <- nbrMutCodons > Ldef$nbrMutatedCodonsMaxForward
+  ## Number of mutated codons/bases
+  if (Ldef$nbrMutatedCodonsMaxForward != (-1)) {
+    codonMismatches <- (mismatchPositions - 1) %/% 3 + 1
+    nbrMutCodons <- S4Vectors::elementNROWS(unique(codonMismatches))
+    toomanycodons <- nbrMutCodons > Ldef$nbrMutatedCodonsMaxForward
+  } else {
+    codonMismatches <- mismatchPositions
+    nbrMutCodons <- S4Vectors::elementNROWS(unique(codonMismatches))
+    toomanycodons <- nbrMutCodons > Ldef$nbrMutatedBasesMaxForward
+  }
   message("Number of reads with too many mutated codons: ", sum(toomanycodons))  ## 581
   fq1 <- fq1[!toomanycodons]
   fq2 <- fq2[!toomanycodons]
   codonMismatches <- codonMismatches[!toomanycodons]
   varForward <- varForward[!toomanycodons]
   ## Forbidden codons
-  uniqueMutCodons <- unique(codonMismatches)
-  mutCodons <- S4Vectors::endoapply(uniqueMutCodons, 
-                                    function(v) rep(3 * v, each = 3) + c(-2, -1, 0))
-  mutCodons <- as(varForward, "DNAStringSet")[mutCodons]
-  matchForbidden <- Biostrings::vmatchPattern(
-    pattern = Ldef$forbiddenMutatedCodonsForward, 
-    as(mutCodons, "DNAStringSet"), 
-    fixed = FALSE)
-  forbiddencodon <- sapply(BiocGenerics::relist(start(unlist(matchForbidden)) %% 3==1, 
-                                                matchForbidden), function(i) any(i))
-  message("Number of reads with forbidden codons: ", sum(forbiddencodon))  ## 82
-  fq1 <- fq1[!forbiddencodon]
-  fq2 <- fq2[!forbiddencodon]
-  varForward <- varForward[!forbiddencodon]
-  mutCodons <- mutCodons[!forbiddencodon]
-  uniqueMutCodons <- uniqueMutCodons[!forbiddencodon]
-  splitMutCodons <- as(strsplit(gsub("([^.]{3})", "\\1\\.", 
-                                     as.character(mutCodons)), ".", fixed = TRUE), 
-                       "CharacterList")
+  if (Ldef$nbrMutatedCodonsMaxForward != (-1)) {
+    uniqueMutCodons <- unique(codonMismatches)
+    mutCodons <- S4Vectors::endoapply(uniqueMutCodons, 
+                                      function(v) rep(3 * v, each = 3) + c(-2, -1, 0))
+    mutCodons <- as(varForward, "DNAStringSet")[mutCodons]
+    matchForbidden <- Biostrings::vmatchPattern(
+      pattern = Ldef$forbiddenMutatedCodonsForward, 
+      as(mutCodons, "DNAStringSet"), 
+      fixed = FALSE)
+    forbiddencodon <- sapply(BiocGenerics::relist(start(unlist(matchForbidden)) %% 3==1, 
+                                                  matchForbidden), function(i) any(i))
+    message("Number of reads with forbidden codons: ", sum(forbiddencodon))  ## 82
+    fq1 <- fq1[!forbiddencodon]
+    fq2 <- fq2[!forbiddencodon]
+    varForward <- varForward[!forbiddencodon]
+    mutCodons <- mutCodons[!forbiddencodon]
+    uniqueMutCodons <- uniqueMutCodons[!forbiddencodon]
+    splitMutCodons <- as(strsplit(gsub("([^.]{3})", "\\1\\.", 
+                                       as.character(mutCodons)), ".", fixed = TRUE), 
+                         "CharacterList")
+  } else {
+    uniqueMutCodons <- unique(codonMismatches)
+    mutCodons <- S4Vectors::endoapply(uniqueMutCodons, 
+                                      function(v) v)
+    mutCodons <- as(varForward, "DNAStringSet")[mutCodons]
+    splitMutCodons <- as(strsplit(gsub("([^.]{1})", "\\1\\.", 
+                                       as.character(mutCodons)), ".", fixed = TRUE), 
+                         "CharacterList")
+  }
+  
   encodedMutCodonsForward <- S4Vectors::unstrsplit(BiocGenerics::relist(
     paste0("f", unlist(uniqueMutCodons), unlist(splitMutCodons)), 
     uniqueMutCodons),
@@ -122,10 +139,9 @@ processReadsCis <- function(Ldef) {
   mutNames <- encodedMutCodonsForward
   mutNames <- gsub("^_", "", gsub("_$", "", mutNames))
   mutNames[mutNames <- ""] <- "WT"
-  message("Number of variants seen twice: ", sum(table(mutNames) == 2))  ## 11
-  message("Variants seen twice: ")
-  print(which(table(mutNames) == 2))  ## f14AAG, f15ATG, f19CAC, f1ACC, f20AAC, f21GTG, f24AGC, 
-  ## f4CGC f7GTG, f9GGC, f9GTC
+  message("Number of variants seen thrice: ", sum(table(mutNames) == 3))  ## 11
+  message("Variants seen thrice: ")
+  print(which(table(mutNames) == 3))  ## f12G f17T f60G f85T f91G f96G
   
   ## Retained reads
   message("Number of retained reads: ", length(fq1))  ## 167
@@ -224,6 +240,34 @@ Ldef <- list(
   umiNMax = 0,
   nbrMutatedCodonsMaxForward = 1,
   nbrMutatedCodonsMaxReverse = 1,
+  forbiddenMutatedCodonsForward = "NNW",
+  forbiddenMutatedCodonsReverse = "NNW",
+  mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+  verbose = FALSE
+)
+processReadsCis(Ldef)
+
+## Limit number of mismatching bases rather than codons
+Ldef <- list(
+  fastqForward = fqc1, fastqReverse = fqc2, 
+  mergeForwardReverse = TRUE, revComplForward = FALSE, revComplReverse = TRUE,
+  skipForward = 1, skipReverse = 1, 
+  umiLengthForward = 10, umiLengthReverse = 7, 
+  constantLengthForward = 18, constantLengthReverse = 17, 
+  variableLengthForward = 96, variableLengthReverse = 96,
+  adapterForward = "GGAAGAGCACACGTC", 
+  adapterReverse = "GGAAGAGCGTCGTGT",
+  wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+  wildTypeReverse = "", 
+  constantForward = "AACCGGAGGAGGGAGCTG", 
+  constantReverse = "GAGTTCATCCTGGCAGC", 
+  avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+  variableNMaxForward = 0, variableNMaxReverse = 0, 
+  umiNMax = 0,
+  nbrMutatedCodonsMaxForward = -1,
+  nbrMutatedCodonsMaxReverse = -1,
+  nbrMutatedBasesMaxForward = 2,
+  nbrMutatedBasesMaxReverse = 2,
   forbiddenMutatedCodonsForward = "NNW",
   forbiddenMutatedCodonsReverse = "NNW",
   mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,

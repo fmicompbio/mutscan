@@ -130,10 +130,14 @@ bool compareCodonPositions(std::string a, std::string b, const char mutNameDelim
 // (and a counter has been incremented)
 bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
                        const std::vector<int> varIntQual, const double mutatedPhredMin,
-                       const unsigned int nbrMutatedCodonsMax, const std::set<std::string> &forbiddenCodons,
-                       const std::string codonPrefix, int &nMutQualTooLow, int &nTooManyMutCodons,
-                       int &nForbiddenCodons, std::string &mutantName, const std::string mutNameDelimiter) {
-  std::set<std::string> mutatedCodons;
+                       const int nbrMutatedCodonsMax, const std::set<std::string> &forbiddenCodons,
+                       const std::string codonPrefix, const int nbrMutatedBasesMax, 
+                       int &nMutQualTooLow, int &nTooManyMutCodons, int &nForbiddenCodons, 
+                       int &nTooManyMutBases, std::string &mutantName, const std::string mutNameDelimiter) {
+  // exactly one of nbrMutatedCodonsMax or nbrMutatedBasesMax should be -1 (checked in the R code).
+  // the one that is not -1 will be used for filtering and naming the mutant
+  
+  std::set<std::string> mutatedCodonsOrBases;
   std::set<std::string>::iterator mutatedCodonIt;
   bool hasLowQualMutation, hasForbidden;
   
@@ -147,43 +151,65 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
         hasLowQualMutation = true;
         break;
       }
-      // add codon to mutatedCodons
-      mutatedCodons.insert(codonPrefix + mutNameDelimiter + 
-        std::to_string((int)(i / 3) + 1) + mutNameDelimiter + 
-        varSeq.substr((int)(i / 3) * 3, 3) +
-        std::string("_"));
+      // add codon or base (depending on which to consider) to mutatedCodonsOrBases
+      if (nbrMutatedCodonsMax != (-1)) {
+        // consider codons
+        mutatedCodonsOrBases.insert(codonPrefix + mutNameDelimiter + 
+          std::to_string((int)(i / 3) + 1) + mutNameDelimiter + 
+          varSeq.substr((int)(i / 3) * 3, 3) +
+          std::string("_"));
+      } else {
+        // nbrMutatedBasesMax != -1
+        // consider individual bases
+        mutatedCodonsOrBases.insert(codonPrefix + mutNameDelimiter + 
+          std::to_string((int)(i) + 1) + mutNameDelimiter + 
+          varSeq.substr((int)(i), 1) +
+          std::string("_"));
+      }
     }
   }
   if (hasLowQualMutation) {
     nMutQualTooLow++;
     return true;
   }
-  // check if there are too many mutated codons
-  if (mutatedCodons.size() > nbrMutatedCodonsMax) {
-    nTooManyMutCodons++;
-    return true;
-  }
-  // check if there are forbidden codons
-  hasForbidden = false;
-  for (mutatedCodonIt = mutatedCodons.begin(); mutatedCodonIt != mutatedCodons.end(); mutatedCodonIt++) {
-    if (forbiddenCodons.find((*mutatedCodonIt).substr((*mutatedCodonIt).length() - 4, 3)) != forbiddenCodons.end()) { // found forbidden codon
-      hasForbidden = true;
-      break;
+  // check if there are too many mutated codons/bases
+  if (nbrMutatedCodonsMax != (-1)) {
+    // consider codons
+    if (mutatedCodonsOrBases.size() > nbrMutatedCodonsMax) {
+      nTooManyMutCodons++;
+      return true;
+    }
+  } else {
+    //consider bases
+    if (mutatedCodonsOrBases.size() > nbrMutatedBasesMax) {
+      nTooManyMutBases++;
+      return true;
     }
   }
-  if (hasForbidden) {
-    nForbiddenCodons++;
-    return true;
+  
+  // check if there are forbidden codons
+  if (nbrMutatedCodonsMax != (-1)) {
+    hasForbidden = false;
+    for (mutatedCodonIt = mutatedCodonsOrBases.begin(); mutatedCodonIt != mutatedCodonsOrBases.end(); mutatedCodonIt++) {
+      if (forbiddenCodons.find((*mutatedCodonIt).substr((*mutatedCodonIt).length() - 4, 3)) != forbiddenCodons.end()) { // found forbidden codon
+        hasForbidden = true;
+        break;
+      }
+    }
+    if (hasForbidden) {
+      nForbiddenCodons++;
+      return true;
+    }
   }
   // create name for mutant
-  std::vector<std::string> mutatedCodonsSorted(mutatedCodons.begin(), mutatedCodons.end());
-  std::sort(mutatedCodonsSorted.begin(), mutatedCodonsSorted.end(), std::bind(compareCodonPositions, _1, _2, *(mutNameDelimiter.c_str())));
-  for (size_t i = 0; i < mutatedCodonsSorted.size(); i++) {
-    mutantName += mutatedCodonsSorted[i];
+  std::vector<std::string> mutatedCodonsOrBasesSorted(mutatedCodonsOrBases.begin(), mutatedCodonsOrBases.end());
+  std::sort(mutatedCodonsOrBasesSorted.begin(), mutatedCodonsOrBasesSorted.end(), std::bind(compareCodonPositions, _1, _2, *(mutNameDelimiter.c_str())));
+  for (size_t i = 0; i < mutatedCodonsOrBasesSorted.size(); i++) {
+    mutantName += mutatedCodonsOrBasesSorted[i];
   }
   
   // if no mutant codons, name as <codonPrefix>.0.WT
-  if (mutatedCodonsSorted.size() == 0) {
+  if (mutatedCodonsOrBasesSorted.size() == 0) {
     mutantName += codonPrefix + mutNameDelimiter + "0" + mutNameDelimiter + "WT_";
   }
   
@@ -590,8 +616,10 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                      double avePhredMinForward = 20.0, double avePhredMinReverse = 20.0,
                      int variableNMaxForward = 0, int variableNMaxReverse = 0, 
                      int umiNMax = 0,
-                     unsigned int nbrMutatedCodonsMaxForward = 1,
-                     unsigned int nbrMutatedCodonsMaxReverse = 1,
+                     int nbrMutatedCodonsMaxForward = 1,
+                     int nbrMutatedCodonsMaxReverse = 1,
+                     int nbrMutatedBasesMaxForward = -1,
+                     int nbrMutatedBasesMaxReverse = -1,
                      CharacterVector forbiddenMutatedCodonsForward = "NNW",
                      CharacterVector forbiddenMutatedCodonsReverse = "NNW",
                      double mutatedPhredMinForward = 0.0,
@@ -621,7 +649,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   bool noReverse;
   int nTot = 0, nAdapter = 0, nNoPrimer = 0, nReadWrongLength = 0, nTooManyMutConstant = 0;
   int nNoValidOverlap = 0, nAvgVarQualTooLow = 0, nTooManyNinVar = 0, nTooManyNinUMI = 0;
-  int nTooManyMutCodons = 0, nForbiddenCodons = 0, nMutQualTooLow = 0, nRetain = 0;
+  int nTooManyMutCodons = 0, nTooManyMutBases = 0, nForbiddenCodons = 0, nMutQualTooLow = 0, nRetain = 0;
   int constantLengthForward, constantLengthReverse, maxSim;
   std::string varSeqForward, varSeqReverse, varQualForward, varQualReverse, umiSeq;
   std::string constSeqForward, constSeqReverse, constQualForward, constQualReverse;
@@ -824,8 +852,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         std::string wtNameForward = std::string(refNamesForward[idxForward]);
         if (compareToWildtype(varSeqForward, wtForward, varIntQualForward,
                               mutatedPhredMinForward, nbrMutatedCodonsMaxForward, forbiddenCodonsForward,
-                              wtNameForward, nMutQualTooLow, 
-                              nTooManyMutCodons, nForbiddenCodons, mutantName, mutNameDelimiter)) {
+                              wtNameForward, nbrMutatedBasesMaxForward, nMutQualTooLow, 
+                              nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, mutantName, mutNameDelimiter)) {
           // read is to be filtered out
           write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
           continue;
@@ -842,8 +870,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         std::string wtNameReverse = std::string(refNamesReverse[idxReverse]);
         if (compareToWildtype(varSeqReverse, wtReverse, varIntQualReverse,
                               mutatedPhredMinReverse, nbrMutatedCodonsMaxReverse, forbiddenCodonsReverse,
-                              wtNameReverse, nMutQualTooLow, 
-                              nTooManyMutCodons, nForbiddenCodons, mutantName, mutNameDelimiter)) {
+                              wtNameReverse, nbrMutatedBasesMaxReverse, nMutQualTooLow, 
+                              nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, mutantName, mutNameDelimiter)) {
           // read is to be filtered out
           write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
           continue;
@@ -1201,7 +1229,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                                      Named("f6_nbrTooManyNinVar") = nTooManyNinVar,
                                      Named("f7_nbrTooManyNinUMI") = nTooManyNinUMI,
                                      Named("f8_nbrMutQualTooLow") = nMutQualTooLow,
-                                     Named("f9_nbrTooManyMutCodons") = nTooManyMutCodons,
+                                     Named("f9a_nbrTooManyMutCodons") = nTooManyMutCodons,
+                                     Named("f9b_nbrTooManyMutBases") = nTooManyMutBases,
                                      Named("f10_nbrForbiddenCodons") = nForbiddenCodons,
                                      Named("f11_nbrTooManyMutConstant") = nTooManyMutConstant,
                                      Named("nbrRetained") = nRetain);
@@ -1247,6 +1276,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   param.push_back(umiNMax, "umiNMax");
   param.push_back(nbrMutatedCodonsMaxForward, "nbrMutatedCodonsMaxForward");
   param.push_back(nbrMutatedCodonsMaxReverse, "nbrMutatedCodonsMaxReverse");
+  param.push_back(nbrMutatedBasesMaxForward, "nbrMutatedBasesMaxForward");
+  param.push_back(nbrMutatedBasesMaxReverse, "nbrMutatedBasesMaxReverse");
   param.push_back(forbiddenCodonsUsedForward, "forbiddenMutatedCodonsForward");
   param.push_back(forbiddenCodonsUsedReverse, "forbiddenMutatedCodonsReverse");
   param.push_back(mutatedPhredMinForward, "mutatedPhredMinForward");

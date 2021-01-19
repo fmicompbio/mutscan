@@ -27,6 +27,8 @@ test_that("digestFastqs fails with incorrect arguments", {
     umiNMax = 0,
     nbrMutatedCodonsMaxForward = 1,
     nbrMutatedCodonsMaxReverse = 1,
+    nbrMutatedBasesMaxForward = -1,
+    nbrMutatedBasesMaxReverse = -1,
     forbiddenMutatedCodonsForward = "NNW",
     forbiddenMutatedCodonsReverse = "NNW",
     mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
@@ -79,6 +81,7 @@ test_that("digestFastqs fails with incorrect arguments", {
   for (var in c("avePhredMinForward", "avePhredMinReverse", "variableNMaxForward",
                 "variableNMaxReverse", "umiNMax", 
                 "nbrMutatedCodonsMaxForward", "nbrMutatedCodonsMaxReverse", 
+                "nbrMutatedBasesMaxForward", "nbrMutatedBasesMaxReverse", 
                 "mutatedPhredMinForward", "mutatedPhredMinReverse",
                 "variableCollapseMaxDist", "umiCollapseMaxDist", "variableCollapseMinReads",
                 "constantMaxDistForward", "constantMaxDistReverse", "maxNReads")) {
@@ -90,7 +93,26 @@ test_that("digestFastqs fails with incorrect arguments", {
     expect_error(do.call(digestFastqs, L))
     L <- Ldef; L[[var]] <- TRUE
     expect_error(do.call(digestFastqs, L))
+    if (!(var %in% c("nbrMutatedCodonsMaxForward", "nbrMutatedCodonsMaxReverse", 
+                     "nbrMutatedBasesMaxForward", "nbrMutatedBasesMaxReverse",
+                     "constantMaxDistForward", "constantMaxDistReverse",
+                     "maxNReads"))) {
+      L <- Ldef; L[[var]] <- -1
+      expect_error(do.call(digestFastqs, L))
+    }
   }
+  
+  ## Both or none of max number of codons and bases specified
+  ## Note that this should only give an error if a wildtype sequence is specified (which it is here)
+  L <- Ldef; L[["nbrMutatedCodonsMaxForward"]] <- L[["nbrMutatedBasesMaxForward"]] <- 1
+  expect_error(do.call(digestFastqs, L))
+  L <- Ldef; L[["nbrMutatedCodonsMaxReverse"]] <- L[["nbrMutatedBasesMaxReverse"]] <- 1
+  expect_error(do.call(digestFastqs, L))
+  L <- Ldef; L[["nbrMutatedCodonsMaxForward"]] <- L[["nbrMutatedBasesMaxForward"]] <- -1
+  expect_error(do.call(digestFastqs, L))
+  L <- Ldef; L[["nbrMutatedCodonsMaxReverse"]] <- L[["nbrMutatedBasesMaxReverse"]] <- -1
+  expect_error(do.call(digestFastqs, L))
+  
   
   for (var in c("elementLengthsForward", "elementLengthsReverse")) {
     L <- Ldef; L[[var]] <- as.character(L[[var]])

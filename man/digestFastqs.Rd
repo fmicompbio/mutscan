@@ -33,6 +33,8 @@ digestFastqs(
   umiNMax = 0,
   nbrMutatedCodonsMaxForward = 1,
   nbrMutatedCodonsMaxReverse = 1,
+  nbrMutatedBasesMaxForward = -1,
+  nbrMutatedBasesMaxReverse = -1,
   forbiddenMutatedCodonsForward = "NNW",
   forbiddenMutatedCodonsReverse = "NNW",
   mutatedPhredMinForward = 0,
@@ -126,7 +128,18 @@ Ns allowed in the variable region for a read to be retained.}
 to be retained.}
 
 \item{nbrMutatedCodonsMaxForward, nbrMutatedCodonsMaxReverse}{numeric(1)
-Maximum number of mutated codons that are allowed.}
+Maximum number of mutated codons that are allowed. Note that for the 
+forward and reverse sequence, respectively, exactly one of  
+\code{nbrMutatedCodonsMax} and \code{nbrMutatedBasesMax} must be -1, 
+and the other must be a non-negative number. The one that is not -1 
+will be used to filter and name the identified mutants.}
+
+\item{nbrMutatedBasesMaxForward, nbrMutatedBasesMaxReverse}{numeric(1)
+Maximum number of mutated bases that are allowed. Note that for the 
+forward and reverse sequence, respectively, exactly one of  
+\code{nbrMutatedCodonsMax} and \code{nbrMutatedBasesMax} must be -1, 
+and the other must be a non-negative number. The one that is not -1 
+will be used to filter and name the identified mutants.}
 
 \item{forbiddenMutatedCodonsForward, forbiddenMutatedCodonsReverse}{character
 vector of codons (can contain ambiguous IUPAC characters, see

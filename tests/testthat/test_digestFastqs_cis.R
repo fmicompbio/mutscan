@@ -50,7 +50,8 @@ test_that("digestFastqs works as expected for cis experiments", {
   expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 44L)
   expect_equal(res$filterSummary$f7_nbrTooManyNinUMI, 0L)
   expect_equal(res$filterSummary$f8_nbrMutQualTooLow, 0L)
-  expect_equal(res$filterSummary$f9_nbrTooManyMutCodons, 581L)
+  expect_equal(res$filterSummary$f9a_nbrTooManyMutCodons, 581L)
+  expect_equal(res$filterSummary$f9b_nbrTooManyMutBases, 0L)
   expect_equal(res$filterSummary$f10_nbrForbiddenCodons, 82L)
   expect_equal(res$filterSummary$f11_nbrTooManyMutConstant, 0L)
   expect_equal(res$filterSummary$nbrRetained, 167)
@@ -96,5 +97,109 @@ test_that("digestFastqs works as expected for cis experiments", {
   expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 14], 7L)
   expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 33], 1L)
   expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 37], 14L)
+  
+})
+
+test_that("digestFastqs works as expected when specifying max nbr of mutated bases rather than codons", {
+  fqc1 <- system.file("extdata/cisInput_1.fastq.gz", package = "mutscan")
+  fqc2 <- system.file("extdata/cisInput_2.fastq.gz", package = "mutscan")
+  ## default arguments
+  Ldef <- list(
+    fastqForward = fqc1, fastqReverse = fqc2, 
+    mergeForwardReverse = TRUE, 
+    minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 1, greedyOverlap = TRUE, 
+    revComplForward = FALSE, revComplReverse = TRUE,
+    elementsForward = "SUCV", elementsReverse = "SUCVS",
+    elementLengthsForward = c(1, 10, 18, 96),
+    elementLengthsReverse = c(1, 7, 17, 96, -1),
+    adapterForward = "GGAAGAGCACACGTC", 
+    adapterReverse = "GGAAGAGCGTCGTGT",
+    primerForward = "",
+    primerReverse = "",
+    wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+    wildTypeReverse = "", 
+    constantForward = "AACCGGAGGAGGGAGCTG", 
+    constantReverse = "GAGTTCATCCTGGCAGC", 
+    avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+    variableNMaxForward = 0, variableNMaxReverse = 0, 
+    umiNMax = 0,
+    nbrMutatedCodonsMaxForward = -1,
+    nbrMutatedCodonsMaxReverse = -1,
+    nbrMutatedBasesMaxForward = 2,
+    nbrMutatedBasesMaxReverse = 2,
+    forbiddenMutatedCodonsForward = "NNW",
+    forbiddenMutatedCodonsReverse = "NNW",
+    mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+    mutNameDelimiter = ".",
+    constantMaxDistForward = -1,
+    constantMaxDistReverse = -1,
+    variableCollapseMaxDist = 0,
+    variableCollapseMinReads = 0,
+    umiCollapseMaxDist = 0,
+    filteredReadsFastqForward = "",
+    filteredReadsFastqReverse = "",
+    maxNReads = -1, verbose = FALSE
+  )
+  
+  res <- do.call(digestFastqs, Ldef)
+  
+  expect_equal(res$filterSummary$nbrTotal, 1000L)
+  expect_equal(res$filterSummary$f1_nbrAdapter, 126L)
+  expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
+  expect_equal(res$filterSummary$f3_nbrReadWrongLength, 0L)
+  expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
+  expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 0L)
+  expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 44L)
+  expect_equal(res$filterSummary$f7_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f8_nbrMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f9a_nbrTooManyMutCodons, 0L)
+  expect_equal(res$filterSummary$f9b_nbrTooManyMutBases, 416L)
+  expect_equal(res$filterSummary$f10_nbrForbiddenCodons, 0L)
+  expect_equal(res$filterSummary$f11_nbrTooManyMutConstant, 0L)
+  expect_equal(res$filterSummary$nbrRetained, 414)
+  
+  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
+    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+  }
+  
+  expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
+  expect_equal(sum(res$summaryTable$nbrReads == 3), 6L)
+  expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 3]),
+               sort(c("f.12.G", "f.17.T", "f.60.G", "f.85.T", "f.91.G", "f.96.G")))
+  expect_true(all(res$summaryTable$nbrReads == res$summaryTable$nbrUmis))
+  
+  ## Check that mutant naming worked (compare to manual matching)
+  example_seq <- paste0("ACTGATACACGCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCT",
+                        "GCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")
+  expect_equal(res$summaryTable$mutantName[res$summaryTable$sequence == example_seq],
+               "f.11.G")
+
+  expect_equal(sum(res$errorStatistics$nbrMatchForward + res$errorStatistics$nbrMismatchForward),
+               nchar(Ldef$constantForward[1]) * res$filterSummary$nbrRetained)
+  expect_equal(sum(res$errorStatistics$nbrMatchReverse + res$errorStatistics$nbrMismatchReverse),
+               nchar(Ldef$constantReverse[1]) * res$filterSummary$nbrRetained)
+  
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 14], 117L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 22], 35L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 27], 205L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 33], 449L)
+  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 37], 6635L)
+  
+  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 14], 6L)
+  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 22], 1L)
+  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 27], 1L)
+  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 33], 1L)
+  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 37], 2L)
+  
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 14], 80L)
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 22], 2L)
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 27], 130L)
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 33], 242L)
+  expect_equal(res$errorStatistics$nbrMatchReverse[res$errorStatistics$PhredQuality == 37], 6541L)
+  
+  expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 2], 8L)
+  expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 14], 14L)
+  expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 33], 5L)
+  expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 37], 16L)
   
 })

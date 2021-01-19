@@ -131,7 +131,17 @@ checkNumericInput <- function(..., nonnegative) {
 #' @param umiNMax numeric(1) Maximum number of Ns allowed in the UMI for a read
 #'   to be retained.
 #' @param nbrMutatedCodonsMaxForward,nbrMutatedCodonsMaxReverse numeric(1)
-#'   Maximum number of mutated codons that are allowed.
+#'   Maximum number of mutated codons that are allowed. Note that for the 
+#'   forward and reverse sequence, respectively, exactly one of  
+#'   \code{nbrMutatedCodonsMax} and \code{nbrMutatedBasesMax} must be -1, 
+#'   and the other must be a non-negative number. The one that is not -1 
+#'   will be used to filter and name the identified mutants. 
+#' @param nbrMutatedBasesMaxForward,nbrMutatedBasesMaxReverse numeric(1)
+#'   Maximum number of mutated bases that are allowed. Note that for the 
+#'   forward and reverse sequence, respectively, exactly one of  
+#'   \code{nbrMutatedCodonsMax} and \code{nbrMutatedBasesMax} must be -1, 
+#'   and the other must be a non-negative number. The one that is not -1 
+#'   will be used to filter and name the identified mutants. 
 #' @param forbiddenMutatedCodonsForward,forbiddenMutatedCodonsReverse character
 #'   vector of codons (can contain ambiguous IUPAC characters, see
 #'   \code{\link[Biostrings]{IUPAC_CODE_MAP}}). If a read pair contains a
@@ -219,6 +229,8 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          umiNMax = 0,
                          nbrMutatedCodonsMaxForward = 1,
                          nbrMutatedCodonsMaxReverse = 1,
+                         nbrMutatedBasesMaxForward = -1,
+                         nbrMutatedBasesMaxReverse = -1,
                          forbiddenMutatedCodonsForward = "NNW",
                          forbiddenMutatedCodonsReverse = "NNW",
                          mutatedPhredMinForward = 0.0,
@@ -269,8 +281,10 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
   checkNumericInput(variableNMaxForward, nonnegative = TRUE)
   checkNumericInput(variableNMaxReverse, nonnegative = TRUE)
   checkNumericInput(umiNMax, nonnegative = TRUE)
-  checkNumericInput(nbrMutatedCodonsMaxForward, nonnegative = TRUE)
-  checkNumericInput(nbrMutatedCodonsMaxReverse, nonnegative = TRUE)
+  checkNumericInput(nbrMutatedCodonsMaxForward, nonnegative = FALSE)
+  checkNumericInput(nbrMutatedCodonsMaxReverse, nonnegative = FALSE)
+  checkNumericInput(nbrMutatedBasesMaxForward, nonnegative = FALSE)
+  checkNumericInput(nbrMutatedBasesMaxReverse, nonnegative = FALSE)
   checkNumericInput(mutatedPhredMinForward, nonnegative = TRUE)
   checkNumericInput(mutatedPhredMinReverse, nonnegative = TRUE)
   checkNumericInput(constantMaxDistForward, nonnegative = FALSE)
@@ -281,10 +295,24 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
   checkNumericInput(umiCollapseMaxDist, nonnegative = TRUE)
   checkNumericInput(maxNReads, nonnegative = FALSE)
   
+  ## If a wildtype sequence is provided, it must be unambiguous how to identify and name mutants
+  if (any(wildTypeForward != "")) {
+    if ((nbrMutatedCodonsMaxForward == (-1) && nbrMutatedBasesMaxForward == (-1)) || 
+        (nbrMutatedCodonsMaxForward != (-1) && nbrMutatedBasesMaxForward != (-1))) {
+      stop("Exactly one of 'nbrMutatedCodonsMaxForward' and 'nbrMutatedBasesMaxForward' must be -1")
+    }
+  }
+  if (any(wildTypeReverse != "")) {
+    if ((nbrMutatedCodonsMaxReverse == (-1) && nbrMutatedBasesMaxReverse == (-1)) || 
+        (nbrMutatedCodonsMaxReverse != (-1) && nbrMutatedBasesMaxReverse != (-1))) {
+      stop("Exactly one of 'nbrMutatedCodonsMaxReverse' and 'nbrMutatedBasesMaxReverse' must be -1")
+    }
+  }
+  
   ## adapters must be strings, valid DNA characters
-  if (!is.character(adapterForward) || length(adapterForward) != 1 ||
-      !grepl("^[AaCcGgTt]*$", adapterForward) || !is.character(adapterReverse) ||
-      length(adapterReverse) != 1 || !grepl("^[AaCcGgTt]*$", adapterReverse)) {
+  if (length(adapterForward) != 1 || !is.character(adapterForward) || 
+      !grepl("^[AaCcGgTt]*$", adapterForward) || length(adapterReverse) != 1 || 
+      !is.character(adapterReverse) || !grepl("^[AaCcGgTt]*$", adapterReverse)) {
     stop("Adapters must be character strings, only containing valid DNA characters")
   } else {
     adapterForward <- toupper(adapterForward)
@@ -375,8 +403,8 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
   }
   
   ## wild type sequences must be given in named vectors
-  if (is.null(names(wildTypeForward)) || any(names(wildTypeForward) == "") || 
-      is.null(names(wildTypeReverse)) || any(names(wildTypeReverse) == "")) {
+  if (any(is.null(names(wildTypeForward))) || any(names(wildTypeForward) == "") || 
+      any(is.null(names(wildTypeReverse))) || any(names(wildTypeReverse) == "")) {
     stop('wild type sequences must be given in named vectors')
   }
   
@@ -501,6 +529,8 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          umiNMax = umiNMax,
                          nbrMutatedCodonsMaxForward = nbrMutatedCodonsMaxForward,
                          nbrMutatedCodonsMaxReverse = nbrMutatedCodonsMaxReverse,
+                         nbrMutatedBasesMaxForward = nbrMutatedBasesMaxForward,
+                         nbrMutatedBasesMaxReverse = nbrMutatedBasesMaxReverse,
                          forbiddenMutatedCodonsForward = forbiddenMutatedCodonsForward,
                          forbiddenMutatedCodonsReverse = forbiddenMutatedCodonsReverse,
                          mutatedPhredMinForward = mutatedPhredMinForward,
