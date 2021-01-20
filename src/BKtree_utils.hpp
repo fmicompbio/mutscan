@@ -2,6 +2,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <map>
 #include <bits/stdc++.h>
 
 using namespace Rcpp;
@@ -462,7 +463,10 @@ RCPP_MODULE(mod_BKtree) {
   ;
 }
 
-
+// TODO: Attempting to export this function here gives a warning: 
+// Invalid parameter: 'std::string&' for Rcpp::export attribute at BKtree_utils.hpp:467 
+// For now, don't export it. 
+int findClosestRefSeqFaster(std::string&, BKtree&, std::map<std::string, int>&, int&);
 
 /*
 

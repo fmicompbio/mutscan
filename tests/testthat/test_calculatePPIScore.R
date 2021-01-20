@@ -20,15 +20,22 @@ Ldef <- list(
   umiNMax = 0,
   nbrMutatedCodonsMaxForward = 1,
   nbrMutatedCodonsMaxReverse = 1,
+  nbrMutatedBasesMaxForward = -1,
+  nbrMutatedBasesMaxReverse = -1,
   forbiddenMutatedCodonsForward = "NNW",
   forbiddenMutatedCodonsReverse = "NNW",
+  useTreeWTmatch = FALSE, 
   mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
   mutNameDelimiter = ".",
   constantMaxDistForward = -1,
   constantMaxDistReverse = -1,
   variableCollapseMaxDist = 0,
   variableCollapseMinReads = 0,
+  variableCollapseMinRatio = 0,
   umiCollapseMaxDist = 0,
+  filteredReadsFastqForward = "",
+  filteredReadsFastqReverse = "",
+  maxNReads = -1, 
   verbose = FALSE
 )
 Ldef1 <- c(

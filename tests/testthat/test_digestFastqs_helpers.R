@@ -12,10 +12,18 @@ test_that("compareCodonPositions works", {
 ## findClosestRefSeq
 ## ----------------------------------------------------------------------------
 test_that("findClosestRefSeq works", {
-  expect_equal(findClosestRefSeq(varSeq = "ACGT", wtSeq = c("ATTT", "ACTT"), sim = 0L), 1L)
-  expect_equal(findClosestRefSeq(varSeq = "ACGT", wtSeq = c("ACGT", "ACTT"), sim = 0L), 0L)
-  expect_equal(findClosestRefSeq(varSeq = "ACGT", wtSeq = c("ACG", "ACGT"), sim = 0L), 1L)
-  expect_equal(findClosestRefSeq(varSeq = "ACGT", wtSeq = c("AACGT", "ACCTA"), sim = 0L), 1L)
+  expect_equal(findClosestRefSeq(varSeq = "ACGT", wtSeq = c("ATTT", "ACTT"), 
+                                 upperBoundMismatch = 4L, sim = 0L), 1L)
+  expect_equal(findClosestRefSeq(varSeq = "ACGT", wtSeq = c("ACGT", "ACTT"), 
+                                 upperBoundMismatch = 4L, sim = 0L), 0L)
+  expect_equal(findClosestRefSeq(varSeq = "ACGT", wtSeq = c("ACG", "ACGT"), 
+                                 upperBoundMismatch = 4L, sim = 0L), 1L)
+  expect_equal(findClosestRefSeq(varSeq = "ACGT", wtSeq = c("AACGT", "ACCTA"), 
+                                 upperBoundMismatch = 4L, sim = 0L), 1L)
+  expect_equal(findClosestRefSeq(varSeq = "ACGT", wtSeq = c("ATTT", "ACTT"), 
+                                 upperBoundMismatch = 0L, sim = 0L), -1L)
+  expect_equal(findClosestRefSeq(varSeq = "ACGT", wtSeq = c("ATGT", "ACTT"), 
+                                 upperBoundMismatch = 1L, sim = 0L), -2L)
 })
 
 ## ----------------------------------------------------------------------------

@@ -37,6 +37,7 @@ digestFastqs(
   nbrMutatedBasesMaxReverse = -1,
   forbiddenMutatedCodonsForward = "NNW",
   forbiddenMutatedCodonsReverse = "NNW",
+  useTreeWTmatch = TRUE,
   mutatedPhredMinForward = 0,
   mutatedPhredMinReverse = 0,
   mutNameDelimiter = ".",
@@ -145,6 +146,11 @@ will be used to filter and name the identified mutants.}
 vector of codons (can contain ambiguous IUPAC characters, see
 \code{\link[Biostrings]{IUPAC_CODE_MAP}}). If a read pair contains a
 mutated codon matching this pattern, it will be filtered out.}
+
+\item{useTreeWTmatch}{logical(1). Should a tree-based matching 
+to wild type sequences be used if possible? If the number of allowed 
+mismatches is small, and the number of wild type sequences is large, 
+this is typically faster.}
 
 \item{mutatedPhredMinForward, mutatedPhredMinReverse}{numeric(1) Minimum Phred
 score of a mutated base for the read to be retained. If any mutated base

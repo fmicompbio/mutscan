@@ -31,12 +31,14 @@ test_that("digestFastqs fails with incorrect arguments", {
     nbrMutatedBasesMaxReverse = -1,
     forbiddenMutatedCodonsForward = "NNW",
     forbiddenMutatedCodonsReverse = "NNW",
+    useTreeWTmatch = TRUE,
     mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
     mutNameDelimiter = ".",
     constantMaxDistForward = -1,
     constantMaxDistReverse = -1,
     variableCollapseMaxDist = 0,
     variableCollapseMinReads = 0,
+    variableCollapseMinRatio = 0,
     umiCollapseMaxDist = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
@@ -84,6 +86,7 @@ test_that("digestFastqs fails with incorrect arguments", {
                 "nbrMutatedBasesMaxForward", "nbrMutatedBasesMaxReverse", 
                 "mutatedPhredMinForward", "mutatedPhredMinReverse",
                 "variableCollapseMaxDist", "umiCollapseMaxDist", "variableCollapseMinReads",
+                "variableCollapseMinRatio",
                 "constantMaxDistForward", "constantMaxDistReverse", "maxNReads")) {
     L <- Ldef; L[[var]] <- "str"
     expect_error(do.call(digestFastqs, L))
@@ -185,6 +188,12 @@ test_that("digestFastqs fails with incorrect arguments", {
                          "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT")
   expect_error(do.call(digestFastqs, L))
   
+  ## Duplicated wild type sequences
+  L <- Ldef
+  L$wildTypeForward <- c(wt1 = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+                         wt2 = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")
+  expect_error(do.call(digestFastqs, L))
+  
   ## Constant sequence of wrong length
   for (var in c("constantForward", "constantReverse")) {
     L <- Ldef; L[[var]] <- substr(L[[var]], 1, 10)
@@ -209,6 +218,12 @@ test_that("digestFastqs fails with incorrect arguments", {
   L <- Ldef; L[["mutNameDelimiter"]] <- 1
   expect_error(do.call(digestFastqs, L))
   L <- Ldef; L[["mutNameDelimiter"]] <- c("a", "B")
+  expect_error(do.call(digestFastqs, L))
+  
+  ## Invalid value of useTreeWTmatch
+  L <- Ldef; L[["useTreeWTmatch"]] <- 2
+  expect_error(do.call(digestFastqs, L))
+  L <- Ldef; L[["useTreeWTmatch"]] <- "TRUE"
   expect_error(do.call(digestFastqs, L))
   
   ## Invalid value of output FASTQ files

@@ -72,14 +72,18 @@ test_that("digestFastqs works as expected for primer experiments", {
     umiNMax = 0,
     nbrMutatedCodonsMaxForward = 0,
     nbrMutatedCodonsMaxReverse = 1,
+    nbrMutatedBasesMaxForward = -1,
+    nbrMutatedBasesMaxReverse = -1,
     forbiddenMutatedCodonsForward = "",
     forbiddenMutatedCodonsReverse = "NNW",
+    useTreeWTmatch = FALSE,
     mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
     mutNameDelimiter = ".", 
     constantMaxDistForward = -1,
     constantMaxDistReverse = -1,
     variableCollapseMaxDist = 0,
     variableCollapseMinReads = 0,
+    variableCollapseMinRatio = 0,
     umiCollapseMaxDist = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
@@ -96,11 +100,13 @@ test_that("digestFastqs works as expected for primer experiments", {
   expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 0L)
   expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 76L)
   expect_equal(res$filterSummary$f7_nbrTooManyNinUMI, 0L)
-  expect_equal(res$filterSummary$f8_nbrMutQualTooLow, 0L)
-  expect_equal(res$filterSummary$f9a_nbrTooManyMutCodons, 58L + 137L)
-  expect_equal(res$filterSummary$f9b_nbrTooManyMutBases, 0L)
-  expect_equal(res$filterSummary$f10_nbrForbiddenCodons, 3L)
-  expect_equal(res$filterSummary$f11_nbrTooManyMutConstant, 0L)
+  expect_equal(res$filterSummary$f8_nbrTooManyBestWTHits, 0L)
+  expect_equal(res$filterSummary$f9_nbrMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f10a_nbrTooManyMutCodons, 58L + 137L)
+  expect_equal(res$filterSummary$f10b_nbrTooManyMutBases, 0L)
+  expect_equal(res$filterSummary$f11_nbrForbiddenCodons, 3L)
+  expect_equal(res$filterSummary$f12_nbrTooManyMutConstant, 0L)
+  expect_equal(res$filterSummary$f13_nbrTooManyBestConstantHits, 0L)
   expect_equal(res$filterSummary$nbrRetained, 600L)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {

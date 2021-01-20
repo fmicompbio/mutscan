@@ -146,6 +146,10 @@ checkNumericInput <- function(..., nonnegative) {
 #'   vector of codons (can contain ambiguous IUPAC characters, see
 #'   \code{\link[Biostrings]{IUPAC_CODE_MAP}}). If a read pair contains a
 #'   mutated codon matching this pattern, it will be filtered out.
+#' @param useTreeWTmatch logical(1). Should a tree-based matching 
+#'   to wild type sequences be used if possible? If the number of allowed 
+#'   mismatches is small, and the number of wild type sequences is large, 
+#'   this is typically faster. 
 #' @param mutatedPhredMinForward,mutatedPhredMinReverse numeric(1) Minimum Phred
 #'   score of a mutated base for the read to be retained. If any mutated base
 #'   has a Phred score lower than \code{mutatedPhredMin}, the read will be
@@ -233,6 +237,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          nbrMutatedBasesMaxReverse = -1,
                          forbiddenMutatedCodonsForward = "NNW",
                          forbiddenMutatedCodonsReverse = "NNW",
+                         useTreeWTmatch = TRUE, 
                          mutatedPhredMinForward = 0.0,
                          mutatedPhredMinReverse = 0.0,
                          mutNameDelimiter = ".",
@@ -420,6 +425,12 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     wildTypeReverse <- toupper(wildTypeReverse)
   }
   
+  ## all wild type sequences should be unique
+  if (any(duplicated(wildTypeForward)) || 
+      any(duplicated(wildTypeReverse))) {
+    stop("Duplicated wild type sequences are not allowed")
+  }
+  
   ## cis experiment - should not have wildTypeReverse
   if (mergeForwardReverse && any(sapply(wildTypeReverse, nchar) > 0)) {
     warning("Ignoring 'wildTypeReverse' when forward and reverse reads are merged")
@@ -472,6 +483,10 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
   } else {
     forbiddenMutatedCodonsForward <- toupper(forbiddenMutatedCodonsForward)
     forbiddenMutatedCodonsReverse <- toupper(forbiddenMutatedCodonsReverse)
+  }
+  
+  if (!is.logical(useTreeWTmatch) || length(useTreeWTmatch) != 1) {
+    stop("'useTreeWTmatch' must be a logical scalar.")
   }
   
   ## mutNameDelimiter must be a single character, and can not appear in any of the WT sequence names
@@ -533,6 +548,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          nbrMutatedBasesMaxReverse = nbrMutatedBasesMaxReverse,
                          forbiddenMutatedCodonsForward = forbiddenMutatedCodonsForward,
                          forbiddenMutatedCodonsReverse = forbiddenMutatedCodonsReverse,
+                         useTreeWTmatch = useTreeWTmatch,
                          mutatedPhredMinForward = mutatedPhredMinForward,
                          mutatedPhredMinReverse = mutatedPhredMinReverse,
                          mutNameDelimiter = mutNameDelimiter,
