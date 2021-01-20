@@ -601,6 +601,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                      int constantMaxDistReverse = -1,
                      double variableCollapseMaxDist = 0.0,
                      int variableCollapseMinReads = 0,
+                     double variableCollapseMinRatio = 0.0,
                      double umiCollapseMaxDist = 0.0,
                      std::string filteredReadsFastqForward = "",
                      std::string filteredReadsFastqReverse = "",
@@ -626,7 +627,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   std::string constSeqForward, constSeqReverse, constQualForward, constQualReverse;
   std::string mutantName;
   std::map<std::string, mutantInfo> mutantSummary;
-  std::map<std::string, mutantInfo>::iterator mutantSummaryIt;
+  std::map<std::string, mutantInfo>::iterator mutantSummaryIt, mutantSummarySimIt;
   std::vector<int> nPhredCorrectForward(100, 0), nPhredMismatchForward(100, 0);
   std::vector<int> nPhredCorrectReverse(100, 0), nPhredMismatchReverse(100, 0);
   
@@ -1049,8 +1050,9 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         while (tree.size > 0) {
           querySeq = tree.first();
           // check in mutantSummary if nReads for querySeq is < variableCollapseMinReads
+          mutantSummaryIt = mutantSummary.find(querySeq);
           if (variableCollapseMinReads > 0 &&
-              (mutantSummaryIt = mutantSummary.find(querySeq)) != mutantSummary.end() &&
+              mutantSummaryIt != mutantSummary.end() &&
               (*mutantSummaryIt).second.nReads < variableCollapseMinReads) {
                 // in that case, nReads < variableCollapseMinReads for all other 
                 // sequences in the tree as well
@@ -1065,10 +1067,19 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           } else {
             simSeqs = tree.search(querySeq, tol);
             for (size_t i = 0; i < simSeqs.size(); i++) {
-              single2collapsed[simSeqs[i]] = querySeq;
-              tree.remove(simSeqs[i]);
+              // check that the read count for querySeq is high enough compared to that of simSeqs[i]
+              // if not, don't collapse simSeqs[i] with querySeq
+              // must check explicitly if simSeqs[i] = querySeq, since the ratio in 
+              // that case will always be 1, and the function will loop indefinitely 
+              // if the querySeq is not removed
+              if (((mutantSummarySimIt = mutantSummary.find(simSeqs[i])) != mutantSummary.end() && 
+                  (*mutantSummaryIt).second.nReads >= variableCollapseMinRatio * (*mutantSummarySimIt).second.nReads) || 
+                  querySeq == simSeqs[i]) {
+                single2collapsed[simSeqs[i]] = querySeq;
+                tree.remove(simSeqs[i]);
+              }
             }
-          
+
             // check for user interruption and print progress
             if ((start_size - tree.size) % 2000 == 0) { // every 2,000 queries (every ~1-2s)
               Rcpp::checkUserInterrupt(); // ... check for user interrupt
@@ -1245,6 +1256,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   param.push_back(constantMaxDistReverse, "constantMaxDistReverse");
   param.push_back(variableCollapseMaxDist, "variableCollapseMaxDist");
   param.push_back(variableCollapseMinReads, "variableCollapseMinReads");
+  param.push_back(variableCollapseMinRatio, "variableCollapseMinRatio");
   param.push_back(umiCollapseMaxDist, "umiCollapseMaxDist");
   param.push_back(filteredReadsFastqForward, "filteredReadsFastqForward");
   param.push_back(filteredReadsFastqReverse, "filteredReadsFastqReverse");
