@@ -583,7 +583,6 @@ int findClosestRefSeqTree(std::string &varSeq, BKtree &wtTree,
   for (size_t i = 0; i < std::min(upperBoundMismatch + 1, varSeq.size()); i++) {
     // find all sequences in the tree within distance i of varSeq
     searchResults = wtTree.search(varSeq, i);
-    // Rcout << i << " ; " << searchResults.size() << std::endl; 
     if (searchResults.size() > 0) {
       sim = varSeq.size() - i;
       // if we find multiple best hits, skip the read (return -2)
@@ -953,11 +952,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         int idxForward;
         std::vector<std::string> refNamesForward = wildTypeForward.attr("names");
         if (useTreeWTmatchForward) {
-          // Rcout << "fast" << std::endl;
           idxForward = findClosestRefSeqTree(varSeqForward, wtTreeForward, 
                                              wtTreeForwardIdx, upperBoundMismatchForward, maxSim);
-          // idxForward = wtTreeForwardIdx[matchForward];
-          // std::vector<int> idxForward = Rcpp::match(wildTypeForward, matchForward);
         } else {
           idxForward = findClosestRefSeq(varSeqForward, wildTypeForward, upperBoundMismatchForward, maxSim);
         }
@@ -979,7 +975,6 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         }
         std::string wtForward = std::string(wildTypeForward[idxForward]);
         std::string wtNameForward = std::string(refNamesForward[idxForward]);
-        // Rcout << varSeqForward << " ; " << wtNameForward << "-" << wtForward << std::endl;
         if (compareToWildtype(varSeqForward, wtForward, varIntQualForward,
                               mutatedPhredMinForward, nbrMutatedCodonsMaxForward, forbiddenCodonsForward,
                               wtNameForward, nbrMutatedBasesMaxForward, nMutQualTooLow, 
@@ -999,8 +994,6 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         if (useTreeWTmatchReverse) {
           idxReverse = findClosestRefSeqTree(varSeqReverse, wtTreeReverse, 
                                              wtTreeReverseIdx, upperBoundMismatchReverse, maxSim);
-          // idxReverse = wtTreeReverseIdx[matchReverse];
-          // std::vector<int> idxReverse = Rcpp::match(wildTypeReverse, matchReverse);
         } else {
           idxReverse = findClosestRefSeq(varSeqReverse, wildTypeReverse, upperBoundMismatchReverse, maxSim);
         }
