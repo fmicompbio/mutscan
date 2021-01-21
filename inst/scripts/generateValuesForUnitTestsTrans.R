@@ -129,6 +129,18 @@ processReadsTrans <- function(Ldef) {
     nucleotideMismatches <- BiocGenerics::relist(unlisted_ans, skeleton)
     offsets <- c(0L, breakpoints[-length(breakpoints)])
     mismatchPositions <- nucleotideMismatches - offsets
+    ## First check, excluding reads with more than 3x(max nbr mut codons) mismatches
+    baseMismatches <- mismatchPositions
+    nbrMutBases <- S4Vectors::elementNROWS(unique(baseMismatches))
+    toomanybases <- nbrMutBases > 3 * Ldef$nbrMutatedCodonsMaxForward
+    message("Number of reads with too many mutated codons, forward (1): ", sum(toomanybases))
+    fq1 <- fq1[!toomanybases]
+    if (!is.null(Ldef$fastqReverse)) {
+      fq2 <- fq2[!toomanybases]
+    }
+    mismatchPositions <- mismatchPositions[!toomanybases]
+    varForward <- varForward[!toomanybases]
+    
     mismatchQualities <- Biostrings::quality(varForward)[mismatchPositions]
     lowqualmm <- min(as(mismatchQualities, "IntegerList")) < Ldef$mutatedPhredMinForward
     message("Number of reads with low-quality mismatch bases, forward: ", sum(lowqualmm))  ## 0
@@ -194,6 +206,19 @@ processReadsTrans <- function(Ldef) {
     nucleotideMismatches <- BiocGenerics::relist(unlisted_ans, skeleton)
     offsets <- c(0L, breakpoints[-length(breakpoints)])
     mismatchPositions <- nucleotideMismatches - offsets
+    
+    ## First check, excluding reads with more than 3x(max nbr mut codons) mismatches
+    baseMismatches <- mismatchPositions
+    nbrMutBases <- S4Vectors::elementNROWS(unique(baseMismatches))
+    toomanybases <- nbrMutBases > 3 * Ldef$nbrMutatedCodonsMaxReverse
+    message("Number of reads with too many mutated codons, reverse (1): ", sum(toomanybases))
+    fq1 <- fq1[!toomanybases]
+    if (!is.null(Ldef$fastqReverse)) {
+      fq2 <- fq2[!toomanybases]
+    }
+    mismatchPositions <- mismatchPositions[!toomanybases]
+    varReverse <- varReverse[!toomanybases]
+    
     mismatchQualities <- Biostrings::quality(varReverse)[mismatchPositions]
     lowqualmm <- min(as(mismatchQualities, "IntegerList")) < Ldef$mutatedPhredMinReverse
     message("Number of reads with low-quality mismatch bases, reverse: ", sum(lowqualmm))  ## 0

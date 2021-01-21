@@ -33,8 +33,11 @@ digestFastqs(
   umiNMax = 0,
   nbrMutatedCodonsMaxForward = 1,
   nbrMutatedCodonsMaxReverse = 1,
+  nbrMutatedBasesMaxForward = -1,
+  nbrMutatedBasesMaxReverse = -1,
   forbiddenMutatedCodonsForward = "NNW",
   forbiddenMutatedCodonsReverse = "NNW",
+  useTreeWTmatch = FALSE,
   mutatedPhredMinForward = 0,
   mutatedPhredMinReverse = 0,
   mutNameDelimiter = ".",
@@ -126,12 +129,28 @@ Ns allowed in the variable region for a read to be retained.}
 to be retained.}
 
 \item{nbrMutatedCodonsMaxForward, nbrMutatedCodonsMaxReverse}{numeric(1)
-Maximum number of mutated codons that are allowed.}
+Maximum number of mutated codons that are allowed. Note that for the 
+forward and reverse sequence, respectively, exactly one of  
+\code{nbrMutatedCodonsMax} and \code{nbrMutatedBasesMax} must be -1, 
+and the other must be a non-negative number. The one that is not -1 
+will be used to filter and name the identified mutants.}
+
+\item{nbrMutatedBasesMaxForward, nbrMutatedBasesMaxReverse}{numeric(1)
+Maximum number of mutated bases that are allowed. Note that for the 
+forward and reverse sequence, respectively, exactly one of  
+\code{nbrMutatedCodonsMax} and \code{nbrMutatedBasesMax} must be -1, 
+and the other must be a non-negative number. The one that is not -1 
+will be used to filter and name the identified mutants.}
 
 \item{forbiddenMutatedCodonsForward, forbiddenMutatedCodonsReverse}{character
 vector of codons (can contain ambiguous IUPAC characters, see
 \code{\link[Biostrings]{IUPAC_CODE_MAP}}). If a read pair contains a
 mutated codon matching this pattern, it will be filtered out.}
+
+\item{useTreeWTmatch}{logical(1). Should a tree-based matching 
+to wild type sequences be used if possible? If the number of allowed 
+mismatches is small, and the number of wild type sequences is large, 
+this is typically faster.}
 
 \item{mutatedPhredMinForward, mutatedPhredMinReverse}{numeric(1) Minimum Phred
 score of a mutated base for the read to be retained. If any mutated base
