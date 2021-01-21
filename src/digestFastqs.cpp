@@ -570,6 +570,50 @@ int findClosestRefSeq(std::string &varSeq, Rcpp::StringVector &wtSeq,
 }
 
 // Find closest wild type sequence to a variable sequence
+// Similar to findClosestRefSeq, but implements an early stopping 
+// criterion if it is clear that the similarity is not going 
+// be large enough
+// [[Rcpp::export]]
+int findClosestRefSeqEarlyStop(std::string &varSeq, Rcpp::StringVector &wtSeq, 
+                               size_t upperBoundMismatch, int &sim) {
+  // return index of most similar sequence
+  int idx = -1;
+  int maxsim = 0;
+  int nbrbesthits = 0;
+  int currsim;
+  size_t minl;
+  for (int i = 0; i < wtSeq.size(); i++) {
+    currsim = 0;
+    std::string currSeq = std::string(wtSeq[i]);
+    minl = std::min(varSeq.size(), currSeq.size());
+    for (size_t j = 0; j < currSeq.length(); j++) {
+      if (currsim < (int)(j - minl + varSeq.size() - upperBoundMismatch)) {
+        // no chance to reach the minimal similarity - break
+        break;
+      }
+      if (currSeq[j] == varSeq[j]) {
+        currsim++;
+      }
+    }
+    if (((int)varSeq.size() - currsim <= (int)upperBoundMismatch)) {
+      if (currsim == maxsim) {
+        nbrbesthits++; 
+      } else if (currsim > maxsim) {
+        nbrbesthits = 1;
+        idx = i;
+        maxsim = currsim;
+      }
+    }
+  }
+  sim = maxsim;
+  if (nbrbesthits > 1) {
+    return -2;
+  } else {
+    return idx;
+  }
+}
+
+// Find closest wild type sequence to a variable sequence
 // Here, 'closest' is defined as the sequence with the largest number of matching bases
 // Assumes that the start of varSeq coincides with the start of each wtSeq
 // Input: a variable sequence, a BKtree and a map (mapping entries in the tree to 

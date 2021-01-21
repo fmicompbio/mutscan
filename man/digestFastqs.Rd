@@ -37,7 +37,7 @@ digestFastqs(
   nbrMutatedBasesMaxReverse = -1,
   forbiddenMutatedCodonsForward = "NNW",
   forbiddenMutatedCodonsReverse = "NNW",
-  useTreeWTmatch = TRUE,
+  useTreeWTmatch = FALSE,
   mutatedPhredMinForward = 0,
   mutatedPhredMinReverse = 0,
   mutNameDelimiter = ".",
