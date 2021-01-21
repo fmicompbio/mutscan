@@ -10,6 +10,10 @@
 
 #define BUFFER_SIZE 4096
 
+// define constants that are used below
+#define NO_SIMILAR_REF    -1 // no similar enough wildtype sequence was found
+#define TOO_MANY_BEST_REF -2 // too many equally good hits among the WT sequences
+
 using namespace std::placeholders;
 using namespace Rcpp;
 
@@ -539,7 +543,7 @@ void removeEOL(std::string &seq) {
 int findClosestRefSeq(std::string &varSeq, Rcpp::StringVector &wtSeq, 
                       size_t upperBoundMismatch, int &sim) {
   // return index of most similar sequence
-  int idx = -1;
+  int idx = NO_SIMILAR_REF;
   int maxsim = 0;
   int nbrbesthits = 0;
   int currsim;
@@ -563,7 +567,7 @@ int findClosestRefSeq(std::string &varSeq, Rcpp::StringVector &wtSeq,
   }
   sim = maxsim;
   if (nbrbesthits > 1) {
-    return -2;
+    return TOO_MANY_BEST_REF;
   } else {
     return idx;
   }
@@ -577,7 +581,7 @@ int findClosestRefSeq(std::string &varSeq, Rcpp::StringVector &wtSeq,
 int findClosestRefSeqEarlyStop(std::string &varSeq, Rcpp::StringVector &wtSeq, 
                                size_t upperBoundMismatch, int &sim) {
   // return index of most similar sequence
-  int idx = -1;
+  int idx = NO_SIMILAR_REF;
   int maxsim = 0;
   int nbrbesthits = 0;
   int currsim;
@@ -586,7 +590,7 @@ int findClosestRefSeqEarlyStop(std::string &varSeq, Rcpp::StringVector &wtSeq,
     currsim = 0;
     std::string currSeq = std::string(wtSeq[i]);
     minl = std::min(varSeq.size(), currSeq.size());
-    for (size_t j = 0; j < currSeq.length(); j++) {
+    for (size_t j = 0; j < minl; j++) {
       if (currsim < (int)(j - minl + varSeq.size() - upperBoundMismatch)) {
         // no chance to reach the minimal similarity - break
         break;
@@ -607,7 +611,7 @@ int findClosestRefSeqEarlyStop(std::string &varSeq, Rcpp::StringVector &wtSeq,
   }
   sim = maxsim;
   if (nbrbesthits > 1) {
-    return -2;
+    return TOO_MANY_BEST_REF;
   } else {
     return idx;
   }
@@ -629,16 +633,16 @@ int findClosestRefSeqTree(std::string &varSeq, BKtree &wtTree,
     searchResults = wtTree.search(varSeq, i);
     if (searchResults.size() > 0) {
       sim = varSeq.size() - i;
-      // if we find multiple best hits, skip the read (return -2)
+      // if we find multiple best hits, skip the read (return TOO_MANY_BEST_REF)
       if (searchResults.size() > 1) {
-        return -2;
+        return TOO_MANY_BEST_REF;
       } else {
         idx = searchResults[0];
         return wtTreeIdx[idx];
       }
     }
   }
-  return -1;
+  return NO_SIMILAR_REF;
 }
 
 // Write one (pair of) filtered reads to output fastq file(s)
@@ -999,10 +1003,11 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           idxForward = findClosestRefSeqTree(varSeqForward, wtTreeForward, 
                                              wtTreeForwardIdx, upperBoundMismatchForward, maxSim);
         } else {
-          idxForward = findClosestRefSeq(varSeqForward, wildTypeForward, upperBoundMismatchForward, maxSim);
+          idxForward = findClosestRefSeqEarlyStop(varSeqForward, wildTypeForward, 
+                                                  upperBoundMismatchForward, maxSim);
         }
-        // if idxForward = -1, no similar enough wildtype sequence was found - skip the read
-        if (idxForward == -1) {
+        // if idxForward = NO_SIMILAR_REF (defined above), no similar enough wildtype sequence was found - skip the read
+        if (idxForward == NO_SIMILAR_REF) {
           if (nbrMutatedCodonsMaxForward != (-1)) {
             nTooManyMutCodons++;
           } else {
@@ -1011,8 +1016,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
           continue;
         }
-        // if idxForward = -2, too many equally good hits among the WT sequences - skip the read
-        if (idxForward == -2) {
+        // if idxForward = TOO_MANY_BEST_REF (defined above), too many equally good hits among the WT sequences - skip the read
+        if (idxForward == TOO_MANY_BEST_REF) {
           nTooManyBestWTHits++;
           write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyBestWTHits");
           continue;
@@ -1039,10 +1044,11 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           idxReverse = findClosestRefSeqTree(varSeqReverse, wtTreeReverse, 
                                              wtTreeReverseIdx, upperBoundMismatchReverse, maxSim);
         } else {
-          idxReverse = findClosestRefSeq(varSeqReverse, wildTypeReverse, upperBoundMismatchReverse, maxSim);
+          idxReverse = findClosestRefSeqEarlyStop(varSeqReverse, wildTypeReverse, 
+                                                  upperBoundMismatchReverse, maxSim);
         }
-        // if idxReverse = -1, no similar enough wildtype sequence was found - skip the read
-        if (idxReverse == -1) {
+        // if idxReverse = NO_SIMILAR_REF (defined above), no similar enough wildtype sequence was found - skip the read
+        if (idxReverse == NO_SIMILAR_REF) {
           if (nbrMutatedCodonsMaxReverse != (-1)) {
             nTooManyMutCodons++;
           } else {
@@ -1051,8 +1057,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
           continue;
         }
-        // if idxReverse = -2, too many equally good hits among the WT sequences - skip the read
-        if (idxReverse == -2) {
+        // if idxReverse = TOO_MANY_BEST_REF (defined above), too many equally good hits among the WT sequences - skip the read
+        if (idxReverse == TOO_MANY_BEST_REF) {
           nTooManyBestWTHits++;
           write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyBestWTHits");
           continue;
@@ -1095,7 +1101,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         
         // find closest constant sequence and tabulate mismatches by quality
         maxSim = 0;
-        idxConstForward = findClosestRefSeq(constSeqForward, constantForward, constSeqForward.size(), maxSim);
+        idxConstForward = findClosestRefSeqEarlyStop(constSeqForward, constantForward, 
+                                                     constSeqForward.size(), maxSim);
         if (constantMaxDistForward != (-1) && 
             constantLengthForward - maxSim > constantMaxDistForward) {
           nTooManyMutConstant++;
@@ -1103,7 +1110,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           continue;
         }
         // more than one equally good best hit among the constant sequences - skip read
-        if (idxConstForward == -2) {
+        if (idxConstForward == TOO_MANY_BEST_REF) {
           nTooManyBestConstantHits++;
           write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyBestConstantHits");
           continue;
@@ -1130,7 +1137,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         
         // find closest constant sequence and tabulate mismatches by quality
         maxSim = 0;
-        idxConstReverse = findClosestRefSeq(constSeqReverse, constantReverse, constSeqReverse.size(), maxSim);
+        idxConstReverse = findClosestRefSeqEarlyStop(constSeqReverse, constantReverse, 
+                                                     constSeqReverse.size(), maxSim);
         if (constantMaxDistReverse != (-1) && 
             constantLengthReverse - maxSim > constantMaxDistReverse) {
           nTooManyMutConstant++;
@@ -1138,7 +1146,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           continue;
         }
         // more than one equally good best hit among the constant sequences - skip read
-        if (idxConstReverse == -2) {
+        if (idxConstReverse == TOO_MANY_BEST_REF) {
           nTooManyBestConstantHits++;
           write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyBestConstantHits");
           continue;
