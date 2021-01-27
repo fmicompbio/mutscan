@@ -516,6 +516,13 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     stop("'verbose' must be a logical scalar.")
   }
   
+  ## Represent the wildtype sequences as pairs of vectors (one with sequences,
+  ## one with names), to make things faster on the C++ side
+  wildTypeForwardNames <- names(wildTypeForward)
+  wildTypeForward <- unname(wildTypeForward)
+  wildTypeReverseNames <- names(wildTypeReverse)
+  wildTypeReverse <- unname(wildTypeReverse)
+  
   res <- digestFastqsCpp(fastqForwardVect = fastqForward, 
                          fastqReverseVect = fastqReverse,
                          mergeForwardReverse = mergeForwardReverse,
@@ -534,7 +541,9 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          primerForward = primerForward,
                          primerReverse = primerReverse,
                          wildTypeForward = wildTypeForward, 
+                         wildTypeForwardNames = wildTypeForwardNames,
                          wildTypeReverse = wildTypeReverse, 
+                         wildTypeReverseNames = wildTypeReverseNames,
                          constantForward = constantForward, 
                          constantReverse = constantReverse,
                          avePhredMinForward = avePhredMinForward,
