@@ -8,6 +8,11 @@
 #include <algorithm>    // std::sort
 #include "BKtree_utils.hpp"
 
+#ifdef _OPENMP
+#include <omp.h>
+// [[Rcpp::plugins(openmp)]]
+#endif
+
 #define BUFFER_SIZE 4096
 
 // define constants that are used below
@@ -247,7 +252,7 @@ struct mutantInfo {
 };
 
 // open fastq file and check if it worked
-gzFile  openFastq(std::string filename, const char* mode = "rb") {
+gzFile openFastq(std::string filename, const char* mode = "rb") {
   gzFile file = gzopen(filename.c_str(), mode);   
   if (!file) {
     if (errno) {
@@ -617,6 +622,52 @@ int findClosestRefSeqEarlyStop(std::string &varSeq, Rcpp::StringVector &wtSeq,
   }
 }
 
+// [[Rcpp::export]]
+int findClosestRefSeqEarlyStopPlayground(std::string &varSeq, std::vector<std::string> &wtSeq, 
+                                         size_t upperBoundMismatch, int &sim) {
+  // return index of most similar sequence
+  int idx = NO_SIMILAR_REF;
+  int maxsim = 0;
+  int nbrbesthits = 0;
+  int currsim;
+  size_t minl;
+// #ifdef _OPENMP
+// #pragma omp critical
+// #endif 
+// {
+//   Rcout << "findClosestRefEarlyStop: " << varSeq << ", wtSeq size: " << wtSeq.size() << std::endl << std::flush;
+// }
+for (int i = 0; i < wtSeq.size(); i++) {
+  currsim = 0;
+  std::string currSeq = wtSeq[i];
+  minl = std::min(varSeq.size(), currSeq.size());
+  for (size_t j = 0; j < minl; j++) {
+    if (currsim < (int)(j - minl + varSeq.size() - upperBoundMismatch)) {
+      // no chance to reach the minimal similarity - break
+      break;
+    }
+    if (currSeq[j] == varSeq[j]) {
+      currsim++;
+    }
+  }
+  if (((int)varSeq.size() - currsim <= (int)upperBoundMismatch)) {
+    if (currsim == maxsim) {
+      nbrbesthits++; 
+    } else if (currsim > maxsim) {
+      nbrbesthits = 1;
+      idx = i;
+      maxsim = currsim;
+    }
+  }
+}
+sim = maxsim;
+if (nbrbesthits > 1) {
+  return TOO_MANY_BEST_REF;
+} else {
+  return idx;
+}
+}
+
 // Find closest wild type sequence to a variable sequence
 // Here, 'closest' is defined as the sequence with the largest number of matching bases
 // Assumes that the start of varSeq coincides with the start of each wtSeq
@@ -721,8 +772,15 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                      double umiCollapseMaxDist = 0.0,
                      std::string filteredReadsFastqForward = "",
                      std::string filteredReadsFastqReverse = "",
-                     int maxNReads = -1, bool verbose = false) {
+                     int maxNReads = -1, bool verbose = false,
+                     int nthreads = 1) {
 
+  // Set number of threads for OpenMP
+#ifdef _OPENMP
+  int nthreads_old = omp_get_num_threads();
+  omp_set_num_threads(nthreads);
+  Rcout << omp_get_num_threads() << std::endl;
+#endif
   
   // Biostrings::IUPAC_CODE_MAP
   std::map<char,std::vector<char>> IUPAC = initializeIUPAC();
@@ -1506,9 +1564,16 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   param.push_back(filteredReadsFastqForward, "filteredReadsFastqForward");
   param.push_back(filteredReadsFastqReverse, "filteredReadsFastqReverse");
   param.push_back(maxNReads, "maxNReads");
+  param.push_back(nthreads, "nthreads");
   List L = List::create(Named("parameters") = param,
                         Named("filterSummary") = filt,
                         Named("summaryTable") = df,
                         Named("errorStatistics") = err);
+  
+#ifdef _OPENMP
+  // reset threads
+  omp_set_num_threads(nthreads_old);
+#endif
+  
   return L;
 }

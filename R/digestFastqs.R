@@ -189,6 +189,7 @@ checkNumericInput <- function(..., nonnegative) {
 #' @param maxNReads integer(1) Maximal number of reads to process. If set to -1,
 #'   all reads will be processed.
 #' @param verbose logical(1), whether to print out progress messages.
+#' @param nthreads numeric(1), number of threads to use for parallel processing.
 #'
 #' @return A list with four entries:
 #' \describe{
@@ -249,7 +250,8 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          umiCollapseMaxDist = 0.0,
                          filteredReadsFastqForward = "",
                          filteredReadsFastqReverse = "",
-                         maxNReads = -1, verbose = FALSE) {
+                         maxNReads = -1, verbose = FALSE, 
+                         nthreads = 1L) {
   ## --------------------------------------------------------------------------
   ## pre-flight checks
   ## --------------------------------------------------------------------------
@@ -299,6 +301,11 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
   checkNumericInput(variableCollapseMinRatio, nonnegative = TRUE)
   checkNumericInput(umiCollapseMaxDist, nonnegative = TRUE)
   checkNumericInput(maxNReads, nonnegative = FALSE)
+  checkNumericInput(nthreads, nonnegative = TRUE)
+  
+  if (nthreads == 0) {
+    stop("nthreads should be >0")
+  }
   
   ## If a wildtype sequence is provided, it must be unambiguous how to identify and name mutants
   if (any(wildTypeForward != "")) {
@@ -561,7 +568,8 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          filteredReadsFastqForward = filteredReadsFastqForward,
                          filteredReadsFastqReverse = filteredReadsFastqReverse,
                          maxNReads = maxNReads,
-                         verbose = verbose)
+                         verbose = verbose, 
+                         nthreads = as.integer(nthreads))
   
   ## Add package version and processing date
   res$parameters$processingInfo <- paste0(
