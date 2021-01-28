@@ -540,16 +540,16 @@ void removeEOL(std::string &seq) {
 // Here, 'closest' is defined as the sequence with the largest number of matching bases
 // Assumes that the start of varSeq coincides with the start of each wtSeq
 // [[Rcpp::export]]
-int findClosestRefSeq(std::string &varSeq, Rcpp::StringVector &wtSeq, 
+int findClosestRefSeq(std::string &varSeq, std::vector<std::string> &wtSeq, 
                       size_t upperBoundMismatch, int &sim) {
   // return index of most similar sequence
   int idx = NO_SIMILAR_REF;
   int maxsim = 0;
   int nbrbesthits = 0;
   int currsim;
-  for (int i = 0; i < wtSeq.size(); i++) {
+  for (size_t i = 0; i < wtSeq.size(); i++) {
     currsim = 0;
-    std::string currSeq = std::string(wtSeq[i]);
+    std::string currSeq = wtSeq[i];
     for (size_t j = 0; j < currSeq.length(); j++) {
       if (currSeq[j] == varSeq[j]) {
         currsim++;
@@ -578,7 +578,7 @@ int findClosestRefSeq(std::string &varSeq, Rcpp::StringVector &wtSeq,
 // criterion if it is clear that the similarity is not going 
 // be large enough
 // [[Rcpp::export]]
-int findClosestRefSeqEarlyStop(std::string &varSeq, Rcpp::StringVector &wtSeq, 
+int findClosestRefSeqEarlyStop(std::string &varSeq, std::vector<std::string> &wtSeq, 
                                size_t upperBoundMismatch, int &sim) {
   // return index of most similar sequence
   int idx = NO_SIMILAR_REF;
@@ -586,9 +586,9 @@ int findClosestRefSeqEarlyStop(std::string &varSeq, Rcpp::StringVector &wtSeq,
   int nbrbesthits = 0;
   int currsim;
   size_t minl;
-  for (int i = 0; i < wtSeq.size(); i++) {
+  for (size_t i = 0; i < wtSeq.size(); i++) {
     currsim = 0;
-    std::string currSeq = std::string(wtSeq[i]);
+    std::string currSeq = wtSeq[i];
     minl = std::min(varSeq.size(), currSeq.size());
     for (size_t j = 0; j < minl; j++) {
       if (currsim < (int)(j - minl + varSeq.size() - upperBoundMismatch)) {
@@ -696,10 +696,12 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                      std::string adapterForward, std::string adapterReverse,
                      std::vector<std::string> primerForward, 
                      std::vector<std::string> primerReverse,
-                     Rcpp::StringVector wildTypeForward, 
-                     Rcpp::StringVector wildTypeReverse, 
-                     Rcpp::StringVector constantForward, 
-                     Rcpp::StringVector constantReverse, 
+                     std::vector<std::string> wildTypeForward, 
+                     std::vector<std::string> wildTypeForwardNames, 
+                     std::vector<std::string> wildTypeReverse, 
+                     std::vector<std::string> wildTypeReverseNames, 
+                     std::vector<std::string> constantForward, 
+                     std::vector<std::string> constantReverse, 
                      double avePhredMinForward = 20.0, double avePhredMinReverse = 20.0,
                      int variableNMaxForward = 0, int variableNMaxReverse = 0, 
                      int umiNMax = 0,
@@ -758,8 +760,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   std::map<std::string, int> wtTreeForwardIdx, wtTreeReverseIdx;
   size_t upperBoundMismatchForward = 0, upperBoundMismatchReverse = 0; 
   // forward
-  if (std::string(wildTypeForward[0]).compare("") != 0 && useTreeWTmatch) {
-    std::vector<std::string> wtTreeForwardVec = Rcpp::as<std::vector<std::string>>(wildTypeForward);
+  if (wildTypeForward[0].compare("") != 0 && useTreeWTmatch) {
+    std::vector<std::string> wtTreeForwardVec = wildTypeForward;
     std::vector<std::string>::iterator wtTreeForwardVecIt;
     size_t wtForwardLen = wtTreeForwardVec[0].length();
     for (wtTreeForwardVecIt = wtTreeForwardVec.begin(); 
@@ -786,8 +788,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     upperBoundMismatchForward = nbrMutatedBasesMaxForward;
   }
   
-  if (std::string(wildTypeReverse[0]).compare("") != 0 && useTreeWTmatch) {
-    std::vector<std::string> wtTreeReverseVec = Rcpp::as<std::vector<std::string>>(wildTypeReverse);
+  if (wildTypeReverse[0].compare("") != 0 && useTreeWTmatch) {
+    std::vector<std::string> wtTreeReverseVec = wildTypeReverse;
     std::vector<std::string>::iterator wtTreeReverseVecIt;
     size_t wtReverseLen = wtTreeReverseVec[0].length();
     for (wtTreeReverseVecIt = wtTreeReverseVec.begin(); 
@@ -996,9 +998,9 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
       }
 
       // if wildTypeForward is available...
-      if (std::string(wildTypeForward[0]).compare("") != 0) {
+      if (wildTypeForward[0].compare("") != 0) {
         int idxForward;
-        std::vector<std::string> refNamesForward = wildTypeForward.attr("names");
+        // std::vector<std::string> refNamesForward = wildTypeForward.attr("names");
         if (useTreeWTmatchForward) {
           idxForward = findClosestRefSeqTree(varSeqForward, wtTreeForward, 
                                              wtTreeForwardIdx, upperBoundMismatchForward, maxSim);
@@ -1022,8 +1024,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyBestWTHits");
           continue;
         }
-        std::string wtForward = std::string(wildTypeForward[idxForward]);
-        std::string wtNameForward = std::string(refNamesForward[idxForward]);
+        std::string wtForward = wildTypeForward[idxForward];
+        std::string wtNameForward = wildTypeForwardNames[idxForward];
         if (compareToWildtype(varSeqForward, wtForward, varIntQualForward,
                               mutatedPhredMinForward, nbrMutatedCodonsMaxForward, forbiddenCodonsForward,
                               wtNameForward, nbrMutatedBasesMaxForward, nMutQualTooLow, 
@@ -1037,9 +1039,9 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
       }
       
       // if wildTypeReverse is available...
-      if (!noReverse && std::string(wildTypeReverse[0]).compare("") != 0) {
+      if (!noReverse && wildTypeReverse[0].compare("") != 0) {
         int idxReverse;
-        std::vector<std::string> refNamesReverse = wildTypeReverse.attr("names");
+        // std::vector<std::string> refNamesReverse = wildTypeReverse.attr("names");
         if (useTreeWTmatchReverse) {
           idxReverse = findClosestRefSeqTree(varSeqReverse, wtTreeReverse, 
                                              wtTreeReverseIdx, upperBoundMismatchReverse, maxSim);
@@ -1063,8 +1065,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyBestWTHits");
           continue;
         }
-        std::string wtReverse = std::string(wildTypeReverse[idxReverse]);
-        std::string wtNameReverse = std::string(refNamesReverse[idxReverse]);
+        std::string wtReverse = wildTypeReverse[idxReverse];
+        std::string wtNameReverse = wildTypeReverseNames[idxReverse];
         if (compareToWildtype(varSeqReverse, wtReverse, varIntQualReverse,
                               mutatedPhredMinReverse, nbrMutatedCodonsMaxReverse, forbiddenCodonsReverse,
                               wtNameReverse, nbrMutatedBasesMaxReverse, nMutQualTooLow, 
@@ -1085,7 +1087,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
       int idxConstForward = 0;
       int idxConstReverse = 0;
       
-      if (std::string(constantForward[0]).compare("") != 0) {
+      if (constantForward[0].compare("") != 0) {
         // reverse complement if requested
         if (revComplForward) {
           transform(begin(constSeqForward), end(constSeqForward),
@@ -1121,7 +1123,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
       }
       
       if (fastqReverse.compare("") != 0 && 
-          std::string(constantReverse[0]).compare("") != 0) {
+          constantReverse[0].compare("") != 0) {
         // reverse (complement) sequence and quality string
         if (revComplReverse) {
           transform(begin(constSeqReverse), end(constSeqReverse),
@@ -1156,14 +1158,14 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         //                     nPhredCorrectReverse, nPhredMismatchReverse);
       }
       
-      if (std::string(constantForward[0]).compare("") != 0) {
-        tabulateBasesByQual(constSeqForward, std::string(constantForward[idxConstForward]), 
+      if (constantForward[0].compare("") != 0) {
+        tabulateBasesByQual(constSeqForward, constantForward[idxConstForward], 
                             constIntQualForward,
                             nPhredCorrectForward, nPhredMismatchForward);
       }
       if (fastqReverse.compare("") != 0 && 
-          std::string(constantReverse[0]).compare("") != 0) {
-        tabulateBasesByQual(constSeqReverse, std::string(constantReverse[idxConstReverse]), 
+          constantReverse[0].compare("") != 0) {
+        tabulateBasesByQual(constSeqReverse, constantReverse[idxConstReverse], 
                             constIntQualReverse,
                             nPhredCorrectReverse, nPhredMismatchReverse);
       }
@@ -1174,8 +1176,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
       if (mutantName.length() > 0) { // we have a least one mutation, or sequence-based name
         mutantName.pop_back(); // remove '_' at the end
       } else {
-        if (std::string(wildTypeForward[0]).compare("") != 0 || 
-            (!noReverse && std::string(wildTypeReverse[0]).compare("") != 0)) {
+        if (wildTypeForward[0].compare("") != 0 || 
+            (!noReverse && wildTypeReverse[0].compare("") != 0)) {
           mutantName = "WT";
         }
       }
@@ -1228,8 +1230,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
 
   // collapse similar variable sequences in mutantSummary
   if (variableCollapseMaxDist > 0.0) {
-    if (std::string(wildTypeForward[0]).compare("") != 0 ||
-        std::string(wildTypeReverse[0]).compare("") != 0) {
+    if (wildTypeForward[0].compare("") != 0 ||
+        wildTypeReverse[0].compare("") != 0) {
       warning("Skipping variable sequence collapsing because wildtype reference sequence(s) are given");
     } else {
       // get sequence length
@@ -1431,6 +1433,14 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     dfUmis[i] = (*mutantSummaryIt).second.umi.size();
     i++;
   }
+  // put back wildtype sequences and names in Rcpp::StringVector
+  Rcpp::StringVector wildTypeForwardRcpp(wildTypeForward.size());
+  wildTypeForwardRcpp = wildTypeForward;
+  wildTypeForwardRcpp.attr("names") = wildTypeForwardNames;
+  Rcpp::StringVector wildTypeReverseRcpp(wildTypeReverse.size());
+  wildTypeReverseRcpp = wildTypeReverse;
+  wildTypeReverseRcpp.attr("names") = wildTypeReverseNames;
+  
   DataFrame filt = DataFrame::create(Named("nbrTotal") = nTot,
                                      Named("f1_nbrAdapter") = nAdapter,
                                      Named("f2_nbrNoPrimer") = nNoPrimer,
@@ -1478,8 +1488,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   param.push_back(adapterReverse, "adapterReverse");
   param.push_back(primerForward, "primerForward");
   param.push_back(primerReverse, "primerReverse");
-  param.push_back(wildTypeForward, "wildTypeForward");
-  param.push_back(wildTypeReverse, "wildTypeReverse");
+  param.push_back(wildTypeForwardRcpp, "wildTypeForward");
+  param.push_back(wildTypeReverseRcpp, "wildTypeReverse");
   param.push_back(constantForward, "constantForward");
   param.push_back(constantReverse, "constantReverse");
   param.push_back(avePhredMinForward, "avePhredMinForward");
