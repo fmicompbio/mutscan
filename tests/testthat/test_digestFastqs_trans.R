@@ -40,7 +40,8 @@ test_that("digestFastqs works as expected for trans experiments", {
     umiCollapseMaxDist = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
-    maxNReads = -1, verbose = FALSE
+    maxNReads = -1, verbose = FALSE,
+    nThreads = 1, chunkSize = 1000
   )
   
   res <- do.call(digestFastqs, Ldef)
@@ -160,7 +161,8 @@ test_that("digestFastqs works as expected for trans experiments, filter based on
     umiCollapseMaxDist = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
-    maxNReads = -1, verbose = FALSE
+    maxNReads = -1, verbose = FALSE,
+    nThreads = 1, chunkSize = 1000
   )
   
   res <- do.call(digestFastqs, Ldef)
@@ -414,7 +416,8 @@ test_that("digestFastqs works as expected for trans experiments - no UMI specifi
     umiCollapseMaxDist = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
-    maxNReads = -1, verbose = FALSE
+    maxNReads = -1, verbose = FALSE,
+    nThreads = 1, chunkSize = 500
   )
   
   res <- do.call(digestFastqs, Ldef)
@@ -479,7 +482,8 @@ test_that("digestFastqs works as expected for trans experiments, when variable s
     umiCollapseMaxDist = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
-    maxNReads = -1, verbose = FALSE
+    maxNReads = -1, verbose = FALSE,
+    nThreads = 1, chunkSize = 700
   )
   
   res <- do.call(digestFastqs, Ldef)
@@ -593,7 +597,8 @@ test_that("digestFastqs works as expected for trans experiments when multiple re
     umiCollapseMaxDist = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
-    maxNReads = -1, verbose = TRUE
+    maxNReads = -1, verbose = TRUE,
+    nThreads = 2, chunkSize = 1000
   )
   
   expect_output(res <- do.call(digestFastqs, Ldef))
@@ -615,7 +620,8 @@ test_that("digestFastqs works as expected for trans experiments when multiple re
   expect_equal(res$filterSummary$f13_nbrTooManyBestConstantHits, 0L)
   expect_equal(res$filterSummary$nbrRetained, 193L)
   
-  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
+  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "nThreads",
+                                    "forbiddenMutatedCodonsReverse", "verbose"))) {
     expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
   }
   
@@ -731,7 +737,8 @@ test_that("digestFastqs works as expected for experiments with only forward read
     umiCollapseMaxDist = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
-    maxNReads = -1, verbose = FALSE
+    maxNReads = -1, verbose = FALSE,
+    nThreads = 1, chunkSize = 300
   )
   
   res <- do.call(digestFastqs, Ldef)
@@ -843,7 +850,8 @@ test_that("writing filtered reads to file works", {
     umiCollapseMaxDist = 0,
     filteredReadsFastqForward = outfile1,
     filteredReadsFastqReverse = outfile2,
-    maxNReads = -1, verbose = FALSE
+    maxNReads = -1, verbose = FALSE,
+    nThreads = 1, chunkSize = 1000
   )
   
   res <- do.call(digestFastqs, Ldef)

@@ -189,6 +189,9 @@ checkNumericInput <- function(..., nonnegative) {
 #' @param maxNReads integer(1) Maximal number of reads to process. If set to -1,
 #'   all reads will be processed.
 #' @param verbose logical(1), whether to print out progress messages.
+#' @param nThreads numeric(1), number of threads to use for parallel processing.
+#' @param chunkSize numeric(1), number of read (pairs) to keep in memory for 
+#'   parallel processing. Reduce from the default value if you run out of memory.
 #'
 #' @return A list with four entries:
 #' \describe{
@@ -249,7 +252,8 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          umiCollapseMaxDist = 0.0,
                          filteredReadsFastqForward = "",
                          filteredReadsFastqReverse = "",
-                         maxNReads = -1, verbose = FALSE) {
+                         maxNReads = -1, verbose = FALSE,
+                         nThreads = 1, chunkSize = 100000) {
   ## --------------------------------------------------------------------------
   ## pre-flight checks
   ## --------------------------------------------------------------------------
@@ -299,6 +303,15 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
   checkNumericInput(variableCollapseMinRatio, nonnegative = TRUE)
   checkNumericInput(umiCollapseMaxDist, nonnegative = TRUE)
   checkNumericInput(maxNReads, nonnegative = FALSE)
+  checkNumericInput(nThreads, nonnegative = TRUE)
+  checkNumericInput(chunkSize, nonnegative = TRUE)
+  
+  if (nThreads == 0) {
+    stop("'nThreads' must be positive.")
+  }
+  if (chunkSize == 0) {
+    stop("'chunkSize' must be positive.")
+  }
   
   ## If a wildtype sequence is provided, it must be unambiguous how to identify and name mutants
   if (any(wildTypeForward != "")) {
@@ -570,7 +583,9 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          filteredReadsFastqForward = filteredReadsFastqForward,
                          filteredReadsFastqReverse = filteredReadsFastqReverse,
                          maxNReads = maxNReads,
-                         verbose = verbose)
+                         verbose = verbose, 
+                         nThreads = as.integer(nThreads),
+                         chunkSize = as.integer(chunkSize))
   
   ## Add package version and processing date
   res$parameters$processingInfo <- paste0(

@@ -50,7 +50,9 @@ digestFastqs(
   filteredReadsFastqForward = "",
   filteredReadsFastqReverse = "",
   maxNReads = -1,
-  verbose = FALSE
+  verbose = FALSE,
+  nThreads = 1,
+  chunkSize = 1e+05
 )
 }
 \arguments{
@@ -199,6 +201,11 @@ empty, filtered reads will not be written to a file.}
 all reads will be processed.}
 
 \item{verbose}{logical(1), whether to print out progress messages.}
+
+\item{nThreads}{numeric(1), number of threads to use for parallel processing.}
+
+\item{chunkSize}{numeric(1), number of read (pairs) to keep in memory for 
+parallel processing. Reduce from the default value if you run out of memory.}
 }
 \value{
 A list with four entries:

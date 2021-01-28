@@ -40,7 +40,8 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     variableCollapseMinRatio = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
-    maxNReads = -1, verbose = FALSE
+    maxNReads = -1, verbose = FALSE,
+    nThreads = 1, chunkSize = 1000
   )
   
   res <- do.call(digestFastqs, Ldef)
@@ -115,7 +116,8 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     variableCollapseMinRatio = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
-    maxNReads = -1, verbose = FALSE
+    maxNReads = -1, verbose = FALSE,
+    nThreads = 1, chunkSize = 1000
   )
   
   res <- do.call(digestFastqs, Ldef)
@@ -186,7 +188,8 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     variableCollapseMinRatio = 0, 
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
-    maxNReads = -1, verbose = FALSE
+    maxNReads = -1, verbose = FALSE,
+    nThreads = 1, chunkSize = 1000
   )
   
   res <- do.call(digestFastqs, Ldef)
@@ -257,7 +260,8 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     variableCollapseMinRatio = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
-    maxNReads = -1, verbose = FALSE
+    maxNReads = -1, verbose = FALSE,
+    nThreads = 2, chunkSize = 500
   )
   
   res <- do.call(digestFastqs, Ldef)
@@ -283,7 +287,8 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   expect_equal(res$filterSummary$f13_nbrTooManyBestConstantHits, 0L)
   expect_equal(res$filterSummary$nbrRetained, 679L)
   
-  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
+  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "nThreads",
+                                    "forbiddenMutatedCodonsReverse", "verbose"))) {
     if (nm == "variableCollapseMinReads") {
       expect_equivalent(res$parameters[[nm]], as.integer(ceiling(Ldef[[nm]])))
     } else {
@@ -336,7 +341,8 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     variableCollapseMinRatio = 1.5,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
-    maxNReads = -1, verbose = FALSE
+    maxNReads = -1, verbose = FALSE,
+    nThreads = 1, chunkSize = 1000
   )
   
   res <- do.call(digestFastqs, Ldef)

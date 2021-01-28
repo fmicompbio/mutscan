@@ -8,11 +8,20 @@
 #include <algorithm>    // std::sort
 #include "BKtree_utils.hpp"
 
-#define BUFFER_SIZE 4096
+#ifdef _OPENMP
+#include <omp.h>
+// [[Rcpp::plugins(openmp)]]
+#endif
+
+#define BUFFER_SIZE 2048
 
 // define constants that are used below
 #define NO_SIMILAR_REF    -1 // no similar enough wildtype sequence was found
 #define TOO_MANY_BEST_REF -2 // too many equally good hits among the WT sequences
+#define QUALITY_OFFSET    33
+
+// FastqEntry_utils needs the BUFFER_SIZE to be defined
+#include "FastqEntry_utils.hpp"
 
 using namespace std::placeholders;
 using namespace Rcpp;
@@ -173,6 +182,9 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
     }
   }
   if (hasLowQualMutation) {
+#ifdef _OPENMP
+    #pragma omp atomic
+#endif
     nMutQualTooLow++;
     return true;
   }
@@ -180,12 +192,18 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
   if (nbrMutatedCodonsMax != (-1)) {
     // consider codons
     if ((int)mutatedCodonsOrBases.size() > nbrMutatedCodonsMax) {
+#ifdef _OPENMP
+      #pragma omp atomic
+#endif
       nTooManyMutCodons++;
       return true;
     }
   } else {
     //consider bases
     if ((int)mutatedCodonsOrBases.size() > nbrMutatedBasesMax) {
+#ifdef _OPENMP
+      #pragma omp atomic
+#endif
       nTooManyMutBases++;
       return true;
     }
@@ -201,6 +219,9 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
       }
     }
     if (hasForbidden) {
+#ifdef _OPENMP
+      #pragma omp atomic
+#endif
       nForbiddenCodons++;
       return true;
     }
@@ -228,8 +249,14 @@ bool tabulateBasesByQual(const std::string constSeq, const std::string constant,
                          std::vector<int> &nPhredCorrect, std::vector<int> &nPhredMismatch) {
   for (size_t i = 0; i < constSeq.length(); i++) { // for each base
     if (constSeq[i] != constant[i]) { // found mismatch
+#ifdef _OPENMP
+      #pragma omp atomic
+#endif
       nPhredMismatch[constIntQual[i]]++;
     } else {                          // found match
+#ifdef _OPENMP
+      #pragma omp atomic
+#endif
       nPhredCorrect[constIntQual[i]]++;
     }
   }
@@ -343,6 +370,9 @@ bool decomposeRead(const std::string sseq,
     }
     // no primer found - read should not be considered further
     if (!foundprimer) {
+#ifdef _OPENMP
+      #pragma omp atomic
+#endif
       nNoPrimer++;
       return false;
     }
@@ -363,12 +393,18 @@ bool decomposeRead(const std::string sseq,
       if (std::find(elementLengths.begin(), elementLengths.end(), -1) == elementLengths.end()) {
         // no -1's - sum of element lengths must be equal to the sequence length
         if (totalElementLength != (int)sseq.size()) {
+#ifdef _OPENMP
+          #pragma omp atomic
+#endif
           nReadWrongLength++;
           return false;
         }
       } else {
         // -1 present - sum of element lengths must be < sequence length
         if (totalElementLength >= (int)sseq.size()) {
+#ifdef _OPENMP
+          #pragma omp atomic
+#endif
           nReadWrongLength++;
           return false;
         }
@@ -645,43 +681,6 @@ int findClosestRefSeqTree(std::string &varSeq, BKtree &wtTree,
   return NO_SIMILAR_REF;
 }
 
-// Write one (pair of) filtered reads to output fastq file(s)
-bool write_seq(gzFile file1, gzFile file2, const char* s1, const char* q1, 
-               const char* s2, const char* q2, const int n, const char* label) {
-  if (file1 != NULL) {
-    std::string read_id = "@S" + std::to_string(n) + "_" + label + " 1\n";
-    if (gzputs(file1, read_id.c_str()) == (-1)) {
-      return false;
-    }
-    if (gzputs(file1, s1) == (-1)) {
-      return false;
-    }
-    if (gzputs(file1, "+\n") == (-1)) {
-      return false;
-    }
-    if (gzputs(file1, q1) == (-1)) {
-      return false;
-    }
-  }
-  
-  if (file2 != NULL) {
-    std::string read_id = "@S" + std::to_string(n) + "_" + label + " 2\n";
-    if (gzputs(file2, read_id.c_str()) == (-1)) {
-      return false;
-    }
-    if (gzputs(file2, s2) == (-1)) {
-      return false;
-    }
-    if (gzputs(file2, "+\n") == (-1)) {
-      return false;
-    }
-    if (gzputs(file2, q2) == (-1)) {
-      return false;
-    }
-  }
-  return true;
-}
-
 // [[Rcpp::export]]
 List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                      std::vector<std::string> fastqReverseVect,
@@ -723,28 +722,40 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                      double umiCollapseMaxDist = 0.0,
                      std::string filteredReadsFastqForward = "",
                      std::string filteredReadsFastqReverse = "",
-                     int maxNReads = -1, bool verbose = false) {
+                     int maxNReads = -1, bool verbose = false, 
+                     int nThreads = 1, int chunkSize = 100000) {
 
-  
+#ifdef _OPENMP
+  if (nThreads > omp_get_max_threads()) {
+    warning("'nThreads' is larger than the number of available threads. Reducing 'nThreads' to %i", omp_get_max_threads());
+    nThreads = omp_get_max_threads();
+  }
+#else
+  if (nThreads > 1) {
+    warning("OpenMP parallelization not available. Ignoring 'nThreads'.")
+  }
+#endif
+
   // Biostrings::IUPAC_CODE_MAP
   std::map<char,std::vector<char>> IUPAC = initializeIUPAC();
 
   // --------------------------------------------------------------------------
-  // digest reads one by one
+  // declare variables
   // --------------------------------------------------------------------------
-  char seq1[BUFFER_SIZE];
-  char qual1[BUFFER_SIZE];
-  char seq2[BUFFER_SIZE];
-  char qual2[BUFFER_SIZE];
-  bool noReverse;
+  // char seq1[BUFFER_SIZE];
+  // char qual1[BUFFER_SIZE];
+  // char seq2[BUFFER_SIZE];
+  // char qual2[BUFFER_SIZE];
+  FastqEntry** chunkVector = new FastqEntry*[chunkSize];
+  for (int ci = 0; ci < chunkSize; ci++) {
+    chunkVector[ci] = new FastqEntry;
+  }
+  
   int nTot = 0, nAdapter = 0, nNoPrimer = 0, nReadWrongLength = 0, nTooManyMutConstant = 0;
   int nNoValidOverlap = 0, nAvgVarQualTooLow = 0, nTooManyNinVar = 0, nTooManyNinUMI = 0;
   int nTooManyMutCodons = 0, nTooManyMutBases = 0, nForbiddenCodons = 0, nMutQualTooLow = 0;
   int nTooManyBestWTHits = 0, nTooManyBestConstantHits = 0, nRetain = 0;
-  int constantLengthForward, constantLengthReverse, maxSim;
-  std::string varSeqForward, varSeqReverse, varQualForward, varQualReverse, umiSeq;
-  std::string constSeqForward, constSeqReverse, constQualForward, constQualReverse;
-  std::string mutantName;
+  
   std::map<std::string, mutantInfo> mutantSummary;
   std::map<std::string, mutantInfo>::iterator mutantSummaryIt, mutantSummarySimIt;
   std::vector<int> nPhredCorrectForward(100, 0), nPhredMismatchForward(100, 0);
@@ -848,19 +859,21 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                (fastqReverse.compare("") != 0 ? "pair " : "") << (f + 1) <<
                " of " << fastqForwardVect.size() << "..." << std::endl;
     }
+    
+    // counter for reads being added to the chunk vector
+    size_t iChunk = 0;
     while (done == false) {
-      // initialize read parts as empty strings (since they will be added onto
-      // when extracting the respective parts from the reads)
-      varSeqForward = "", varSeqReverse = "", varQualForward = "", varQualReverse = "";
-      umiSeq = "", constSeqForward = "", constSeqReverse = "";
-      constQualForward = "", constQualReverse = "";
-      
-      mutantName = ""; // start with empty name
-      
-      // read sequence pair
-      done = get_next_seq(file1, seq1, qual1);
+      done = get_next_seq(file1, chunkVector[iChunk]->seq1, chunkVector[iChunk]->qual1);
       if (fastqReverse.compare("") != 0) {
-        done = (done || get_next_seq(file2, seq2, qual2));
+        done = (done || get_next_seq(file2, chunkVector[iChunk]->seq2, chunkVector[iChunk]->qual2));
+      }
+      if (done == false) {
+        // Rcout << "adding read " << (iChunk + 1) << " " << std::string(chunkVector[iChunk]->seq1) << std::endl << std::flush;
+        iChunk++;
+        nTot++;
+      }
+      if (nTot % 200000 == 0) { // every 200,000 reads (every ~1.6 seconds)
+        Rcpp::checkUserInterrupt(); // ... check for user interrupt
       }
       
       // if maxNReads has been reached, break
@@ -868,345 +881,403 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         done = true;
       }
       
+      // process reads in the chunk
+      if ((int)iChunk == chunkSize || done) {
+#ifdef _OPENMP
+#pragma omp parallel for schedule(guided) num_threads(nThreads)
+#endif
+        for (size_t ci = 0; ci < iChunk; ci++) { // for each read in chunk
+          // while (done == false) {
+          // initialize read parts as empty strings (since they will be added onto
+          // when extracting the respective parts from the reads)
+          std::string varSeqForward = "", varSeqReverse = "", varQualForward = "";
+          std::string varQualReverse = "", umiSeq = "", constSeqForward = "";
+          std::string constSeqReverse = "", constQualForward = "", constQualReverse = "";
+          std::string mutantName = "";
+          int maxSim = 0;
+          int constantLengthForward, constantLengthReverse;
+          std::map<std::string, mutantInfo>::iterator mutantSummaryParIt;
+
+          // convert C char* to C++ string
+          std::string sseq1(chunkVector[ci]->seq1);
+          std::string squal1(chunkVector[ci]->qual1);
+          std::string sseq2, squal2;
+          if (fastqReverse.compare("") != 0) {
+            sseq2 = chunkVector[ci]->seq2;
+            squal2 = chunkVector[ci]->qual2;
+          }
+          
+          // search for adapter sequences and filter read pairs
+          if ((adapterForward.compare("") != 0 && sseq1.find(adapterForward) != std::string::npos) ||
+              (fastqReverse.compare("") != 0 && adapterReverse.compare("") != 0 && sseq2.find(adapterReverse) != std::string::npos)) {
+#ifdef _OPENMP
+            #pragma omp atomic
+#endif
+            nAdapter++;
+            chunkVector[ci]->write_seq(outfile1, outfile2, nTot-(int)iChunk+(int)ci, "adapter");
+            continue;
+          }
+          
+          // check if the last character(s) are new line, if so remove them
+          removeEOL(sseq1);
+          removeEOL(squal1);
+          if (fastqReverse.compare("") != 0) {
+            removeEOL(sseq2);
+            removeEOL(squal2);
+          }
+          
+          // Extract the components of the reads
+          // UMI, constant sequence, variable sequence, forward/reverse
+          // if processing of either forward or reverse read signals 'break', go to the next read pair
+          if (!decomposeRead(sseq1, squal1, elementsForward, elementLengthsForward,
+                             primerForward, umiSeq, varSeqForward, varQualForward,
+                             constSeqForward, constQualForward, nNoPrimer, nReadWrongLength)) {
+            chunkVector[ci]->write_seq(outfile1, outfile2, nTot-(int)iChunk+(int)ci, "noPrimer_readWrongLength");
+            continue;
+          }
+          if (fastqReverse.compare("") != 0 && 
+              !decomposeRead(sseq2, squal2, elementsReverse, elementLengthsReverse,
+                             primerReverse, umiSeq, varSeqReverse, varQualReverse,
+                             constSeqReverse, constQualReverse, nNoPrimer, nReadWrongLength)) {
+            chunkVector[ci]->write_seq(outfile1, outfile2, nTot-(int)iChunk+(int)ci, "noPrimer_readWrongLength");
+            continue;
+          }
+          
+          // reverse complement if requested
+          if (revComplForward) {
+            transform(
+              begin(varSeqForward), end(varSeqForward),
+              begin(varSeqForward), complement);
+            reverse(begin(varSeqForward), end(varSeqForward));
+            reverse(begin(varQualForward), end(varQualForward));
+          }
+          if (fastqReverse.compare("") != 0 && revComplReverse) {
+            transform(
+              begin(varSeqReverse), end(varSeqReverse),
+              begin(varSeqReverse), complement);
+            reverse(begin(varSeqReverse), end(varSeqReverse));
+            reverse(begin(varQualReverse), end(varQualReverse));
+          }
+          
+          // convert qualities to int
+          std::vector<int> varIntQualForward(varSeqForward.length(), 0);
+          for (size_t i = 0; i < varSeqForward.length(); i++) {
+            varIntQualForward[i] = int(varQualForward[i]) - QUALITY_OFFSET;
+          }
+          
+          std::vector<int> varIntQualReverse;
+          if (fastqReverse.compare("") != 0) {
+            varIntQualReverse.resize(varSeqReverse.length()); // set number of elements
+            std::fill(varIntQualReverse.begin(), varIntQualReverse.end(), 0); // fill with zero
+            for (size_t i = 0; i < varSeqReverse.length(); i++) {
+              varIntQualReverse[i] = int(varQualReverse[i]) - QUALITY_OFFSET;
+            }
+          }
+          
+          // if requested, fuse forward and reverse reads
+          if (mergeForwardReverse) {
+            if (mergeReadPairPartial(varSeqForward, varIntQualForward,
+                                     varSeqReverse, varIntQualReverse,
+                                     minOverlap, maxOverlap, maxFracMismatchOverlap,
+                                     greedyOverlap)) {
+              // read should be filtered out - no valid overlap found
+#ifdef _OPENMP
+              #pragma omp atomic
+#endif
+              nNoValidOverlap++;
+              chunkVector[ci]->write_seq(outfile1, outfile2, nTot-(int)iChunk+(int)ci, "noValidOverlap");
+              continue;
+            }
+          }
+          // if no reverse sequence was provided, hereafter it is identical to the situation 
+          // where forward and reverse reads were merged
+          bool noReverse = mergeForwardReverse || fastqReverse.compare("") == 0;
+          
+          // filter if the average quality in variable region is too low
+          if (std::accumulate(varIntQualForward.begin(), varIntQualForward.end(), 0.0) <
+            avePhredMinForward * varSeqForward.length() ||
+            (!noReverse && std::accumulate(varIntQualReverse.begin(), varIntQualReverse.end(), 0.0) <
+              avePhredMinReverse * varSeqReverse.length())) {
+#ifdef _OPENMP
+            #pragma omp atomic
+#endif
+            nAvgVarQualTooLow++;
+            chunkVector[ci]->write_seq(outfile1, outfile2, nTot-(int)iChunk+(int)ci, "avgVarQualTooLow");
+            continue;
+          }
+          
+          // filter if there are too many N's in variable regions
+          if (std::count(varSeqForward.begin(), varSeqForward.end(), 'N') > variableNMaxForward ||
+              (!noReverse && std::count(varSeqReverse.begin(), varSeqReverse.end(), 'N') > variableNMaxReverse)) {
+#ifdef _OPENMP
+            #pragma omp atomic
+#endif
+            nTooManyNinVar++;
+            chunkVector[ci]->write_seq(outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyNinVar");
+            continue;
+          }
+          
+          if (umiSeq != "" && std::count(umiSeq.begin(), umiSeq.end(), 'N') > umiNMax) {
+#ifdef _OPENMP
+            #pragma omp atomic
+#endif
+            nTooManyNinUMI++;
+            chunkVector[ci]->write_seq(outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyNinUMI");
+            continue;
+          }
+          
+          // if wildTypeForward is available...
+          if (wildTypeForward[0].compare("") != 0) {
+            int idxForward;
+            if (useTreeWTmatchForward) {
+              idxForward = findClosestRefSeqTree(varSeqForward, wtTreeForward, 
+                                                 wtTreeForwardIdx, upperBoundMismatchForward, maxSim);
+            } else {
+              idxForward = findClosestRefSeqEarlyStop(varSeqForward, wildTypeForward, 
+                                                      upperBoundMismatchForward, maxSim);
+            }
+            // if idxForward = NO_SIMILAR_REF (defined above), no similar enough wildtype sequence was found - skip the read
+            if (idxForward == NO_SIMILAR_REF) {
+              if (nbrMutatedCodonsMaxForward != (-1)) {
+#ifdef _OPENMP
+                #pragma omp atomic
+#endif
+                nTooManyMutCodons++;
+              } else {
+#ifdef _OPENMP
+                #pragma omp atomic
+#endif
+                nTooManyMutBases++;
+              }
+              chunkVector[ci]->write_seq(outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
+              continue;
+            }
+            // if idxForward = TOO_MANY_BEST_REF (defined above), too many equally good hits among the WT sequences - skip the read
+            if (idxForward == TOO_MANY_BEST_REF) {
+#ifdef _OPENMP
+              #pragma omp atomic
+#endif
+              nTooManyBestWTHits++;
+              chunkVector[ci]->write_seq(outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyBestWTHits");
+              continue;
+            }
+            std::string wtForward = wildTypeForward[idxForward];
+            std::string wtNameForward = wildTypeForwardNames[idxForward];
+            if (compareToWildtype(varSeqForward, wtForward, varIntQualForward,
+                                  mutatedPhredMinForward, nbrMutatedCodonsMaxForward, forbiddenCodonsForward,
+                                  wtNameForward, nbrMutatedBasesMaxForward, nMutQualTooLow, 
+                                  nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, mutantName, mutNameDelimiter)) {
+              // read is to be filtered out
+              chunkVector[ci]->write_seq(outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
+              continue;
+            }
+          } else if (varSeqForward.length() > 0) { // variable seq, but no reference -> add variable seq to mutantName
+            mutantName += (varSeqForward + std::string("_"));
+          }
+          
+          // if wildTypeReverse is available...
+          if (!noReverse && wildTypeReverse[0].compare("") != 0) {
+            int idxReverse;
+            if (useTreeWTmatchReverse) {
+              idxReverse = findClosestRefSeqTree(varSeqReverse, wtTreeReverse, 
+                                                 wtTreeReverseIdx, upperBoundMismatchReverse, maxSim);
+            } else {
+              idxReverse = findClosestRefSeqEarlyStop(varSeqReverse, wildTypeReverse, 
+                                                      upperBoundMismatchReverse, maxSim);
+            }
+            // if idxReverse = NO_SIMILAR_REF (defined above), no similar enough wildtype sequence was found - skip the read
+            if (idxReverse == NO_SIMILAR_REF) {
+              if (nbrMutatedCodonsMaxReverse != (-1)) {
+#ifdef _OPENMP
+                #pragma omp atomic
+#endif
+                nTooManyMutCodons++;
+              } else {
+#ifdef _OPENMP
+                #pragma omp atomic
+#endif
+                nTooManyMutBases++;
+              }
+              chunkVector[ci]->write_seq(outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
+              continue;
+            }
+            // if idxReverse = TOO_MANY_BEST_REF (defined above), too many equally good hits among the WT sequences - skip the read
+            if (idxReverse == TOO_MANY_BEST_REF) {
+#ifdef _OPENMP
+              #pragma omp atomic
+#endif
+              nTooManyBestWTHits++;
+              chunkVector[ci]->write_seq(outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyBestWTHits");
+              continue;
+            }
+            std::string wtReverse = wildTypeReverse[idxReverse];
+            std::string wtNameReverse = wildTypeReverseNames[idxReverse];
+            if (compareToWildtype(varSeqReverse, wtReverse, varIntQualReverse,
+                                  mutatedPhredMinReverse, nbrMutatedCodonsMaxReverse, forbiddenCodonsReverse,
+                                  wtNameReverse, nbrMutatedBasesMaxReverse, nMutQualTooLow, 
+                                  nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, mutantName, mutNameDelimiter)) {
+              // read is to be filtered out
+              chunkVector[ci]->write_seq(outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
+              continue;
+            }
+          } else if (!noReverse && varSeqReverse.length() > 0) { // variable seq, but no reference -> add variable seq to mutantName
+            mutantName += (varSeqReverse + std::string("_"));
+          }
+          
+          // for retained reads, count numbers of (mis-)matching bases in constant seq by Phred quality
+          constantLengthForward = (int) constSeqForward.length();
+          constantLengthReverse = (int) constSeqReverse.length();
+          std::vector<int> constIntQualForward(constantLengthForward, 0);
+          std::vector<int> constIntQualReverse(constantLengthReverse,0);
+          int idxConstForward = 0;
+          int idxConstReverse = 0;
+          
+          if (constantForward[0].compare("") != 0) {
+            // reverse complement if requested
+            if (revComplForward) {
+              transform(begin(constSeqForward), end(constSeqForward),
+                        begin(constSeqForward), complement);
+              reverse(constSeqForward.begin(), constSeqForward.end());
+              reverse(constQualForward.begin(), constQualForward.end());
+            }
+            
+            // populate an integer vector of base qualities
+            for (size_t i = 0; i < (size_t) constantLengthForward; i++) {
+              constIntQualForward[i] = int(constQualForward[i]) - QUALITY_OFFSET;
+            }
+            
+            // find closest constant sequence and tabulate mismatches by quality
+            maxSim = 0;
+            idxConstForward = findClosestRefSeqEarlyStop(constSeqForward, constantForward, 
+                                                         constSeqForward.size(), maxSim);
+            if (constantMaxDistForward != (-1) && 
+                constantLengthForward - maxSim > constantMaxDistForward) {
+#ifdef _OPENMP
+              #pragma omp atomic
+#endif
+              nTooManyMutConstant++;
+              chunkVector[ci]->write_seq(outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyMutConstant");
+              continue;
+            }
+            // more than one equally good best hit among the constant sequences - skip read
+            if (idxConstForward == TOO_MANY_BEST_REF) {
+#ifdef _OPENMP
+              #pragma omp atomic
+#endif
+              nTooManyBestConstantHits++;
+              chunkVector[ci]->write_seq(outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyBestConstantHits");
+              continue;
+            }
+          }
+          
+          if (fastqReverse.compare("") != 0 && 
+              constantReverse[0].compare("") != 0) {
+            // reverse (complement) sequence and quality string
+            if (revComplReverse) {
+              transform(begin(constSeqReverse), end(constSeqReverse),
+                        begin(constSeqReverse), complement);
+              reverse(constSeqReverse.begin(), constSeqReverse.end());
+              reverse(constQualReverse.begin(), constQualReverse.end());
+            }
+            
+            // populate an integer vector of base qualities
+            for (size_t i = 0; i < (size_t) constantLengthReverse; i++) {
+              constIntQualReverse[i] = int(constQualReverse[i]) - QUALITY_OFFSET;
+            }
+            
+            // find closest constant sequence and tabulate mismatches by quality
+            maxSim = 0;
+            idxConstReverse = findClosestRefSeqEarlyStop(constSeqReverse, constantReverse, 
+                                                         constSeqReverse.size(), maxSim);
+            if (constantMaxDistReverse != (-1) && 
+                constantLengthReverse - maxSim > constantMaxDistReverse) {
+#ifdef _OPENMP
+              #pragma omp atomic
+#endif
+              nTooManyMutConstant++;
+              chunkVector[ci]->write_seq(outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyMutConstant");
+              continue;
+            }
+            // more than one equally good best hit among the constant sequences - skip read
+            if (idxConstReverse == TOO_MANY_BEST_REF) {
+#ifdef _OPENMP
+              #pragma omp atomic
+#endif
+              nTooManyBestConstantHits++;
+              chunkVector[ci]->write_seq(outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyBestConstantHits");
+              continue;
+            }
+          }
+          
+          if (constantForward[0].compare("") != 0) {
+            tabulateBasesByQual(constSeqForward, constantForward[idxConstForward], 
+                                constIntQualForward,
+                                nPhredCorrectForward, nPhredMismatchForward);
+          }
+          if (fastqReverse.compare("") != 0 && 
+              constantReverse[0].compare("") != 0) {
+            tabulateBasesByQual(constSeqReverse, constantReverse[idxConstReverse], 
+                                constIntQualReverse,
+                                nPhredCorrectReverse, nPhredMismatchReverse);
+          }
+          
+          // store the read pair
+#ifdef _OPENMP
+          #pragma omp atomic
+#endif
+          nRetain++;
+          // ... create final mutant name
+          if (mutantName.length() > 0) { // we have a least one mutation, or sequence-based name
+            mutantName.pop_back(); // remove '_' at the end
+          } else {
+            if (wildTypeForward[0].compare("") != 0 || 
+                (!noReverse && wildTypeReverse[0].compare("") != 0)) {
+              mutantName = "WT";
+            }
+          }
+          
+          if (!noReverse) { // "trans" experiment
+            varSeqForward += (std::string("_") + varSeqReverse);
+          }
+          // ... check if mutant already exists in mutantSummary
+#ifdef _OPENMP
+#pragma omp critical
+#endif
+{
+          if ((mutantSummaryParIt = mutantSummary.find(mutantName)) != mutantSummary.end()) {
+            // ... ... update existing mutantInfo
+            (*mutantSummaryParIt).second.nReads++;
+            (*mutantSummaryParIt).second.maxNReads++;
+            if (umiSeq != "") {
+              (*mutantSummaryParIt).second.umi.insert(umiSeq);
+            }
+            (*mutantSummaryParIt).second.sequence.insert(varSeqForward);
+          } else {
+            // ... ... create mutantInfo instance for this mutant and add it to mutantSummary
+            mutantInfo newMutant;
+            newMutant.nReads = 1;
+            newMutant.maxNReads = 1;
+            if (umiSeq != "") {
+              newMutant.umi.insert(umiSeq);
+            }
+            newMutant.sequence.insert(varSeqForward);
+            mutantSummary.insert(std::pair<std::string,mutantInfo>(mutantName, newMutant));
+          }
+}
+        } // iterate over individual sequence pairs
+        iChunk = 0;
+        
+        // ... and give an update
+        if (verbose) {
+          Rcout << "    " << nTot << " read pairs processed ("
+                << std::setprecision(3) << (100*((double)nRetain/nTot)) << "% retained)" << std::endl;
+        }
+      }
       // check if end-of-file was reached
       if (done) {
         break;
       }
-      
-      // update counters
-      nTot++;
-      if (nTot % 200000 == 0) { // every 200,000 reads (every ~1.6 seconds)
-        Rcpp::checkUserInterrupt(); // ... check for user interrupt
-        // ... and give an update
-        if (verbose && nTot % 1000000 == 0) {
-          Rcout << "    " << nTot << " read pairs read ("
-                << std::setprecision(3) << (100*((double)nRetain/nTot)) << "% retained)" << std::endl;
-        }
-      }
-
-      // convert C char* to C++ string
-      std::string sseq1(seq1);
-      std::string squal1(qual1);
-      std::string sseq2, squal2;
-      if (fastqReverse.compare("") != 0) {
-        sseq2 = seq2;
-        squal2 = qual2;
-      }
-      
-      // search for adapter sequences and filter read pairs
-      if ((adapterForward.compare("") != 0 && sseq1.find(adapterForward) != std::string::npos) ||
-          (fastqReverse.compare("") != 0 && adapterReverse.compare("") != 0 && sseq2.find(adapterReverse) != std::string::npos)) {
-        nAdapter++;
-        write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "adapter");
-        continue;
-      }
-      
-      // check if the last character(s) are new line, if so remove them
-      removeEOL(sseq1);
-      removeEOL(squal1);
-      if (fastqReverse.compare("") != 0) {
-        removeEOL(sseq2);
-        removeEOL(squal2);
-      }
-      
-      // Extract the components of the reads
-      // UMI, constant sequence, variable sequence, forward/reverse
-      // if processing of either forward or reverse read signals 'break', go to the next read pair
-      if (!decomposeRead(sseq1, squal1, elementsForward, elementLengthsForward,
-                         primerForward, umiSeq, varSeqForward, varQualForward,
-                         constSeqForward, constQualForward, nNoPrimer, nReadWrongLength)) {
-        write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "noPrimer_readWrongLength");
-        continue;
-      }
-      if (fastqReverse.compare("") != 0 && 
-          !decomposeRead(sseq2, squal2, elementsReverse, elementLengthsReverse,
-                         primerReverse, umiSeq, varSeqReverse, varQualReverse,
-                         constSeqReverse, constQualReverse, nNoPrimer, nReadWrongLength)) {
-        write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "noPrimer_readWrongLength");
-        continue;
-      }
-      
-      // reverse complement if requested
-      if (revComplForward) {
-        transform(
-          begin(varSeqForward), end(varSeqForward),
-          begin(varSeqForward), complement);
-        reverse(begin(varSeqForward), end(varSeqForward));
-        reverse(begin(varQualForward), end(varQualForward));
-      }
-      if (fastqReverse.compare("") != 0 && revComplReverse) {
-        transform(
-          begin(varSeqReverse), end(varSeqReverse),
-          begin(varSeqReverse), complement);
-        reverse(begin(varSeqReverse), end(varSeqReverse));
-        reverse(begin(varQualReverse), end(varQualReverse));
-      }
-      
-      // convert qualities to int
-      std::vector<int> varIntQualForward(varSeqForward.length(), 0);
-      for (size_t i = 0; i < varSeqForward.length(); i++) {
-        varIntQualForward[i] = int(varQualForward[i]) - 33;
-      }
-      
-      std::vector<int> varIntQualReverse;
-      if (fastqReverse.compare("") != 0) {
-        varIntQualReverse.resize(varSeqReverse.length()); // set number of elements
-        std::fill(varIntQualReverse.begin(), varIntQualReverse.end(), 0); // fill with zero
-        for (size_t i = 0; i < varSeqReverse.length(); i++) {
-          varIntQualReverse[i] = int(varQualReverse[i]) - 33;
-        }
-      }
-      
-      // if requested, fuse forward and reverse reads
-      if (mergeForwardReverse) {
-        if (mergeReadPairPartial(varSeqForward, varIntQualForward,
-                                 varSeqReverse, varIntQualReverse,
-                                 minOverlap, maxOverlap, maxFracMismatchOverlap,
-                                 greedyOverlap)) {
-          // read should be filtered out - no valid overlap found
-          nNoValidOverlap++;
-          write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "noValidOverlap");
-          continue;
-        }
-      }
-      // if no reverse sequence was provided, hereafter it is identical to the situation 
-      // where forward and reverse reads were merged
-      noReverse = mergeForwardReverse || fastqReverse.compare("") == 0;
-      
-      // filter if the average quality in variable region is too low
-      if (std::accumulate(varIntQualForward.begin(), varIntQualForward.end(), 0.0) <
-          avePhredMinForward * varSeqForward.length() ||
-          (!noReverse && std::accumulate(varIntQualReverse.begin(), varIntQualReverse.end(), 0.0) <
-            avePhredMinReverse * varSeqReverse.length())) {
-        nAvgVarQualTooLow++;
-        write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "avgVarQualTooLow");
-        continue;
-      }
-      
-      // filter if there are too many N's in variable regions
-      if (std::count(varSeqForward.begin(), varSeqForward.end(), 'N') > variableNMaxForward ||
-          (!noReverse && std::count(varSeqReverse.begin(), varSeqReverse.end(), 'N') > variableNMaxReverse)) {
-        nTooManyNinVar++;
-        write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyNinVar");
-        continue;
-      }
-      
-      if (umiSeq != "" && std::count(umiSeq.begin(), umiSeq.end(), 'N') > umiNMax) {
-        nTooManyNinUMI++;
-        write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyNinUMI");
-        continue;
-      }
-
-      // if wildTypeForward is available...
-      if (wildTypeForward[0].compare("") != 0) {
-        int idxForward;
-        // std::vector<std::string> refNamesForward = wildTypeForward.attr("names");
-        if (useTreeWTmatchForward) {
-          idxForward = findClosestRefSeqTree(varSeqForward, wtTreeForward, 
-                                             wtTreeForwardIdx, upperBoundMismatchForward, maxSim);
-        } else {
-          idxForward = findClosestRefSeqEarlyStop(varSeqForward, wildTypeForward, 
-                                                  upperBoundMismatchForward, maxSim);
-        }
-        // if idxForward = NO_SIMILAR_REF (defined above), no similar enough wildtype sequence was found - skip the read
-        if (idxForward == NO_SIMILAR_REF) {
-          if (nbrMutatedCodonsMaxForward != (-1)) {
-            nTooManyMutCodons++;
-          } else {
-            nTooManyMutBases++;
-          }
-          write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
-          continue;
-        }
-        // if idxForward = TOO_MANY_BEST_REF (defined above), too many equally good hits among the WT sequences - skip the read
-        if (idxForward == TOO_MANY_BEST_REF) {
-          nTooManyBestWTHits++;
-          write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyBestWTHits");
-          continue;
-        }
-        std::string wtForward = wildTypeForward[idxForward];
-        std::string wtNameForward = wildTypeForwardNames[idxForward];
-        if (compareToWildtype(varSeqForward, wtForward, varIntQualForward,
-                              mutatedPhredMinForward, nbrMutatedCodonsMaxForward, forbiddenCodonsForward,
-                              wtNameForward, nbrMutatedBasesMaxForward, nMutQualTooLow, 
-                              nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, mutantName, mutNameDelimiter)) {
-          // read is to be filtered out
-          write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
-          continue;
-        }
-      } else if (varSeqForward.length() > 0) { // variable seq, but no reference -> add variable seq to mutantName
-        mutantName += (varSeqForward + std::string("_"));
-      }
-      
-      // if wildTypeReverse is available...
-      if (!noReverse && wildTypeReverse[0].compare("") != 0) {
-        int idxReverse;
-        // std::vector<std::string> refNamesReverse = wildTypeReverse.attr("names");
-        if (useTreeWTmatchReverse) {
-          idxReverse = findClosestRefSeqTree(varSeqReverse, wtTreeReverse, 
-                                             wtTreeReverseIdx, upperBoundMismatchReverse, maxSim);
-        } else {
-          idxReverse = findClosestRefSeqEarlyStop(varSeqReverse, wildTypeReverse, 
-                                                  upperBoundMismatchReverse, maxSim);
-        }
-        // if idxReverse = NO_SIMILAR_REF (defined above), no similar enough wildtype sequence was found - skip the read
-        if (idxReverse == NO_SIMILAR_REF) {
-          if (nbrMutatedCodonsMaxReverse != (-1)) {
-            nTooManyMutCodons++;
-          } else {
-            nTooManyMutBases++;
-          }
-          write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
-          continue;
-        }
-        // if idxReverse = TOO_MANY_BEST_REF (defined above), too many equally good hits among the WT sequences - skip the read
-        if (idxReverse == TOO_MANY_BEST_REF) {
-          nTooManyBestWTHits++;
-          write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyBestWTHits");
-          continue;
-        }
-        std::string wtReverse = wildTypeReverse[idxReverse];
-        std::string wtNameReverse = wildTypeReverseNames[idxReverse];
-        if (compareToWildtype(varSeqReverse, wtReverse, varIntQualReverse,
-                              mutatedPhredMinReverse, nbrMutatedCodonsMaxReverse, forbiddenCodonsReverse,
-                              wtNameReverse, nbrMutatedBasesMaxReverse, nMutQualTooLow, 
-                              nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, mutantName, mutNameDelimiter)) {
-          // read is to be filtered out
-          write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
-          continue;
-        }
-      } else if (!noReverse && varSeqReverse.length() > 0) { // variable seq, but no reference -> add variable seq to mutantName
-        mutantName += (varSeqReverse + std::string("_"));
-      }
-      
-      // for retained reads, count numbers of (mis-)matching bases in constant seq by Phred quality
-      constantLengthForward = (int) constSeqForward.length();
-      constantLengthReverse = (int) constSeqReverse.length();
-      std::vector<int> constIntQualForward(constantLengthForward, 0);
-      std::vector<int> constIntQualReverse(constantLengthReverse,0);
-      int idxConstForward = 0;
-      int idxConstReverse = 0;
-      
-      if (constantForward[0].compare("") != 0) {
-        // reverse complement if requested
-        if (revComplForward) {
-          transform(begin(constSeqForward), end(constSeqForward),
-                    begin(constSeqForward), complement);
-          reverse(constSeqForward.begin(), constSeqForward.end());
-          reverse(constQualForward.begin(), constQualForward.end());
-        }
-        
-        // populate an integer vector of base qualities
-        for (size_t i = 0; i < (size_t) constantLengthForward; i++) {
-          constIntQualForward[i] = int(constQualForward[i]) - 33;
-        }
-        
-        // find closest constant sequence and tabulate mismatches by quality
-        maxSim = 0;
-        idxConstForward = findClosestRefSeqEarlyStop(constSeqForward, constantForward, 
-                                                     constSeqForward.size(), maxSim);
-        if (constantMaxDistForward != (-1) && 
-            constantLengthForward - maxSim > constantMaxDistForward) {
-          nTooManyMutConstant++;
-          write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyMutConstant");
-          continue;
-        }
-        // more than one equally good best hit among the constant sequences - skip read
-        if (idxConstForward == TOO_MANY_BEST_REF) {
-          nTooManyBestConstantHits++;
-          write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyBestConstantHits");
-          continue;
-        }
-        // tabulateBasesByQual(constSeqForward, std::string(constantForward[idxConstForward]), 
-        //                     constIntQualForward,
-        //                     nPhredCorrectForward, nPhredMismatchForward);
-      }
-      
-      if (fastqReverse.compare("") != 0 && 
-          constantReverse[0].compare("") != 0) {
-        // reverse (complement) sequence and quality string
-        if (revComplReverse) {
-          transform(begin(constSeqReverse), end(constSeqReverse),
-                    begin(constSeqReverse), complement);
-          reverse(constSeqReverse.begin(), constSeqReverse.end());
-          reverse(constQualReverse.begin(), constQualReverse.end());
-        }
-        
-        // populate an integer vector of base qualities
-        for (size_t i = 0; i < (size_t) constantLengthReverse; i++) {
-          constIntQualReverse[i] = int(constQualReverse[i]) - 33;
-        }
-        
-        // find closest constant sequence and tabulate mismatches by quality
-        maxSim = 0;
-        idxConstReverse = findClosestRefSeqEarlyStop(constSeqReverse, constantReverse, 
-                                                     constSeqReverse.size(), maxSim);
-        if (constantMaxDistReverse != (-1) && 
-            constantLengthReverse - maxSim > constantMaxDistReverse) {
-          nTooManyMutConstant++;
-          write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyMutConstant");
-          continue;
-        }
-        // more than one equally good best hit among the constant sequences - skip read
-        if (idxConstReverse == TOO_MANY_BEST_REF) {
-          nTooManyBestConstantHits++;
-          write_seq(outfile1, outfile2, seq1, qual1, seq2, qual2, nTot, "tooManyBestConstantHits");
-          continue;
-        }
-        // tabulateBasesByQual(constSeqReverse, std::string(constantReverse[idxConstReverse]), 
-        //                     constIntQualReverse,
-        //                     nPhredCorrectReverse, nPhredMismatchReverse);
-      }
-      
-      if (constantForward[0].compare("") != 0) {
-        tabulateBasesByQual(constSeqForward, constantForward[idxConstForward], 
-                            constIntQualForward,
-                            nPhredCorrectForward, nPhredMismatchForward);
-      }
-      if (fastqReverse.compare("") != 0 && 
-          constantReverse[0].compare("") != 0) {
-        tabulateBasesByQual(constSeqReverse, constantReverse[idxConstReverse], 
-                            constIntQualReverse,
-                            nPhredCorrectReverse, nPhredMismatchReverse);
-      }
-      
-      // store the read pair
-      nRetain++;
-      // ... create final mutant name
-      if (mutantName.length() > 0) { // we have a least one mutation, or sequence-based name
-        mutantName.pop_back(); // remove '_' at the end
-      } else {
-        if (wildTypeForward[0].compare("") != 0 || 
-            (!noReverse && wildTypeReverse[0].compare("") != 0)) {
-          mutantName = "WT";
-        }
-      }
-      
-      if (!noReverse) { // "trans" experiment
-        varSeqForward += (std::string("_") + varSeqReverse);
-      }
-      // ... check if mutant already exists in mutantSummary
-      if ((mutantSummaryIt = mutantSummary.find(mutantName)) != mutantSummary.end()) {
-        // ... ... update existing mutantInfo
-        (*mutantSummaryIt).second.nReads++;
-        (*mutantSummaryIt).second.maxNReads++;
-        if (umiSeq != "") {
-          (*mutantSummaryIt).second.umi.insert(umiSeq);
-        }
-        (*mutantSummaryIt).second.sequence.insert(varSeqForward);
-      } else {
-        // ... ... create mutantInfo instance for this mutant and add it to mutantSummary
-        mutantInfo newMutant;
-        newMutant.nReads = 1;
-        newMutant.maxNReads = 1;
-        if (umiSeq != "") {
-          newMutant.umi.insert(umiSeq);
-        }
-        newMutant.sequence.insert(varSeqForward);
-        mutantSummary.insert(std::pair<std::string,mutantInfo>(mutantName, newMutant));
-      }
-      
-    } // iterate over individual sequence pairs
+    }
 
     // clean up
     gzclose(file1);
@@ -1219,15 +1290,18 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     if (outfile2 != NULL) {
       gzclose(outfile2);
     }
-    
-    if (verbose) {
-      Rcout << "done reading sequences" << std::endl;
-    }
   } // iterate over fastq files
   if (verbose) {
+    Rcout << "done reading sequences" << std::endl;
     Rcout << "retained " << mutantSummary.size() << " unique features" << std::endl;
   }
 
+  // reading of reads is done - don't need the chunkVector anymore
+  for (int ci = 0; ci < chunkSize; ci++) {
+    delete chunkVector[ci];
+  }
+  delete[] chunkVector;
+  
   // collapse similar variable sequences in mutantSummary
   if (variableCollapseMaxDist > 0.0) {
     if (wildTypeForward[0].compare("") != 0 ||
@@ -1516,6 +1590,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   param.push_back(filteredReadsFastqForward, "filteredReadsFastqForward");
   param.push_back(filteredReadsFastqReverse, "filteredReadsFastqReverse");
   param.push_back(maxNReads, "maxNReads");
+  param.push_back(nThreads, "nThreads");
+  param.push_back(chunkSize, "chunkSize");
   List L = List::create(Named("parameters") = param,
                         Named("filterSummary") = filt,
                         Named("summaryTable") = df,

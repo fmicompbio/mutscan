@@ -87,7 +87,8 @@ test_that("digestFastqs works as expected for primer experiments", {
     umiCollapseMaxDist = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
-    maxNReads = -1, verbose = FALSE
+    maxNReads = -1, verbose = FALSE,
+    nThreads = 1, chunkSize = 1000
   )
   
   res <- do.call(digestFastqs, Ldef)
