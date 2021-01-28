@@ -658,6 +658,29 @@ test_that("digestFastqs works as expected for trans experiments when multiple re
   expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 14], 6L)
   expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 27], 1L)
   expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 33], 1L)
+  
+  ## Test that we get the same results with useTreeWTmatch = TRUE
+  Ldef$useTreeWTmatch <- TRUE
+  res2 <- do.call(digestFastqs, Ldef)
+  
+  expect_equal(res$filterSummary$nbrTotal, res2$filterSummary$nbrTotal)
+  expect_equal(res$filterSummary$f1_nbrAdapter, res2$filterSummary$f1_nbrAdapter)
+  expect_equal(res$filterSummary$f2_nbrNoPrimer, res2$filterSummary$f2_nbrNoPrimer)
+  expect_equal(res$filterSummary$f3_nbrReadWrongLength, res2$filterSummary$f3_nbrReadWrongLength)
+  expect_equal(res$filterSummary$f4_nbrNoValidOverlap, res2$filterSummary$f4_nbrNoValidOverlap)
+  expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, res2$filterSummary$f5_nbrAvgVarQualTooLow)
+  expect_equal(res$filterSummary$f6_nbrTooManyNinVar, res2$filterSummary$f6_nbrTooManyNinVar)
+  expect_equal(res$filterSummary$f7_nbrTooManyNinUMI, res2$filterSummary$f7_nbrTooManyNinUMI)
+  expect_equal(res$filterSummary$f8_nbrTooManyBestWTHits, res2$filterSummary$f8_nbrTooManyBestWTHits)
+  expect_equal(res$filterSummary$f9_nbrMutQualTooLow, res2$filterSummary$f9_nbrMutQualTooLow)
+  expect_equal(res$filterSummary$f10a_nbrTooManyMutCodons, res2$filterSummary$f10a_nbrTooManyMutCodons)
+  expect_equal(res$filterSummary$f10b_nbrTooManyMutBases, res2$filterSummary$f10b_nbrTooManyMutBases)
+  expect_equal(res$filterSummary$f11_nbrForbiddenCodons, res2$filterSummary$f11_nbrForbiddenCodons)
+  expect_equal(res$filterSummary$f12_nbrTooManyMutConstant, res2$filterSummary$f12_nbrTooManyMutConstant)
+  expect_equal(res$filterSummary$f13_nbrTooManyBestConstantHits, res2$filterSummary$f13_nbrTooManyBestConstantHits)
+  expect_equal(res$filterSummary$nbrRetained, res2$filterSummary$nbrRetained)
+  
+  expect_equal(res$summaryTable$nbrReads, res2$summaryTable$nbrReads)
 })
 
 ## ----------------------------------------------------------------------------
@@ -862,5 +885,29 @@ test_that("writing filtered reads to file works", {
                  res$filterSummary$f11_nbrForbiddenCodons)
   expect_equal(length(grep("tooManyMutConstant", names(out1))), res$filterSummary$f12_nbrTooManyMutConstant)
   expect_equal(length(grep("tooManyBestConstantHits", names(out1))), res$filterSummary$f13_nbrTooManyBestConstantHits)
+  
+  ## Test that we get the same results with useTreeWTmatch = TRUE
+  Ldef$useTreeWTmatch <- TRUE
+  res2 <- do.call(digestFastqs, Ldef)
+  
+  expect_equal(res$filterSummary$nbrTotal, res2$filterSummary$nbrTotal)
+  expect_equal(res$filterSummary$f1_nbrAdapter, res2$filterSummary$f1_nbrAdapter)
+  expect_equal(res$filterSummary$f2_nbrNoPrimer, res2$filterSummary$f2_nbrNoPrimer)
+  expect_equal(res$filterSummary$f3_nbrReadWrongLength, res2$filterSummary$f3_nbrReadWrongLength)
+  expect_equal(res$filterSummary$f4_nbrNoValidOverlap, res2$filterSummary$f4_nbrNoValidOverlap)
+  expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, res2$filterSummary$f5_nbrAvgVarQualTooLow)
+  expect_equal(res$filterSummary$f6_nbrTooManyNinVar, res2$filterSummary$f6_nbrTooManyNinVar)
+  expect_equal(res$filterSummary$f7_nbrTooManyNinUMI, res2$filterSummary$f7_nbrTooManyNinUMI)
+  expect_equal(res$filterSummary$f8_nbrTooManyBestWTHits, res2$filterSummary$f8_nbrTooManyBestWTHits)
+  expect_equal(res$filterSummary$f9_nbrMutQualTooLow, res2$filterSummary$f9_nbrMutQualTooLow)
+  expect_equal(res$filterSummary$f10a_nbrTooManyMutCodons, res2$filterSummary$f10a_nbrTooManyMutCodons)
+  expect_equal(res$filterSummary$f10b_nbrTooManyMutBases, res2$filterSummary$f10b_nbrTooManyMutBases)
+  expect_equal(res$filterSummary$f11_nbrForbiddenCodons, res2$filterSummary$f11_nbrForbiddenCodons)
+  expect_equal(res$filterSummary$f12_nbrTooManyMutConstant, res2$filterSummary$f12_nbrTooManyMutConstant)
+  expect_equal(res$filterSummary$f13_nbrTooManyBestConstantHits, res2$filterSummary$f13_nbrTooManyBestConstantHits)
+  expect_equal(res$filterSummary$nbrRetained, res2$filterSummary$nbrRetained)
+  
+  expect_equal(res$summaryTable$nbrReads, res2$summaryTable$nbrReads)
+  
 })
 
