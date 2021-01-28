@@ -143,5 +143,6 @@ test_that("digestFastqs works as expected for primer experiments", {
   expect_equal(res$filterSummary$nbrRetained, res2$filterSummary$nbrRetained)
   
   expect_equal(res$summaryTable$nbrReads, res2$summaryTable$nbrReads)
-  
+  expect_equal(res$summaryTable$mutantName, res2$summaryTable$mutantName)
+  expect_equal(res$summaryTable$sequence, res2$summaryTable$sequence)
 })
