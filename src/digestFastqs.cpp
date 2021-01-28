@@ -725,10 +725,12 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                      int maxNReads = -1, bool verbose = false, 
                      int nThreads = 1, int chunkSize = 100000) {
 
+  // See https://github.com/Rdatatable/data.table/issues/3300#issuecomment-457017735 for 
+  // a discussion on limiting the number of threads available to OpenMP
 #ifdef _OPENMP
-  if (nThreads > omp_get_max_threads()) {
-    warning("'nThreads' is larger than the number of available threads. Reducing 'nThreads' to %i", omp_get_max_threads());
-    nThreads = omp_get_max_threads();
+  if (nThreads > std::min(omp_get_max_threads(), omp_get_thread_limit())) {
+    warning("'nThreads' is larger than the number of available threads. Reducing 'nThreads' to %i", std::min(omp_get_max_threads(), omp_get_thread_limit()));
+    nThreads = std::min(omp_get_max_threads(), omp_get_thread_limit());
   }
 #else
   if (nThreads > 1) {
@@ -742,10 +744,6 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   // --------------------------------------------------------------------------
   // declare variables
   // --------------------------------------------------------------------------
-  // char seq1[BUFFER_SIZE];
-  // char qual1[BUFFER_SIZE];
-  // char seq2[BUFFER_SIZE];
-  // char qual2[BUFFER_SIZE];
   FastqEntry** chunkVector = new FastqEntry*[chunkSize];
   for (int ci = 0; ci < chunkSize; ci++) {
     chunkVector[ci] = new FastqEntry;
@@ -772,11 +770,10 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   size_t upperBoundMismatchForward = 0, upperBoundMismatchReverse = 0; 
   // forward
   if (wildTypeForward[0].compare("") != 0 && useTreeWTmatch) {
-    std::vector<std::string> wtTreeForwardVec = wildTypeForward;
     std::vector<std::string>::iterator wtTreeForwardVecIt;
-    size_t wtForwardLen = wtTreeForwardVec[0].length();
-    for (wtTreeForwardVecIt = wtTreeForwardVec.begin(); 
-         wtTreeForwardVecIt != wtTreeForwardVec.end(); wtTreeForwardVecIt++) {
+    size_t wtForwardLen = wildTypeForward[0].length();
+    for (wtTreeForwardVecIt = wildTypeForward.begin(); 
+         wtTreeForwardVecIt != wildTypeForward.end(); wtTreeForwardVecIt++) {
       if ((*wtTreeForwardVecIt).length() != wtForwardLen) {
         // not all WT sequences are of the same length -> 
         // don't use the tree for finding the most similar WT sequence
@@ -787,10 +784,9 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         wtTreeForward.insert(*wtTreeForwardVecIt);
       }
     }
-    for (size_t i = 0; i < wtTreeForwardVec.size(); i++) {
-      wtTreeForwardIdx[wtTreeForwardVec[i]] = i;
+    for (size_t i = 0; i < wildTypeForward.size(); i++) {
+      wtTreeForwardIdx[wildTypeForward[i]] = i;
     }
-    wtTreeForwardVec.clear(); // remove temporary vector
   }
   // determine the upper bound for the number of base mismatches in the tree search
   if (nbrMutatedCodonsMaxForward != (-1)) {
@@ -800,11 +796,10 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   }
   
   if (wildTypeReverse[0].compare("") != 0 && useTreeWTmatch) {
-    std::vector<std::string> wtTreeReverseVec = wildTypeReverse;
     std::vector<std::string>::iterator wtTreeReverseVecIt;
-    size_t wtReverseLen = wtTreeReverseVec[0].length();
-    for (wtTreeReverseVecIt = wtTreeReverseVec.begin(); 
-         wtTreeReverseVecIt != wtTreeReverseVec.end(); wtTreeReverseVecIt++) {
+    size_t wtReverseLen = wildTypeReverse[0].length();
+    for (wtTreeReverseVecIt = wildTypeReverse.begin(); 
+         wtTreeReverseVecIt != wildTypeReverse.end(); wtTreeReverseVecIt++) {
       if ((*wtTreeReverseVecIt).length() != wtReverseLen) {
         // not all WT sequences are of the same length -> 
         // don't use the tree for finding the most similar WT sequence
@@ -815,10 +810,9 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         wtTreeReverse.insert(*wtTreeReverseVecIt);
       }
     }
-    for (size_t i = 0; i < wtTreeReverseVec.size(); i++) {
-      wtTreeReverseIdx[wtTreeReverseVec[i]] = i;
+    for (size_t i = 0; i < wildTypeReverse.size(); i++) {
+      wtTreeReverseIdx[wildTypeReverse[i]] = i;
     }
-    wtTreeReverseVec.clear(); // remove temporary vector
   }
   // determine the upper bound for the number of base mismatches in the tree search
   if (nbrMutatedCodonsMaxForward != (-1)) {
@@ -868,7 +862,6 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         done = (done || get_next_seq(file2, chunkVector[iChunk]->seq2, chunkVector[iChunk]->qual2));
       }
       if (done == false) {
-        // Rcout << "adding read " << (iChunk + 1) << " " << std::string(chunkVector[iChunk]->seq1) << std::endl << std::flush;
         iChunk++;
         nTot++;
       }
