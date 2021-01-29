@@ -6,7 +6,7 @@ using namespace Rcpp;
 
 class FastqBuffer {
 private:
-  int nentries; // number of fastq entries allocated (BUFFER_SIZE-1 max length)
+  size_t nentries; // number of fastq entries allocated (BUFFER_SIZE-1 max length)
   bool paired;  // paired read entries?
   char *buffer; // single block of memory
   //  each entry e has 2-times (4-times for paired=true) BUFFER_SIZE bytes available
@@ -17,7 +17,7 @@ public:
   char *seq1, *qual1, *seq2, *qual2;
   
   // constructor
-  FastqBuffer(int n, bool p = true) {
+  FastqBuffer(size_t n, bool p = true) {
     nentries = n;
     paired = p;
     buffer = new char[nentries * BUFFER_SIZE * (paired ? 4 : 2)];
@@ -55,7 +55,7 @@ public:
   }
   
   // Write one (pair of) filtered reads to output fastq file(s)
-  bool write_seq(int i, gzFile file1, gzFile file2, const int n, const char* label) {
+  bool write_seq(size_t i, gzFile file1, gzFile file2, const int n, const char* label) {
     bool success = (i < nentries);
 #ifdef _OPENMP
 #pragma omp critical

@@ -744,7 +744,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   // --------------------------------------------------------------------------
   // declare variables
   // --------------------------------------------------------------------------
-  FastqBuffer *chunkBuffer = new FastqBuffer(chunkSize, fastqReverseVect[0].compare("") != 0);
+  FastqBuffer *chunkBuffer = new FastqBuffer((size_t)chunkSize, fastqReverseVect[0].compare("") != 0);
 
   int nTot = 0, nAdapter = 0, nNoPrimer = 0, nReadWrongLength = 0, nTooManyMutConstant = 0;
   int nNoValidOverlap = 0, nAvgVarQualTooLow = 0, nTooManyNinVar = 0, nTooManyNinUMI = 0;
@@ -908,7 +908,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             #pragma omp atomic
 #endif
             nAdapter++;
-            chunkBuffer->write_seq((int)ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "adapter");
+            chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "adapter");
             continue;
           }
           
@@ -926,14 +926,14 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           if (!decomposeRead(sseq1, squal1, elementsForward, elementLengthsForward,
                              primerForward, umiSeq, varSeqForward, varQualForward,
                              constSeqForward, constQualForward, nNoPrimer, nReadWrongLength)) {
-            chunkBuffer->write_seq((int)ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "noPrimer_readWrongLength");
+            chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "noPrimer_readWrongLength");
             continue;
           }
           if (fastqReverse.compare("") != 0 && 
               !decomposeRead(sseq2, squal2, elementsReverse, elementLengthsReverse,
                              primerReverse, umiSeq, varSeqReverse, varQualReverse,
                              constSeqReverse, constQualReverse, nNoPrimer, nReadWrongLength)) {
-            chunkBuffer->write_seq((int)ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "noPrimer_readWrongLength");
+            chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "noPrimer_readWrongLength");
             continue;
           }
           
@@ -979,7 +979,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
               #pragma omp atomic
 #endif
               nNoValidOverlap++;
-              chunkBuffer->write_seq((int)ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "noValidOverlap");
+              chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "noValidOverlap");
               continue;
             }
           }
@@ -996,7 +996,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             #pragma omp atomic
 #endif
             nAvgVarQualTooLow++;
-            chunkBuffer->write_seq((int)ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "avgVarQualTooLow");
+            chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "avgVarQualTooLow");
             continue;
           }
           
@@ -1007,7 +1007,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             #pragma omp atomic
 #endif
             nTooManyNinVar++;
-            chunkBuffer->write_seq((int)ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyNinVar");
+            chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyNinVar");
             continue;
           }
           
@@ -1016,7 +1016,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             #pragma omp atomic
 #endif
             nTooManyNinUMI++;
-            chunkBuffer->write_seq((int)ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyNinUMI");
+            chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyNinUMI");
             continue;
           }
           
@@ -1043,7 +1043,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
 #endif
                 nTooManyMutBases++;
               }
-              chunkBuffer->write_seq((int)ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
+              chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
               continue;
             }
             // if idxForward = TOO_MANY_BEST_REF (defined above), too many equally good hits among the WT sequences - skip the read
@@ -1052,7 +1052,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
               #pragma omp atomic
 #endif
               nTooManyBestWTHits++;
-              chunkBuffer->write_seq((int)ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyBestWTHits");
+              chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyBestWTHits");
               continue;
             }
             std::string wtForward = wildTypeForward[idxForward];
@@ -1062,7 +1062,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                                   wtNameForward, nbrMutatedBasesMaxForward, nMutQualTooLow, 
                                   nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, mutantName, mutNameDelimiter)) {
               // read is to be filtered out
-              chunkBuffer->write_seq((int)ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
+              chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
               continue;
             }
           } else if (varSeqForward.length() > 0) { // variable seq, but no reference -> add variable seq to mutantName
@@ -1092,7 +1092,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
 #endif
                 nTooManyMutBases++;
               }
-              chunkBuffer->write_seq((int)ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
+              chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
               continue;
             }
             // if idxReverse = TOO_MANY_BEST_REF (defined above), too many equally good hits among the WT sequences - skip the read
@@ -1101,7 +1101,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
               #pragma omp atomic
 #endif
               nTooManyBestWTHits++;
-              chunkBuffer->write_seq((int)ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyBestWTHits");
+              chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyBestWTHits");
               continue;
             }
             std::string wtReverse = wildTypeReverse[idxReverse];
@@ -1111,7 +1111,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                                   wtNameReverse, nbrMutatedBasesMaxReverse, nMutQualTooLow, 
                                   nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, mutantName, mutNameDelimiter)) {
               // read is to be filtered out
-              chunkBuffer->write_seq((int)ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
+              chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
               continue;
             }
           } else if (!noReverse && varSeqReverse.length() > 0) { // variable seq, but no reference -> add variable seq to mutantName
@@ -1150,7 +1150,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
               #pragma omp atomic
 #endif
               nTooManyMutConstant++;
-              chunkBuffer->write_seq((int)ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyMutConstant");
+              chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyMutConstant");
               continue;
             }
             // more than one equally good best hit among the constant sequences - skip read
@@ -1159,7 +1159,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
               #pragma omp atomic
 #endif
               nTooManyBestConstantHits++;
-              chunkBuffer->write_seq((int)ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyBestConstantHits");
+              chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyBestConstantHits");
               continue;
             }
           }
@@ -1189,7 +1189,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
               #pragma omp atomic
 #endif
               nTooManyMutConstant++;
-              chunkBuffer->write_seq((int)ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyMutConstant");
+              chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyMutConstant");
               continue;
             }
             // more than one equally good best hit among the constant sequences - skip read
@@ -1198,7 +1198,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
               #pragma omp atomic
 #endif
               nTooManyBestConstantHits++;
-              chunkBuffer->write_seq((int)ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyBestConstantHits");
+              chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "tooManyBestConstantHits");
               continue;
             }
           }
