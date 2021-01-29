@@ -43,39 +43,39 @@ public:
 #pragma omp critical
 #endif
 {
-    if (file1 != NULL) {
-      std::string read_id = "@S" + std::to_string(n) + "_" + label + " 1\n";
-      if (success && gzputs(file1, read_id.c_str()) == (-1)) {
-        success = false;
-      }
-      if (success && gzputs(file1, seq1) == (-1)) {
-        success = false;
-      }
-      if (success && gzputs(file1, "+\n") == (-1)) {
-        success = false;
-      }
-      if (success && gzputs(file1, qual1) == (-1)) {
-        success = false;
-      }
+  if (file1 != NULL) {
+    std::string read_id = "@S" + std::to_string(n) + "_" + label + " 1\n";
+    if (success && gzputs(file1, read_id.c_str()) == (-1)) {
+      success = false;
     }
-    
-    if (file2 != NULL) {
-      std::string read_id = "@S" + std::to_string(n) + "_" + label + " 2\n";
-      if (success && gzputs(file2, read_id.c_str()) == (-1)) {
-        success = false;
-      }
-      if (success && gzputs(file2, seq2) == (-1)) {
-        success = false;
-      }
-      if (success && gzputs(file2, "+\n") == (-1)) {
-        success = false;
-      }
-      if (success && gzputs(file2, qual2) == (-1)) {
-        success = false;
-      }
+    if (success && gzputs(file1, seq1) == (-1)) {
+      success = false;
     }
-}
-    return success;
+    if (success && gzputs(file1, "+\n") == (-1)) {
+      success = false;
+    }
+    if (success && gzputs(file1, qual1) == (-1)) {
+      success = false;
+    }
   }
-
+  
+  if (file2 != NULL) {
+    std::string read_id = "@S" + std::to_string(n) + "_" + label + " 2\n";
+    if (success && gzputs(file2, read_id.c_str()) == (-1)) {
+      success = false;
+    }
+    if (success && gzputs(file2, seq2) == (-1)) {
+      success = false;
+    }
+    if (success && gzputs(file2, "+\n") == (-1)) {
+      success = false;
+    }
+    if (success && gzputs(file2, qual2) == (-1)) {
+      success = false;
+    }
+  }
+}
+return success;
+  }
+  
 };
