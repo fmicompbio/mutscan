@@ -42,7 +42,8 @@ test_that("digestFastqs fails with incorrect arguments", {
     umiCollapseMaxDist = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
-    maxNReads = -1, verbose = FALSE
+    maxNReads = -1, verbose = FALSE,
+    nThreads = 1, chunkSize = 1000
   )
   
   ## Incorrect specification of merging/rev complementing arguments
@@ -87,7 +88,8 @@ test_that("digestFastqs fails with incorrect arguments", {
                 "mutatedPhredMinForward", "mutatedPhredMinReverse",
                 "variableCollapseMaxDist", "umiCollapseMaxDist", "variableCollapseMinReads",
                 "variableCollapseMinRatio",
-                "constantMaxDistForward", "constantMaxDistReverse", "maxNReads")) {
+                "constantMaxDistForward", "constantMaxDistReverse", "maxNReads",
+                "nThreads", "chunkSize")) {
     L <- Ldef; L[[var]] <- "str"
     expect_error(do.call(digestFastqs, L))
     L <- Ldef; L[[var]] <- c(1, 2)
@@ -101,6 +103,10 @@ test_that("digestFastqs fails with incorrect arguments", {
                      "constantMaxDistForward", "constantMaxDistReverse",
                      "maxNReads"))) {
       L <- Ldef; L[[var]] <- -1
+      expect_error(do.call(digestFastqs, L))
+    }
+    if (var %in% c("nThreads", "chunkSize")) {
+      L <- Ldef; L[[var]] <- 0
       expect_error(do.call(digestFastqs, L))
     }
   }

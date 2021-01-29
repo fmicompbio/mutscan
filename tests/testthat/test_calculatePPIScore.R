@@ -36,7 +36,8 @@ Ldef <- list(
   filteredReadsFastqForward = "",
   filteredReadsFastqReverse = "",
   maxNReads = -1, 
-  verbose = FALSE
+  verbose = FALSE,
+  nThreads = 1, chunkSize = 1000
 )
 Ldef1 <- c(
   list(fastqForward = system.file("extdata/cisInput_1.fastq.gz", package = "mutscan"),
