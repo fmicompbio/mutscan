@@ -55,7 +55,14 @@ test_that("low-level BKtree wrapper functions work as expected", {
   expect_length(res00, 1L)
   expect_length(res01, 5L)
   expect_length(res24, 14L)
-  
+
+  expect_length(tree$search(seqs[2],  2),  1L)
+  expect_length(tree$search(seqs[2], 17),  1L)
+  expect_length(tree$search(seqs[2], 23),  9L)
+  expect_length(tree$search(seqs[2], 26), 16L)
+  expect_length(tree$search(seqs[2], 27), 20L)
+  expect_length(tree$search(seqs[2], 30), 20L)
+
   # remove sequences
   tree$remove("non_existing")
   expect_equal(tree$size, n)
