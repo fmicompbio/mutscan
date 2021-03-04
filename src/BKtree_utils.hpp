@@ -53,9 +53,7 @@ static int hamming_distance(std::string str1, std::string str2){
   int d = 0;
   
   for (size_t i = 0; i <= str1.length(); i++) {
-    if (str1[i] != str2[i]) {
-      d++;
-    }
+    d += (str1[i] != str2[i]);
   }
   
   return d;
