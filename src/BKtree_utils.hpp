@@ -97,16 +97,16 @@ public:
   size_t size; // number of strings in tree
   
   // tree constructors
-  BKtree(): size(0){ // empty tree
+  BKtree(const std::string dmetric = "hamming") { // empty tree
+    size = 0;
+    metric = dmetric;
+    _set_distance_function_pointer();
     root = nullptr;
   }
   
-  BKtree(const std::string str): size(1) { // from a string
-    items.push_back(str);
-    root = new node(0);
-  }
-
-  BKtree(const std::vector<std::string>& v) { // from a vector of strings
+  BKtree(const std::vector<std::string>& v, const std::string dmetric = "hamming") { // from a vector of strings
+    metric = dmetric;
+    _set_distance_function_pointer();
     items = v;
     size = v.size();
     _build_from_items(v);
@@ -240,15 +240,36 @@ public:
     return sz;
   }
   
+  // return the distance metric used by a tree instance
+  std::string distance_metric() {
+    return metric;
+  }
+  
   inline std::vector<std::string>::iterator begin() noexcept { return items.begin(); }
   inline std::vector<std::string>::const_iterator cbegin() const noexcept { return items.cbegin(); }
   inline std::vector<std::string>::iterator end() noexcept { return items.end(); }
   inline std::vector<std::string>::const_iterator cend() const noexcept { return items.end(); }
   
 private:
-  std::vector<std::string> items;
-  node* root;
-  std::unordered_set<std::string> deleted;
+  std::vector<std::string> items;            // all strings added to the tree in the order of addition
+                                             // (including potentially deleted ones)
+  node* root;                                // pointer to root node
+  std::unordered_set<std::string> deleted;   // nodes deleted from the tree but not yet removed
+  std::string metric;                        // name of the distance metric to use
+  int (*distance)(std::string, std::string); // pointer to function to calcluate string distance
+  
+  // set the distance function pointer according to metric
+  void _set_distance_function_pointer() {
+    if (metric == "hamming") {
+      distance = &hamming_distance;
+
+    } else if (metric == "levenshtein") {
+      distance = &levenshtein_distance;
+
+    } else {
+      stop("unknown distance metric '%s'", metric);
+    }
+  }
   
   // build new tree from string elements in vector v
   void _build_from_items(const std::vector<std::string>& v) {
@@ -333,7 +354,7 @@ private:
       
       // distance of new item to current node
       // int dist = levenshtein_distance(items[t->index], str);
-      int dist = hamming_distance(items[t->index], str);
+      int dist = distance(items[t->index], str);
       
       // while current node t already has a child at that distance dist
       while (t->children.find(dist) != t->children.end()) {
@@ -341,7 +362,7 @@ private:
         t = t->children.find(dist)->second;
         // ... and calculate new distance
         // dist = levenshtein_distance(items[t->index], str);
-        dist = hamming_distance(items[t->index], str);
+        dist = distance(items[t->index], str);
       }
       
       // t now points to a node without children at distance dist
@@ -361,7 +382,7 @@ private:
   void _search(std::string str, int tol, node* r, std::vector<std::string>& vec) {
     std::string r_val = items[r->index];
     // int dist = levenshtein_distance(r_val, str);
-    int dist = hamming_distance(r_val, str);
+    int dist = distance(r_val, str);
     
     if (dist <= tol) { // found element within tolerance
       // only add to results if not deleted
@@ -386,7 +407,7 @@ private:
   bool _has(std::string str, int tol, node* r) {
     std::string r_val = items[r->index];
     // int dist = levenshtein_distance(r_val, str);
-    int dist = hamming_distance(r_val, str);
+    int dist = distance(r_val, str);
     
     if (dist <= tol) { // found an element within tolerance
       // only return true if not deleted
@@ -431,8 +452,7 @@ private:
       // if node n is deleted, prefix it with D*
       Rcout << "D*";
     }
-    // Rcout << levenshtein_distance(r_val, n_val) << ": " << n_val << std::endl;
-    Rcout << hamming_distance(r_val, n_val) << ": " << n_val << std::endl;
+    Rcout << distance(r_val, n_val) << ": " << n_val << std::endl;
     for (const std::pair<int, node*>&x: n->children) {
       // recursively print all children of n
       _print(n, x.second, depth + 1);
@@ -450,6 +470,7 @@ RCPP_MODULE(mod_BKtree) {
   .constructor()
   .constructor<std::string>()
   .constructor<std::vector<std::string>>()
+  .constructor<std::vector<std::string>, std::string>()
 
   .field_readonly( "size", &BKtree::size, "number of elements stored in tree" )
 
@@ -462,6 +483,7 @@ RCPP_MODULE(mod_BKtree) {
   .method( "has", &BKtree::has, "check if there are elements within distance toelrance" )
   .method( "first", &BKtree::first, "get first (non-deleted) element from tree" )
   .method( "capacity", &BKtree::capacity, "calculate tree memory usage" )
+  .method( "distance_metric", &BKtree::distance_metric, "return distance metric used by tree")
 
   ;
 }
