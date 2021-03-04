@@ -1,5 +1,53 @@
 context("BKtree_utils")
 
+test_that("levenshtein_distance() works", {
+  # ground truth e.g. from:
+  # stringdist::stringdist(s1, s2, method = "lv")
+
+  s1 <- "AAAAAAACCC"
+  s2 <- "AAAAAACCCC"
+  s3 <- "ACGTACGTACGT"
+  s4 <- "CGTACGTACGTA"
+  
+  expect_error(levenshtein_distance(c(s1, s1), s2))
+  expect_error(levenshtein_distance(s1, c(s2, s2)))
+
+  expect_identical(levenshtein_distance(s1, s1), 0L)
+  expect_identical(levenshtein_distance(s2, s2), 0L)
+  expect_identical(levenshtein_distance(s3, s3), 0L)
+  expect_identical(levenshtein_distance(s4, s4), 0L)
+  expect_identical(levenshtein_distance(s1, s2), 1L)
+  expect_identical(levenshtein_distance(s1, s3), 8L)
+  expect_identical(levenshtein_distance(s1, s4), 9L)
+  expect_identical(levenshtein_distance(s2, s3), 9L)
+  expect_identical(levenshtein_distance(s2, s4), 9L)
+  expect_identical(levenshtein_distance(s3, s4), 2L)
+})
+
+
+test_that("hamming_distance() works", {
+  # ground truth e.g. from:
+  # stringdist::stringdist(s1, s2, method = "hamming")
+  
+  s1 <- "AAAAAAACCC"
+  s2 <- "AAAAAACCCC"
+  s3 <- "ACGTACGTACGT"
+  s4 <- "CGTACGTACGTA"
+  
+  expect_error(hamming_distance(c(s1, s1), s2))
+  expect_error(hamming_distance(s1, c(s2, s2)))
+  
+  expect_identical(hamming_distance(s1, s1),  0L)
+  expect_identical(hamming_distance(s2, s2),  0L)
+  expect_identical(hamming_distance(s3, s3),  0L)
+  expect_identical(hamming_distance(s4, s4),  0L)
+  expect_identical(hamming_distance(s1, s2),  1L)
+  expect_identical(hamming_distance(s2, s1),  1L)
+  expect_identical(hamming_distance(s3, s4), 12L)
+  expect_identical(hamming_distance(s4, s3), 12L)
+})
+
+
 # using Rcpp-module that exposes the BKtree class to R
 test_that("low-level BKtree wrapper functions work as expected", {
   # create random k-mers
