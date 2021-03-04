@@ -284,7 +284,7 @@ private:
       return;
 
     } else {
-      // multiple elements -> create rood and add rest sequentially
+      // multiple elements -> create root and add rest sequentially
       root = new node(0);
       for (size_t i = 1; i < size; ++i) {
         if (!_add_from_items(i)) { // attach item[i] as new child
