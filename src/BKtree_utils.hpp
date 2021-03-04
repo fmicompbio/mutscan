@@ -7,8 +7,63 @@
 
 using namespace Rcpp;
 
+
+// distance metrices used by the BKtree class:
+// calculate levenshtein distance between pair of strings
+static int levenshtein_distance(std::string str1, std::string str2){
+  size_t m = str1.length(), n = str2.length();
+  
+  int** dn = new int*[m + 1];
+  for(int i = 0; i < m + 1; ++i) {
+    dn[i] = new int[n + 1];
+  }
+  
+  for (int i = 0; i < m + 1; ++i) {
+    for (int j = 0; j < n + 1; ++j) {
+      if (i == 0) {
+        dn[0][j] = j; // deletions at the start of str2
+        
+      } else if (j==0) {
+        dn[i][0] = i; // deletions at the start of str1
+        
+      } else if (str1[i-1] == str2[j-1]) { // match of str1[i-1] and str2[j-1]
+        dn[i][j] = dn[i-1][j-1];
+        
+      } else { // mismatch between str1[i-1] and str2[j-1] -> find minimal source
+        dn[i][j] = 1 + std::min(
+          dn[i-1][j], // deletion in str1
+                 std::min(dn[i][j-1], // deletion in str2
+                          dn[i-1][j-1]) // mismatch
+        );
+      }
+    }
+  }
+  
+  int d = dn[m][n];
+  for (int i = 0; i < m + 1; ++i) {
+    delete [] dn[i];
+  }
+  delete [] dn;
+  
+  return d;
+}
+
+// calculate hamming distance between pair of strings of equal lengths
+static int hamming_distance(std::string str1, std::string str2){
+  int d = 0;
+  
+  for (size_t i = 0; i <= str1.length(); i++) {
+    if (str1[i] != str2[i]) {
+      d++;
+    }
+  }
+  
+  return d;
+}
+
+
 // simple implementation of a BK tree (https://en.wikipedia.org/wiki/BK-tree)
-// for std::string elements and Hamming distance
+// for std::string elements and Hamming or Levenshtein distance
 // based on:
 //   https://github.com/talhasaruhan/fuzzy-search/blob/master/bktree.hpp
 class BKtree {
@@ -183,58 +238,6 @@ public:
       sz += root->capacity();
     }
     return sz;
-  }
-  
-  // calculate levenshtein distance between pair of strings
-  static int levenshtein_distance(std::string str1, std::string str2){
-    int m = str1.length(), n = str2.length();
-    
-    int** dn = new int*[m + 1];
-    for(int i = 0; i < m + 1; ++i) {
-      dn[i] = new int[n + 1];
-    }
-    
-    for (int i = 0; i < m + 1; ++i) {
-      for (int j = 0; j < n + 1; ++j) {
-        if (i == 0) {
-          dn[0][j] = j; // deletions at the start of str2
-
-        } else if (j==0) {
-          dn[i][0] = i; // deletions at the start of str1
-        
-        } else if (str1[i-1] == str2[j-1]) { // match of str1[i-1] and str2[j-1]
-          dn[i][j] = dn[i-1][j-1];
-
-        } else { // mismatch between str1[i-1] and str2[j-1] -> find minimal source
-          dn[i][j] = 1 + std::min(
-            dn[i-1][j], // deletion in str1
-                   std::min(dn[i][j-1], // deletion in str2
-                            dn[i-1][j-1]) // mismatch
-          );
-        }
-      }
-    }
-    
-    int d = dn[m][n];
-    for (int i = 0; i < m + 1; ++i) {
-      delete [] dn[i];
-    }
-    delete [] dn;
-    
-    return d;
-  }
-  
-  // calculate hamming distance between pair of strings of equal lengths
-  static int hamming_distance(std::string str1, std::string str2){
-    int d = 0;
-    
-    for (size_t i = 0; i <= str1.length(); i++) {
-      if (str1[i] != str2[i]) {
-        d++;
-      }
-    }
-    
-    return d;
   }
   
   inline std::vector<std::string>::iterator begin() noexcept { return items.begin(); }
