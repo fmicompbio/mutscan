@@ -6,37 +6,37 @@
 using namespace Rcpp;
 
 // levenshtein_distance
-int levenshtein_distance(std::string str1, std::string str2);
+int levenshtein_distance(const std::string& str1, const std::string& str2);
 RcppExport SEXP _mutscan_levenshtein_distance(SEXP str1SEXP, SEXP str2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type str1(str1SEXP);
-    Rcpp::traits::input_parameter< std::string >::type str2(str2SEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type str1(str1SEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type str2(str2SEXP);
     rcpp_result_gen = Rcpp::wrap(levenshtein_distance(str1, str2));
     return rcpp_result_gen;
 END_RCPP
 }
 // hamming_distance
-int hamming_distance(std::string str1, std::string str2);
+int hamming_distance(const std::string& str1, const std::string& str2);
 RcppExport SEXP _mutscan_hamming_distance(SEXP str1SEXP, SEXP str2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type str1(str1SEXP);
-    Rcpp::traits::input_parameter< std::string >::type str2(str2SEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type str1(str1SEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type str2(str2SEXP);
     rcpp_result_gen = Rcpp::wrap(hamming_distance(str1, str2));
     return rcpp_result_gen;
 END_RCPP
 }
 // hamming_shift_distance
-int hamming_shift_distance(std::string str1, std::string str2, int max_abs_shift);
+int hamming_shift_distance(const std::string& str1, const std::string& str2, int max_abs_shift);
 RcppExport SEXP _mutscan_hamming_shift_distance(SEXP str1SEXP, SEXP str2SEXP, SEXP max_abs_shiftSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type str1(str1SEXP);
-    Rcpp::traits::input_parameter< std::string >::type str2(str2SEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type str1(str1SEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type str2(str2SEXP);
     Rcpp::traits::input_parameter< int >::type max_abs_shift(max_abs_shiftSEXP);
     rcpp_result_gen = Rcpp::wrap(hamming_shift_distance(str1, str2, max_abs_shift));
     return rcpp_result_gen;

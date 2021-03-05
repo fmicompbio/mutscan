@@ -11,7 +11,7 @@ using namespace Rcpp;
 // distance metrices used by the BKtree class:
 // calculate levenshtein distance between pair of strings
 // [[Rcpp::export]]
-int levenshtein_distance(std::string str1, std::string str2){
+int levenshtein_distance(const std::string &str1, const std::string &str2){
   size_t m = str1.length(), n = str2.length();
   
   int** dn = new int*[m + 1];
@@ -51,7 +51,7 @@ int levenshtein_distance(std::string str1, std::string str2){
 
 // calculate hamming distance between pair of strings of equal lengths
 // [[Rcpp::export]]
-int hamming_distance(std::string str1, std::string str2){
+int hamming_distance(const std::string &str1, const std::string &str2){
   int d = 0;
   
   for (size_t i = 0; i <= str1.length(); i++) {
@@ -63,7 +63,7 @@ int hamming_distance(std::string str1, std::string str2){
 
 // calculate hamming distance + shifts between pair of strings of equal lengths
 // [[Rcpp::export]]
-int hamming_shift_distance(std::string str1, std::string str2,
+int hamming_shift_distance(const std::string &str1, const std::string &str2,
                            int max_abs_shift = -1){
   int d = str1.size(), ds = 0;
   if (max_abs_shift < 0) {
@@ -86,7 +86,7 @@ int hamming_shift_distance(std::string str1, std::string str2,
 }
 
 // wrapper function for use in tree
-int hamming_shift_distance_wrapper(std::string str1, std::string str2) {
+int hamming_shift_distance_wrapper(const std::string &str1, const std::string &str2) {
     return hamming_shift_distance(str1, str2, (int)std::min(str1.size() - 1, str2.size() - 1));
 }
 
@@ -285,7 +285,7 @@ private:
   node* root;                                // pointer to root node
   std::unordered_set<std::string> deleted;   // nodes deleted from the tree but not yet removed
   std::string metric;                        // name of the distance metric to use
-  int (*distance)(std::string, std::string); // pointer to function to calcluate string distance
+  int (*distance)(const std::string&, const std::string&); // pointer to function to calcluate string distance
 
   // set the distance function pointer according to metric
   void _set_distance_function_pointer() {
