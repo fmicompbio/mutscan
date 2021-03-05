@@ -9,6 +9,10 @@ hamming_distance <- function(str1, str2) {
     .Call(`_mutscan_hamming_distance`, str1, str2)
 }
 
+hamming_shift_distance <- function(str1, str2, max_abs_shift = -1L) {
+    .Call(`_mutscan_hamming_shift_distance`, str1, str2, max_abs_shift)
+}
+
 compareCodonPositions <- function(a, b, mutNameDelimiter) {
     .Call(`_mutscan_compareCodonPositions`, a, b, mutNameDelimiter)
 }

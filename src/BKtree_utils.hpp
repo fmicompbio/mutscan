@@ -61,9 +61,37 @@ int hamming_distance(std::string str1, std::string str2){
   return d;
 }
 
+// calculate hamming distance + shifts between pair of strings of equal lengths
+// [[Rcpp::export]]
+int hamming_shift_distance(std::string str1, std::string str2,
+                           int max_abs_shift = -1){
+  int d = str1.size(), ds = 0;
+  if (max_abs_shift < 0) {
+    max_abs_shift = (int)str1.size() - 1;
+  }
+
+  d = str1.size();
+  for (int s = -max_abs_shift; s <= max_abs_shift; s++) {
+    ds = std::abs(s) + std::abs(s); // overhangs are treated as mismatches
+    for (size_t i = std::max(0, s), j = std::max(0, -s);
+         i < str1.length() + std::min(0, s); i++, j++) {
+      ds += (str1[i] != str2[j]);
+    }
+    if (ds < d) {
+      d = ds;
+    }
+  }
+
+  return d;
+}
+
+// wrapper function for use in tree
+int hamming_shift_distance_wrapper(std::string str1, std::string str2) {
+    return hamming_shift_distance(str1, str2, (int)std::min(str1.size() - 1, str2.size() - 1));
+}
 
 // simple implementation of a BK tree (https://en.wikipedia.org/wiki/BK-tree)
-// for std::string elements and Hamming or Levenshtein distance
+// for std::string elements and Hamming (+ Shifts) or Levenshtein distance
 // based on:
 //   https://github.com/talhasaruhan/fuzzy-search/blob/master/bktree.hpp
 class BKtree {
@@ -104,7 +132,8 @@ public:
     root = nullptr;
   }
   
-  BKtree(const std::vector<std::string>& v, const std::string dmetric = "hamming") { // from a vector of strings
+  BKtree(const std::vector<std::string>& v,
+         const std::string dmetric = "hamming") { // from a vector of strings
     metric = dmetric;
     _set_distance_function_pointer();
     items = v;
@@ -257,12 +286,15 @@ private:
   std::unordered_set<std::string> deleted;   // nodes deleted from the tree but not yet removed
   std::string metric;                        // name of the distance metric to use
   int (*distance)(std::string, std::string); // pointer to function to calcluate string distance
-  
+
   // set the distance function pointer according to metric
   void _set_distance_function_pointer() {
     if (metric == "hamming") {
       distance = &hamming_distance;
 
+    } else if (metric == "hamming_shift") {
+      distance = &hamming_shift_distance_wrapper;
+      
     } else if (metric == "levenshtein") {
       distance = &levenshtein_distance;
 
@@ -353,7 +385,6 @@ private:
       node* new_node = new node(index); // create new node
       
       // distance of new item to current node
-      // int dist = levenshtein_distance(items[t->index], str);
       int dist = distance(items[t->index], str);
       
       // while current node t already has a child at that distance dist
@@ -361,7 +392,6 @@ private:
         // descend to the children of that child
         t = t->children.find(dist)->second;
         // ... and calculate new distance
-        // dist = levenshtein_distance(items[t->index], str);
         dist = distance(items[t->index], str);
       }
       
@@ -381,7 +411,6 @@ private:
   // recursively search for elements within tol of str in subtree of node r, add results to vec
   void _search(std::string str, int tol, node* r, std::vector<std::string>& vec) {
     std::string r_val = items[r->index];
-    // int dist = levenshtein_distance(r_val, str);
     int dist = distance(r_val, str);
     
     if (dist <= tol) { // found element within tolerance
@@ -406,7 +435,6 @@ private:
   // recursively check if subtree of node r has an element within tol of str
   bool _has(std::string str, int tol, node* r) {
     std::string r_val = items[r->index];
-    // int dist = levenshtein_distance(r_val, str);
     int dist = distance(r_val, str);
     
     if (dist <= tol) { // found an element within tolerance

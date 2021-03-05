@@ -29,6 +29,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// hamming_shift_distance
+int hamming_shift_distance(std::string str1, std::string str2, int max_abs_shift);
+RcppExport SEXP _mutscan_hamming_shift_distance(SEXP str1SEXP, SEXP str2SEXP, SEXP max_abs_shiftSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type str1(str1SEXP);
+    Rcpp::traits::input_parameter< std::string >::type str2(str2SEXP);
+    Rcpp::traits::input_parameter< int >::type max_abs_shift(max_abs_shiftSEXP);
+    rcpp_result_gen = Rcpp::wrap(hamming_shift_distance(str1, str2, max_abs_shift));
+    return rcpp_result_gen;
+END_RCPP
+}
 // compareCodonPositions
 bool compareCodonPositions(std::string a, std::string b, const char mutNameDelimiter);
 RcppExport SEXP _mutscan_compareCodonPositions(SEXP aSEXP, SEXP bSEXP, SEXP mutNameDelimiterSEXP) {
@@ -176,6 +189,7 @@ RcppExport SEXP _rcpp_module_boot_mod_BKtree();
 static const R_CallMethodDef CallEntries[] = {
     {"_mutscan_levenshtein_distance", (DL_FUNC) &_mutscan_levenshtein_distance, 2},
     {"_mutscan_hamming_distance", (DL_FUNC) &_mutscan_hamming_distance, 2},
+    {"_mutscan_hamming_shift_distance", (DL_FUNC) &_mutscan_hamming_shift_distance, 3},
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 3},
     {"_mutscan_test_decomposeRead", (DL_FUNC) &_mutscan_test_decomposeRead, 12},
     {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 8},

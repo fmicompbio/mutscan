@@ -48,12 +48,45 @@ test_that("hamming_distance() works", {
 })
 
 
+
+
+test_that("hamming_shift_distance() works", {
+  # ground truth e.g. from:
+  # s <- 1; stringdist::stringdist(substr(s1, 1, 15 - s), substr(s2, 1 + s, 15), "hamming") + 2 * s
+  # s <- 1; stringdist::stringdist(substr(s2, 1, 15 - s), substr(s1, 1 + s, 15), "hamming") + 2 * s
+
+  s1 <- "AAACAAAACGTTGCC"
+  s2 <- "ACAAAACGTTGCCCC"
+  s3 <- "AGTCATGCTTAGAAA"
+  s4 <- "AAAAGTCATGCTTAG"
+  
+  expect_error(hamming_shift_distance(c(s1, s1), s2))
+  expect_error(hamming_shift_distance(s1, c(s2, s2)))
+  expect_error(hamming_shift_distance(s1, s2, "error"))
+  
+  expect_identical(hamming_shift_distance(s1, s1),  0L)
+  expect_identical(hamming_shift_distance(s2, s2),  0L)
+  expect_identical(hamming_shift_distance(s3, s3),  0L)
+  expect_identical(hamming_shift_distance(s4, s4),  0L)
+  expect_identical(hamming_shift_distance(s1, s2,  0),  9L)
+  expect_identical(hamming_shift_distance(s1, s2,  1),  9L)
+  expect_identical(hamming_shift_distance(s1, s2,  2),  4L)
+  expect_identical(hamming_shift_distance(s1, s2,  3),  4L)
+  expect_identical(hamming_shift_distance(s1, s2, -1),  4L)
+  expect_identical(hamming_shift_distance(s3, s4,  0), 11L)
+  expect_identical(hamming_shift_distance(s3, s4,  1), 11L)
+  expect_identical(hamming_shift_distance(s3, s4,  2), 11L)
+  expect_identical(hamming_shift_distance(s3, s4,  3),  6L)
+  expect_identical(hamming_shift_distance(s3, s4, -1),  6L)
+})
+
+
 # using Rcpp-module that exposes the BKtree class to R
 test_that("low-level BKtree wrapper functions work as expected", {
   # create random k-mers
   set.seed(42)
   k <- 30L
-  n <- 20L
+  n <- 20
   alph <- c("A","C","G","T","N")
   seqs <- unlist(lapply(seq_len(n - length(alph) + 1),
                         function(i) paste(sample(alph, size = k, replace = TRUE),
@@ -70,31 +103,35 @@ test_that("low-level BKtree wrapper functions work as expected", {
   tree2 <- new(BKtree, "levenshtein")
   tree3 <- new(BKtree, seqs[c(seq.int(n), seq.int(n))], "hamming")
   tree4 <- new(BKtree, character(0), "hamming")
+  tree5 <- new(BKtree, "hamming_shift")
   expect_is(bk, "Module")
   expect_is(BKtree, "C++Class")
   expect_is(tree, "Rcpp_BKtree")
   expect_is(tree2, "Rcpp_BKtree")
   expect_is(tree3, "Rcpp_BKtree")
   expect_is(tree4, "Rcpp_BKtree")
+  expect_is(tree5, "Rcpp_BKtree")
   expect_identical(tree$distance_metric(), "hamming")
   expect_identical(tree2$distance_metric(), "levenshtein")
   expect_identical(tree3$distance_metric(), "hamming")
   expect_identical(tree4$distance_metric(), "hamming")
+  expect_identical(tree5$distance_metric(), "hamming_shift")
   
   # add sequences
-  expect_equal(tree$size, 0)
-  expect_equal(tree2$size, 0)
+  expect_error(tree$insert(seqs))
+  expect_identical(tree$size, 0)
+  expect_identical(tree2$size, 0)
   for (s in seqs) {
     tree$insert(s)
     tree2$insert(s)
   }
-  expect_equal(tree$size, n)
-  expect_equal(tree2$size, n)
-  expect_equal(tree3$size, n)
+  expect_identical(tree$size, n)
+  expect_identical(tree2$size, n)
+  expect_identical(tree3$size, n)
   tree$insert(seqs[1])
   tree2$insert(seqs[1])
-  expect_equal(tree$size, n)
-  expect_equal(tree2$size, n)
+  expect_identical(tree$size, n)
+  expect_identical(tree2$size, n)
   
   # check presence
   expect_true(tree$has(seqs[1], 0))
@@ -140,6 +177,21 @@ test_that("low-level BKtree wrapper functions work as expected", {
   expect_length(tree$search(seqs[2], 27), 20L)
   expect_length(tree$search(seqs[2], 30), 20L)
   expect_true(all(tree$search(seqs[2], 23) %in% seqs))
+  # ... hamming+shift distances
+  expect_identical(tree4$size, 0)
+  expect_identical(tree5$size, 0)
+  for (s in c("CGATCGATGCAA", "AACGATCGATGC")) {
+    tree4$insert(s)
+    tree5$insert(s)
+  }
+  expect_identical(tree4$size, 2)
+  expect_identical(tree5$size, 2)
+  expect_length(tree4$search("CGATCGATGCAA",  0), 1L)
+  expect_length(tree4$search("CGATCGATGCAA", 11), 1L)
+  expect_length(tree4$search("CGATCGATGCAA", 12), 2L)
+  expect_length(tree5$search("CGATCGATGCAA",  0), 1L)
+  expect_length(tree5$search("CGATCGATGCAA",  3), 1L)
+  expect_length(tree5$search("CGATCGATGCAA",  4), 2L)
   # ... levenshtein distances
   # ground truth from: sum(stringdist::stringdist(seqs[1], seqs, method = "lv") <= 24)
   res <- tree2$search(seqs[1], 0)
@@ -158,24 +210,24 @@ test_that("low-level BKtree wrapper functions work as expected", {
   # remove sequences
   expect_identical(tree$remove("non_existing"), NULL)
   expect_identical(tree2$remove("non_existing"), NULL)
-  expect_equal(tree$size, n)
-  expect_equal(tree2$size, n)
+  expect_identical(tree$size, n)
+  expect_identical(tree2$size, n)
   r <- ceiling(n * 0.7)
   for (i in seq_len(r)) {
     tree$remove(seqs[i])
     tree2$remove(seqs[i])
   }
-  expect_equal(tree$size, n - r)
-  expect_equal(tree2$size, n - r)
+  expect_identical(tree$size, n - r)
+  expect_identical(tree2$size, n - r)
   expect_identical(tree$remove_all(), NULL)
   expect_identical(tree2$remove_all(), NULL)
-  expect_equal(tree$size, 0)
-  expect_equal(tree2$size, 0)
-  expect_equal(tree3$size, n)
+  expect_identical(tree$size, 0)
+  expect_identical(tree2$size, 0)
+  expect_identical(tree3$size, n)
   expect_is(tree3$remove(seqs[1]), "NULL")
-  expect_equal(tree3$size, n - 1)
+  expect_identical(tree3$size, n - 1)
   expect_is(tree3$insert(seqs[1]), "NULL")
-  expect_equal(tree3$size, n)
+  expect_identical(tree3$size, n)
   
   # check existing elements
   expect_identical(tree$remove_all(), NULL)
