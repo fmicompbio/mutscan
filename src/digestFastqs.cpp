@@ -587,9 +587,7 @@ int findClosestRefSeq(std::string &varSeq, std::vector<std::string> &wtSeq,
     currsim = 0;
     std::string currSeq = wtSeq[i];
     for (size_t j = 0; j < currSeq.length(); j++) {
-      if (currSeq[j] == varSeq[j]) {
-        currsim++;
-      }
+      currsim += (currSeq[j] == varSeq[j]);
     }
     if (((int)varSeq.size() - currsim <= (int)upperBoundMismatch)) {
       if (currsim == maxsim) {
@@ -631,9 +629,7 @@ int findClosestRefSeqEarlyStop(std::string &varSeq, std::vector<std::string> &wt
         // no chance to reach the minimal similarity - break
         break;
       }
-      if (currSeq[j] == varSeq[j]) {
-        currsim++;
-      }
+      currsim += (currSeq[j] == varSeq[j]);
     }
     if (((int)varSeq.size() - currsim <= (int)upperBoundMismatch)) {
       if (currsim == maxsim) {
