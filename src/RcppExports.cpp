@@ -6,26 +6,28 @@
 using namespace Rcpp;
 
 // levenshtein_distance
-int levenshtein_distance(const std::string& str1, const std::string& str2);
-RcppExport SEXP _mutscan_levenshtein_distance(SEXP str1SEXP, SEXP str2SEXP) {
+int levenshtein_distance(const std::string& str1, const std::string& str2, int ignored_variable);
+RcppExport SEXP _mutscan_levenshtein_distance(SEXP str1SEXP, SEXP str2SEXP, SEXP ignored_variableSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const std::string& >::type str1(str1SEXP);
     Rcpp::traits::input_parameter< const std::string& >::type str2(str2SEXP);
-    rcpp_result_gen = Rcpp::wrap(levenshtein_distance(str1, str2));
+    Rcpp::traits::input_parameter< int >::type ignored_variable(ignored_variableSEXP);
+    rcpp_result_gen = Rcpp::wrap(levenshtein_distance(str1, str2, ignored_variable));
     return rcpp_result_gen;
 END_RCPP
 }
 // hamming_distance
-int hamming_distance(const std::string& str1, const std::string& str2);
-RcppExport SEXP _mutscan_hamming_distance(SEXP str1SEXP, SEXP str2SEXP) {
+int hamming_distance(const std::string& str1, const std::string& str2, int ignored_variable);
+RcppExport SEXP _mutscan_hamming_distance(SEXP str1SEXP, SEXP str2SEXP, SEXP ignored_variableSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const std::string& >::type str1(str1SEXP);
     Rcpp::traits::input_parameter< const std::string& >::type str2(str2SEXP);
-    rcpp_result_gen = Rcpp::wrap(hamming_distance(str1, str2));
+    Rcpp::traits::input_parameter< int >::type ignored_variable(ignored_variableSEXP);
+    rcpp_result_gen = Rcpp::wrap(hamming_distance(str1, str2, ignored_variable));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -187,8 +189,8 @@ END_RCPP
 RcppExport SEXP _rcpp_module_boot_mod_BKtree();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_mutscan_levenshtein_distance", (DL_FUNC) &_mutscan_levenshtein_distance, 2},
-    {"_mutscan_hamming_distance", (DL_FUNC) &_mutscan_hamming_distance, 2},
+    {"_mutscan_levenshtein_distance", (DL_FUNC) &_mutscan_levenshtein_distance, 3},
+    {"_mutscan_hamming_distance", (DL_FUNC) &_mutscan_hamming_distance, 3},
     {"_mutscan_hamming_shift_distance", (DL_FUNC) &_mutscan_hamming_shift_distance, 3},
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 3},
     {"_mutscan_test_decomposeRead", (DL_FUNC) &_mutscan_test_decomposeRead, 12},

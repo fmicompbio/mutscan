@@ -99,11 +99,14 @@ test_that("low-level BKtree wrapper functions work as expected", {
   BKtree <- bk$BKtree
   expect_error(new(BKtree, "error"))
   expect_error(new(BKtree, seqs, "error"))
+  expect_error(new(BKtree, seqs, "hamming_shift", "error"))
   tree <- new(BKtree)
   tree2 <- new(BKtree, "levenshtein")
-  tree3 <- new(BKtree, seqs[c(seq.int(n), seq.int(n))], "hamming")
-  tree4 <- new(BKtree, character(0), "hamming")
-  tree5 <- new(BKtree, "hamming_shift")
+  tree3 <- new(BKtree, seqs[c(seq.int(n), seq.int(n))], "hamming", -1)
+  tree4 <- new(BKtree, character(0), "hamming", -1)
+  tree5 <- new(BKtree, "hamming_shift", 5L)
+  tree6 <- new(BKtree, "hamming_shift", 0L)
+  
   expect_is(bk, "Module")
   expect_is(BKtree, "C++Class")
   expect_is(tree, "Rcpp_BKtree")
@@ -111,11 +114,15 @@ test_that("low-level BKtree wrapper functions work as expected", {
   expect_is(tree3, "Rcpp_BKtree")
   expect_is(tree4, "Rcpp_BKtree")
   expect_is(tree5, "Rcpp_BKtree")
+  expect_is(tree6, "Rcpp_BKtree")
   expect_identical(tree$distance_metric(), "hamming")
   expect_identical(tree2$distance_metric(), "levenshtein")
   expect_identical(tree3$distance_metric(), "hamming")
   expect_identical(tree4$distance_metric(), "hamming")
   expect_identical(tree5$distance_metric(), "hamming_shift")
+  expect_identical(tree6$distance_metric(), "hamming_shift")
+  expect_identical(tree5$maximal_absolute_shift(), 5L)
+  expect_identical(tree6$maximal_absolute_shift(), 0L)
   
   # add sequences
   expect_error(tree$insert(seqs))
@@ -180,18 +187,24 @@ test_that("low-level BKtree wrapper functions work as expected", {
   # ... hamming+shift distances
   expect_identical(tree4$size, 0)
   expect_identical(tree5$size, 0)
+  expect_identical(tree6$size, 0)
   for (s in c("CGATCGATGCAA", "AACGATCGATGC")) {
     tree4$insert(s)
     tree5$insert(s)
+    tree6$insert(s)
   }
   expect_identical(tree4$size, 2)
   expect_identical(tree5$size, 2)
+  expect_identical(tree6$size, 2)
   expect_length(tree4$search("CGATCGATGCAA",  0), 1L)
   expect_length(tree4$search("CGATCGATGCAA", 11), 1L)
   expect_length(tree4$search("CGATCGATGCAA", 12), 2L)
   expect_length(tree5$search("CGATCGATGCAA",  0), 1L)
   expect_length(tree5$search("CGATCGATGCAA",  3), 1L)
   expect_length(tree5$search("CGATCGATGCAA",  4), 2L)
+  expect_length(tree6$search("CGATCGATGCAA",  0), 1L)
+  expect_length(tree6$search("CGATCGATGCAA", 11), 1L)
+  expect_length(tree6$search("CGATCGATGCAA", 12), 2L)
   # ... levenshtein distances
   # ground truth from: sum(stringdist::stringdist(seqs[1], seqs, method = "lv") <= 24)
   res <- tree2$search(seqs[1], 0)

@@ -11,7 +11,8 @@ using namespace Rcpp;
 // distance metrices used by the BKtree class:
 // calculate levenshtein distance between pair of strings
 // [[Rcpp::export]]
-int levenshtein_distance(const std::string &str1, const std::string &str2){
+int levenshtein_distance(const std::string &str1, const std::string &str2,
+                         int ignored_variable = -1){
   size_t m = str1.length(), n = str2.length();
   
   int** dn = new int*[m + 1];
@@ -51,7 +52,8 @@ int levenshtein_distance(const std::string &str1, const std::string &str2){
 
 // calculate hamming distance between pair of strings of equal lengths
 // [[Rcpp::export]]
-int hamming_distance(const std::string &str1, const std::string &str2){
+int hamming_distance(const std::string &str1, const std::string &str2,
+                     int ignored_variable = -1){
   int d = 0;
   
   for (size_t i = 0; i <= str1.length(); i++) {
@@ -85,10 +87,6 @@ int hamming_shift_distance(const std::string &str1, const std::string &str2,
   return d;
 }
 
-// wrapper function for use in tree
-int hamming_shift_distance_wrapper(const std::string &str1, const std::string &str2) {
-    return hamming_shift_distance(str1, str2, (int)std::min(str1.size() - 1, str2.size() - 1));
-}
 
 // simple implementation of a BK tree (https://en.wikipedia.org/wiki/BK-tree)
 // for std::string elements and Hamming (+ Shifts) or Levenshtein distance
@@ -125,16 +123,18 @@ public:
   size_t size; // number of strings in tree
   
   // tree constructors
-  BKtree(const std::string dmetric = "hamming") { // empty tree
+  BKtree(const std::string dmetric = "hamming", int mshift = -1) { // empty tree
     size = 0;
     metric = dmetric;
+    max_absolute_shift = mshift;
     _set_distance_function_pointer();
     root = nullptr;
   }
   
   BKtree(const std::vector<std::string>& v,
-         const std::string dmetric = "hamming") { // from a vector of strings
+         const std::string dmetric = "hamming", int mshift = -1) { // from a vector of strings
     metric = dmetric;
+    max_absolute_shift = mshift;
     _set_distance_function_pointer();
     items = v;
     size = v.size();
@@ -274,6 +274,11 @@ public:
     return metric;
   }
   
+  // return the maximal shift used in hamming_shift_distance()
+  int maximal_absolute_shift() {
+    return max_absolute_shift;
+  }
+  
   inline std::vector<std::string>::iterator begin() noexcept { return items.begin(); }
   inline std::vector<std::string>::const_iterator cbegin() const noexcept { return items.cbegin(); }
   inline std::vector<std::string>::iterator end() noexcept { return items.end(); }
@@ -285,7 +290,8 @@ private:
   node* root;                                // pointer to root node
   std::unordered_set<std::string> deleted;   // nodes deleted from the tree but not yet removed
   std::string metric;                        // name of the distance metric to use
-  int (*distance)(const std::string&, const std::string&); // pointer to function to calcluate string distance
+  int (*distance)(const std::string&, const std::string&, int); // pointer to function to calcluate string distance
+  int max_absolute_shift;                    // maximum shift (only used for metric="hamming_shift")
 
   // set the distance function pointer according to metric
   void _set_distance_function_pointer() {
@@ -293,7 +299,7 @@ private:
       distance = &hamming_distance;
 
     } else if (metric == "hamming_shift") {
-      distance = &hamming_shift_distance_wrapper;
+      distance = &hamming_shift_distance;
       
     } else if (metric == "levenshtein") {
       distance = &levenshtein_distance;
@@ -385,14 +391,14 @@ private:
       node* new_node = new node(index); // create new node
       
       // distance of new item to current node
-      int dist = distance(items[t->index], str);
+      int dist = distance(items[t->index], str, max_absolute_shift);
       
       // while current node t already has a child at that distance dist
       while (t->children.find(dist) != t->children.end()) {
         // descend to the children of that child
         t = t->children.find(dist)->second;
         // ... and calculate new distance
-        dist = distance(items[t->index], str);
+        dist = distance(items[t->index], str, max_absolute_shift);
       }
       
       // t now points to a node without children at distance dist
@@ -411,7 +417,7 @@ private:
   // recursively search for elements within tol of str in subtree of node r, add results to vec
   void _search(std::string str, int tol, node* r, std::vector<std::string>& vec) {
     std::string r_val = items[r->index];
-    int dist = distance(r_val, str);
+    int dist = distance(r_val, str, max_absolute_shift);
     
     if (dist <= tol) { // found element within tolerance
       // only add to results if not deleted
@@ -435,7 +441,7 @@ private:
   // recursively check if subtree of node r has an element within tol of str
   bool _has(std::string str, int tol, node* r) {
     std::string r_val = items[r->index];
-    int dist = distance(r_val, str);
+    int dist = distance(r_val, str, max_absolute_shift);
     
     if (dist <= tol) { // found an element within tolerance
       // only return true if not deleted
@@ -480,7 +486,7 @@ private:
       // if node n is deleted, prefix it with D*
       Rcout << "D*";
     }
-    Rcout << distance(r_val, n_val) << ": " << n_val << std::endl;
+    Rcout << distance(r_val, n_val, max_absolute_shift) << ": " << n_val << std::endl;
     for (const std::pair<int, node*>&x: n->children) {
       // recursively print all children of n
       _print(n, x.second, depth + 1);
@@ -497,8 +503,10 @@ RCPP_MODULE(mod_BKtree) {
 
   .constructor()
   .constructor<std::string>()
+  .constructor<std::string, int>()
   .constructor<std::vector<std::string>>()
   .constructor<std::vector<std::string>, std::string>()
+  .constructor<std::vector<std::string>, std::string, int>()
 
   .field_readonly( "size", &BKtree::size, "number of elements stored in tree" )
 
@@ -512,6 +520,7 @@ RCPP_MODULE(mod_BKtree) {
   .method( "first", &BKtree::first, "get first (non-deleted) element from tree" )
   .method( "capacity", &BKtree::capacity, "calculate tree memory usage" )
   .method( "distance_metric", &BKtree::distance_metric, "return distance metric used by tree")
+  .method( "maximal_absolute_shift", &BKtree::maximal_absolute_shift, "return maximal shift for metric='hamming_shift'")
 
   ;
 }
