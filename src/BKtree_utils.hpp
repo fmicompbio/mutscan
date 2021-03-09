@@ -51,39 +51,67 @@ int levenshtein_distance(const std::string &str1, const std::string &str2,
 }
 
 // calculate hamming distance between pair of strings of equal lengths
+// int hamming_distance(const std::string &str1, const std::string &str2,
+//                      int ignored_variable = -1){
+//   int d = 0;
+//   
+//   for (size_t i = 0; i <= str1.length(); i++) {
+//     d += (str1[i] != str2[i]);
+//   }
+//   
+//   return d;
+// }
 // [[Rcpp::export]]
 int hamming_distance(const std::string &str1, const std::string &str2,
                      int ignored_variable = -1){
-  int d = 0;
-  
-  for (size_t i = 0; i <= str1.length(); i++) {
-    d += (str1[i] != str2[i]);
-  }
-  
-  return d;
+  const char *a = str1.data(), *b = str2.data();
+
+  return std::inner_product(a, a + str1.length(), b, 0,
+                            std::plus<int>(), std::not_equal_to<int>());
 }
 
 // calculate hamming distance + shifts between pair of strings of equal lengths
+// int hamming_shift_distance(const std::string &str1, const std::string &str2,
+//                            int max_abs_shift = -1){
+//   int d = str1.size(), ds = 0;
+//   if (max_abs_shift < 0) {
+//     max_abs_shift = (int)str1.size() - 1;
+//   }
+// 
+//   d = str1.size();
+//   for (int s = -max_abs_shift; s <= max_abs_shift; s++) {
+//     ds = std::abs(s) + std::abs(s); // overhangs are treated as mismatches
+//     for (size_t i = std::max(0, s), j = std::max(0, -s);
+//          i < str1.length() + std::min(0, s); i++, j++) {
+//       ds += (str1[i] != str2[j]);
+//     }
+//     if (ds < d) {
+//       d = ds;
+//     }
+//   }
+// 
+//   return d;
+// }
 // [[Rcpp::export]]
 int hamming_shift_distance(const std::string &str1, const std::string &str2,
                            int max_abs_shift = -1){
   int d = str1.size(), ds = 0;
+  const char *a = str1.data(), *b = str2.data();
   if (max_abs_shift < 0) {
     max_abs_shift = (int)str1.size() - 1;
   }
-
-  d = str1.size();
+  
   for (int s = -max_abs_shift; s <= max_abs_shift; s++) {
-    ds = std::abs(s) + std::abs(s); // overhangs are treated as mismatches
-    for (size_t i = std::max(0, s), j = std::max(0, -s);
-         i < str1.length() + std::min(0, s); i++, j++) {
-      ds += (str1[i] != str2[j]);
-    }
+    ds = std::abs(s) + std::abs(s) + // overhangs are treated as mismatches
+      std::inner_product(a + std::max(0, s),
+                         a + str1.length() + std::min(0, s),
+                         b + std::max(0, -s), 0,
+                         std::plus<int>(), std::not_equal_to<int>());
     if (ds < d) {
       d = ds;
     }
   }
-
+  
   return d;
 }
 
