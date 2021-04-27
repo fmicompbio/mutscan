@@ -616,7 +616,7 @@ int findClosestRefSeqEarlyStop(std::string &varSeq, std::vector<std::string> &wt
                                size_t upperBoundMismatch, int &sim) {
   // return index of most similar sequence
   int idx = NO_SIMILAR_REF;
-  int maxsim = 0;
+  int maxsim = -1;
   int nbrbesthits = 0;
   int currsim;
   size_t minl;
@@ -625,6 +625,8 @@ int findClosestRefSeqEarlyStop(std::string &varSeq, std::vector<std::string> &wt
     std::string currSeq = wtSeq[i];
     minl = std::min(varSeq.size(), currSeq.size());
     for (size_t j = 0; j < minl; j++) {
+      // if currsim + (minl - j) >= varSeq.size() - upperBoundMismatch, we can still continue looking
+      // if varSeq is longer than minl, the additional positions are considered mismatches
       if (currsim < (int)(j - minl + varSeq.size() - upperBoundMismatch)) {
         // no chance to reach the minimal similarity - break
         break;
@@ -636,7 +638,7 @@ int findClosestRefSeqEarlyStop(std::string &varSeq, std::vector<std::string> &wt
         nbrbesthits++; 
       } else if (currsim > maxsim) {
         nbrbesthits = 1;
-        idx = i;
+        idx = (int)i;
         maxsim = currsim;
       }
     }
@@ -756,6 +758,9 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   std::set<std::string> forbiddenCodonsForward = enumerateCodonsFromIUPAC(forbiddenMutatedCodonsForward, IUPAC, verbose);
   std::set<std::string> forbiddenCodonsReverse = enumerateCodonsFromIUPAC(forbiddenMutatedCodonsReverse, IUPAC, verbose);
 
+  // max number of mismatches for constant sequences
+  size_t upperBoundMismatchConstForward = 0, upperBoundMismatchConstReverse = 0;
+  
   // build BKtree(s) for wildtype sequences
   bool useTreeWTmatchForward = useTreeWTmatch, useTreeWTmatchReverse = useTreeWTmatch;
   BKtree wtTreeForward, wtTreeReverse;
@@ -1138,10 +1143,15 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             
             // find closest constant sequence and tabulate mismatches by quality
             maxSim = 0;
+            // define upperBoundMismatch for this read 
+            if (constantMaxDistForward != (-1)) {
+              upperBoundMismatchConstForward = (size_t)constantMaxDistForward;
+            } else {
+              upperBoundMismatchConstForward = constSeqForward.size();
+            }
             idxConstForward = findClosestRefSeqEarlyStop(constSeqForward, constantForward, 
-                                                         constSeqForward.size(), maxSim);
-            if (constantMaxDistForward != (-1) && 
-                constantLengthForward - maxSim > constantMaxDistForward) {
+                                                         upperBoundMismatchConstForward, maxSim);
+            if (idxConstForward == NO_SIMILAR_REF) {
 #ifdef _OPENMP
               #pragma omp atomic
 #endif
@@ -1177,10 +1187,15 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             
             // find closest constant sequence and tabulate mismatches by quality
             maxSim = 0;
+            // define upperBoundMismatch for this read 
+            if (constantMaxDistReverse != (-1)) {
+              upperBoundMismatchConstReverse = (size_t)constantMaxDistReverse;
+            } else {
+              upperBoundMismatchConstReverse = constSeqReverse.size();
+            }
             idxConstReverse = findClosestRefSeqEarlyStop(constSeqReverse, constantReverse, 
-                                                         constSeqReverse.size(), maxSim);
-            if (constantMaxDistReverse != (-1) && 
-                constantLengthReverse - maxSim > constantMaxDistReverse) {
+                                                         upperBoundMismatchConstReverse, maxSim);
+            if (idxConstReverse == NO_SIMILAR_REF) {
 #ifdef _OPENMP
               #pragma omp atomic
 #endif
