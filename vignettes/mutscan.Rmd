@@ -455,13 +455,27 @@ variant betwen two conditions (or more generally, in association with any
 predictor) compared to one or more WT sequences. Note that for this, at least
 two replicates are required.
 
+We start by looking at the design matrix, in order to determine which of the 
+coefficients to specify for the testing in `calculateRelativeFC`. For more 
+information about how to set up and interpret design matrices in `edgeR` or 
+`limma`, see e.g. [Law et al (2020)](https://f1000research.com/articles/9-1444), 
+or [Soneson et al (2020)](https://f1000research.com/articles/9-512).
+
+```{r}
+model.matrix(~ Replicate + Condition,
+             data = colData(se_collapsed))
+```
+
+Next, we apply either `edgeR` or `limma` to extract the logFCs of the mutants, 
+compared to the wildtype sequence.
+
 ```{r}
 ## edgeR
 edger_scores <- calculateRelativeFC(
   se = se_collapsed,
   design = model.matrix(~ Replicate + Condition,
                         data = colData(se_collapsed)),
-  coef = 3, pseudocount = 1, WTrows = "f.0.NA",
+  coef = "Conditioncis_output", pseudocount = 1, WTrows = "f.0.NA",
   method = "edgeR")
 head(edger_scores[order(edger_scores$PValue), , drop = FALSE])
 
@@ -470,7 +484,7 @@ limma_scores <- calculateRelativeFC(
   se = se_collapsed,
   design = model.matrix(~ Replicate + Condition,
                         data = colData(se_collapsed)),
-  coef = 3, pseudocount = 1, WTrows = "f.0.NA",
+  coef = "Conditioncis_output", pseudocount = 1, WTrows = "f.0.NA",
   method = "limma")
 head(limma_scores[order(limma_scores$P.Value), , drop = FALSE])
 ```
