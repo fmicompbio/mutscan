@@ -15,7 +15,8 @@ plotPairs(
   corSizeMult = 5,
   corSizeAdd = 2,
   pointSize = 0.1,
-  pointAlpha = 0.3
+  pointAlpha = 0.3,
+  colorByCorrelation = TRUE
 )
 }
 \arguments{
@@ -46,6 +47,9 @@ transformation is corSizeMult * abs(corr) + corSizeAdd.}
 
 \item{pointSize, pointAlpha}{Numeric scalars determining the size and 
 opacity of points in the plot.}
+
+\item{colorByCorrelation}{Logical scalar, indicating whether the correlation
+panels should be colored according to the correlation value.}
 }
 \description{
 Construct a pairs plot of all columns of a given assay. The lower-triangular 

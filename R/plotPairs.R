@@ -28,17 +28,21 @@
 #'   transformation is corSizeMult * abs(corr) + corSizeAdd.
 #' @param pointSize,pointAlpha Numeric scalars determining the size and 
 #'   opacity of points in the plot.
+#' @param colorByCorrelation Logical scalar, indicating whether the correlation
+#'   panels should be colored according to the correlation value.
 #'   
 #' @importFrom GGally eval_data_col ggpairs wrap
 #' @importFrom ggplot2 ggplot annotate theme_void ylim stat_density2d 
 #'   scale_fill_continuous geom_point theme_bw theme element_blank aes
+#'   geom_histogram
 #' @importFrom stats cor
 #' @importFrom SummarizedExperiment assayNames assay
 #' 
 plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
                       corMethod = "pearson", histBreaks = 40,
                       pointsType = "points", corSizeMult = 5, 
-                      corSizeAdd = 2, pointSize = 0.1, pointAlpha = 0.3) {
+                      corSizeAdd = 2, pointSize = 0.1, pointAlpha = 0.3,
+                      colorByCorrelation = TRUE) {
   
   stopifnot(methods::is(se, "SummarizedExperiment"))
   stopifnot(is.character(selAssay) && length(selAssay) == 1 && 
@@ -60,7 +64,20 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
               pointSize > 0)
   stopifnot(is.numeric(pointAlpha) && length(pointAlpha) == 1 && 
               pointAlpha > 0)
+  stopifnot(is.logical(colorByCorrelation) && length(colorByCorrelation) == 1)
   
+  ## ----------------------------------------------------------------------- ##
+  ## Define shared theme elements
+  ## ----------------------------------------------------------------------- ##
+  ggtheme <- list(
+    theme_bw(),
+    theme(panel.grid.major = ggplot2::element_blank(),
+          panel.grid.minor = ggplot2::element_blank())
+  )
+  
+  ## ----------------------------------------------------------------------- ##
+  ## Correlations
+  ## ----------------------------------------------------------------------- ##
   ## Define function to calculate and display correlations (for use with ggpairs)
   cor_fcn <- function(data, mapping, ...) {
     ## Get data
@@ -70,33 +87,71 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
     ## Calculate correlation
     mainCor = stats::cor(xData, yData, method = corMethod)
     
+    ## Determine the color
+    if (colorByCorrelation) {
+      if (mainCor >= 0) {
+        col <- grDevices::rgb(grDevices::colorRamp(
+          c("white", "red"))(mainCor),
+          maxColorValue = 255)
+      } else {
+        col <- grDevices::rgb(grDevices::colorRamp(
+          c("white", "steelblue"))(abs(mainCor)),
+          maxColorValue = 255)
+      }
+    } else {
+      col <- "white"
+    }
+    
     ## Construct plot
     ggplot2::ggplot(data = data, mapping = mapping) +
       ggplot2::annotate(x = 0.5, y = 0.5, label = round(mainCor, digits = 3), 
                         geom = "text", 
                         size = abs(mainCor) * corSizeMult + corSizeAdd) +
-      ggplot2::theme_void() + ggplot2::ylim(c(0, 1))
+      ggtheme + ggplot2::ylim(c(0, 1)) + 
+      ggplot2::theme(panel.background = ggplot2::element_rect(fill = col))
   }
   
+  ## ----------------------------------------------------------------------- ##
+  ## Scatter plots
+  ## ----------------------------------------------------------------------- ##
   ## Define function to create smoothscatter-like plot (for use with ggpairs)
   smoothscat <- function(data, mapping, ...) {
     ggplot2::ggplot(data = data, mapping = mapping) +
       ggplot2::stat_density2d(ggplot2::aes(fill = ..density..^0.25), geom = "tile", 
                               contour = FALSE, n = 200) +
       ggplot2::scale_fill_continuous(low = "white", high = "dodgerblue4") + 
-      ggplot2::geom_point(alpha = 0.1, shape = 20, size = pointSize, color = "grey50")
+      ggplot2::geom_point(alpha = 0.1, shape = 20, size = pointSize, color = "grey50") + 
+      ggtheme
+  }
+  
+  ## Define function to create scatter plot (for use with ggpairs)
+  plotpoints <- function(data, mapping, ...) {
+    ggplot2::ggplot(data = data, mapping = mapping) +
+      ggplot2::geom_point(alpha = pointAlpha, size = pointSize) + 
+      ggtheme
   }
   
   ## Define the function to use for the plots
   if (pointsType == "smoothscatter") {
     lower <- list(continuous = smoothscat)
   } else if (pointsType == "points") {
-    lower <- list(continuous = GGally::wrap(pointsType, alpha = pointAlpha, 
-                                            size = pointSize))
+    lower <- list(continuous = plotpoints)
   } else {
     stop("Invalid 'pointsType'")
   }
   
+  ## ----------------------------------------------------------------------- ##
+  ## Histogram
+  ## ----------------------------------------------------------------------- ##
+  diaghist <- function(data, mapping, ...) {
+    ggplot2::ggplot(data = data, mapping = mapping) +
+      ggplot2::geom_histogram(fill = "cyan", color = "grey50", bins = histBreaks) + 
+      ggtheme
+  }
+  
+  ## ----------------------------------------------------------------------- ##
+  ## Combined plot
+  ## ----------------------------------------------------------------------- ##
   ## Prepare the data and plot title, depending on whether to log-transform or not
   if (doLog) {
     mat <- log10(as.matrix(SummarizedExperiment::assay(se, selAssay)) + pseudocount)
@@ -119,13 +174,9 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
     title = title, xlab = NULL, ylab = NULL,
     upper = list(continuous = cor_fcn),
     lower = lower,
-    diag = list(continuous = GGally::wrap("barDiag", fill = "cyan", 
-                                          color = "grey50", bins = histBreaks)),
+    diag = list(continuous = diaghist),
     progress = FALSE,
     axisLabels = "show"
-  ) + 
-    ggplot2::theme_bw() + 
-    ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
-                   panel.grid.minor = ggplot2::element_blank())
+  )
 }
 
