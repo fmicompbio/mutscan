@@ -51,6 +51,9 @@ opacity of points in the plot.}
 \item{colorByCorrelation}{Logical scalar, indicating whether the correlation
 panels should be colored according to the correlation value.}
 }
+\value{
+A \code{ggplot} object.
+}
 \description{
 Construct a pairs plot of all columns of a given assay. The lower-triangular 
 panels display the scatter plots, the upper-triangular ones print out 

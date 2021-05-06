@@ -33,7 +33,8 @@ Imports:
     ggplot2,
     tidyselect,
     tibble,
-    rlang
+    rlang,
+    grDevices
 Suggests: 
     testthat,
     BiocStyle,

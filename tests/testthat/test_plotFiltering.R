@@ -19,27 +19,37 @@ test_that("plotFiltering fails with incorrect arguments", {
   expect_error(plotFiltering(se = se, displayNumbers = 1))
   expect_error(plotFiltering(se = se, displayNumbers = "TRUE"))
   expect_error(plotFiltering(se = se, displayNumbers = c(TRUE, FALSE)))
+  
+  expect_error(plotFiltering(se = se, numberSize = "1"))
+  expect_error(plotFiltering(se = se, numberSize = TRUE))
+  expect_error(plotFiltering(se = se, numberSize = c(1, 2)))
+  expect_error(plotFiltering(se = se, numberSize = 0))
 })
 
 test_that("plotFiltering works with correct arguments", {
   ## Defaults
   expect_is(plotFiltering(se = se, valueType = "reads", 
                           onlyActiveFilters = FALSE, 
-                          displayNumbers = TRUE), "ggplot")
+                          displayNumbers = TRUE, numberSize = 4), "ggplot")
   
   ## Fractions
   expect_is(plotFiltering(se = se, valueType = "fractions", 
                           onlyActiveFilters = FALSE, 
-                          displayNumbers = TRUE), "ggplot")
+                          displayNumbers = TRUE, numberSize = 4), "ggplot")
   
   ## Only active filters
   expect_is(plotFiltering(se = se, valueType = "reads", 
                           onlyActiveFilters = TRUE, 
-                          displayNumbers = TRUE), "ggplot")
+                          displayNumbers = TRUE, numberSize = 4), "ggplot")
   
   ## Don't display numbers
   expect_is(plotFiltering(se = se, valueType = "reads", 
                           onlyActiveFilters = FALSE, 
-                          displayNumbers = FALSE), "ggplot")
+                          displayNumbers = FALSE, numberSize = 4), "ggplot")
+
+  ## Change size of displayed numbers
+  expect_is(plotFiltering(se = se, valueType = "reads", 
+                          onlyActiveFilters = FALSE, 
+                          displayNumbers = FALSE, numberSize = 2), "ggplot")
   
 })

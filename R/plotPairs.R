@@ -9,6 +9,8 @@
 #' 
 #' @export
 #' 
+#' @return A \code{ggplot} object. 
+#' 
 #' @param se A SummarizedExperiment object, e.g. the output of 
 #'   \code{summarizeExperiment}
 #' @param selAssay Character scalar, the assay to use as the basis for the 
@@ -34,9 +36,10 @@
 #' @importFrom GGally eval_data_col ggpairs wrap
 #' @importFrom ggplot2 ggplot annotate theme_void ylim stat_density2d 
 #'   scale_fill_continuous geom_point theme_bw theme element_blank aes
-#'   geom_histogram
+#'   geom_histogram scale_x_continuous scale_y_continuous
 #' @importFrom stats cor
 #' @importFrom SummarizedExperiment assayNames assay
+#' @importFrom grDevices hcl.colors rgb colorRamp
 #' 
 plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
                       corMethod = "pearson", histBreaks = 40,
@@ -86,16 +89,19 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
 
     ## Calculate correlation
     mainCor = stats::cor(xData, yData, method = corMethod)
+    transfCor <- (abs(mainCor) - min(corRange))/(max(corRange) - min(corRange))
     
     ## Determine the color
     if (colorByCorrelation) {
       if (mainCor >= 0) {
+        cols <- grDevices::hcl.colors(n = 11, palette = "RdBu")[6:2]
         col <- grDevices::rgb(grDevices::colorRamp(
-          c("white", "red"))(mainCor),
+          cols)(transfCor),
           maxColorValue = 255)
       } else {
+        cols <- grDevices::hcl.colors(n = 11, palette = "RdBu")[6:10]
         col <- grDevices::rgb(grDevices::colorRamp(
-          c("white", "steelblue"))(abs(mainCor)),
+          cols)(transfCor),
           maxColorValue = 255)
       }
     } else {
@@ -119,9 +125,10 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
     ggplot2::ggplot(data = data, mapping = mapping) +
       ggplot2::stat_density2d(ggplot2::aes(fill = ..density..^0.25), geom = "tile", 
                               contour = FALSE, n = 200) +
-      ggplot2::scale_fill_continuous(low = "white", high = "dodgerblue4") + 
-      ggplot2::geom_point(alpha = 0.1, shape = 20, size = pointSize, color = "grey50") + 
-      ggtheme
+      ggplot2::scale_fill_continuous(low = "white", high = "darkgreen") + 
+      ggtheme + 
+      ggplot2::scale_x_continuous(expand = c(0, 0)) + 
+      ggplot2::scale_y_continuous(expand = c(0, 0))
   }
   
   ## Define function to create scatter plot (for use with ggpairs)
@@ -144,9 +151,13 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
   ## Histogram
   ## ----------------------------------------------------------------------- ##
   diaghist <- function(data, mapping, ...) {
-    ggplot2::ggplot(data = data, mapping = mapping) +
-      ggplot2::geom_histogram(fill = "cyan", color = "grey50", bins = histBreaks) + 
+    gg <- ggplot2::ggplot(data = data, mapping = mapping) +
+      ggplot2::geom_histogram(fill = "#F5C710", color = "grey50", bins = histBreaks) + 
       ggtheme
+    if (pointsType == "smoothscatter") {
+      gg <- gg + ggplot2::scale_x_continuous(expand = c(0, 0))
+    }
+    gg
   }
   
   ## ----------------------------------------------------------------------- ##
@@ -165,6 +176,10 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
   mat <- as.data.frame(mat)
   title <- paste0(title, ", ", toupper(substr(corMethod, 1, 1)), 
                   substr(corMethod, 2, nchar(corMethod)), " correlation")
+  
+  ## Calculate correlations and get range
+  allCors <- stats::cor(mat, method = corMethod)
+  corRange <- range(abs(allCors[upper.tri(allCors)]))
   
   ## Construct the pairs plot
   GGally::ggpairs(

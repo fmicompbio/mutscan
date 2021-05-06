@@ -7,8 +7,9 @@
 plotFiltering(
   se,
   valueType = "reads",
-  onlyActiveFilters = FALSE,
-  displayNumbers = TRUE
+  onlyActiveFilters = TRUE,
+  displayNumbers = TRUE,
+  numberSize = 4
 )
 }
 \arguments{
@@ -21,10 +22,16 @@ that are retained after each filtering step.}
 
 \item{onlyActiveFilters}{Logical scalar, whether to only include the 
 active filters (i.e., where any read was filtered out in any of the samples). 
-Defaults to \code{FALSE}, i.e., including all filters.}
+Defaults to \code{TRUE}.}
 
 \item{displayNumbers}{Logical scalar, indicating whether to display the 
 number (or fraction) of reads retained at every filtering step.}
+
+\item{numberSize}{Numeric scalar, indicating the size of the displayed 
+numbers (if \code{displayNumbers} is \code{TRUE}).}
+}
+\value{
+A \code{ggplot} object.
 }
 \description{
 Display the number (or fraction) of reads remaining after each step 

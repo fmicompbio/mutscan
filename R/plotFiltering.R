@@ -12,6 +12,8 @@
 #' 
 #' @export
 #' 
+#' @return A \code{ggplot} object. 
+#' 
 #' @param se A \code{SummarizedExperiment} object, e.g. from 
 #'   \code{summarizeExperiment}.
 #' @param valueType Either "reads" or "fractions", indicating whether to 
@@ -19,9 +21,11 @@
 #'   that are retained after each filtering step.
 #' @param onlyActiveFilters Logical scalar, whether to only include the 
 #'   active filters (i.e., where any read was filtered out in any of the samples). 
-#'   Defaults to \code{FALSE}, i.e., including all filters. 
+#'   Defaults to \code{TRUE}. 
 #' @param displayNumbers Logical scalar, indicating whether to display the 
 #'   number (or fraction) of reads retained at every filtering step. 
+#' @param numberSize Numeric scalar, indicating the size of the displayed 
+#'   numbers (if \code{displayNumbers} is \code{TRUE}). 
 #' 
 #' @importFrom tidyselect matches
 #' @importFrom dplyr select %>% mutate group_by summarize pull ungroup filter
@@ -31,13 +35,15 @@
 #'   geom_text element_text
 #' @importFrom rlang .data
 #' 
-plotFiltering <- function(se, valueType = "reads", onlyActiveFilters = FALSE,
-                          displayNumbers = TRUE) {
+plotFiltering <- function(se, valueType = "reads", onlyActiveFilters = TRUE,
+                          displayNumbers = TRUE, numberSize = 4) {
   stopifnot(is(se, "SummarizedExperiment"))
   stopifnot(is.character(valueType) && length(valueType) == 1 && 
               valueType %in% c("reads", "fractions"))
   stopifnot(is.logical(onlyActiveFilters) && length(onlyActiveFilters) == 1)
   stopifnot(is.logical(displayNumbers) && length(displayNumbers) == 1)
+  stopifnot(is.numeric(numberSize) && length(numberSize) == 1 && 
+              numberSize > 0)
   
   ## ----------------------------------------------------------------------- ##
   ## Extract relevant columns from colData(se)
@@ -88,7 +94,9 @@ plotFiltering <- function(se, valueType = "reads", onlyActiveFilters = FALSE,
     })) %>%
     dplyr::mutate(nbrRemaining = .data$nbrReads[.data$step == "nbrTotal"] - 
                     .data$cumulsum) %>%
-    dplyr::mutate(fracRemaining = .data$nbrRemaining/.data$nbrReads[.data$step == "nbrTotal"]) %>%
+    dplyr::mutate(fracRemaining = round(.data$nbrRemaining /
+                                          .data$nbrReads[.data$step == "nbrTotal"],
+                                        digits = 3)) %>%
     dplyr::filter(.data$step != "nbrRetained") %>%
     dplyr::ungroup()
   
@@ -108,7 +116,7 @@ plotFiltering <- function(se, valueType = "reads", onlyActiveFilters = FALSE,
   gg <- ggplot2::ggplot(cd, ggplot2::aes(x = .data$step, y = .data[[yvar]], 
                                          label = .data[[yvar]])) + 
     ggplot2::geom_bar(stat = "identity") + 
-    ggplot2::facet_wrap(~ sample, ncol = 1) + 
+    ggplot2::facet_wrap(~ sample, ncol = 1, scales = "free_y") + 
     ggplot2::theme_bw() + 
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, 
                                                        vjust = 0.5)) + 
@@ -116,7 +124,7 @@ plotFiltering <- function(se, valueType = "reads", onlyActiveFilters = FALSE,
                   title = paste0(ylab, " remaining after each filtering step"))
   
   if (displayNumbers) {
-    gg <- gg + ggplot2::geom_text(vjust = 1.5, color = "white")
+    gg <- gg + ggplot2::geom_text(vjust = 1.5, color = "white", size = numberSize)
   }
   gg
 }
