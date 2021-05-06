@@ -1,6 +1,6 @@
 Package: mutscan
 Title: Preprocessing and Analysis of Deep Mutational Scanning Data
-Version: 0.2.18
+Version: 0.2.19
 Authors@R: 
     c(person(given = "Charlotte",
              family = "Soneson",
@@ -27,7 +27,14 @@ Imports:
     Matrix,
     Matrix.utils,
     limma,
-    tidyr
+    tidyr,
+    stats,
+    GGally,
+    ggplot2,
+    tidyselect,
+    tibble,
+    rlang,
+    grDevices
 Suggests: 
     testthat,
     BiocStyle,
