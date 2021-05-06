@@ -30,7 +30,10 @@ Imports:
     tidyr,
     stats,
     GGally,
-    ggplot2
+    ggplot2,
+    tidyselect,
+    tibble,
+    rlang
 Suggests: 
     testthat,
     BiocStyle,
