@@ -832,12 +832,18 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   // iterate over fastq files
   // --------------------------------------------------------------------------
   for (size_t f = 0; f < fastqForwardVect.size(); f++) {
-    bool done = false;
+    // if maxNReads has been reached in the previous file, break
+    bool done;
+    if (maxNReads != (-1) && nTot >= maxNReads) {
+      done = true;
+    } else {
+      done = false;
+    }
     std::string fastqForward = fastqForwardVect[f];
     std::string fastqReverse = fastqReverseVect[f];
     
     // --------------------------------------------------------------------------
-    // open fastq files
+    // open fastq file(s)
     // --------------------------------------------------------------------------
     gzFile file1 = openFastq(fastqForward, "rb");
     gzFile file2 = NULL;
@@ -1289,13 +1295,16 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     if (fastqReverse.compare("") != 0) {
       gzclose(file2);
     }
-    if (outfile1 != NULL) {
-      gzclose(outfile1);
-    }
-    if (outfile2 != NULL) {
-      gzclose(outfile2);
-    }
   } // iterate over fastq files
+  
+  // close output files
+  if (outfile1 != NULL) {
+    gzclose(outfile1);
+  }
+  if (outfile2 != NULL) {
+    gzclose(outfile2);
+  }
+  
   if (verbose) {
     Rcout << "done reading sequences" << std::endl;
     Rcout << "retained " << mutantSummary.size() << " unique features" << std::endl;
