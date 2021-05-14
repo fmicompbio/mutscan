@@ -104,6 +104,7 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     tidyr::unite(sequence, -mutantName, sep = ",") %>%
     dplyr::mutate(sequence = gsub("[,]+", ",", sequence)) %>%
     dplyr::mutate(sequence = sub(",$", "", sequence)) %>%
+    dplyr::mutate(sequence = sub("^,", "", sequence)) %>%
     dplyr::mutate(sequence = vapply(sequence, function(x) {
       paste(unique(strsplit(x, ",")[[1]]), collapse = ",")
     }, ""))
