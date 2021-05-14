@@ -273,10 +273,10 @@ test_that("mergeReadPairsPartial works", {
   ## don't count N as mismatch, pick base with higher quality
   sF1 <- "AAAANA"; qF1 <- rep(40L, nchar(sF1))
   sR1 <- "AACCCC"; qR1 <- rep(42L, nchar(sR1))
-  res1a <- mutscan:::test_mergeReadPairPartial(sF1, qF1, sR1, qR1, 1, 6, 1/4, TRUE)
-  res1b <- mutscan:::test_mergeReadPairPartial(sF1, qF1, sR1, qR1, 1, 6, 1/4, FALSE)
-  res1c <- mutscan:::test_mergeReadPairPartial(sF1, qR1, sR1, qF1, 2, 2, 1/4, TRUE)
-  res1d <- mutscan:::test_mergeReadPairPartial(sF1, qF1, sR1, qR1, 2, 2, 0, TRUE)
+  res1a <- mutscan:::test_mergeReadPairPartial(sF1, qF1, sR1, qR1, 1, 6, 0, 0, 1/4, TRUE)
+  res1b <- mutscan:::test_mergeReadPairPartial(sF1, qF1, sR1, qR1, 1, 6, 0, 0, 1/4, FALSE)
+  res1c <- mutscan:::test_mergeReadPairPartial(sF1, qR1, sR1, qF1, 2, 2, 0, 0, 1/4, TRUE)
+  res1d <- mutscan:::test_mergeReadPairPartial(sF1, qF1, sR1, qR1, 2, 2, 0, 0, 0, TRUE)
   expect_is(res1a, "list")
   expect_is(res1b, "list")
   expect_is(res1c, "list")
@@ -290,8 +290,8 @@ test_that("mergeReadPairsPartial works", {
   ## no valid overlap, multiple possible overlaps with single valid overlap
   sF2 <- "TTACACG"; qF2 <- rep(10L, nchar(sF2))
   sR2 <- "ACACACA"; qR2 <- rep(40L, nchar(sR2))
-  res2a <- mutscan:::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, maxFracMismatchOverlap = 3/7, TRUE)
-  res2b <- mutscan:::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, 1, 7, 1/5, TRUE)
+  res2a <- mutscan:::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, 0, 0, 0, 0, maxFracMismatchOverlap = 3/7, TRUE)
+  res2b <- mutscan:::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, 1, 7, 0, 0, 1/5, TRUE)
   expect_is(res2a, "list")
   expect_is(res2b, "list")
   expect_identical(res2a$mergedSeq, sR2)
@@ -305,7 +305,7 @@ test_that("mergeReadPairsPartial works", {
     qF <- rep(30L, nchar(sF))
     sR <- paste(rep(c("A","C"), c(6, i)), collapse = "")
     qR <- rep(30L, nchar(sR))
-    res <- mutscan:::test_mergeReadPairPartial(sF, qF, sR, qR, 6, 6, 0)
+    res <- mutscan:::test_mergeReadPairPartial(sF, qF, sR, qR, 6, 6, 0, 0, 0)
     expect_identical(res$mergedSeq, paste(rep(c("C","A","C"), c(i, 6, i)), collapse = ""))
   }
   
@@ -315,9 +315,9 @@ test_that("mergeReadPairsPartial works", {
   for (i in 1:10) {
     sF <- paste(rep(c("C","A"), c(i, 6)), collapse = "")
     qF <- rep(30L, nchar(sF))
-    res <- mutscan:::test_mergeReadPairPartial(sF, qF, sR, qR, 6, 6, 0)
+    res <- mutscan:::test_mergeReadPairPartial(sF, qF, sR, qR, 6, 6, 0, 0, 0)
     expect_identical(res$mergedSeq, sF)
-    res <- mutscan:::test_mergeReadPairPartial(sR, qR, sF, qF, 6, 6, 0)
+    res <- mutscan:::test_mergeReadPairPartial(sR, qR, sF, qF, 6, 6, 0, 0, 0)
     expect_identical(res$mergedSeq, sR)
   }
 })

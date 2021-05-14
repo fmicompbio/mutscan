@@ -83,10 +83,14 @@ checkNumericInput <- function(..., nonnegative) {
 #'   \code{mergeForwardReverse} is \code{TRUE}. If set to 0, only overlaps
 #'   covering the full length of the shortest of the two reads will be
 #'   considered.
+#' @param minMergedLength,maxMergedLength numeric(1), the minimal and maximal 
+#'   allowed total length of the merged product (if \code{mergeForwardReverse} is 
+#'   \code{TRUE}). If set to 0, any length is allowed. 
 #' @param maxFracMismatchOverlap numeric(1), maximal mismatch rate in the
 #'   overlap. Only used if \code{mergeForwardReverse} is \code{TRUE}.
 #' @param greedyOverlap logical(1). If \code{TRUE}, the first overlap satisfying
-#'   \code{minOverlap}, \code{maxOverlap} and \code{maxFracMismatchOverlap} will
+#'   \code{minOverlap}, \code{maxOverlap}, \code{minMergedLength}, 
+#'   \code{maxMergedLength} and \code{maxFracMismatchOverlap} will
 #'   be retained. If \code{FALSE}, all valid overlaps will be scored and the one
 #'   with the highest score (largest number of matches) will be retained.
 #' @param revComplForward,revComplReverse logical(1), whether to reverse
@@ -221,6 +225,7 @@ checkNumericInput <- function(..., nonnegative) {
 #' @export
 digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          mergeForwardReverse = FALSE, minOverlap = 0, maxOverlap = 0, 
+                         minMergedLength = 0, maxMergedLength = 0,
                          maxFracMismatchOverlap = 1, greedyOverlap = TRUE,
                          revComplForward = FALSE, revComplReverse = FALSE,
                          adapterForward = "", adapterReverse = "",
@@ -285,6 +290,10 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
   for (i in elementLengthsReverse) {
     checkNumericInput(i, nonnegative = FALSE)
   }
+  checkNumericInput(minOverlap, nonnegative = TRUE)
+  checkNumericInput(maxOverlap, nonnegative = TRUE)
+  checkNumericInput(minMergedLength, nonnegative = TRUE)
+  checkNumericInput(maxMergedLength, nonnegative = TRUE)
   checkNumericInput(avePhredMinForward, nonnegative = TRUE)
   checkNumericInput(avePhredMinReverse, nonnegative = TRUE)
   checkNumericInput(variableNMaxForward, nonnegative = TRUE)
@@ -541,6 +550,8 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          mergeForwardReverse = mergeForwardReverse,
                          minOverlap = minOverlap, 
                          maxOverlap = maxOverlap, 
+                         minMergedLength = minMergedLength,
+                         maxMergedLength = maxMergedLength,
                          maxFracMismatchOverlap = maxFracMismatchOverlap,
                          greedyOverlap = greedyOverlap,
                          revComplForward = revComplForward,

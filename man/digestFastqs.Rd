@@ -10,6 +10,8 @@ digestFastqs(
   mergeForwardReverse = FALSE,
   minOverlap = 0,
   maxOverlap = 0,
+  minMergedLength = 0,
+  maxMergedLength = 0,
   maxFracMismatchOverlap = 1,
   greedyOverlap = TRUE,
   revComplForward = FALSE,
@@ -71,11 +73,16 @@ overlap between the forward and reverse reads when merging. Only used if
 covering the full length of the shortest of the two reads will be
 considered.}
 
+\item{minMergedLength, maxMergedLength}{numeric(1), the minimal and maximal 
+allowed total length of the merged product (if \code{mergeForwardReverse} is 
+\code{TRUE}). If set to 0, any length is allowed.}
+
 \item{maxFracMismatchOverlap}{numeric(1), maximal mismatch rate in the
 overlap. Only used if \code{mergeForwardReverse} is \code{TRUE}.}
 
 \item{greedyOverlap}{logical(1). If \code{TRUE}, the first overlap satisfying
-\code{minOverlap}, \code{maxOverlap} and \code{maxFracMismatchOverlap} will
+\code{minOverlap}, \code{maxOverlap}, \code{minMergedLength}, 
+\code{maxMergedLength} and \code{maxFracMismatchOverlap} will
 be retained. If \code{FALSE}, all valid overlaps will be scored and the one
 with the highest score (largest number of matches) will be retained.}
 

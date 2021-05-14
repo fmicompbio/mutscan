@@ -475,6 +475,7 @@ List test_decomposeRead(const std::string sseq,
 bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQualForward,
                           std::string &varSeqReverse, std::vector<int> &varIntQualReverse,
                           size_t minOverlap = 0, size_t maxOverlap = 0, 
+                          size_t minMergedLength = 0, size_t maxMergedLength = 0,
                           double maxFracMismatchOverlap = 0,
                           bool greedy = true) {
   // initialize overlap parameters
@@ -484,15 +485,39 @@ bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQu
     if (minOverlap > lenR) {
       minOverlap = lenR;
     }
-  } else if (minOverlap > lenF || minOverlap > lenR) {
+  }
+  // if maxMergedLength is 0, set it to the sum of lenF and lenR
+  // (the merged sequence can't be longer than that)
+  if (maxMergedLength == 0) {
+    maxMergedLength = lenF + lenR;
+  }
+  // if maxMergedLength is specified, adjust allowed minOverlap
+  if (minOverlap < (lenF + lenR - maxMergedLength)) {
+    minOverlap = (lenF + lenR - maxMergedLength);
+  }
+  if (minOverlap > lenF || minOverlap > lenR) {
     return true; //  no valid overlap possible
   }
+  
   if (maxOverlap == 0) {
     maxOverlap = lenF;
     if (maxOverlap > lenR) {
       maxOverlap = lenR;
     }
-  } else if (maxOverlap < minOverlap) {
+  }
+  // if minMergedLength is 0, set it to the larger of lenF and lenR
+  // (the merged sequence can't be shorter than that)
+  if (minMergedLength == 0) {
+    minMergedLength = lenF;
+    if (minMergedLength < lenR) {
+      minMergedLength = lenR;
+    }
+  }
+  // if minMergedLength is specified, adjust allowed maxOverlap
+  if (maxOverlap > (lenF + lenR - minMergedLength)) {
+    maxOverlap = (lenF + lenR - minMergedLength);
+  }
+  if (maxOverlap < minOverlap) {
     return true; //  no valid overlap possible
   }
 
@@ -553,10 +578,13 @@ bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQu
 List test_mergeReadPairPartial(std::string seqF, std::vector<int> qualF,
                                std::string seqR, std::vector<int> qualR,
                                size_t minOverlap = 0, size_t maxOverlap = 0, 
+                               size_t minMergedLength = 0, size_t maxMergedLength = 0,
                                double maxFracMismatchOverlap = 0,
                                bool greedy = true) {
   mergeReadPairPartial(seqF, qualF, seqR, qualR,
-                       minOverlap, maxOverlap, maxFracMismatchOverlap, greedy);
+                       minOverlap, maxOverlap, 
+                       minMergedLength, maxMergedLength,
+                       maxFracMismatchOverlap, greedy);
   List L = List::create(Named("mergedSeq") = seqF,
                         Named("mergedQual") = qualF);
   return L;
@@ -684,6 +712,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                      std::vector<std::string> fastqReverseVect,
                      bool mergeForwardReverse, 
                      size_t minOverlap, size_t maxOverlap, 
+                     size_t minMergedLength, size_t maxMergedLength, 
                      double maxFracMismatchOverlap, bool greedyOverlap,
                      bool revComplForward, bool revComplReverse,
                      std::string elementsForward, 
@@ -979,8 +1008,9 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           if (mergeForwardReverse) {
             if (mergeReadPairPartial(varSeqForward, varIntQualForward,
                                      varSeqReverse, varIntQualReverse,
-                                     minOverlap, maxOverlap, maxFracMismatchOverlap,
-                                     greedyOverlap)) {
+                                     minOverlap, maxOverlap, 
+                                     minMergedLength, maxMergedLength, 
+                                     maxFracMismatchOverlap, greedyOverlap)) {
               // read should be filtered out - no valid overlap found
 #ifdef _OPENMP
               #pragma omp atomic
@@ -1561,6 +1591,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   param.push_back(mergeForwardReverse, "mergeForwardReverse");
   param.push_back(minOverlap, "minOverlap");
   param.push_back(maxOverlap, "maxOverlap");
+  param.push_back(minMergedLength, "minMergedLength");
+  param.push_back(maxMergedLength, "maxMergedLength");
   param.push_back(maxFracMismatchOverlap, "maxFracMismatchOverlap");
   param.push_back(greedyOverlap, "greedyOverlap");
   param.push_back(revComplForward, "revComplForward");
