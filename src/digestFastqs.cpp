@@ -536,7 +536,7 @@ bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQu
 
   // find overlap (score := number of overlap bases - number of mismatches in overlap)
   size_t o, i, j;
-  int bestScore = 0, bestO = -1, score;
+  int bestScore = -1, bestO = -1, score;
   double fracmm;
 
   for (o = maxOverlap; o >= minOverlap; o--) {

@@ -302,12 +302,16 @@ test_that("mergeReadPairsPartial works", {
   ## specify min/max merged length instead
   res2c <- mutscan::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, 1, 7, 9, 9, 1, FALSE)
   res2d <- mutscan::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, 1, 7, 11, 11, 1, FALSE)
+  res2e <- mutscan::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, 1, 7, 12, 12, 1, FALSE)
   expect_is(res2c, "list")
   expect_is(res2d, "list")
+  expect_is(res2e, "list")
   expect_identical(res2c$mergedSeq, "TTACACACA")
   expect_identical(res2c$mergedQual, rep(c(10L, 40L), c(2, 7)))
   expect_identical(res2d$mergedSeq, "TTACACACACA")
   expect_identical(res2d$mergedQual, rep(c(10L, 40L), c(4, 7)))
+  expect_identical(res2e$mergedSeq, "TTACAACACACA")
+  expect_identical(res2e$mergedQual, rep(c(10L, 40L), c(5, 7)))
   
   ## padded reads
   for (i in 1:10) {
