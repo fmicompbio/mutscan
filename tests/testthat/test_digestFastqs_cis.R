@@ -74,6 +74,21 @@ test_that("digestFastqs works as expected for cis experiments", {
                       "f.24.AGC", "f.4.CGC", "f.7.GTG", "f.9.GGC", "f.9.GTC")))
   expect_true(all(res$summaryTable$nbrReads == res$summaryTable$nbrUmis))
   
+  ## Check the number of reads with a given number of mismatches
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 0]), 77L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 1]), 88L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 2]), 2L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 0]), 77L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 1]), 90L)
+  
+  ## Similarly but for the number of unique sequences
+  expect_equal(sum(res$summaryTable$nbrMutBases == 0), 1L)
+  expect_equal(sum(res$summaryTable$nbrMutBases == 1), 64L)
+  expect_equal(sum(res$summaryTable$nbrMutBases == 2), 2L)
+  expect_equal(sum(res$summaryTable$nbrMutCodons == 0), 1L)
+  expect_equal(sum(res$summaryTable$nbrMutCodons == 1), 66L)
+  
+
   ## Check that mutant naming worked (compare to manual matching)
   example_seq <- paste0("ACTGATACACGCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCT", 
                         "GCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")
@@ -182,6 +197,22 @@ test_that("digestFastqs works as expected when specifying max nbr of mutated bas
   expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 3]),
                sort(c("f.12.G", "f.17.T", "f.60.G", "f.85.T", "f.96.G")))
   expect_true(all(res$summaryTable$nbrReads == res$summaryTable$nbrUmis))
+  
+  ## Check the number of reads with a given number of mismatches
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 0]), 77L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 1]), 88L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 2]), 37L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 0]), 77L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 1]), 90L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 2]), 35L)
+
+  ## Similarly but for the number of unique sequences
+  expect_equal(sum(res$summaryTable$nbrMutBases == 0), 1L)
+  expect_equal(sum(res$summaryTable$nbrMutBases == 1), 64L)
+  expect_equal(sum(res$summaryTable$nbrMutBases == 2), 36L)
+  expect_equal(sum(res$summaryTable$nbrMutCodons == 0), 1L)
+  expect_equal(sum(res$summaryTable$nbrMutCodons == 1), 66L)
+  expect_equal(sum(res$summaryTable$nbrMutCodons == 2), 34L)
   
   ## Check that mutant naming worked (compare to manual matching)
   example_seq <- paste0("ACTGATACACGCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCT",
