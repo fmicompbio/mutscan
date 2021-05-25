@@ -114,6 +114,8 @@ processReadsTrans <- function(Ldef) {
   ## Compare to wildtype, forward
   mutCodons <- NULL
   uniqueMutCodons <- NULL
+  mutBases <- NULL
+  uniqueMutBases <- NULL
   if (Ldef$wildTypeForward != "") {
     varForward <- Biostrings::subseq(fq1, start = Ldef$skipForward + Ldef$umiLengthForward + 
                                        Ldef$constantLengthForward + 1, width = Ldef$variableLengthForward)
@@ -161,6 +163,8 @@ processReadsTrans <- function(Ldef) {
     }
     codonMismatches <- codonMismatches[!toomanycodons]
     varForward <- varForward[!toomanycodons]
+    nbrMutCodons <- nbrMutCodons[!toomanycodons]
+    nbrMutBases <- S4Vectors::elementNROWS(unique(mismatchPositions[!toomanycodons]))
     ## Forbidden codons
     uniqueMutCodons <- unique(codonMismatches)
     mutCodons <- S4Vectors::endoapply(uniqueMutCodons, 
@@ -178,6 +182,8 @@ processReadsTrans <- function(Ldef) {
       fq2 <- fq2[!forbiddencodon]
     }
     mutCodons <- mutCodons[!forbiddencodon]
+    nbrMutCodonsTot <- nbrMutCodons[!forbiddencodon]
+    nbrMutBasesTot <- nbrMutBases[!forbiddencodon]
     uniqueMutCodons <- uniqueMutCodons[!forbiddencodon]
     splitMutCodons <- as(strsplit(gsub("([^.]{3})", "\\1\\.", 
                                        as.character(mutCodons)), ".", fixed = TRUE), 
@@ -218,6 +224,9 @@ processReadsTrans <- function(Ldef) {
     }
     mismatchPositions <- mismatchPositions[!toomanybases]
     varReverse <- varReverse[!toomanybases]
+    encodedMutCodonsForward <- encodedMutCodonsForward[!toomanybases]
+    nbrMutBasesTot <- nbrMutBasesTot[!toomanybases]
+    nbrMutCodonsTot <- nbrMutCodonsTot[!toomanybases]
     
     mismatchQualities <- Biostrings::quality(varReverse)[mismatchPositions]
     lowqualmm <- min(as(mismatchQualities, "IntegerList")) < Ldef$mutatedPhredMinReverse
@@ -227,6 +236,8 @@ processReadsTrans <- function(Ldef) {
     mismatchPositions <- mismatchPositions[!lowqualmm]
     varReverse <- varReverse[!lowqualmm]
     encodedMutCodonsForward <- encodedMutCodonsForward[!lowqualmm]
+    nbrMutBasesTot <- nbrMutBasesTot[!lowqualmm]
+    nbrMutCodonsTot <- nbrMutCodonsTot[!lowqualmm]
     ## Number of mutated codons
     codonMismatches <- (mismatchPositions - 1) %/% 3 + 1
     nbrMutCodons <- S4Vectors::elementNROWS(unique(codonMismatches))
@@ -237,6 +248,10 @@ processReadsTrans <- function(Ldef) {
     codonMismatches <- codonMismatches[!toomanycodons]
     varReverse <- varReverse[!toomanycodons]
     encodedMutCodonsForward <- encodedMutCodonsForward[!toomanycodons]
+    nbrMutBasesTot <- nbrMutBasesTot[!toomanycodons]
+    nbrMutCodonsTot <- nbrMutCodonsTot[!toomanycodons]
+    nbrMutCodons <- nbrMutCodons[!toomanycodons]
+    nbrMutBases <- S4Vectors::elementNROWS(unique(mismatchPositions[!toomanycodons]))
     ## Forbidden codons
     uniqueMutCodons <- unique(codonMismatches)
     mutCodons <- S4Vectors::endoapply(uniqueMutCodons, 
@@ -253,6 +268,10 @@ processReadsTrans <- function(Ldef) {
     fq2 <- fq2[!forbiddencodon]
     encodedMutCodonsForward <- encodedMutCodonsForward[!forbiddencodon]
     mutCodons <- mutCodons[!forbiddencodon]
+    nbrMutCodonsTot <- nbrMutCodonsTot[!forbiddencodon]
+    nbrMutBasesTot <- nbrMutBasesTot[!forbiddencodon]
+    nbrMutCodons <- nbrMutCodons[!forbiddencodon]
+    nbrMutBases <- nbrMutBases[!forbiddencodon]
     uniqueMutCodons <- uniqueMutCodons[!forbiddencodon]
     splitMutCodons <- as(strsplit(gsub("([^.]{3})", "\\1\\.", 
                                        as.character(mutCodons)), ".", fixed = TRUE), 
@@ -262,6 +281,10 @@ processReadsTrans <- function(Ldef) {
       uniqueMutCodons),
       sep = "_")
     mutNames <- paste(encodedMutCodonsForward, encodedMutCodonsReverse, sep = "_")
+    
+    nbrMutCodonsTot <- nbrMutCodonsTot + nbrMutCodons
+    nbrMutBasesTot <- nbrMutBasesTot + nbrMutBases
+    
   } else {
     mutNames <- encodedMutCodonsForward
   }
@@ -301,6 +324,26 @@ processReadsTrans <- function(Ldef) {
   uniqueMutCodons <- uniqueMutCodons[keep]
   mutNames <- mutNames[keep]
   
+  if (!is.null(nbrMutBasesTot)) {
+    nbrMutBasesTot <- nbrMutBasesTot[keep]
+    nbrMutCodonsTot <- nbrMutCodonsTot[keep]
+    ## Number of mutated bases and codons
+    varForwardFinal <- Biostrings::subseq(
+      fq1, start = Ldef$skipForward + Ldef$umiLengthForward + 
+        Ldef$constantLengthForward + 1, width = Ldef$variableLengthForward)
+    varReverseFinal <- Biostrings::subseq(
+      fq2, start = Ldef$skipReverse + Ldef$umiLengthReverse + 
+        Ldef$constantLengthReverse + 1, width = Ldef$variableLengthReverse)
+    message("Number of mutated codons per retained read: ")
+    print(table(nbrMutCodonsTot))
+    message("Number of different reads with each number of mismatched codons: ")
+    print(table(nbrMutCodonsTot[!duplicated(paste0(varForwardFinal, "_", varReverseFinal))]))
+    message("Number of mutated bases per retained read: ")
+    print(table(nbrMutBasesTot))
+    message("Number of different reads with each number of mismatched bases: ")
+    print(table(nbrMutBasesTot[!duplicated(paste0(varForwardFinal, "_", varReverseFinal))]))
+    
+  }
 
   mutNames <- gsub("^_", "", gsub("_$", "", mutNames))
   mutNames[mutNames == ""] <- "WT"

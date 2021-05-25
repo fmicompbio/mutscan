@@ -86,55 +86,66 @@ processReadsCis <- function(Ldef) {
   mismatchPositions <- mismatchPositions[!lowqualmm]
   varForward <- varForward[!lowqualmm]
   ## Number of mutated codons/bases
+  codonMismatches <- (mismatchPositions - 1) %/% 3 + 1
+  nbrMutCodons <- S4Vectors::elementNROWS(unique(codonMismatches))
+  baseMismatches <- mismatchPositions
+  nbrMutBases <- S4Vectors::elementNROWS(unique(baseMismatches))
   if (Ldef$nbrMutatedCodonsMaxForward != (-1)) {
-    codonMismatches <- (mismatchPositions - 1) %/% 3 + 1
-    nbrMutCodons <- S4Vectors::elementNROWS(unique(codonMismatches))
     toomanycodons <- nbrMutCodons > Ldef$nbrMutatedCodonsMaxForward
   } else {
-    codonMismatches <- mismatchPositions
-    nbrMutCodons <- S4Vectors::elementNROWS(unique(codonMismatches))
-    toomanycodons <- nbrMutCodons > Ldef$nbrMutatedBasesMaxForward
+    toomanycodons <- nbrMutBases > Ldef$nbrMutatedBasesMaxForward
   }
   message("Number of reads with too many mutated codons: ", sum(toomanycodons))  ## 581
   fq1 <- fq1[!toomanycodons]
   fq2 <- fq2[!toomanycodons]
   codonMismatches <- codonMismatches[!toomanycodons]
+  nbrMutCodons <- nbrMutCodons[!toomanycodons]
+  baseMismatches <- baseMismatches[!toomanycodons]
+  nbrMutBases <- nbrMutBases[!toomanycodons]
   varForward <- varForward[!toomanycodons]
   ## Forbidden codons
+  # if (Ldef$nbrMutatedCodonsMaxForward != (-1)) {
+  uniqueMutCodons <- unique(codonMismatches)
+  uniqueMutBases <- unique(baseMismatches)
+  mutBases <- S4Vectors::endoapply(uniqueMutBases,
+                                    function(v) v)
+  mutBases <- as(varForward, "DNAStringSet")[mutBases]
+  mutCodons <- S4Vectors::endoapply(uniqueMutCodons, 
+                                    function(v) rep(3 * v, each = 3) + c(-2, -1, 0))
+  mutCodons <- as(varForward, "DNAStringSet")[mutCodons]
+  matchForbidden <- Biostrings::vmatchPattern(
+    pattern = Ldef$forbiddenMutatedCodonsForward, 
+    as(mutCodons, "DNAStringSet"), 
+    fixed = FALSE)
+  forbiddencodon <- sapply(BiocGenerics::relist(start(unlist(matchForbidden)) %% 3==1, 
+                                                matchForbidden), function(i) any(i))
+  message("Number of reads with forbidden codons: ", sum(forbiddencodon))  ## 82
+  fq1 <- fq1[!forbiddencodon]
+  fq2 <- fq2[!forbiddencodon]
+  varForward <- varForward[!forbiddencodon]
+  mutCodons <- mutCodons[!forbiddencodon]
+  mutBases <- mutBases[!forbiddencodon]
+  uniqueMutCodons <- uniqueMutCodons[!forbiddencodon]
+  uniqueMutBases <- uniqueMutBases[!forbiddencodon]
+  nbrMutCodons <- nbrMutCodons[!forbiddencodon]
+  nbrMutBases <- nbrMutBases[!forbiddencodon]
   if (Ldef$nbrMutatedCodonsMaxForward != (-1)) {
-    uniqueMutCodons <- unique(codonMismatches)
-    mutCodons <- S4Vectors::endoapply(uniqueMutCodons, 
-                                      function(v) rep(3 * v, each = 3) + c(-2, -1, 0))
-    mutCodons <- as(varForward, "DNAStringSet")[mutCodons]
-    matchForbidden <- Biostrings::vmatchPattern(
-      pattern = Ldef$forbiddenMutatedCodonsForward, 
-      as(mutCodons, "DNAStringSet"), 
-      fixed = FALSE)
-    forbiddencodon <- sapply(BiocGenerics::relist(start(unlist(matchForbidden)) %% 3==1, 
-                                                  matchForbidden), function(i) any(i))
-    message("Number of reads with forbidden codons: ", sum(forbiddencodon))  ## 82
-    fq1 <- fq1[!forbiddencodon]
-    fq2 <- fq2[!forbiddencodon]
-    varForward <- varForward[!forbiddencodon]
-    mutCodons <- mutCodons[!forbiddencodon]
-    uniqueMutCodons <- uniqueMutCodons[!forbiddencodon]
     splitMutCodons <- as(strsplit(gsub("([^.]{3})", "\\1\\.", 
                                        as.character(mutCodons)), ".", fixed = TRUE), 
                          "CharacterList")
+    encodedMutCodonsForward <- S4Vectors::unstrsplit(BiocGenerics::relist(
+      paste0("f", unlist(uniqueMutCodons), unlist(splitMutCodons)), 
+      uniqueMutCodons),
+      sep = "_")
   } else {
-    uniqueMutCodons <- unique(codonMismatches)
-    mutCodons <- S4Vectors::endoapply(uniqueMutCodons, 
-                                      function(v) v)
-    mutCodons <- as(varForward, "DNAStringSet")[mutCodons]
-    splitMutCodons <- as(strsplit(gsub("([^.]{1})", "\\1\\.", 
-                                       as.character(mutCodons)), ".", fixed = TRUE), 
-                         "CharacterList")
+    splitMutBases <- as(strsplit(gsub("([^.]{1})", "\\1\\.",
+                                      as.character(mutBases)), ".", fixed = TRUE),
+                        "CharacterList")
+    encodedMutCodonsForward <- S4Vectors::unstrsplit(BiocGenerics::relist(
+      paste0("f", unlist(uniqueMutBases), unlist(splitMutBases)), 
+      uniqueMutBases),
+      sep = "_")
   }
-  
-  encodedMutCodonsForward <- S4Vectors::unstrsplit(BiocGenerics::relist(
-    paste0("f", unlist(uniqueMutCodons), unlist(splitMutCodons)), 
-    uniqueMutCodons),
-    sep = "_")
   
   mutNames <- encodedMutCodonsForward
   mutNames <- gsub("^_", "", gsub("_$", "", mutNames))
@@ -145,6 +156,16 @@ processReadsCis <- function(Ldef) {
   
   ## Retained reads
   message("Number of retained reads: ", length(fq1))  ## 167
+  
+  ## Number of mutated bases and codons
+  message("Number of mutated codons per retained read: ")
+  print(table(nbrMutCodons))
+  message("Number of different reads with each number of mismatched codons: ")
+  print(table(nbrMutCodons[!duplicated(varForward)]))
+  message("Number of mutated bases per retained read: ")
+  print(table(nbrMutBases))
+  message("Number of different reads with each number of mismatched bases: ")
+  print(table(nbrMutBases[!duplicated(varForward)]))
   
   ## Error statistics
   ## Forward

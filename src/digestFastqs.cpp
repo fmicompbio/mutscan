@@ -146,11 +146,13 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
                        const int nbrMutatedCodonsMax, const std::set<std::string> &forbiddenCodons,
                        const std::string codonPrefix, const int nbrMutatedBasesMax, 
                        int &nMutQualTooLow, int &nTooManyMutCodons, int &nForbiddenCodons, 
-                       int &nTooManyMutBases, std::string &mutantName, const std::string mutNameDelimiter) {
+                       int &nTooManyMutBases, std::string &mutantName, int &nMutBases,
+                       int &nMutCodons, const std::string mutNameDelimiter) {
   // exactly one of nbrMutatedCodonsMax or nbrMutatedBasesMax should be -1 (checked in the R code).
   // the one that is not -1 will be used for filtering and naming the mutant
   
-  std::set<std::string> mutatedCodonsOrBases;
+  std::set<std::string> mutatedCodons;
+  std::set<std::string> mutatedBases;
   std::set<std::string>::iterator mutatedCodonIt;
   bool hasLowQualMutation, hasForbidden;
   
@@ -165,20 +167,20 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
         break;
       }
       // add codon or base (depending on which to consider) to mutatedCodonsOrBases
-      if (nbrMutatedCodonsMax != (-1)) {
-        // consider codons
-        mutatedCodonsOrBases.insert(codonPrefix + mutNameDelimiter + 
-          std::to_string((int)(i / 3) + 1) + mutNameDelimiter + 
-          varSeq.substr((int)(i / 3) * 3, 3) +
-          std::string("_"));
-      } else {
+      // if (nbrMutatedCodonsMax != (-1)) {
+      // consider codons
+      mutatedCodons.insert(codonPrefix + mutNameDelimiter + 
+        std::to_string((int)(i / 3) + 1) + mutNameDelimiter + 
+        varSeq.substr((int)(i / 3) * 3, 3) +
+        std::string("_"));
+      // } else {
         // nbrMutatedBasesMax != -1
         // consider individual bases
-        mutatedCodonsOrBases.insert(codonPrefix + mutNameDelimiter + 
-          std::to_string((int)(i) + 1) + mutNameDelimiter + 
-          varSeq.substr((int)(i), 1) +
-          std::string("_"));
-      }
+      mutatedBases.insert(codonPrefix + mutNameDelimiter + 
+        std::to_string((int)(i) + 1) + mutNameDelimiter + 
+        varSeq.substr((int)(i), 1) +
+        std::string("_"));
+      // }
     }
   }
   if (hasLowQualMutation) {
@@ -191,7 +193,7 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
   // check if there are too many mutated codons/bases
   if (nbrMutatedCodonsMax != (-1)) {
     // consider codons
-    if ((int)mutatedCodonsOrBases.size() > nbrMutatedCodonsMax) {
+    if ((int)mutatedCodons.size() > nbrMutatedCodonsMax) {
 #ifdef _OPENMP
       #pragma omp atomic
 #endif
@@ -200,7 +202,7 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
     }
   } else {
     //consider bases
-    if ((int)mutatedCodonsOrBases.size() > nbrMutatedBasesMax) {
+    if ((int)mutatedBases.size() > nbrMutatedBasesMax) {
 #ifdef _OPENMP
       #pragma omp atomic
 #endif
@@ -210,29 +212,38 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
   }
   
   // check if there are forbidden codons
-  if (nbrMutatedCodonsMax != (-1)) {
-    hasForbidden = false;
-    for (mutatedCodonIt = mutatedCodonsOrBases.begin(); mutatedCodonIt != mutatedCodonsOrBases.end(); mutatedCodonIt++) {
-      if (forbiddenCodons.find((*mutatedCodonIt).substr((*mutatedCodonIt).length() - 4, 3)) != forbiddenCodons.end()) { // found forbidden codon
-        hasForbidden = true;
-        break;
-      }
-    }
-    if (hasForbidden) {
-#ifdef _OPENMP
-      #pragma omp atomic
-#endif
-      nForbiddenCodons++;
-      return true;
+  // if (nbrMutatedCodonsMax != (-1)) {
+  hasForbidden = false;
+  for (mutatedCodonIt = mutatedCodons.begin(); mutatedCodonIt != mutatedCodons.end(); mutatedCodonIt++) {
+    if (forbiddenCodons.find((*mutatedCodonIt).substr((*mutatedCodonIt).length() - 4, 3)) != forbiddenCodons.end()) { // found forbidden codon
+      hasForbidden = true;
+      break;
     }
   }
+  if (hasForbidden) {
+#ifdef _OPENMP
+    #pragma omp atomic
+#endif
+    nForbiddenCodons++;
+    return true;
+  }
+  // }
+  
+  nMutBases += (int)mutatedBases.size();
+  nMutCodons += (int)mutatedCodons.size();
+    
   // create name for mutant
-  std::vector<std::string> mutatedCodonsOrBasesSorted(mutatedCodonsOrBases.begin(), mutatedCodonsOrBases.end());
-  std::sort(mutatedCodonsOrBasesSorted.begin(), mutatedCodonsOrBasesSorted.end(), std::bind(compareCodonPositions, _1, _2, *(mutNameDelimiter.c_str())));
+  std::vector<std::string> mutatedCodonsOrBasesSorted;
+  if (nbrMutatedCodonsMax != (-1)) {
+    mutatedCodonsOrBasesSorted.assign(mutatedCodons.begin(), mutatedCodons.end());
+  } else {
+    mutatedCodonsOrBasesSorted.assign(mutatedBases.begin(), mutatedBases.end());
+  }
+  std::sort(mutatedCodonsOrBasesSorted.begin(), mutatedCodonsOrBasesSorted.end(), 
+            std::bind(compareCodonPositions, _1, _2, *(mutNameDelimiter.c_str())));
   for (size_t i = 0; i < mutatedCodonsOrBasesSorted.size(); i++) {
     mutantName += mutatedCodonsOrBasesSorted[i];
   }
-  
   // if no mutant codons, name as <codonPrefix>.0.WT
   if (mutatedCodonsOrBasesSorted.size() == 0) {
     mutantName += codonPrefix + mutNameDelimiter + "0" + mutNameDelimiter + "WT_";
@@ -270,6 +281,8 @@ struct mutantInfo {
   int nReads;                     // number of reads
   int maxNReads;                  // maximum number of reads for an individual mutant, in case of collapsing multiple
                                   // mutants into one entry
+  int nMutBases;                  // number of mutated bases
+  int nMutCodons;                 // number of mutated codons
   std::set<std::string> sequence; // set of sequences for that mutant
 };
 
@@ -475,6 +488,7 @@ List test_decomposeRead(const std::string sseq,
 bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQualForward,
                           std::string &varSeqReverse, std::vector<int> &varIntQualReverse,
                           size_t minOverlap = 0, size_t maxOverlap = 0, 
+                          size_t minMergedLength = 0, size_t maxMergedLength = 0,
                           double maxFracMismatchOverlap = 0,
                           bool greedy = true) {
   // initialize overlap parameters
@@ -484,21 +498,45 @@ bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQu
     if (minOverlap > lenR) {
       minOverlap = lenR;
     }
-  } else if (minOverlap > lenF || minOverlap > lenR) {
+  }
+  // if maxMergedLength is 0, set it to the sum of lenF and lenR
+  // (the merged sequence can't be longer than that)
+  if (maxMergedLength == 0) {
+    maxMergedLength = lenF + lenR;
+  }
+  // if maxMergedLength is specified, adjust allowed minOverlap
+  if (minOverlap < (lenF + lenR - maxMergedLength)) {
+    minOverlap = (lenF + lenR - maxMergedLength);
+  }
+  if (minOverlap > lenF || minOverlap > lenR) {
     return true; //  no valid overlap possible
   }
+  
   if (maxOverlap == 0) {
     maxOverlap = lenF;
     if (maxOverlap > lenR) {
       maxOverlap = lenR;
     }
-  } else if (maxOverlap < minOverlap) {
+  }
+  // if minMergedLength is 0, set it to the larger of lenF and lenR
+  // (the merged sequence can't be shorter than that)
+  if (minMergedLength == 0) {
+    minMergedLength = lenF;
+    if (minMergedLength < lenR) {
+      minMergedLength = lenR;
+    }
+  }
+  // if minMergedLength is specified, adjust allowed maxOverlap
+  if (maxOverlap > (lenF + lenR - minMergedLength)) {
+    maxOverlap = (lenF + lenR - minMergedLength);
+  }
+  if (maxOverlap < minOverlap) {
     return true; //  no valid overlap possible
   }
 
   // find overlap (score := number of overlap bases - number of mismatches in overlap)
   size_t o, i, j;
-  int bestScore = 0, bestO = -1, score;
+  int bestScore = -1, bestO = -1, score;
   double fracmm;
 
   for (o = maxOverlap; o >= minOverlap; o--) {
@@ -553,10 +591,13 @@ bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQu
 List test_mergeReadPairPartial(std::string seqF, std::vector<int> qualF,
                                std::string seqR, std::vector<int> qualR,
                                size_t minOverlap = 0, size_t maxOverlap = 0, 
+                               size_t minMergedLength = 0, size_t maxMergedLength = 0,
                                double maxFracMismatchOverlap = 0,
                                bool greedy = true) {
   mergeReadPairPartial(seqF, qualF, seqR, qualR,
-                       minOverlap, maxOverlap, maxFracMismatchOverlap, greedy);
+                       minOverlap, maxOverlap, 
+                       minMergedLength, maxMergedLength,
+                       maxFracMismatchOverlap, greedy);
   List L = List::create(Named("mergedSeq") = seqF,
                         Named("mergedQual") = qualF);
   return L;
@@ -684,6 +725,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                      std::vector<std::string> fastqReverseVect,
                      bool mergeForwardReverse, 
                      size_t minOverlap, size_t maxOverlap, 
+                     size_t minMergedLength, size_t maxMergedLength, 
                      double maxFracMismatchOverlap, bool greedyOverlap,
                      bool revComplForward, bool revComplReverse,
                      std::string elementsForward, 
@@ -832,12 +874,18 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   // iterate over fastq files
   // --------------------------------------------------------------------------
   for (size_t f = 0; f < fastqForwardVect.size(); f++) {
-    bool done = false;
+    // if maxNReads has been reached in the previous file, break
+    bool done;
+    if (maxNReads != (-1) && nTot >= maxNReads) {
+      done = true;
+    } else {
+      done = false;
+    }
     std::string fastqForward = fastqForwardVect[f];
     std::string fastqReverse = fastqReverseVect[f];
     
     // --------------------------------------------------------------------------
-    // open fastq files
+    // open fastq file(s)
     // --------------------------------------------------------------------------
     gzFile file1 = openFastq(fastqForward, "rb");
     gzFile file2 = NULL;
@@ -889,6 +937,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           std::string varQualReverse = "", umiSeq = "", constSeqForward = "";
           std::string constSeqReverse = "", constQualForward = "", constQualReverse = "";
           std::string mutantName = "";
+          int nMutBases = 0, nMutCodons = 0;
           int maxSim = 0;
           int constantLengthForward, constantLengthReverse;
           std::map<std::string, mutantInfo>::iterator mutantSummaryParIt;
@@ -973,8 +1022,9 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           if (mergeForwardReverse) {
             if (mergeReadPairPartial(varSeqForward, varIntQualForward,
                                      varSeqReverse, varIntQualReverse,
-                                     minOverlap, maxOverlap, maxFracMismatchOverlap,
-                                     greedyOverlap)) {
+                                     minOverlap, maxOverlap, 
+                                     minMergedLength, maxMergedLength, 
+                                     maxFracMismatchOverlap, greedyOverlap)) {
               // read should be filtered out - no valid overlap found
 #ifdef _OPENMP
               #pragma omp atomic
@@ -1061,7 +1111,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             if (compareToWildtype(varSeqForward, wtForward, varIntQualForward,
                                   mutatedPhredMinForward, nbrMutatedCodonsMaxForward, forbiddenCodonsForward,
                                   wtNameForward, nbrMutatedBasesMaxForward, nMutQualTooLow, 
-                                  nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, mutantName, mutNameDelimiter)) {
+                                  nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, mutantName, 
+                                  nMutBases, nMutCodons, mutNameDelimiter)) {
               // read is to be filtered out
               chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
               continue;
@@ -1110,7 +1161,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             if (compareToWildtype(varSeqReverse, wtReverse, varIntQualReverse,
                                   mutatedPhredMinReverse, nbrMutatedCodonsMaxReverse, forbiddenCodonsReverse,
                                   wtNameReverse, nbrMutatedBasesMaxReverse, nMutQualTooLow, 
-                                  nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, mutantName, mutNameDelimiter)) {
+                                  nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, mutantName, 
+                                  nMutBases, nMutCodons, mutNameDelimiter)) {
               // read is to be filtered out
               chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
               continue;
@@ -1235,6 +1287,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           if (mutantName.length() > 0) { // we have a least one mutation, or sequence-based name
             mutantName.pop_back(); // remove '_' at the end
           } else {
+            // will we ever go in here?
             if (wildTypeForward[0].compare("") != 0 || 
                 (!noReverse && wildTypeReverse[0].compare("") != 0)) {
               mutantName = "WT";
@@ -1262,6 +1315,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             mutantInfo newMutant;
             newMutant.nReads = 1;
             newMutant.maxNReads = 1;
+            newMutant.nMutBases = nMutBases;
+            newMutant.nMutCodons = nMutCodons;
             if (umiSeq != "") {
               newMutant.umi.insert(umiSeq);
             }
@@ -1289,13 +1344,16 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     if (fastqReverse.compare("") != 0) {
       gzclose(file2);
     }
-    if (outfile1 != NULL) {
-      gzclose(outfile1);
-    }
-    if (outfile2 != NULL) {
-      gzclose(outfile2);
-    }
   } // iterate over fastq files
+  
+  // close output files
+  if (outfile1 != NULL) {
+    gzclose(outfile1);
+  }
+  if (outfile2 != NULL) {
+    gzclose(outfile2);
+  }
+  
   if (verbose) {
     Rcout << "done reading sequences" << std::endl;
     Rcout << "retained " << mutantSummary.size() << " unique features" << std::endl;
@@ -1492,6 +1550,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   size_t dfLen = mutantSummary.size();
   std::vector<std::string> dfSeq(dfLen, ""), dfName(dfLen, "");
   std::vector<int> dfReads(dfLen, 0), dfUmis(dfLen, 0), dfMaxReads(dfLen, 0);
+  std::vector<int> dfMutBases(dfLen, 0), dfMutCodons(dfLen, 0); 
   int i = 0;
   for (mutantSummaryIt = mutantSummary.begin(); mutantSummaryIt != mutantSummary.end(); mutantSummaryIt++) {
     // collapse all sequences associated with the mutant
@@ -1507,6 +1566,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     dfReads[i] = (*mutantSummaryIt).second.nReads;
     dfMaxReads[i] = (*mutantSummaryIt).second.maxNReads;
     dfUmis[i] = (*mutantSummaryIt).second.umi.size();
+    dfMutBases[i] = (*mutantSummaryIt).second.nMutBases;
+    dfMutCodons[i] = (*mutantSummaryIt).second.nMutCodons;
     i++;
   }
   // put back wildtype sequences and names in Rcpp::StringVector
@@ -1535,6 +1596,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                                      Named("nbrRetained") = nRetain);
   DataFrame df = DataFrame::create(Named("mutantName") = dfName,
                                    Named("sequence") = dfSeq,
+                                   Named("nbrMutBases") = dfMutBases,
+                                   Named("nbrMutCodons") = dfMutCodons,
                                    Named("nbrReads") = dfReads,
                                    Named("maxNbrReads") = dfMaxReads,
                                    Named("nbrUmis") = dfUmis,
@@ -1552,6 +1615,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   param.push_back(mergeForwardReverse, "mergeForwardReverse");
   param.push_back(minOverlap, "minOverlap");
   param.push_back(maxOverlap, "maxOverlap");
+  param.push_back(minMergedLength, "minMergedLength");
+  param.push_back(maxMergedLength, "maxMergedLength");
   param.push_back(maxFracMismatchOverlap, "maxFracMismatchOverlap");
   param.push_back(greedyOverlap, "greedyOverlap");
   param.push_back(revComplForward, "revComplForward");
