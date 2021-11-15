@@ -7,11 +7,13 @@
 calculateRelativeFC(
   se,
   design,
-  coef,
+  coef = NULL,
+  contrast = NULL,
   WTrows,
   selAssay = "counts",
   pseudocount = 1,
-  method = "edgeR"
+  method = "edgeR",
+  csawnorm = FALSE
 )
 }
 \arguments{
@@ -20,7 +22,9 @@ calculateRelativeFC(
 \item{design}{Design matrix. The rows of the design matrix must be in the
 same order as the columns in \code{se}.}
 
-\item{coef}{Coefficient(s) to test with edgeR.}
+\item{coef}{Coefficient(s) to test with edgeR or limma.}
+
+\item{contrast}{Numeric contrast to test with edgeR or limma.}
 
 \item{WTrows}{Vector of row names that will be used as the reference when
 calculating logFCs and statistics. If more than one value is provided, the
@@ -36,6 +40,10 @@ normalization factors).}
 transform the counts and estimate observation weights before applying
 limma. In this case, the results also contain the standard errors of the
 logFCs.}
+
+\item{csawnorm}{Logical scalar. If \code{TRUE}, uses 
+\code{csaw::normOffsets()} to estimate offsets for use with \code{edgeR}, 
+rather than the default TMM-based size factors.}
 }
 \description{
 Calculate logFCs and associated p-values for a given comparison, using the
