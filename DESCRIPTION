@@ -41,7 +41,8 @@ Suggests:
     BiocStyle,
     knitr,
     rmarkdown,
-    Biostrings
+    Biostrings,
+    plotly
 License: GPL-2
 Encoding: UTF-8
 RoxygenNote: 7.1.2
