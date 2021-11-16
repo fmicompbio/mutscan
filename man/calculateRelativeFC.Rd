@@ -9,11 +9,11 @@ calculateRelativeFC(
   design,
   coef = NULL,
   contrast = NULL,
-  WTrows,
+  WTrows = NULL,
   selAssay = "counts",
   pseudocount = 1,
   method = "edgeR",
-  csawnorm = FALSE
+  normMethod = ifelse(is.null(WTrows), "TMM", "sum")
 )
 }
 \arguments{
@@ -41,14 +41,15 @@ transform the counts and estimate observation weights before applying
 limma. In this case, the results also contain the standard errors of the
 logFCs.}
 
-\item{csawnorm}{Logical scalar. If \code{TRUE}, uses 
-\code{csaw::normOffsets()} to estimate offsets for use with \code{edgeR}, 
-rather than the default TMM-based size factors.}
+\item{normMethod}{Character scalar indicating which normalization method 
+should be used to calculate size factors. Should be either \code{"TMM"} or 
+\code{"csaw"} when \code{WTrows} is \code{NULL}, and \code{"geomean"} or 
+\code{"sum"} when \code{WTrows} is provided.}
 }
 \description{
-Calculate logFCs and associated p-values for a given comparison, using the
-Negative Binomial quasi-likelihood framework provided by edgeR. The observed
-counts for the WT variant will be used as offsets in the model.
+Calculate logFCs and associated p-values for a given comparison, using 
+either limma or the Negative Binomial quasi-likelihood framework of edgeR. 
+The observed counts for the WT variants can be used as offsets in the model.
 }
 \author{
 Charlotte Soneson, Michael Stadler

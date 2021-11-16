@@ -1,8 +1,8 @@
 #' Calculate logFCs relative to WT using edgeR
 #'
-#' Calculate logFCs and associated p-values for a given comparison, using the
-#' Negative Binomial quasi-likelihood framework provided by edgeR. The observed
-#' counts for the WT variant will be used as offsets in the model.
+#' Calculate logFCs and associated p-values for a given comparison, using 
+#' either limma or the Negative Binomial quasi-likelihood framework of edgeR. 
+#' The observed counts for the WT variants can be used as offsets in the model.
 #'
 #' @param se SummarizedExperiment object.
 #' @param design Design matrix. The rows of the design matrix must be in the
@@ -20,24 +20,26 @@
 #'     transform the counts and estimate observation weights before applying
 #'     limma. In this case, the results also contain the standard errors of the
 #'     logFCs.
-#' @param csawnorm Logical scalar. If \code{TRUE}, uses 
-#'     \code{csaw::normOffsets()} to estimate offsets for use with \code{edgeR}, 
-#'     rather than the default TMM-based size factors.
+#' @param normMethod Character scalar indicating which normalization method 
+#'     should be used to calculate size factors. Should be either \code{"TMM"} or 
+#'     \code{"csaw"} when \code{WTrows} is \code{NULL}, and \code{"geomean"} or 
+#'     \code{"sum"} when \code{WTrows} is provided.
 #' 
 #' @author Charlotte Soneson, Michael Stadler
 #' 
 #' @export
 #' 
 #' @importFrom edgeR DGEList scaleOffset estimateDisp glmQLFit glmQLFTest
-#'     topTags predFC topTags calcNormFactors
+#'     topTags predFC topTags calcNormFactors effectiveLibSizes
 #' @importFrom SummarizedExperiment colData assay assayNames
-#' @importFrom limma voom eBayes topTable lmFit
+#' @importFrom limma voom eBayes topTable lmFit contrasts.fit
 #' @importFrom csaw normOffsets
 #' 
 calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL, 
-                                WTrows, selAssay = "counts", 
+                                WTrows = NULL, selAssay = "counts", 
                                 pseudocount = 1, method = "edgeR", 
-                                csawnorm = FALSE) {
+                                normMethod = ifelse(is.null(WTrows), 
+                                                    "TMM", "sum")) {
     if (!is(se, "SummarizedExperiment")) {
         stop("'se' must be a SummarizedExperiment object.")
     }
@@ -68,39 +70,53 @@ calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
         stop("'pseudocount' must be a non-negative scalar value.")
     }
     
-    if (csawnorm && !is.null(WTrows)) {
-        stop("'csawnorm = TRUE' can only be used with WTrows = NULL.")
+    if (normMethod %in% c("csaw", "TMM") && !is.null(WTrows)) {
+        stop("normMethod = '", normMethod, "' can only be used when WTrows is NULL.")
+    }
+
+    if (normMethod %in% c("sum", "geomean") && is.null(WTrows)) {
+        stop("normMethod = '", normMethod, "' can only be used when WTrows is not NULL.")
     }
     
-    if (csawnorm && method == "limma") {
-        stop("'csawnorm = TRUE' can only be used with method = 'edgeR'.")
+    if (normMethod == "csaw" && method == "limma") {
+        stop("normMethod = 'csaw' can only be used with method = 'edgeR'.")
     }
     
     if (is.null(coef) && is.null(contrast)) {
-        stop("Both 'coef' and 'contrast' can not be NULL.")
+        stop("'coef' and 'contrast' can not both be NULL.")
+    }
+    
+    if (!is.null(contrast) && !is.null(dim(contrast))) {
+        stop("'contrast' must be a vector.")
     }
     
     ## Create DGEList from SummarizedExperiment
     dge <- edgeR::DGEList(counts = as.matrix(SummarizedExperiment::assay(se, selAssay)),
                           samples = SummarizedExperiment::colData(se))
-    if (csawnorm) {
+    if (normMethod == "csaw") {
         ## csaw normalization - also calculate normalization factors since 
         ## aveLogCPM does not use provided offsets
         ## In this case, we know that WTrows is NULL, so all features 
         ## will be used for the normalization
         dge <- edgeR::calcNormFactors(dge)
         dge <- csaw::normOffsets(dge)
-    } else if (is.null(WTrows)) {
+    } else if (normMethod == "TMM") {
         ## TMM normalization, with all features
         dge <- edgeR::calcNormFactors(dge)
-    } else {
+    } else if (normMethod == "geomean") {
         ## Use size factors (offsets) derived from the geometric mean 
         ## of the WT rows
         tmp0 <- dge$counts[WTrows, , drop = FALSE]
         tmp0 <- tmp0[apply(tmp0, 1, min) > 0, , drop = FALSE]
         offsets <- apply(tmp0, 2, function(s) exp(mean(log(s))))
-        offsets <- matrix(offsets, nrow = nrow(dge), ncol = length(offsets), byrow = TRUE)
         dge <- edgeR::scaleOffset(dge, log(offsets))
+    } else if (normMethod == "sum") {
+        ## Use size factors (offsets) derived from the sum of the 
+        ## WT rows
+        tmp0 <- dge$counts[WTrows, , drop = FALSE]
+        dge <- edgeR::scaleOffset(dge, log(colSums(tmp0)))
+    } else {
+        stop("Unknown 'normMethod'")
     }
     
     ## Fit model and perform test
@@ -115,17 +131,18 @@ calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
         if (length(coef) == 1 && is.null(contrast)) {
             tt$logFC_shrunk <- predfc[, coef]
         } else if (!is.null(contrast)) {
-            tt$logFC_shrunk <- predfc %*% cbind(contrast)
+            tt$logFC_shrunk <- c(predfc %*% cbind(contrast))
         }
     } else if (method == "limma") {
         if (!is.null(dge$offset)) {
             vm <- limma::voom(dge, design = design, lib.size = exp(dge$offset))
         } else {
-            vm <- limma::voom(dge, design = design, lib.size = effectiveLibSizes(dge))
+            vm <- limma::voom(dge, design = design, 
+                              lib.size = edgeR::effectiveLibSizes(dge))
         }
         fit <- limma::lmFit(vm, design = design)
         if (!is.null(contrast)) {
-            fit <- contrasts.fit(fit, contrasts = contrast)
+            fit <- limma::contrasts.fit(fit, contrasts = contrast)
             coef <- 1
         }
         fit <- limma::eBayes(fit)
