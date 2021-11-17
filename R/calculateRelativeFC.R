@@ -108,8 +108,8 @@ calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
         ## of the WT rows
         tmp0 <- dge$counts[WTrows, , drop = FALSE]
         tmp0 <- tmp0[apply(tmp0, 1, min) > 0, , drop = FALSE]
-        offsets <- apply(tmp0, 2, function(s) exp(mean(log(s))))
-        dge <- edgeR::scaleOffset(dge, log(offsets))
+        logoffsets <- apply(tmp0, 2, function(s) mean(log(s)))
+        dge <- edgeR::scaleOffset(dge, logoffsets)
     } else if (normMethod == "sum") {
         ## Use size factors (offsets) derived from the sum of the 
         ## WT rows
