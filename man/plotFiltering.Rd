@@ -9,7 +9,9 @@ plotFiltering(
   valueType = "reads",
   onlyActiveFilters = TRUE,
   displayNumbers = TRUE,
-  numberSize = 4
+  numberSize = 4,
+  plotType = "remaining",
+  facetBy = "sample"
 )
 }
 \arguments{
@@ -18,7 +20,7 @@ plotFiltering(
 
 \item{valueType}{Either "reads" or "fractions", indicating whether to 
 plot the number of reads, or the fraction of the total number of reads,
-that are retained after each filtering step.}
+that are retained after/filtered out in each filtering step.}
 
 \item{onlyActiveFilters}{Logical scalar, whether to only include the 
 active filters (i.e., where any read was filtered out in any of the samples). 
@@ -29,6 +31,12 @@ number (or fraction) of reads retained at every filtering step.}
 
 \item{numberSize}{Numeric scalar, indicating the size of the displayed 
 numbers (if \code{displayNumbers} is \code{TRUE}).}
+
+\item{plotType}{Character scalar, indicating what to show in the plot. 
+Either \code{"remaining"} or \code{"filtered"}.}
+
+\item{facetBy}{Character scalar, indicating the variable by which the plots 
+should be facetted. Either \code{"sample"} or \code{"step"}.}
 }
 \value{
 A \code{ggplot} object.
