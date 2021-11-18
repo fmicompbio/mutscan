@@ -31,15 +31,16 @@ plotDistributions <- function(se, selAssay = "counts",
                               groupBy = NULL, plotType = "density", 
                               facet = FALSE, pseudocount = 0) {
     stopifnot(is(se, "SummarizedExperiment"))
-    stopifnot(is.character(selAssay) && length(selAssay) == 1 && 
+    stopifnot(length(selAssay) == 1 && is.character(selAssay) && 
                   selAssay %in% SummarizedExperiment::assayNames(se))
     stopifnot(is.null(groupBy) ||
-                  (is.character(groupBy) && length(groupBy) == 1 && 
+                  (length(groupBy) == 1 && is.character(groupBy) && 
                        groupBy %in% colnames(SummarizedExperiment::colData(se))))
-    stopifnot(is.character(plotType) && length(plotType) == 1 && 
+    stopifnot(length(plotType) == 1 && is.character(plotType) && 
                   plotType %in% c("density", "knee", "histogram"))
-    stopifnot(is.logical(facet) && length(facet) == 1)
-    stopifnot(is.numeric(pseudocount) && pseudocount >= 0)
+    stopifnot(length(facet) == 1 && is.logical(facet))
+    stopifnot(length(pseudocount) == 1 && is.numeric(pseudocount) && 
+                  pseudocount >= 0)
     
     ## Define a common theme to use for the plots
     commonTheme <- list(
