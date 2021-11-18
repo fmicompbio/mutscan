@@ -23,15 +23,15 @@ unique UMIs observed for each sequence (pair).}
 }
 \value{
 A \code{\link[SummarizedExperiment]{SummarizedExperiment}} \code{x}
-  with
-  \describe{
-    \item{assays(x)$counts}{containing the observed number of sequences or
-    sequence pairs (if \code{countType} = "reads"), or the observed number of
-    unique UMIs for each sequence or sequence pair (if \code{countType} =
-    "umis").}
-    \item{rowData(x)}{containing the unique sequences or sequence pairs.}
-    \item{colData(x)}{containing the metadata provided by \code{coldata}.}
-  }
+    with
+    \describe{
+        \item{assays(x)$counts}{containing the observed number of sequences or
+        sequence pairs (if \code{countType} = "reads"), or the observed number of
+        unique UMIs for each sequence or sequence pair (if \code{countType} =
+        "umis").}
+        \item{rowData(x)}{containing the unique sequences or sequence pairs.}
+        \item{colData(x)}{containing the metadata provided by \code{coldata}.}
+    }
 }
 \description{
 Combine multiple sequence lists (as returned by \code{\link{digestFastqs}}
