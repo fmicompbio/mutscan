@@ -180,6 +180,10 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
   ## Calculate correlations and get range
   allCors <- stats::cor(mat, method = corMethod)
   corRange <- range(abs(allCors[upper.tri(allCors)]))
+  if (length(unique(corRange)) == 1) {
+      ## Having a range with width 0 leads to problems in the rescaling of the correlations
+      corRange <- c(0, 1)
+  }
   
   ## Construct the pairs plot
   GGally::ggpairs(
