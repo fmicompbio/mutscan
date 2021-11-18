@@ -35,12 +35,12 @@ Imports:
     tibble,
     rlang,
     grDevices,
-    csaw
+    csaw,
+    rmarkdown
 Suggests: 
     testthat,
     BiocStyle,
     knitr,
-    rmarkdown,
     Biostrings,
     plotly
 License: GPL-2
