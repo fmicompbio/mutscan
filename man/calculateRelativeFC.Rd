@@ -7,11 +7,13 @@
 calculateRelativeFC(
   se,
   design,
-  coef,
-  WTrows,
+  coef = NULL,
+  contrast = NULL,
+  WTrows = NULL,
   selAssay = "counts",
   pseudocount = 1,
-  method = "edgeR"
+  method = "edgeR",
+  normMethod = ifelse(is.null(WTrows), "TMM", "sum")
 )
 }
 \arguments{
@@ -20,7 +22,9 @@ calculateRelativeFC(
 \item{design}{Design matrix. The rows of the design matrix must be in the
 same order as the columns in \code{se}.}
 
-\item{coef}{Coefficient(s) to test with edgeR.}
+\item{coef}{Coefficient(s) to test with edgeR or limma.}
+
+\item{contrast}{Numeric contrast to test with edgeR or limma.}
 
 \item{WTrows}{Vector of row names that will be used as the reference when
 calculating logFCs and statistics. If more than one value is provided, the
@@ -36,11 +40,24 @@ normalization factors).}
 transform the counts and estimate observation weights before applying
 limma. In this case, the results also contain the standard errors of the
 logFCs.}
+
+\item{normMethod}{Character scalar indicating which normalization method 
+should be used to calculate size factors. Should be either \code{"TMM"} or 
+\code{"csaw"} when \code{WTrows} is \code{NULL}, and \code{"geomean"} or 
+\code{"sum"} when \code{WTrows} is provided.}
 }
 \description{
-Calculate logFCs and associated p-values for a given comparison, using the
-Negative Binomial quasi-likelihood framework provided by edgeR. The observed
-counts for the WT variant will be used as offsets in the model.
+Calculate logFCs and associated p-values for a given comparison, using 
+either limma or the Negative Binomial quasi-likelihood framework of edgeR. 
+The observed counts for the WT variants can be used as offsets in the model.
+}
+\examples{
+se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+                          package = "mutscan"))[1:200, ]
+design <- model.matrix(~ Replicate + Condition, 
+                       data = SummarizedExperiment::colData(se))
+res <- calculateRelativeFC(se, design, coef = "Conditioncis_output")
+
 }
 \author{
 Charlotte Soneson, Michael Stadler

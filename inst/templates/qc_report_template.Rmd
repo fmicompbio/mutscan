@@ -1,0 +1,132 @@
+---
+title: "mutscan QC report"
+subtitle: "`r paste0('Generated with mutscan v', packageVersion('mutscan'))`"
+date: "`r Sys.time()`"
+output: 
+    html_document:
+        theme: united
+        toc: true
+        toc_float: true
+        code_folding: hide
+params: 
+    se: "unspecified"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+suppressPackageStartupMessages({
+    library(SummarizedExperiment)
+    library(mutscan)
+    library(DT)
+    library(dplyr)
+})
+```
+
+# Data object
+
+The input data use in this report is contained in the following 
+SummarizedExperiment object:
+
+```{r, class.source = "fold-show"}
+params$se
+```
+
+# Sample annotation and filtering summary
+
+The table below summarizes the available sample information, including 
+annotations provided by the data analyst as well as filtering information 
+collected by `mutscan`. 
+
+```{r, warning = FALSE}
+tmpdf <- as.data.frame(colData(params$se))
+extradf <- do.call(
+    dplyr::bind_rows, 
+    lapply(names(metadata(params$se)$parameters), function(nm) {
+        data.frame(Name = nm, 
+                   lapply(metadata(params$se)$parameters[[nm]], 
+                          function(x) paste(x, collapse = "; ")))
+    })
+)
+DT::datatable(dplyr::full_join(tmpdf, extradf, by = "Name"),
+              extensions = "FixedColumns",
+              rownames = FALSE,
+              options = list(
+                  paging = TRUE, searching = TRUE, info = FALSE,
+                  pageLength = 20, 
+                  sort = TRUE, scrollX = TRUE, fixedColumns = list(leftColumns = 1)
+              )) %>%
+    formatStyle("Name", "vertical-align" = "center")
+```
+
+The plots below focus on the filtering information, and show the number of 
+reads remaining after each filtering step performed by `mutscan`, as well as the 
+fraction of reads that are filtered out by each step.
+
+```{r, fig.height = 1.5 * ncol(params$se), fig.width = 10}
+tryCatch({mutscan::plotFiltering(params$se, valueType = "reads", onlyActiveFilters = TRUE, 
+                                 displayNumbers = TRUE, plotType = "remaining", facetBy = "sample")},
+         error = function(e) message("Couldn't generate filtering plots."))
+```
+
+```{r, fig.height = 1.5 * ncol(params$se), fig.width = 10}
+tryCatch({mutscan::plotFiltering(params$se, valueType = "fractions", onlyActiveFilters = TRUE, 
+                                 displayNumbers = TRUE, plotType = "filtered", facetBy = "step")},
+         error = function(e) message("Couldn't generate filtering plots."))
+```
+
+# Pairs plot
+
+Next, we show a pairs plot, displaying the correlation between each pair of
+samples. 
+
+```{r, fig.height = 10, fig.width = 10}
+tryCatch({mutscan::plotPairs(params$se)},
+         error = function(e) message("Couldn't generate pairs plot."))
+```
+
+# Total count plot
+
+The plot below shows the total count for each sample, across all features
+in the SummarizedExperiment object.
+
+```{r}
+tryCatch({mutscan::plotTotals(params$se, selAssay = "counts")},
+         error = function(e) message("Couldn't generate total count plot."))
+```
+
+# Distribution plots
+
+The next group of plots displays the distribution of counts for each sample 
+(across all features in the SummarizedExperiment object). The same information 
+is displayed as a 'knee plot', where the counts for each sample are 
+arranged in decreasing order, and as a density plot. Note that both plots 
+display the values on a log scale; hence any zero values are not shown. 
+
+```{r, warning = FALSE}
+tryCatch({mutscan::plotDistributions(params$se, selAssay = "counts", pseudocount = 1,
+                                     groupBy = NULL, plotType = "knee", facet = FALSE)},
+         error = function(e) message("Couldn't generate distribution plot."))
+```
+
+```{r, warning = FALSE}
+tryCatch({mutscan::plotDistributions(params$se, selAssay = "counts", pseudocount = 1, 
+                                     groupBy = NULL, plotType = "density", facet = FALSE)},
+         error = function(e) message("Couldn't generate distribution plot."))
+```
+
+# Session info
+
+<details>
+<summary><b>
+Click here to see the package versions used to generate this report.
+</b></summary>
+```{r}
+sessionInfo()
+```
+</details>
+
