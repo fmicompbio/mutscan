@@ -48,26 +48,26 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
                       colorByCorrelation = TRUE) {
   
   stopifnot(methods::is(se, "SummarizedExperiment"))
-  stopifnot(is.character(selAssay) && length(selAssay) == 1 && 
+  stopifnot(length(selAssay) == 1 && is.character(selAssay) && 
               selAssay %in% SummarizedExperiment::assayNames(se))
-  stopifnot(is.logical(doLog) && length(doLog) == 1)
-  stopifnot(is.numeric(pseudocount) && length(pseudocount) == 1 && 
+  stopifnot(length(doLog) == 1 && is.logical(doLog))
+  stopifnot(length(pseudocount) == 1 && is.numeric(pseudocount) && 
               pseudocount >= 0)
-  stopifnot(is.character(corMethod) && length(corMethod) == 1 && 
+  stopifnot(length(corMethod) == 1 && is.character(corMethod) && 
               corMethod %in% c("pearson", "spearman"))
-  stopifnot(is.numeric(histBreaks) && length(histBreaks) == 1 && 
+  stopifnot(length(histBreaks) == 1 && is.numeric(histBreaks) && 
               histBreaks > 0)
-  stopifnot(is.character(pointsType) && length(pointsType) == 1 && 
+  stopifnot(length(pointsType) == 1 && is.character(pointsType) && 
               pointsType %in% c("smoothscatter", "points"))
-  stopifnot(is.numeric(corSizeMult) && length(corSizeMult) == 1 && 
+  stopifnot(length(corSizeMult) == 1 && is.numeric(corSizeMult) && 
               corSizeMult > 0)
-  stopifnot(is.numeric(corSizeAdd) && length(corSizeAdd) == 1 && 
+  stopifnot(length(corSizeAdd) == 1 && is.numeric(corSizeAdd) && 
               corSizeAdd >= 0)
-  stopifnot(is.numeric(pointSize) && length(pointSize) == 1 && 
+  stopifnot(length(pointSize) == 1 && is.numeric(pointSize) && 
               pointSize > 0)
-  stopifnot(is.numeric(pointAlpha) && length(pointAlpha) == 1 && 
+  stopifnot(length(pointAlpha) == 1 && is.numeric(pointAlpha) && 
               pointAlpha > 0)
-  stopifnot(is.logical(colorByCorrelation) && length(colorByCorrelation) == 1)
+  stopifnot(length(colorByCorrelation) == 1 && is.logical(colorByCorrelation))
   
   ## ----------------------------------------------------------------------- ##
   ## Define shared theme elements
