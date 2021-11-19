@@ -54,7 +54,8 @@ plotTotals <- function(se, selAssay = "counts", groupBy = NULL) {
         ggplot2::theme_minimal() + 
         ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, 
                                                            vjust = 0.5, size = 12),
-              axis.text.y = ggplot2::element_text(size = 12)) + 
+                       axis.text.y = ggplot2::element_text(size = 12),
+                       axis.title = ggplot2::element_text(size = 14)) + 
         ggplot2::labs(x = "", y = paste0("Total (", selAssay, ")"))
     if (!is.null(groupBy)) {
         gg <- gg + 
