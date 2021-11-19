@@ -20,7 +20,7 @@
 #' se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
 #'                           package = "mutscan"))
 #' ## Define output file
-#' outfile <- tempfile(fileext = "html")
+#' outfile <- tempfile(fileext = ".html")
 #' 
 #' ## Generate QC report
 #' generateQCReport(se, outfile)
