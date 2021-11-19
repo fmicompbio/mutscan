@@ -16,7 +16,12 @@
 #' @importFrom ggplot2 ggplot theme_minimal theme element_text labs 
 #'     geom_bar scale_fill_discrete aes
 #' @importFrom SummarizedExperiment assay rowData
-#'     
+#' 
+#' @examples 
+#' se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+#'                           package = "mutscan"))[1:200, ]
+#' plotTotals(se)
+#' 
 plotTotals <- function(se, selAssay = "counts", groupBy = NULL) {
     stopifnot(is(se, "SummarizedExperiment"))
     stopifnot(length(selAssay) == 1 && is.character(selAssay) && 

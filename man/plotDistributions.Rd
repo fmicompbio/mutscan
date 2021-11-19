@@ -38,6 +38,12 @@ A ggplot object.
 \description{
 Plot distribution of observed values
 }
+\examples{
+se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+                          package = "mutscan"))[1:200, ]
+plotDistributions(se)
+
+}
 \author{
 Charlotte Soneson
 }

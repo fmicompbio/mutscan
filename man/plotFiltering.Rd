@@ -51,6 +51,12 @@ are provided as columns of \code{colData(se)}, with column names
 of the form \code{f[0-9]_filteringreason}, and that all filtering columns 
 occur between the columns named \code{nbrTotal} and \code{nbrRetained}.
 }
+\examples{
+se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+                          package = "mutscan"))[1:200, ]
+plotFiltering(se)
+
+}
 \author{
 Charlotte Soneson
 }

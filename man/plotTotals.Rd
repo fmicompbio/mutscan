@@ -23,6 +23,12 @@ A ggplot object.
 \description{
 Plot the column totals of a selected assay
 }
+\examples{
+se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+                          package = "mutscan"))[1:200, ]
+plotTotals(se)
+
+}
 \author{
 Charlotte Soneson
 }

@@ -39,6 +39,11 @@
 #'     geom_text element_text
 #' @importFrom rlang .data
 #' 
+#' @examples 
+#' se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+#'                           package = "mutscan"))[1:200, ]
+#' plotFiltering(se)
+#' 
 plotFiltering <- function(se, valueType = "reads", onlyActiveFilters = TRUE,
                           displayNumbers = TRUE, numberSize = 4,
                           plotType = "remaining", facetBy = "sample") {
@@ -144,7 +149,9 @@ plotFiltering <- function(se, valueType = "reads", onlyActiveFilters = TRUE,
         ggplot2::facet_wrap(~ .data[[facetBy]], ncol = 1, scales = "free_y") + 
         ggplot2::theme_bw() + 
         ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, 
-                                                           vjust = 0.5)) + 
+                                                           vjust = 0.5, size = 12),
+                       axis.text.y = ggplot2::element_text(size = 12),
+                       axis.title = ggplot2::element_text(size = 14)) + 
         ggplot2::labs(x = "", y = ylab1, 
                       title = paste0(ylab1, ylab2, " each filtering step"))
     

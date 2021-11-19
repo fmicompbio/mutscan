@@ -27,6 +27,11 @@
 #'     element_text aes
 #' @importFrom rlang .data
 #' 
+#' @examples 
+#' se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+#'                           package = "mutscan"))[1:200, ]
+#' plotDistributions(se)
+#' 
 plotDistributions <- function(se, selAssay = "counts", 
                               groupBy = NULL, plotType = "density", 
                               facet = FALSE, pseudocount = 0) {
