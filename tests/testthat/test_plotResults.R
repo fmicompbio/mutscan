@@ -9,6 +9,27 @@ res0 <- calculateRelativeFC(se, design, coef = "Conditioncis_output",
                             normMethod = "sum")
 
 test_that("plotResults functions fail with incorrect input", {
+    expect_error(plotMeanDiff(res0, padjThreshold = "0.05"))
+    expect_error(plotMeanDiff(res0, padjThreshold = c(0.01, 0.05)))
+    expect_error(plotMeanDiff(res0, padjThreshold = -0.05))
+    expect_error(plotVolcano(res0, padjThreshold = "0.05"))
+    expect_error(plotVolcano(res0, padjThreshold = c(0.01, 0.05)))
+    expect_error(plotVolcano(res0, padjThreshold = -0.05))
+
+    expect_error(plotMeanDiff(res0, pointSize = 1))
+    expect_error(plotMeanDiff(res0, pointSize = c("small", "large")))
+    expect_error(plotMeanDiff(res0, pointSize = "wrong"))
+    expect_error(plotVolcano(res0, pointSize = 1))
+    expect_error(plotVolcano(res0, pointSize = c("small", "large")))
+    expect_error(plotVolcano(res0, pointSize = "wrong"))
+    
+    expect_error(plotMeanDiff(res0, interactivePlot = 1))
+    expect_error(plotMeanDiff(res0, interactivePlot = c(TRUE, FALSE)))
+    expect_error(plotMeanDiff(res0, interactivePlot = "TRUE"))
+    expect_error(plotVolcano(res0, interactivePlot = 1))
+    expect_error(plotVolcano(res0, interactivePlot = c(TRUE, FALSE)))
+    expect_error(plotVolcano(res0, interactivePlot = "TRUE"))
+    
     res1 <- res0
     colnames(res1)[colnames(res1) == "logCPM"] <- "wrong"
     expect_error(plotMeanDiff(res1), 
