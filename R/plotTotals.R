@@ -19,10 +19,10 @@
 #'     
 plotTotals <- function(se, selAssay = "counts", groupBy = NULL) {
     stopifnot(is(se, "SummarizedExperiment"))
-    stopifnot(is.character(selAssay) && length(selAssay) == 1 && 
+    stopifnot(length(selAssay) == 1 && is.character(selAssay) && 
                   selAssay %in% SummarizedExperiment::assayNames(se))
     stopifnot(is.null(groupBy) ||
-                  (is.character(groupBy) && length(groupBy) == 1 && 
+                  (length(groupBy) == 1 && is.character(groupBy) && 
                        groupBy %in% colnames(SummarizedExperiment::rowData(se))))
     
     ## Extract the assay matrix and reformat relevant parts of it for plotting
