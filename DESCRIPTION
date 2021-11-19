@@ -36,7 +36,8 @@ Imports:
     rlang,
     grDevices,
     csaw,
-    rmarkdown
+    rmarkdown,
+    xfun
 Suggests: 
     testthat,
     BiocStyle,

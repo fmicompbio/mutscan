@@ -32,7 +32,7 @@ suppressPackageStartupMessages({
 The input data use in this report is contained in the following 
 SummarizedExperiment object:
 
-```{r}
+```{r, class.source = "fold-show"}
 params$se
 ```
 
@@ -68,13 +68,15 @@ reads remaining after each filtering step performed by `mutscan`, as well as the
 fraction of reads that are filtered out by each step.
 
 ```{r, fig.height = 1.5 * ncol(params$se), fig.width = 10}
-mutscan::plotFiltering(params$se, valueType = "reads", onlyActiveFilters = TRUE, 
-                       displayNumbers = TRUE, plotType = "remaining", facetBy = "sample")
+tryCatch({mutscan::plotFiltering(params$se, valueType = "reads", onlyActiveFilters = TRUE, 
+                                 displayNumbers = TRUE, plotType = "remaining", facetBy = "sample")},
+         error = function(e) message("Couldn't generate filtering plots."))
 ```
 
 ```{r, fig.height = 1.5 * ncol(params$se), fig.width = 10}
-mutscan::plotFiltering(params$se, valueType = "fractions", onlyActiveFilters = TRUE, 
-                       displayNumbers = TRUE, plotType = "filtered", facetBy = "step")
+tryCatch({mutscan::plotFiltering(params$se, valueType = "fractions", onlyActiveFilters = TRUE, 
+                                 displayNumbers = TRUE, plotType = "filtered", facetBy = "step")},
+         error = function(e) message("Couldn't generate filtering plots."))
 ```
 
 # Pairs plot
@@ -83,7 +85,8 @@ Next, we show a pairs plot, displaying the correlation between each pair of
 samples. 
 
 ```{r, fig.height = 10, fig.width = 10}
-mutscan::plotPairs(params$se)
+tryCatch({mutscan::plotPairs(params$se)},
+         error = function(e) message("Couldn't generate pairs plot."))
 ```
 
 # Total count plot
@@ -92,7 +95,8 @@ The plot below shows the total count for each sample, across all features
 in the SummarizedExperiment object.
 
 ```{r}
-mutscan::plotTotals(params$se, selAssay = "counts")
+tryCatch({mutscan::plotTotals(params$se, selAssay = "counts")},
+         error = function(e) message("Couldn't generate total count plot."))
 ```
 
 # Distribution plots
@@ -104,13 +108,15 @@ arranged in decreasing order, and as a density plot. Note that both plots
 display the values on a log scale; hence any zero values are not shown. 
 
 ```{r, warning = FALSE}
-mutscan::plotDistributions(params$se, selAssay = "counts", pseudoCount = 1,
-                           groupBy = NULL, plotType = "knee", facet = FALSE)
+tryCatch({mutscan::plotDistributions(params$se, selAssay = "counts", pseudocount = 1,
+                                     groupBy = NULL, plotType = "knee", facet = FALSE)},
+         error = function(e) message("Couldn't generate distribution plot."))
 ```
 
 ```{r, warning = FALSE}
-mutscan::plotDistributions(params$se, selAssay = "counts", pseudoCount = 1, 
-                           groupBy = NULL, plotType = "density", facet = FALSE)
+tryCatch({mutscan::plotDistributions(params$se, selAssay = "counts", pseudocount = 1, 
+                                     groupBy = NULL, plotType = "density", facet = FALSE)},
+         error = function(e) message("Couldn't generate distribution plot."))
 ```
 
 # Session info

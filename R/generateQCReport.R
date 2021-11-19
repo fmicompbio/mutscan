@@ -8,26 +8,46 @@
 #'     with the same name as \code{outFile} should be overwritten. 
 #' 
 #' @export
-#' @author Charlotte 
+#' @author Charlotte Soneson
 #' 
 #' @returns Invisibly, the path to the generated html file. 
 #' 
 #' @importFrom rmarkdown render
+#' @importFrom xfun Rscript_call
+#' 
+#' @examples 
+#' ## Load SummarizedExperiment object
+#' se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+#'                           package = "mutscan"))
+#' ## Define output file
+#' outfile <- tempfile(fileext = "html")
+#' 
+#' ## Generate QC report
+#' generateQCReport(se, outfile)
+#' 
 generateQCReport <- function(se, outFile, forceOverwrite = FALSE) {
     
+    ## --------------------------------------------------------------------- ##
+    ## Check that input arguments are valid
+    ## --------------------------------------------------------------------- ##
+    stopifnot(is(se, "SummarizedExperiment"))
+    stopifnot(length(outFile) == 1 && is.character(outFile))
+    stopifnot(length(forceOverwrite) == 1 && is.logical(forceOverwrite))
     if (tools::file_ext(outFile) != "html") {
-        stop("'outFile' must have the file extension '.html'. ")
+        stop("'outFile' must have the file extension '.html'.")
     }
     outDir <- dirname(outFile)
     if (!dir.exists(outDir)) {
         dir.create(outDir, recursive = TRUE)
     }
-    if (file.exists(outFile) && !forceOverwrite) {
-        stop(outFile, " already exists and forceOverwrite = FALSE, stopping.")
-    } else if (file.exists(outFile) && forceOverwrite) {
-        message(outFile, " already exists but forceOverwrite = TRUE, overwriting.")
+    if (file.exists(outFile)) {
+        if (!forceOverwrite) {
+            stop(outFile, " already exists and forceOverwrite = FALSE, stopping.")
+        } else {
+            message(outFile, " already exists but forceOverwrite = TRUE, overwriting.")
+        }
     }
-
+    
     ## --------------------------------------------------------------------- ##
     ## Render the Rmd file
     ## --------------------------------------------------------------------- ##

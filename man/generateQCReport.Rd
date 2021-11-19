@@ -22,6 +22,17 @@ Invisibly, the path to the generated html file.
 \description{
 Generate QC report
 }
+\examples{
+## Load SummarizedExperiment object
+se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+                          package = "mutscan"))
+## Define output file
+outfile <- tempfile(fileext = "html")
+
+## Generate QC report
+generateQCReport(se, outfile)
+
+}
 \author{
-Charlotte
+Charlotte Soneson
 }
