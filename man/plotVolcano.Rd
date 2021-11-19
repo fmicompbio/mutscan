@@ -36,6 +36,15 @@ If \code{interactivePlot} is \code{TRUE}, a \code{plotly}
 \description{
 Construct a volcano plot
 }
+\examples{
+se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+                          package = "mutscan"))[1:200, ]
+design <- model.matrix(~ Replicate + Condition, 
+                       data = SummarizedExperiment::colData(se))
+res <- calculateRelativeFC(se, design, coef = "Conditioncis_output")
+plotVolcano(res, pointSize = "large")
+
+}
 \author{
 Charlotte Soneson
 }

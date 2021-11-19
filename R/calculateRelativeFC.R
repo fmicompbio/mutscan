@@ -35,6 +35,13 @@
 #' @importFrom limma voom eBayes topTable lmFit contrasts.fit
 #' @importFrom csaw normOffsets
 #' 
+#' @examples 
+#' se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+#'                           package = "mutscan"))[1:200, ]
+#' design <- model.matrix(~ Replicate + Condition, 
+#'                        data = SummarizedExperiment::colData(se))
+#' res <- calculateRelativeFC(se, design, coef = "Conditioncis_output")
+#' 
 calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL, 
                                 WTrows = NULL, selAssay = "counts", 
                                 pseudocount = 1, method = "edgeR", 

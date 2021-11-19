@@ -51,6 +51,14 @@ Calculate logFCs and associated p-values for a given comparison, using
 either limma or the Negative Binomial quasi-likelihood framework of edgeR. 
 The observed counts for the WT variants can be used as offsets in the model.
 }
+\examples{
+se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+                          package = "mutscan"))[1:200, ]
+design <- model.matrix(~ Replicate + Condition, 
+                       data = SummarizedExperiment::colData(se))
+res <- calculateRelativeFC(se, design, coef = "Conditioncis_output")
+
+}
 \author{
 Charlotte Soneson, Michael Stadler
 }

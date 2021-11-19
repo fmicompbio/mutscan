@@ -5,6 +5,12 @@
                              padjCol, padjLabel, padjThreshold, 
                              labelCol = NULL, centerAxis = "x", 
                              pointSize = "small", interactivePlot = FALSE) {
+    stopifnot(is(res, "data.frame"))
+    stopifnot(length(padjThreshold) == 1 && is.numeric(padjThreshold) && 
+                  padjThreshold >= 0)
+    stopifnot(length(pointSize) == 1 && is.character(pointSize) && 
+                  pointSize %in% c("small", "large"))
+    stopifnot(length(interactivePlot) == 1 && is.logical(interactivePlot))
     if (interactivePlot && !requireNamespace("plotly", quietly = TRUE)) {
         stop("The 'plotly' package is required to make interactive plots.")
     }
@@ -57,6 +63,7 @@
 }
 
 .getColName <- function(res, validValues, aspect) {
+    stopifnot(is(res, "data.frame"))
     colName = grep(paste(paste0("^", validValues, "$"), collapse = "|"), 
                    colnames(res), value = TRUE)
     if (length(colName) == 0) {
@@ -93,6 +100,14 @@
 #' 
 #' @author Charlotte Soneson
 #' @export
+#' 
+#' @examples 
+#' se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+#'                           package = "mutscan"))[1:200, ]
+#' design <- model.matrix(~ Replicate + Condition, 
+#'                        data = SummarizedExperiment::colData(se))
+#' res <- calculateRelativeFC(se, design, coef = "Conditioncis_output")
+#' plotMeanDiff(res, pointSize = "large")
 #' 
 plotMeanDiff <- function(res, padjThreshold = 0.05, pointSize = "small",
                          interactivePlot = FALSE) {
@@ -135,6 +150,14 @@ plotMeanDiff <- function(res, padjThreshold = 0.05, pointSize = "small",
 #' 
 #' @author Charlotte Soneson
 #' @export
+#' 
+#' @examples 
+#' se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+#'                           package = "mutscan"))[1:200, ]
+#' design <- model.matrix(~ Replicate + Condition, 
+#'                        data = SummarizedExperiment::colData(se))
+#' res <- calculateRelativeFC(se, design, coef = "Conditioncis_output")
+#' plotVolcano(res, pointSize = "large")
 #' 
 plotVolcano <- function(res, padjThreshold = 0.05, pointSize = "small",
                         interactivePlot = FALSE) {
