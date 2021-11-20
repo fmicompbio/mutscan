@@ -50,7 +50,7 @@ calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
     if (!is(se, "SummarizedExperiment")) {
         stop("'se' must be a SummarizedExperiment object.")
     }
-    .assertScalar(selAssay, type = "character")
+    .assertScalar(x = selAssay, type = "character")
     if (!(selAssay %in% SummarizedExperiment::assayNames(se))) {
         if (is.null(SummarizedExperiment::assayNames(se)) && 
             length(SummarizedExperiment::assays(se)) == 1) {
@@ -61,15 +61,17 @@ calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
         }
     }
     
-    .assertVector(WTrows, type = "character", validValues = rownames(se))
-
+    if (!is.null(WTrows)) {
+        .assertVector(x = WTrows, type = "character", validValues = rownames(se))
+    }
+    
     if (nrow(design) != ncol(se)) {
         stop("The number of rows in 'design' (", nrow(design), 
              ") is not equal to the number", 
              " of columns in 'se' (", ncol(se), ").")
     }
     
-    .assertScalar(pseudocount, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = pseudocount, type = "numeric", rngIncl = c(0, Inf))
 
     if (normMethod %in% c("csaw", "TMM") && !is.null(WTrows)) {
         stop("normMethod = '", normMethod, 

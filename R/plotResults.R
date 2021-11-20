@@ -6,9 +6,9 @@
                              labelCol = NULL, centerAxis = "x", 
                              pointSize = "small", interactivePlot = FALSE) {
     stopifnot(is(res, "data.frame"))
-    .assertScalar(padjThreshold, type = "numeric", rngIncl = c(0, 1))
-    .assertScalar(pointSize, type = "character", validValues = c("small", "large"))
-    .assertScalar(interactivePlot, type = "logical")
+    .assertScalar(x = padjThreshold, type = "numeric", rngIncl = c(0, 1))
+    .assertScalar(x = pointSize, type = "character", validValues = c("small", "large"))
+    .assertScalar(x = interactivePlot, type = "logical")
     
     if (interactivePlot && !requireNamespace("plotly", quietly = TRUE)) {
         stop("The 'plotly' package is required to make interactive plots.")

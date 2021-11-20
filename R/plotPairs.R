@@ -48,20 +48,20 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
                       colorByCorrelation = TRUE) {
     
     stopifnot(methods::is(se, "SummarizedExperiment"))
-    .assertScalar(selAssay, type = "character",
+    .assertScalar(x = selAssay, type = "character",
                   validValues = SummarizedExperiment::assayNames(se))
-    .assertScalar(doLog, type = "logical")
-    .assertScalar(pseudocount, type = "numeric", rngIncl = c(0, Inf))
-    .assertScalar(corMethod, type = "character",
+    .assertScalar(x = doLog, type = "logical")
+    .assertScalar(x = pseudocount, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = corMethod, type = "character",
                   validValues = c("pearson", "spearman"))
-    .assertScalar(histBreaks, type = "numeric", rngExcl = c(0, Inf))
-    .assertScalar(pointsType, type = "character",
+    .assertScalar(x = histBreaks, type = "numeric", rngExcl = c(0, Inf))
+    .assertScalar(x = pointsType, type = "character",
                   validValues = c("smoothscatter", "points"))
-    .assertScalar(corSizeMult, type = "numeric", rngExcl = c(0, Inf))
-    .assertScalar(corSizeAdd, type = "numeric", rngIncl = c(0, Inf))
-    .assertScalar(pointSize, type = "numeric", rngExcl = c(0, Inf))
-    .assertScalar(pointAlpha, type = "numeric", rngExcl = c(0, Inf))
-    .assertScalar(colorByCorrelation, type = "logical")
+    .assertScalar(x = corSizeMult, type = "numeric", rngExcl = c(0, Inf))
+    .assertScalar(x = corSizeAdd, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = pointSize, type = "numeric", rngExcl = c(0, Inf))
+    .assertScalar(x = pointAlpha, type = "numeric", rngExcl = c(0, Inf))
+    .assertScalar(x = colorByCorrelation, type = "logical")
 
     ## ----------------------------------------------------------------------- ##
     ## Define shared theme elements

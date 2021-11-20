@@ -24,10 +24,10 @@
 #' 
 plotTotals <- function(se, selAssay = "counts", groupBy = NULL) {
     stopifnot(is(se, "SummarizedExperiment"))
-    .assertScalar(selAssay, type = "character",
+    .assertScalar(x = selAssay, type = "character",
                   validValues = SummarizedExperiment::assayNames(se))
     if (!is.null(groupBy)) {
-        .assertScalar(groupBy, type = "character",
+        .assertScalar(x = groupBy, type = "character",
                       validValues = colnames(SummarizedExperiment::rowData(se)))
     }
 

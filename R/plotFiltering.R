@@ -48,14 +48,14 @@ plotFiltering <- function(se, valueType = "reads", onlyActiveFilters = TRUE,
                           displayNumbers = TRUE, numberSize = 4,
                           plotType = "remaining", facetBy = "sample") {
     stopifnot(is(se, "SummarizedExperiment"))
-    .assertScalar(valueType, type = "character", 
+    .assertScalar(x = valueType, type = "character", 
                   validValues = c("reads", "fractions"))
-    .assertScalar(onlyActiveFilters, type = "logical")
-    .assertScalar(displayNumbers, type = "logical")
-    .assertScalar(numberSize, type = "numeric", rngExcl = c(0, Inf))
-    .assertScalar(plotType, type = "character",
+    .assertScalar(x = onlyActiveFilters, type = "logical")
+    .assertScalar(x = displayNumbers, type = "logical")
+    .assertScalar(x = numberSize, type = "numeric", rngExcl = c(0, Inf))
+    .assertScalar(x = plotType, type = "character",
                   validValues = c("remaining", "filtered"))
-    .assertScalar(facetBy, type = "character", 
+    .assertScalar(x = facetBy, type = "character", 
                   validValues = c("sample", "step"))
 
     ## ----------------------------------------------------------------------- ##

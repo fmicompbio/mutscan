@@ -36,16 +36,16 @@ plotDistributions <- function(se, selAssay = "counts",
                               groupBy = NULL, plotType = "density", 
                               facet = FALSE, pseudocount = 0) {
     stopifnot(is(se, "SummarizedExperiment"))
-    .assertScalar(selAssay, type = "character", 
+    .assertScalar(x = selAssay, type = "character", 
                   validValues = SummarizedExperiment::assayNames(se))
     if (!is.null(groupBy)) {
-        .assertScalar(groupBy, type = "character",
+        .assertScalar(x = groupBy, type = "character",
                       validValues = colnames(SummarizedExperiment::colData(se)))
     }
-    .assertScalar(plotType, type = "character", 
+    .assertScalar(x = plotType, type = "character", 
                   validValues = c("density", "knee", "histogram"))
-    .assertScalar(facet, type = "logical")
-    .assertScalar(pseudocount, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = facet, type = "logical")
+    .assertScalar(x = pseudocount, type = "numeric", rngIncl = c(0, Inf))
 
     ## Define a common theme to use for the plots
     commonTheme <- list(

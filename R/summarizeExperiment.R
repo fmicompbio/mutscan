@@ -61,7 +61,7 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
         stop("'coldata' must be a data.frame with at least one column, named ",
              "'Name'.")
     }
-    .assertScalar(countType, type = "character", 
+    .assertScalar(x = countType, type = "character", 
                   validValues = c("umis", "reads"))
     ## If no UMI sequences were given, then countType = "umis" should not be allowed
     if (countType == "umis" && 

@@ -33,8 +33,8 @@ generateQCReport <- function(se, outFile, reportTitle = "mutscan QC report",
     ## Check that input arguments are valid
     ## --------------------------------------------------------------------- ##
     stopifnot(is(se, "SummarizedExperiment"))
-    .assertScalar(outFile, type = "character")
-    .assertScalar(forceOverwrite, type = "logical")
+    .assertScalar(x = outFile, type = "character")
+    .assertScalar(x = forceOverwrite, type = "logical")
     if (tools::file_ext(outFile) != "html") {
         stop("'outFile' must have the file extension '.html'.")
     }

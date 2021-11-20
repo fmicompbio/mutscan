@@ -41,22 +41,22 @@ calculatePPIScore <- function(se, pairingCol, ODCols, comparison, WTrows) {
     }
     
     ## pairingCol is in colData(se)
-    .assertScalar(pairingCol, type = "character", 
+    .assertScalar(x = pairingCol, type = "character", 
                   validValues = colnames(SummarizedExperiment::colData(se)))
 
     ## ODCols are all in colData(se) and contain numeric values
-    .assertVector(ODCols, type = "character", rngLen = c(1, Inf),
+    .assertVector(x = ODCols, type = "character", rngLen = c(1, Inf),
                   validValues = colnames(SummarizedExperiment::colData(se)))
     for (odc in ODCols) {
-        .assertVector(SummarizedExperiment::colData(se)[[odc]], 
+        .assertVector(x = SummarizedExperiment::colData(se)[[odc]], 
                       type = "numeric")
     }
 
     ## comparison is length(3)-character with column and values in colData(se)
-    .assertVector(comparison, type = "character", rngLen = c(3, 3))
-    .assertScalar(comparison[1], type = "character", 
+    .assertVector(x = comparison, type = "character", rngLen = c(3, 3))
+    .assertScalar(x = comparison[1], type = "character", 
                   validValues = colnames(SummarizedExperiment::colData(se)))
-    .assertVector(comparison[2:3], type = "character", 
+    .assertVector(x = comparison[2:3], type = "character", 
                   validValues = SummarizedExperiment::colData(se)[[comparison[1]]])
     
     ## there is exactly one observation per pairing and condition
@@ -70,7 +70,7 @@ calculatePPIScore <- function(se, pairingCol, ODCols, comparison, WTrows) {
     }
     
     ## WTrows exist in the SE
-    .assertVector(WTrows, type = "character", validValues = rownames(se))
+    .assertVector(x = WTrows, type = "character", validValues = rownames(se))
 
     ## ------------------------------------------------------------------------
     ## subset se and reorder samples by shared replicates
