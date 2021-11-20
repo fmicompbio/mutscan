@@ -1,49 +1,49 @@
 checkWTSeqConsistency <- function(se, translate = TRUE) {
-  ## Extract wild type sequences from the SE, and check that they are the same for all samples
-  wtf <- lapply(metadata(se)$parameters, function(i) i$wildTypeForward)
-  wtr <- lapply(metadata(se)$parameters, function(i) i$wildTypeReverse)
-  mnd <- lapply(metadata(se)$parameters, function(i) i$mutNameDelimiter)
-  
-  if (!all(sapply(seq_along(wtf), function(i) wtf[[i]] == wtf[[1]]))) {
-    stop("The set of wildTypeForward sequences must be the same for all samples")
-  }
-  if (!all(sapply(seq_along(wtr), function(i) wtr[[i]] == wtr[[1]]))) {
-    stop("The set of wildTypeReverse sequences must be the same for all samples")
-  }
-  if (!all(sapply(seq_along(mnd), function(i) mnd[[i]] == mnd[[1]]))) {
-    stop("The mutNameDelimiter must be the same for all samples")
-  }
-  
-  l <- list(wildTypeForward = wtf[[1]], wildTypeReverse = wtr[[1]],
-            mutNameDelimiter = mnd[[1]])
-  
-  if (translate) {
-    l$wildTypeForward <- unlist(lapply(l$wildTypeForward, function(w) {
-      as.character(Biostrings::translate(Biostrings::DNAString(w)))
-    }))
-    l$wildTypeReverse <- unlist(lapply(l$wildTypeReverse, function(w) {
-      as.character(Biostrings::translate(Biostrings::DNAString(w)))
-    }))
-  }
-  
-  l
+    ## Extract wild type sequences from the SE, and check that they are the same for all samples
+    wtf <- lapply(metadata(se)$parameters, function(i) i$wildTypeForward)
+    wtr <- lapply(metadata(se)$parameters, function(i) i$wildTypeReverse)
+    mnd <- lapply(metadata(se)$parameters, function(i) i$mutNameDelimiter)
+    
+    if (!all(sapply(seq_along(wtf), function(i) wtf[[i]] == wtf[[1]]))) {
+        stop("The set of wildTypeForward sequences must be the same for all samples")
+    }
+    if (!all(sapply(seq_along(wtr), function(i) wtr[[i]] == wtr[[1]]))) {
+        stop("The set of wildTypeReverse sequences must be the same for all samples")
+    }
+    if (!all(sapply(seq_along(mnd), function(i) mnd[[i]] == mnd[[1]]))) {
+        stop("The mutNameDelimiter must be the same for all samples")
+    }
+    
+    l <- list(wildTypeForward = wtf[[1]], wildTypeReverse = wtr[[1]],
+              mutNameDelimiter = mnd[[1]])
+    
+    if (translate) {
+        l$wildTypeForward <- unlist(lapply(l$wildTypeForward, function(w) {
+            as.character(Biostrings::translate(Biostrings::DNAString(w)))
+        }))
+        l$wildTypeReverse <- unlist(lapply(l$wildTypeReverse, function(w) {
+            as.character(Biostrings::translate(Biostrings::DNAString(w)))
+        }))
+    }
+    
+    l
 }
 
 ## This is from Biostrings
 GENETIC_CODE <- structure(c(
-  TTT = "F", TTC = "F", TTA = "L", TTG = "L", TCT = "S", 
-  TCC = "S", TCA = "S", TCG = "S", TAT = "Y", TAC = "Y", TAA = "*", 
-  TAG = "*", TGT = "C", TGC = "C", TGA = "*", TGG = "W", CTT = "L", 
-  CTC = "L", CTA = "L", CTG = "L", CCT = "P", CCC = "P", CCA = "P", 
-  CCG = "P", CAT = "H", CAC = "H", CAA = "Q", CAG = "Q", CGT = "R", 
-  CGC = "R", CGA = "R", CGG = "R", ATT = "I", ATC = "I", ATA = "I", 
-  ATG = "M", ACT = "T", ACC = "T", ACA = "T", ACG = "T", AAT = "N", 
-  AAC = "N", AAA = "K", AAG = "K", AGT = "S", AGC = "S", AGA = "R", 
-  AGG = "R", GTT = "V", GTC = "V", GTA = "V", GTG = "V", GCT = "A", 
-  GCC = "A", GCA = "A", GCG = "A", GAT = "D", GAC = "D", GAA = "E", 
-  GAG = "E", GGT = "G", GGC = "G", GGA = "G", GGG = "G"), 
-  alt_init_codons = c("TTG", 
-                      "CTG")
+    TTT = "F", TTC = "F", TTA = "L", TTG = "L", TCT = "S", 
+    TCC = "S", TCA = "S", TCG = "S", TAT = "Y", TAC = "Y", TAA = "*", 
+    TAG = "*", TGT = "C", TGC = "C", TGA = "*", TGG = "W", CTT = "L", 
+    CTC = "L", CTA = "L", CTG = "L", CCT = "P", CCC = "P", CCA = "P", 
+    CCG = "P", CAT = "H", CAC = "H", CAA = "Q", CAG = "Q", CGT = "R", 
+    CGC = "R", CGA = "R", CGG = "R", ATT = "I", ATC = "I", ATA = "I", 
+    ATG = "M", ACT = "T", ACC = "T", ACA = "T", ACG = "T", AAT = "N", 
+    AAC = "N", AAA = "K", AAG = "K", AGT = "S", AGC = "S", AGA = "R", 
+    AGG = "R", GTT = "V", GTC = "V", GTA = "V", GTG = "V", GCT = "A", 
+    GCC = "A", GCA = "A", GCG = "A", GAT = "D", GAC = "D", GAA = "E", 
+    GAG = "E", GGT = "G", GGC = "G", GGA = "G", GGG = "G"), 
+    alt_init_codons = c("TTG", 
+                        "CTG")
 )
 
 #' Collapse counts by mutated amino acid
@@ -66,79 +66,79 @@ GENETIC_CODE <- structure(c(
 #' @importFrom SummarizedExperiment assay SummarizedExperiment colData 
 #' 
 collapseMutantsByAA <- function(se, collapseSynonymous = FALSE) {
-  ## se must be a SummarizedExperiment object
-  if (!is(se, "SummarizedExperiment")) {
-    stop("'se' must be a SummarizedExperiment object")
-  }
-  
-  ## Split names into components
-  tmp <- base::strsplit(rownames(se), split = "_", fixed = TRUE)
-  unl <- base::unlist(tmp, use.names = FALSE)
-  unl <- base::strsplit(unl, split = metadata(se)$mutNameDelimiter, fixed = TRUE)
-  ## Store the reference sequence and the corresponding row for each entry
-  refseqs <- sapply(unl, .subset, 1)
-  refrows <- rep(seq_along(tmp), sapply(tmp, length))
-  ## Replace codon by corresponding amino acid
-  unl <- lapply(unl, function(w) {
-    w[3] <- GENETIC_CODE[w[3]]
-    w
-  })
-  unl <- sapply(unl, function(w) paste(w, collapse = metadata(se)$mutNameDelimiter))
-  
-  if (collapseSynonymous) {
-    ## For each WT sequence, generate all "WT-synonymous mutations" and replace them by 
-    ## <seqname>.0.NA
-    ## First check that all samples have the same WT sequences, and extract them
-    wtseqs <- checkWTSeqConsistency(se, translate = TRUE)
-    ## Go through each WT sequence (fwd/rev), find the synonymous mutations and
-    ## replace them by <seqname>.0.NA
-    replacedIdx <- c()
-    for (nm in names(wtseqs$wildTypeForward)) {
-      nch <- nchar(wtseqs$wildTypeForward[[nm]])
-      synid <- paste(nm, seq_len(nch), strsplit(wtseqs$wildTypeForward[[nm]], "")[[1]], 
-                     sep = wtseqs$mutNameDelimiter)
-      idx <- which(unl %in% synid)
-      replacedIdx <- c(replacedIdx, idx)
-      unl[idx] <- paste(nm, 0, NA, sep = wtseqs$mutNameDelimiter)
+    ## se must be a SummarizedExperiment object
+    if (!is(se, "SummarizedExperiment")) {
+        stop("'se' must be a SummarizedExperiment object")
     }
-    for (nm in names(wtseqs$wildTypeReverse)) {
-      nch <- nchar(wtseqs$wildTypeReverse[[nm]])
-      synid <- paste(nm, seq_len(nch), strsplit(wtseqs$wildTypeReverse[[nm]], "")[[1]], 
-                     sep = wtseqs$mutNameDelimiter)
-      idx <- which(unl %in% synid)
-      replacedIdx <- c(replacedIdx, idx)
-      unl[idx] <- paste(nm, 0, NA, sep = wtseqs$mutNameDelimiter)
+    
+    ## Split names into components
+    tmp <- base::strsplit(rownames(se), split = "_", fixed = TRUE)
+    unl <- base::unlist(tmp, use.names = FALSE)
+    unl <- base::strsplit(unl, split = metadata(se)$mutNameDelimiter, fixed = TRUE)
+    ## Store the reference sequence and the corresponding row for each entry
+    refseqs <- sapply(unl, .subset, 1)
+    refrows <- rep(seq_along(tmp), sapply(tmp, length))
+    ## Replace codon by corresponding amino acid
+    unl <- lapply(unl, function(w) {
+        w[3] <- GENETIC_CODE[w[3]]
+        w
+    })
+    unl <- sapply(unl, function(w) paste(w, collapse = metadata(se)$mutNameDelimiter))
+    
+    if (collapseSynonymous) {
+        ## For each WT sequence, generate all "WT-synonymous mutations" and replace them by 
+        ## <seqname>.0.NA
+        ## First check that all samples have the same WT sequences, and extract them
+        wtseqs <- checkWTSeqConsistency(se, translate = TRUE)
+        ## Go through each WT sequence (fwd/rev), find the synonymous mutations and
+        ## replace them by <seqname>.0.NA
+        replacedIdx <- c()
+        for (nm in names(wtseqs$wildTypeForward)) {
+            nch <- nchar(wtseqs$wildTypeForward[[nm]])
+            synid <- paste(nm, seq_len(nch), strsplit(wtseqs$wildTypeForward[[nm]], "")[[1]], 
+                           sep = wtseqs$mutNameDelimiter)
+            idx <- which(unl %in% synid)
+            replacedIdx <- c(replacedIdx, idx)
+            unl[idx] <- paste(nm, 0, NA, sep = wtseqs$mutNameDelimiter)
+        }
+        for (nm in names(wtseqs$wildTypeReverse)) {
+            nch <- nchar(wtseqs$wildTypeReverse[[nm]])
+            synid <- paste(nm, seq_len(nch), strsplit(wtseqs$wildTypeReverse[[nm]], "")[[1]], 
+                           sep = wtseqs$mutNameDelimiter)
+            idx <- which(unl %in% synid)
+            replacedIdx <- c(replacedIdx, idx)
+            unl[idx] <- paste(nm, 0, NA, sep = wtseqs$mutNameDelimiter)
+        }
+        ## For all entries that have been replaced, check if there is another entry
+        ## in the same row, with the same ref.sequence, that is not a WT sequence.
+        ## If so, remove the replaced one
+        ## TODO: Make this more efficient
+        for (id in replacedIdx) {
+            if (length(setdiff(which(refseqs == refseqs[id] & refrows == refrows[id]), replacedIdx)) > 0) {
+                unl[id] <- ""
+            }
+        }
     }
-    ## For all entries that have been replaced, check if there is another entry
-    ## in the same row, with the same ref.sequence, that is not a WT sequence.
-    ## If so, remove the replaced one
-    ## TODO: Make this more efficient
-    for (id in replacedIdx) {
-      if (length(setdiff(which(refseqs == refseqs[id] & refrows == refrows[id]), replacedIdx)) > 0) {
-        unl[id] <- ""
-      }
-    }
-  }
-  
-  # unl <- paste0(base::substr(unl, 1, nchar(unl) - 3), 
-  #               GENETIC_CODE[base::substr(unl, nchar(unl) - 2, nchar(unl))])
-  tmp <- utils::relist(unl, skeleton = tmp)
-  tmp <- lapply(tmp, function(w) {
-    unique(w[w != ""])
-  })
-  tmp <- S4Vectors::unstrsplit(tmp, sep = "_")
-  tmp[rownames(se) == "WT"] <- "WT"
-
-  ## Collapse counts
-  collapsedCounts <- Matrix.utils::aggregate.Matrix(
-    x = SummarizedExperiment::assay(se, "counts"), 
-    groupings = factor(tmp), 
-    fun = "colSums") 
-  
-  ## Create SummarizedExperiment
-  SummarizedExperiment::SummarizedExperiment(
-    assays = list(counts = collapsedCounts),
-    colData = SummarizedExperiment::colData(se), 
-    metadata = S4Vectors::metadata(se)
-  )
+    
+    # unl <- paste0(base::substr(unl, 1, nchar(unl) - 3), 
+    #               GENETIC_CODE[base::substr(unl, nchar(unl) - 2, nchar(unl))])
+    tmp <- utils::relist(unl, skeleton = tmp)
+    tmp <- lapply(tmp, function(w) {
+        unique(w[w != ""])
+    })
+    tmp <- S4Vectors::unstrsplit(tmp, sep = "_")
+    tmp[rownames(se) == "WT"] <- "WT"
+    
+    ## Collapse counts
+    collapsedCounts <- Matrix.utils::aggregate.Matrix(
+        x = SummarizedExperiment::assay(se, "counts"), 
+        groupings = factor(tmp), 
+        fun = "colSums") 
+    
+    ## Create SummarizedExperiment
+    SummarizedExperiment::SummarizedExperiment(
+        assays = list(counts = collapsedCounts),
+        colData = SummarizedExperiment::colData(se), 
+        metadata = S4Vectors::metadata(se)
+    )
 }

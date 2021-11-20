@@ -1,10 +1,10 @@
 .hasReadComponent <- function(composition, component) {
-  tmp <- gregexpr(pattern = component, text = composition, fixed = TRUE)[[1]]
-  if (length(tmp) == 1 && tmp == -1) {
-    FALSE
-  } else {
-    TRUE
-  }
+    tmp <- gregexpr(pattern = component, text = composition, fixed = TRUE)[[1]]
+    if (length(tmp) == 1 && tmp == -1) {
+        FALSE
+    } else {
+        TRUE
+    }
 }
 
 #' Summarize and collapse multiple mutational scanning experiments
