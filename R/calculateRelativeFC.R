@@ -50,39 +50,35 @@ calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
     if (!is(se, "SummarizedExperiment")) {
         stop("'se' must be a SummarizedExperiment object.")
     }
-    
-    if (!is.character(selAssay) || length(selAssay) != 1) {
-        stop("'selAssay' must be a character scalar.")
-    }
-    
+    .assertScalar(selAssay, type = "character")
     if (!(selAssay %in% SummarizedExperiment::assayNames(se))) {
         if (is.null(SummarizedExperiment::assayNames(se)) && 
             length(SummarizedExperiment::assays(se)) == 1) {
-            warning("No assayNames provided in 'se', but only one assay present - using that.")
+            warning("No assayNames provided in 'se', but only one ", 
+                    "assay present - using that.")
         } else {
             stop("The provided 'selAssay' not present in 'se'.")
         }
     }
     
-    if (!all(WTrows %in% rownames(se))) {
-        stop("'se' must have rows named '", paste(WTrows, collapse = ", "), "'.")
-    }
-    
+    .assertVector(WTrows, type = "character", validValues = rownames(se))
+
     if (nrow(design) != ncol(se)) {
-        stop("The number of rows in 'design' (", nrow(design), ") is not equal to the number", 
+        stop("The number of rows in 'design' (", nrow(design), 
+             ") is not equal to the number", 
              " of columns in 'se' (", ncol(se), ").")
     }
     
-    if (!is.numeric(pseudocount) || length(pseudocount) != 1 || pseudocount < 0) {
-        stop("'pseudocount' must be a non-negative scalar value.")
-    }
-    
+    .assertScalar(pseudocount, type = "numeric", rngIncl = c(0, Inf))
+
     if (normMethod %in% c("csaw", "TMM") && !is.null(WTrows)) {
-        stop("normMethod = '", normMethod, "' can only be used when WTrows is NULL.")
+        stop("normMethod = '", normMethod, 
+             "' can only be used when WTrows is NULL.")
     }
 
     if (normMethod %in% c("sum", "geomean") && is.null(WTrows)) {
-        stop("normMethod = '", normMethod, "' can only be used when WTrows is not NULL.")
+        stop("normMethod = '", normMethod,
+             "' can only be used when WTrows is not NULL.")
     }
     
     if (normMethod == "csaw" && method == "limma") {
