@@ -41,43 +41,37 @@ calculatePPIScore <- function(se, pairingCol, ODCols, comparison, WTrows) {
     }
     
     ## pairingCol is in colData(se)
-    
-    if (!is.character(pairingCol) || length(pairingCol) != 1L ||
-        !(pairingCol %in% colnames(colData(se)))) {
-        stop("'pairingCol' must be a character(1) from ",
-             paste(colnames(colData(se)), collapse = ", "))
-    }
-    
+    .assertScalar(pairingCol, type = "character", 
+                  validValues = colnames(SummarizedExperiment::colData(se)))
+
     ## ODCols are all in colData(se) and contain numeric values
-    if (!is.character(ODCols) || length(ODCols) < 1L ||
-        !all(ODCols %in% colnames(colData(se)))) {
-        stop("'ODCols' must be one or several string from ",
-             paste(colnames(colData(se)), collapse = ", "))
+    .assertVector(ODCols, type = "character", rngLen = c(1, Inf),
+                  validValues = colnames(SummarizedExperiment::colData(se)))
+    for (odc in ODCols) {
+        .assertVector(SummarizedExperiment::colData(se)[[odc]], 
+                      type = "numeric")
     }
-    if (!all(apply(colData(se)[, ODCols, drop = FALSE], 2, is.numeric))) {
-        stop("'ODCols' columns must only contain numeric values")
-    }
-    
+
     ## comparison is length(3)-character with column and values in colData(se)
-    if (!is.character(comparison) || length(comparison) != 3L ||
-        !(comparison[1] %in% colnames(colData(se))) ||
-        !all(comparison[2:3] %in% colData(se)[,comparison[1]])) {
-        stop("'comparison' must be a character(3) with column name in colData(se) ",
-             "and two values in that column")
-    }
+    .assertVector(comparison, type = "character", rngLen = c(3, 3))
+    .assertScalar(comparison[1], type = "character", 
+                  validValues = colnames(SummarizedExperiment::colData(se)))
+    .assertVector(comparison[2:3], type = "character", 
+                  validValues = SummarizedExperiment::colData(se)[[comparison[1]]])
     
     ## there is exactly one observation per pairing and condition
-    if (any(table(colData(se)[colData(se)[, comparison[1]] %in% comparison[2:3], pairingCol],
-                  colData(se)[colData(se)[, comparison[1]] %in% comparison[2:3], comparison[1]]) != 1)) {
-        stop("There must be exactly one sample for every replicate-condition combination ",
+    if (any(table(colData(se)[colData(se)[, comparison[1]] %in% 
+                              comparison[2:3], pairingCol],
+                  colData(se)[colData(se)[, comparison[1]] %in% 
+                              comparison[2:3], comparison[1]]) != 1)) {
+        stop("There must be exactly one sample for every ", 
+             "replicate-condition combination ",
              "defined by 'pairingCol' and 'comparison'")
     }
     
     ## WTrows exist in the SE
-    if (!all(WTrows %in% rownames(se))) {
-        stop("Not all rows '", paste(WTrows, collapse = ", "), "' are present in the SummarizedExperiment object.")
-    }
-    
+    .assertVector(WTrows, type = "character", validValues = rownames(se))
+
     ## ------------------------------------------------------------------------
     ## subset se and reorder samples by shared replicates
     ## ------------------------------------------------------------------------
@@ -87,7 +81,8 @@ calculatePPIScore <- function(se, pairingCol, ODCols, comparison, WTrows) {
     shared_repl <- intersect(colData(se_numerator)[, pairingCol], 
                              colData(se_denominator)[, pairingCol])
     se_numerator <- se_numerator[, match(shared_repl, colData(se_numerator)[, pairingCol])]
-    se_denominator <- se_denominator[, match(shared_repl, colData(se_denominator)[, pairingCol])]
+    se_denominator <- se_denominator[, match(shared_repl, 
+                                             colData(se_denominator)[, pairingCol])]
     
     ## ------------------------------------------------------------------------
     ## calculate normalized counts (n_i)
