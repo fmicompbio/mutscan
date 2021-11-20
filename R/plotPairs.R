@@ -47,7 +47,7 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
                       corSizeAdd = 2, pointSize = 0.1, pointAlpha = 0.3,
                       colorByCorrelation = TRUE) {
     
-    stopifnot(methods::is(se, "SummarizedExperiment"))
+    .assertVector(x = se, type = "SummarizedExperiment")
     .assertScalar(x = selAssay, type = "character",
                   validValues = SummarizedExperiment::assayNames(se))
     .assertScalar(x = doLog, type = "logical")

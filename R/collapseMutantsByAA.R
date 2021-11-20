@@ -1,5 +1,6 @@
 checkWTSeqConsistency <- function(se, translate = TRUE) {
-    ## Extract wild type sequences from the SE, and check that they are the same for all samples
+    ## Extract wild type sequences from the SE, and check that they 
+    ## are the same for all samples
     wtf <- lapply(metadata(se)$parameters, function(i) i$wildTypeForward)
     wtr <- lapply(metadata(se)$parameters, function(i) i$wildTypeReverse)
     mnd <- lapply(metadata(se)$parameters, function(i) i$mutNameDelimiter)
@@ -42,8 +43,7 @@ GENETIC_CODE <- structure(c(
     AGG = "R", GTT = "V", GTC = "V", GTA = "V", GTG = "V", GCT = "A", 
     GCC = "A", GCA = "A", GCG = "A", GAT = "D", GAC = "D", GAA = "E", 
     GAG = "E", GGT = "G", GGC = "G", GGA = "G", GGG = "G"), 
-    alt_init_codons = c("TTG", 
-                        "CTG")
+    alt_init_codons = c("TTG", "CTG")
 )
 
 #' Collapse counts by mutated amino acid
@@ -66,10 +66,8 @@ GENETIC_CODE <- structure(c(
 #' @importFrom SummarizedExperiment assay SummarizedExperiment colData 
 #' 
 collapseMutantsByAA <- function(se, collapseSynonymous = FALSE) {
-    ## se must be a SummarizedExperiment object
-    if (!is(se, "SummarizedExperiment")) {
-        stop("'se' must be a SummarizedExperiment object")
-    }
+    .assertVector(x = se, type = "SummarizedExperiment")
+    .assertScalar(x = collapseSynonymous, type = "logical")
     
     ## Split names into components
     tmp <- base::strsplit(rownames(se), split = "_", fixed = TRUE)

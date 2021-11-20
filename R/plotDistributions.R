@@ -35,7 +35,7 @@
 plotDistributions <- function(se, selAssay = "counts", 
                               groupBy = NULL, plotType = "density", 
                               facet = FALSE, pseudocount = 0) {
-    stopifnot(is(se, "SummarizedExperiment"))
+    .assertVector(x = se, type = "SummarizedExperiment")
     .assertScalar(x = selAssay, type = "character", 
                   validValues = SummarizedExperiment::assayNames(se))
     if (!is.null(groupBy)) {

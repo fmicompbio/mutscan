@@ -5,7 +5,7 @@
                              padjCol, padjLabel, padjThreshold, 
                              labelCol = NULL, centerAxis = "x", 
                              pointSize = "small", interactivePlot = FALSE) {
-    stopifnot(is(res, "data.frame"))
+    .assertVector(x = res, type = "data.frame")
     .assertScalar(x = padjThreshold, type = "numeric", rngIncl = c(0, 1))
     .assertScalar(x = pointSize, type = "character", validValues = c("small", "large"))
     .assertScalar(x = interactivePlot, type = "logical")
@@ -62,7 +62,7 @@
 }
 
 .getColName <- function(res, validValues, aspect) {
-    stopifnot(is(res, "data.frame"))
+    .assertVector(x = res, type = "data.frame")
     colName = grep(paste(paste0("^", validValues, "$"), collapse = "|"), 
                    colnames(res), value = TRUE)
     if (length(colName) == 0) {

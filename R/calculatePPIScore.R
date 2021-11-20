@@ -35,10 +35,7 @@ calculatePPIScore <- function(se, pairingCol, ODCols, comparison, WTrows) {
     ## ------------------------------------------------------------------------
     ## pre-flight checks
     ## ------------------------------------------------------------------------
-    ## se is a SummarizedExperiment
-    if (!is(se, "SummarizedExperiment")) {
-        stop("'se' must be a SummarizedExperiment")
-    }
+    .assertVector(x = se, type = "SummarizedExperiment")
     
     ## pairingCol is in colData(se)
     .assertScalar(x = pairingCol, type = "character", 
@@ -53,7 +50,7 @@ calculatePPIScore <- function(se, pairingCol, ODCols, comparison, WTrows) {
     }
 
     ## comparison is length(3)-character with column and values in colData(se)
-    .assertVector(x = comparison, type = "character", rngLen = c(3, 3))
+    .assertVector(x = comparison, type = "character", len = 3)
     .assertScalar(x = comparison[1], type = "character", 
                   validValues = colnames(SummarizedExperiment::colData(se)))
     .assertVector(x = comparison[2:3], type = "character", 

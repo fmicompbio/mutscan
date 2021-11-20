@@ -47,7 +47,7 @@
 plotFiltering <- function(se, valueType = "reads", onlyActiveFilters = TRUE,
                           displayNumbers = TRUE, numberSize = 4,
                           plotType = "remaining", facetBy = "sample") {
-    stopifnot(is(se, "SummarizedExperiment"))
+    .assertVector(x = se, type = "SummarizedExperiment")
     .assertScalar(x = valueType, type = "character", 
                   validValues = c("reads", "fractions"))
     .assertScalar(x = onlyActiveFilters, type = "logical")

@@ -32,7 +32,7 @@ generateQCReport <- function(se, outFile, reportTitle = "mutscan QC report",
     ## --------------------------------------------------------------------- ##
     ## Check that input arguments are valid
     ## --------------------------------------------------------------------- ##
-    stopifnot(is(se, "SummarizedExperiment"))
+    .assertVector(x = se, type = "SummarizedExperiment")
     .assertScalar(x = outFile, type = "character")
     .assertScalar(x = forceOverwrite, type = "logical")
     if (tools::file_ext(outFile) != "html") {

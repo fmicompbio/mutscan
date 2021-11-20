@@ -67,7 +67,8 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     if (countType == "umis" && 
         !(all(sapply(x, function(w) .hasReadComponent(w$parameters$elementsForward, "U") || 
                      .hasReadComponent(w$parameters$elementsReverse, "U"))))) {
-        stop("'countType' is set to 'umis', but no UMI sequences were provided when quantifying. ",
+        stop("'countType' is set to 'umis', but no UMI sequences ", 
+             "were provided when quantifying. ",
              "Set 'countType' to 'reads' instead.")
     }
     ## Get the mutNameDelimiters, and make sure that they are the same

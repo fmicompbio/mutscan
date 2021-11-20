@@ -23,7 +23,7 @@
 #' plotTotals(se)
 #' 
 plotTotals <- function(se, selAssay = "counts", groupBy = NULL) {
-    stopifnot(is(se, "SummarizedExperiment"))
+    .assertVector(x = se, type = "SummarizedExperiment")
     .assertScalar(x = selAssay, type = "character",
                   validValues = SummarizedExperiment::assayNames(se))
     if (!is.null(groupBy)) {

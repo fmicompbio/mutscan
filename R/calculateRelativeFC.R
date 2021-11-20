@@ -47,9 +47,7 @@ calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
                                 pseudocount = 1, method = "edgeR", 
                                 normMethod = ifelse(is.null(WTrows), 
                                                     "TMM", "sum")) {
-    if (!is(se, "SummarizedExperiment")) {
-        stop("'se' must be a SummarizedExperiment object.")
-    }
+    .assertVector(x = se, type = "SummarizedExperiment")
     .assertScalar(x = selAssay, type = "character")
     if (!(selAssay %in% SummarizedExperiment::assayNames(se))) {
         if (is.null(SummarizedExperiment::assayNames(se)) && 

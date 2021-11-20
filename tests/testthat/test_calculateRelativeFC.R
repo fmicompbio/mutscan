@@ -7,7 +7,7 @@ design <- model.matrix(~ Replicate + Condition, data = colData(se))
 test_that("calculateRelativeFC fails with incorrect arguments", {
     expect_error(calculateRelativeFC(se = NULL, design = design, 
                                      coef = "Conditioncis_output"),
-                 "must be a SummarizedExperiment object")
+                 "'se' must be of class 'SummarizedExperiment'")
     expect_error(calculateRelativeFC(se = se, design = NULL, 
                                      coef = "Conditioncis_output"),
                  "argument is of length zero")

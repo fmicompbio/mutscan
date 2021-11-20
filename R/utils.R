@@ -127,7 +127,7 @@
     }
     
     if (!is.null(rngLen) && is.numeric(rngLen) && length(rngLen) == 2L &&
-        any(x < rngLen[1] | x > rngLen[2])) {
+        any(length(x) < rngLen[1] | length(x) > rngLen[2])) {
         stop("length of '", xname, "' must be within [", rngLen[1], ",", 
              rngLen[2], "] (inclusive)")
     }
