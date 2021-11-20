@@ -4,7 +4,12 @@
 \alias{generateQCReport}
 \title{Generate QC report}
 \usage{
-generateQCReport(se, outFile, forceOverwrite = FALSE)
+generateQCReport(
+  se,
+  outFile,
+  reportTitle = "mutscan QC report",
+  forceOverwrite = FALSE
+)
 }
 \arguments{
 \item{se}{A \code{SummarizedExperiment} object, typically generated with 
@@ -12,6 +17,8 @@ generateQCReport(se, outFile, forceOverwrite = FALSE)
 
 \item{outFile}{Character string providing the name of the output file. 
 Should have the extension \code{.html}.}
+
+\item{reportTitle}{Character string specifying the title of the QC report.}
 
 \item{forceOverwrite}{Logical scalar, indicating whether an existing file
 with the same name as \code{outFile} should be overwritten.}
