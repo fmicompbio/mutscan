@@ -36,17 +36,17 @@ plotDistributions <- function(se, selAssay = "counts",
                               groupBy = NULL, plotType = "density", 
                               facet = FALSE, pseudocount = 0) {
     stopifnot(is(se, "SummarizedExperiment"))
-    stopifnot(length(selAssay) == 1 && is.character(selAssay) && 
-                  selAssay %in% SummarizedExperiment::assayNames(se))
-    stopifnot(is.null(groupBy) ||
-                  (length(groupBy) == 1 && is.character(groupBy) && 
-                       groupBy %in% colnames(SummarizedExperiment::colData(se))))
-    stopifnot(length(plotType) == 1 && is.character(plotType) && 
-                  plotType %in% c("density", "knee", "histogram"))
-    stopifnot(length(facet) == 1 && is.logical(facet))
-    stopifnot(length(pseudocount) == 1 && is.numeric(pseudocount) && 
-                  pseudocount >= 0)
-    
+    .assertScalar(selAssay, type = "character", 
+                  validValues = SummarizedExperiment::assayNames(se))
+    if (!is.null(groupBy)) {
+        .assertScalar(groupBy, type = "character",
+                      validValues = colnames(SummarizedExperiment::colData(se)))
+    }
+    .assertScalar(plotType, type = "character", 
+                  validValues = c("density", "knee", "histogram"))
+    .assertScalar(facet, type = "logical")
+    .assertScalar(pseudocount, type = "numeric", rngIncl = c(0, Inf))
+
     ## Define a common theme to use for the plots
     commonTheme <- list(
         ggplot2::theme_minimal(),
@@ -125,9 +125,13 @@ plotDistributions <- function(se, selAssay = "counts",
                           y = "Count")
         if (facet) {
             if (colorFacetByName) {
-                gg <- gg + ggplot2::geom_histogram(ggplot2::aes(fill = .data$Name), bins = 50)
+                gg <- gg + 
+                    ggplot2::geom_histogram(ggplot2::aes(fill = .data$Name), 
+                                            bins = 50)
             } else {
-                gg <- gg + ggplot2::geom_histogram(ggplot2::aes(group = .data$Name), bins = 50)
+                gg <- gg + 
+                    ggplot2::geom_histogram(ggplot2::aes(group = .data$Name), 
+                                            bins = 50)
             }
             gg <- gg +
                 ggplot2::facet_wrap(~ .data[[groupBy]])
