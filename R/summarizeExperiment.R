@@ -61,10 +61,8 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
         stop("'coldata' must be a data.frame with at least one column, named ",
              "'Name'.")
     }
-    if (!is.character(countType) || length(countType) != 1 || 
-        !(countType %in% c("umis", "reads"))) {
-        stop("'countType' must be either 'umis' or 'reads'")
-    }
+    .assertScalar(countType, type = "character", 
+                  validValues = c("umis", "reads"))
     ## If no UMI sequences were given, then countType = "umis" should not be allowed
     if (countType == "umis" && 
         !(all(sapply(x, function(w) .hasReadComponent(w$parameters$elementsForward, "U") || 
