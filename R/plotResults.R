@@ -6,11 +6,10 @@
                              labelCol = NULL, centerAxis = "x", 
                              pointSize = "small", interactivePlot = FALSE) {
     stopifnot(is(res, "data.frame"))
-    stopifnot(length(padjThreshold) == 1 && is.numeric(padjThreshold) && 
-                  padjThreshold >= 0)
-    stopifnot(length(pointSize) == 1 && is.character(pointSize) && 
-                  pointSize %in% c("small", "large"))
-    stopifnot(length(interactivePlot) == 1 && is.logical(interactivePlot))
+    .assertScalar(padjThreshold, type = "numeric", rngIncl = c(0, 1))
+    .assertScalar(pointSize, type = "character", validValues = c("small", "large"))
+    .assertScalar(interactivePlot, type = "logical")
+    
     if (interactivePlot && !requireNamespace("plotly", quietly = TRUE)) {
         stop("The 'plotly' package is required to make interactive plots.")
     }
