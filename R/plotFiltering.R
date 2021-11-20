@@ -48,17 +48,16 @@ plotFiltering <- function(se, valueType = "reads", onlyActiveFilters = TRUE,
                           displayNumbers = TRUE, numberSize = 4,
                           plotType = "remaining", facetBy = "sample") {
     stopifnot(is(se, "SummarizedExperiment"))
-    stopifnot(is.character(valueType) && length(valueType) == 1 && 
-                  valueType %in% c("reads", "fractions"))
-    stopifnot(is.logical(onlyActiveFilters) && length(onlyActiveFilters) == 1)
-    stopifnot(is.logical(displayNumbers) && length(displayNumbers) == 1)
-    stopifnot(is.numeric(numberSize) && length(numberSize) == 1 && 
-                  numberSize > 0)
-    stopifnot(is.character(plotType) && length(plotType) == 1 && 
-                  plotType %in% c("remaining", "filtered"))
-    stopifnot(is.character(facetBy) && length(facetBy) == 1 && 
-                  facetBy %in% c("sample", "step"))
-    
+    .assertScalar(valueType, type = "character", 
+                  validValues = c("reads", "fractions"))
+    .assertScalar(onlyActiveFilters, type = "logical")
+    .assertScalar(displayNumbers, type = "logical")
+    .assertScalar(numberSize, type = "numeric", rngExcl = c(0, Inf))
+    .assertScalar(plotType, type = "character",
+                  validValues = c("remaining", "filtered"))
+    .assertScalar(facetBy, type = "character", 
+                  validValues = c("sample", "step"))
+
     ## ----------------------------------------------------------------------- ##
     ## Extract relevant columns from colData(se)
     ## ----------------------------------------------------------------------- ##
