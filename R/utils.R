@@ -11,13 +11,13 @@
 #' arguments to functions satisfy required criteria. 
 #'  
 #' @param x The variable to be checked.
-#' @param type The desired type of the variable.
-#' @param rngIncl The allowed range of the (numeric) variable, if 
-#'     endpoints should be allowed.
-#' @param rngExcl The allowed range of the (numeric) variable, if 
-#'     endpoints should not be allowed.
-#' @param validValues A vector with the allowed values of the 
-#'     variable. 
+#' @param type The desired type of \code{x}.
+#' @param rngIncl The allowed range of the (numeric) variable \code{x}, 
+#'     including the endpoints.
+#' @param rngExcl The allowed range of the (numeric) variable \code{x}, 
+#'     excluding the endpoints.
+#' @param validValues A vector with the allowed values of \code{x}.
+#' 
 #' @author Michael Stadler
 #' @noRd
 #' @keywords internal
@@ -28,6 +28,11 @@
                           validValues = NULL) {
     args <- lapply(sys.call()[-1], as.character)
     xname <- if ("x" %in% names(args)) args$x else "argument"
+    
+    ## Check arguments
+    stopifnot(is.null(type) || (length(type) == 1 && is.character(type)))
+    stopifnot(is.null(rngIncl) || (length(rngIncl) == 2 && is.numeric(rngIncl)))
+    stopifnot(is.null(rngExcl) || (length(rngExcl) == 2 && is.numeric(rngExcl)))
     
     if (length(x) != 1L) {
         stop("'", xname, "' must be a scalar value (length one)")
@@ -66,15 +71,16 @@
 #' This function provides a convenient way e.g. to check that provided
 #' arguments to functions satisfy required criteria. 
 #'  
-#' @param x The variable to be checked.
-#' @param type The desired type of the variable.
-#' @param rngIncl The allowed range of the (numeric) variable, if 
-#'     endpoints should be allowed.
-#' @param rngExcl The allowed range of the (numeric) variable, if 
-#'     endpoints should not be allowed.
-#' @param validValues A vector with the allowed values of the 
-#'     variable. 
-#' @param rngLen The allowed range of the length of the variable. 
+#' @param x The variable to be checked
+#' @param type The desired type of \code{x}.
+#' @param rngIncl The allowed range of the (numeric) variable \code{x}, 
+#'     including the endpoints.
+#' @param rngExcl The allowed range of the (numeric) variable \code{x}, 
+#'     excluding the endpoints.
+#' @param validValues A vector with the allowed values of \code{x}.
+#' @param len The required length of \code{x}.
+#' @param rngLen The allowed range for the length of \code{x}.
+#' 
 #' @author Michael Stadler, Charlotte Soneson
 #' @noRd
 #' @keywords internal
@@ -83,9 +89,17 @@
                           rngIncl = NULL,
                           rngExcl = NULL,
                           validValues = NULL,
+                          len = NULL, 
                           rngLen = NULL) {
     args <- lapply(sys.call()[-1], as.character)
     xname <- if ("x" %in% names(args)) args$x else "argument"
+    
+    ## Check arguments
+    stopifnot(is.null(type) || (length(type) == 1 && is.character(type)))
+    stopifnot(is.null(rngIncl) || (length(rngIncl) == 2 && is.numeric(rngIncl)))
+    stopifnot(is.null(rngExcl) || (length(rngExcl) == 2 && is.numeric(rngExcl)))
+    stopifnot(is.null(len) || (length(len) == 1 && is.numeric(len)))
+    stopifnot(is.null(rngLen) || (length(rngLen) == 2 && is.numeric(rngLen)))
     
     if (is.null(type) && (!is.null(rngIncl) || !is.null(rngExcl))) {
         type <- "numeric"
@@ -107,10 +121,15 @@
              rngExcl[2], ") (exclusive)")
     }
     
-    if (!is.null(rngLen) && is.numeric(rngLen) && length(rngLen) == 2L && 
-        any(length(x) < rngLen[1] | length(x) > rngLen[2])) {
-        stop("'The length of ", xname, "' must be within [", rngLen[1], ",",
-             rngLen[2], "].")
+    if (!is.null(len) && is.numeric(len) && length(len) == 1L && 
+        length(x) != len) {
+        stop("'", xname, "' must have length ", len)
+    }
+    
+    if (!is.null(rngLen) && is.numeric(rngLen) && length(rngLen) == 2L &&
+        any(x < rngLen[1] | x > rngLen[2])) {
+        stop("length of '", xname, "' must be within [", rngLen[1], ",", 
+             rngLen[2], "] (inclusive)")
     }
     
     if (!is.null(validValues) && !all(x %in% validValues)) {
