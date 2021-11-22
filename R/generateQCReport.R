@@ -4,6 +4,7 @@
 #'     \code{summarizeExperiment()}.
 #' @param outFile Character string providing the name of the output file. 
 #'     Should have the extension \code{.html}.
+#' @param reportTitle Character string specifying the title of the QC report.
 #' @param forceOverwrite Logical scalar, indicating whether an existing file
 #'     with the same name as \code{outFile} should be overwritten. 
 #' 
@@ -25,14 +26,15 @@
 #' ## Generate QC report
 #' generateQCReport(se, outfile)
 #' 
-generateQCReport <- function(se, outFile, forceOverwrite = FALSE) {
+generateQCReport <- function(se, outFile, reportTitle = "mutscan QC report", 
+                             forceOverwrite = FALSE) {
     
     ## --------------------------------------------------------------------- ##
     ## Check that input arguments are valid
     ## --------------------------------------------------------------------- ##
-    stopifnot(is(se, "SummarizedExperiment"))
-    stopifnot(length(outFile) == 1 && is.character(outFile))
-    stopifnot(length(forceOverwrite) == 1 && is.logical(forceOverwrite))
+    .assertVector(x = se, type = "SummarizedExperiment")
+    .assertScalar(x = outFile, type = "character")
+    .assertScalar(x = forceOverwrite, type = "logical")
     if (tools::file_ext(outFile) != "html") {
         stop("'outFile' must have the file extension '.html'.")
     }
@@ -60,7 +62,7 @@ generateQCReport <- function(se, outFile, forceOverwrite = FALSE) {
     args$intermediates_dir <- outDir
     args$quiet <- FALSE
     args$run_pandoc <- TRUE
-    args$params <- list(se = se)
+    args$params <- list(se = se, title = reportTitle)
     
     outputReport <- xfun::Rscript_call(
         rmarkdown::render,

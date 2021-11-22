@@ -5,12 +5,11 @@
                              padjCol, padjLabel, padjThreshold, 
                              labelCol = NULL, centerAxis = "x", 
                              pointSize = "small", interactivePlot = FALSE) {
-    stopifnot(is(res, "data.frame"))
-    stopifnot(length(padjThreshold) == 1 && is.numeric(padjThreshold) && 
-                  padjThreshold >= 0)
-    stopifnot(length(pointSize) == 1 && is.character(pointSize) && 
-                  pointSize %in% c("small", "large"))
-    stopifnot(length(interactivePlot) == 1 && is.logical(interactivePlot))
+    .assertVector(x = res, type = "data.frame")
+    .assertScalar(x = padjThreshold, type = "numeric", rngIncl = c(0, 1))
+    .assertScalar(x = pointSize, type = "character", validValues = c("small", "large"))
+    .assertScalar(x = interactivePlot, type = "logical")
+    
     if (interactivePlot && !requireNamespace("plotly", quietly = TRUE)) {
         stop("The 'plotly' package is required to make interactive plots.")
     }
@@ -63,7 +62,7 @@
 }
 
 .getColName <- function(res, validValues, aspect) {
-    stopifnot(is(res, "data.frame"))
+    .assertVector(x = res, type = "data.frame")
     colName = grep(paste(paste0("^", validValues, "$"), collapse = "|"), 
                    colnames(res), value = TRUE)
     if (length(colName) == 0) {

@@ -1,5 +1,5 @@
 ---
-title: "mutscan QC report"
+title: "`r params$title`"
 subtitle: "`r paste0('Generated with mutscan v', packageVersion('mutscan'))`"
 date: "`r Sys.time()`"
 output: 
@@ -10,6 +10,7 @@ output:
         code_folding: hide
 params: 
     se: "unspecified"
+    title: "mutscan QC report"
 editor_options: 
   chunk_output_type: console
 ---

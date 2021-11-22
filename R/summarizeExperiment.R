@@ -1,10 +1,10 @@
 .hasReadComponent <- function(composition, component) {
-  tmp <- gregexpr(pattern = component, text = composition, fixed = TRUE)[[1]]
-  if (length(tmp) == 1 && tmp == -1) {
-    FALSE
-  } else {
-    TRUE
-  }
+    tmp <- gregexpr(pattern = component, text = composition, fixed = TRUE)[[1]]
+    if (length(tmp) == 1 && tmp == -1) {
+        FALSE
+    } else {
+        TRUE
+    }
 }
 
 #' Summarize and collapse multiple mutational scanning experiments
@@ -61,15 +61,14 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
         stop("'coldata' must be a data.frame with at least one column, named ",
              "'Name'.")
     }
-    if (!is.character(countType) || length(countType) != 1 || 
-        !(countType %in% c("umis", "reads"))) {
-        stop("'countType' must be either 'umis' or 'reads'")
-    }
+    .assertScalar(x = countType, type = "character", 
+                  validValues = c("umis", "reads"))
     ## If no UMI sequences were given, then countType = "umis" should not be allowed
     if (countType == "umis" && 
         !(all(sapply(x, function(w) .hasReadComponent(w$parameters$elementsForward, "U") || 
                      .hasReadComponent(w$parameters$elementsReverse, "U"))))) {
-        stop("'countType' is set to 'umis', but no UMI sequences were provided when quantifying. ",
+        stop("'countType' is set to 'umis', but no UMI sequences ", 
+             "were provided when quantifying. ",
              "Set 'countType' to 'reads' instead.")
     }
     ## Get the mutNameDelimiters, and make sure that they are the same

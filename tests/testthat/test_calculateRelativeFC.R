@@ -7,7 +7,7 @@ design <- model.matrix(~ Replicate + Condition, data = colData(se))
 test_that("calculateRelativeFC fails with incorrect arguments", {
     expect_error(calculateRelativeFC(se = NULL, design = design, 
                                      coef = "Conditioncis_output"),
-                 "must be a SummarizedExperiment object")
+                 "'se' must be of class 'SummarizedExperiment'")
     expect_error(calculateRelativeFC(se = se, design = NULL, 
                                      coef = "Conditioncis_output"),
                  "argument is of length zero")
@@ -30,7 +30,7 @@ test_that("calculateRelativeFC fails with incorrect arguments", {
     expect_error(calculateRelativeFC(se = se, design = design, 
                                      coef = "Conditioncis_output", 
                                      WTrows = "missing"),
-                 "must have rows named")
+                 "All values in 'WTrows' must be")
     expect_error(calculateRelativeFC(se = se, design = design, 
                                      coef = "Conditioncis_output", 
                                      selAssay = "missing"),
@@ -38,11 +38,11 @@ test_that("calculateRelativeFC fails with incorrect arguments", {
     expect_error(calculateRelativeFC(se = se, design = design, 
                                      coef = "Conditioncis_output", 
                                      selAssay = 1),
-                 "'selAssay' must be a character scalar")
+                 "'selAssay' must be of type 'character'")
     expect_error(calculateRelativeFC(se = se, design = design, 
                                      coef = "Conditioncis_output", 
                                      pseudocount = -1),
-                 "must be a non-negative scalar value")
+                 "must be within")
     expect_error(calculateRelativeFC(se = se, design = design, 
                                      coef = "Conditioncis_output", 
                                      method = "missing"),

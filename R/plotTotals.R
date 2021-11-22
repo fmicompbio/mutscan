@@ -23,13 +23,14 @@
 #' plotTotals(se)
 #' 
 plotTotals <- function(se, selAssay = "counts", groupBy = NULL) {
-    stopifnot(is(se, "SummarizedExperiment"))
-    stopifnot(length(selAssay) == 1 && is.character(selAssay) && 
-                  selAssay %in% SummarizedExperiment::assayNames(se))
-    stopifnot(is.null(groupBy) ||
-                  (length(groupBy) == 1 && is.character(groupBy) && 
-                       groupBy %in% colnames(SummarizedExperiment::rowData(se))))
-    
+    .assertVector(x = se, type = "SummarizedExperiment")
+    .assertScalar(x = selAssay, type = "character",
+                  validValues = SummarizedExperiment::assayNames(se))
+    if (!is.null(groupBy)) {
+        .assertScalar(x = groupBy, type = "character",
+                      validValues = colnames(SummarizedExperiment::rowData(se)))
+    }
+
     ## Extract the assay matrix and reformat relevant parts of it for plotting
     selAssayMat <- SummarizedExperiment::assay(se, selAssay)
     if (!is.null(groupBy)) {
