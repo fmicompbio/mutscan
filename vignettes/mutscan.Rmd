@@ -40,7 +40,7 @@ The figure below provides a high-level overview of the `mutscan` functionality,
 which will be described in more detail in the following sections. 
 
 ```{r overview-figure, fig.align = 'center', out.width = "100%", fig.cap = "Overview of the `mutscan` functionality. The `digestFastqs()` function processes each sequencing library separately, and generates an output object containing, among other things, the count table and a summary of the filtering steps. The `summarizeExperiment()` function takes one or more of these objects and combines them into a `SummarizedExperiment` object, that can then be used for downstream analysis such as plotting and statistical testing.", echo = FALSE}
-knitr::include_graphics("mutscan-overview.001.jpeg")
+knitr::include_graphics("mutscan-overview.001.png")
 ```
 
 
