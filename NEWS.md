@@ -1,3 +1,7 @@
+# mutscan 0.2.23
+
+* Changed default value of forbidden codons to ""
+
 # mutscan 0.2.22
 
 * Added argument to specify the title of the QC report.
