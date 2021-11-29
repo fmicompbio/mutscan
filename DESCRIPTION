@@ -38,9 +38,10 @@ Imports:
     csaw,
     rmarkdown,
     xfun,
-    DT
+    DT,
+    ggrepel
 Suggests: 
-    testthat,
+    testthat (>= 3.0.0),
     BiocStyle,
     knitr,
     Biostrings,
@@ -51,3 +52,4 @@ RoxygenNote: 7.1.2
 VignetteBuilder: knitr
 LinkingTo: 
     Rcpp
+Config/testthat/edition: 3

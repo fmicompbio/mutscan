@@ -6,9 +6,13 @@
 \usage{
 plotVolcano(
   res,
+  logFCCol = NULL,
+  pvalCol = NULL,
+  padjCol = NULL,
   padjThreshold = 0.05,
   pointSize = "small",
-  interactivePlot = FALSE
+  interactivePlot = FALSE,
+  nTopToLabel = 0
 )
 }
 \arguments{
@@ -16,6 +20,14 @@ plotVolcano(
 \code{calculateRelativeFC()}) with columns corresponding to the 
 log-fold change (\code{logFC}), p-value (\code{PValue} or 
 \code{P.Value}) and significance (\code{FDR} or \code{adj.P.Val}).}
+
+\item{logFCCol, pvalCol, padjCol}{Character scalars indicating which 
+columns (from \code{res}) that will be used to represent the 
+logFC (x-axis), p-value (y-axis) and adjusted p-value (used 
+for coloring). If \code{NULL} (default), pre-specified values 
+will be used depending on the available columns 
+(\code{"logFC"}, \code{"PValue"} or \code{"P.Value"}, and 
+\code{"FDR"} or \code{"adj.P.Val"}, respectively).}
 
 \item{padjThreshold}{Numeric scalar indicating the adjusted p-value 
 threshold to use for coloring the points. All features with 
@@ -27,6 +39,12 @@ which of the two available plot styles that will be used.}
 \item{interactivePlot}{Logical scalar, indicating whether an 
 interactive plot should be returned, in which one can hover 
 over the individual points and obtain further information.}
+
+\item{nTopToLabel}{Numeric scalar, indicating the number of points that 
+should be labeled in the plot. The points will be ranked by the 
+\code{padjCol} column, and the top \code{nTopToLabel} values will 
+be labeled by the corresponding row names. Only used if 
+\code{interactivePlot} is \code{FALSE}.}
 }
 \value{
 If \code{interactivePlot} is \code{TRUE}, a \code{plotly} 
@@ -42,7 +60,7 @@ se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds",
 design <- model.matrix(~ Replicate + Condition, 
                        data = SummarizedExperiment::colData(se))
 res <- calculateRelativeFC(se, design, coef = "Conditioncis_output")
-plotVolcano(res, pointSize = "large")
+plotVolcano(res, pointSize = "large", nTopToLabel = 3)
 
 }
 \author{
