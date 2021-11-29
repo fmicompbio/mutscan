@@ -1,5 +1,3 @@
-context("digestFastqs - trans - collapsing")
-
 test_that("digestFastqs works as expected for trans experiments, when similar sequences are collapsed", {
   fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
   fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
@@ -68,7 +66,7 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   expect_equal(res$filterSummary$nbrRetained, 679L)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
-    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+    expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
@@ -140,7 +138,7 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   expect_equal(res$filterSummary$nbrRetained, 679L)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
-    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+    expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
@@ -212,7 +210,7 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   expect_equal(res$filterSummary$nbrRetained, 703L)
   
   for (nm in setdiff(names(Ldef), c("fastqReverse", "forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
-    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+    expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
@@ -290,9 +288,10 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "nThreads",
                                     "forbiddenMutatedCodonsReverse", "verbose"))) {
     if (nm == "variableCollapseMinReads") {
-      expect_equivalent(res$parameters[[nm]], as.integer(ceiling(Ldef[[nm]])))
+      expect_equal(res$parameters[[nm]], as.integer(ceiling(Ldef[[nm]])),
+                   ignore_attr = TRUE)
     } else {
-      expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+      expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
     }
   }
   
@@ -371,9 +370,10 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
     if (nm == "variableCollapseMinReads") {
-      expect_equivalent(res$parameters[[nm]], as.integer(ceiling(Ldef[[nm]])))
+      expect_equal(res$parameters[[nm]], as.integer(ceiling(Ldef[[nm]])), 
+                   ignore_attr = TRUE)
     } else {
-      expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+      expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
     }
   }
   

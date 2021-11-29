@@ -1,5 +1,3 @@
-context("BKtree_utils")
-
 test_that("levenshtein_distance() works", {
   # ground truth e.g. from:
   # stringdist::stringdist(s1, s2, method = "lv")
@@ -107,14 +105,14 @@ test_that("low-level BKtree wrapper functions work as expected", {
   tree5 <- new(BKtree, "hamming_shift", 5L)
   tree6 <- new(BKtree, "hamming_shift", 0L)
   
-  expect_is(bk, "Module")
-  expect_is(BKtree, "C++Class")
-  expect_is(tree, "Rcpp_BKtree")
-  expect_is(tree2, "Rcpp_BKtree")
-  expect_is(tree3, "Rcpp_BKtree")
-  expect_is(tree4, "Rcpp_BKtree")
-  expect_is(tree5, "Rcpp_BKtree")
-  expect_is(tree6, "Rcpp_BKtree")
+  expect_s4_class(bk, "Module")
+  expect_s4_class(BKtree, "C++Class")
+  expect_s4_class(tree, "Rcpp_BKtree")
+  expect_s4_class(tree2, "Rcpp_BKtree")
+  expect_s4_class(tree3, "Rcpp_BKtree")
+  expect_s4_class(tree4, "Rcpp_BKtree")
+  expect_s4_class(tree5, "Rcpp_BKtree")
+  expect_s4_class(tree6, "Rcpp_BKtree")
   expect_identical(tree$distance_metric(), "hamming")
   expect_identical(tree2$distance_metric(), "levenshtein")
   expect_identical(tree3$distance_metric(), "hamming")
@@ -153,11 +151,11 @@ test_that("low-level BKtree wrapper functions work as expected", {
   expect_identical(tree2$first(), seqs[1])
   
   # memory size
-  expect_is(m <- tree$capacity(), "integer")
+  expect_type(m <- tree$capacity(), "integer")
   expect_true(m > 0 && m < n * k * 8)
   expect_identical(tree2$capacity(), m)
   expect_identical(tree3$remove(seqs[n]), NULL)
-  expect_is(m3 <- tree3$capacity(), "integer")
+  expect_type(m3 <- tree3$capacity(), "integer")
   expect_true(m3 > 0 && m3 < (n - 1) * k * 8)
   expect_identical(tree3$insert(seqs[n]), NULL)
   
@@ -173,7 +171,7 @@ test_that("low-level BKtree wrapper functions work as expected", {
   # ... hamming distances
   # ground truth from: sum(stringdist::stringdist(seqs[1], seqs, method = "hamming") <= 24)
   res <- tree$search(seqs[1], 0)
-  expect_is(res, "character")
+  expect_type(res, "character")
   expect_length(res, 1L)
   expect_length(tree$search(seqs[1],  1),  5L)
   expect_length(tree$search(seqs[1], 24), 14L)
@@ -208,7 +206,7 @@ test_that("low-level BKtree wrapper functions work as expected", {
   # ... levenshtein distances
   # ground truth from: sum(stringdist::stringdist(seqs[1], seqs, method = "lv") <= 24)
   res <- tree2$search(seqs[1], 0)
-  expect_is(res, "character")
+  expect_type(res, "character")
   expect_length(res, 1L)
   expect_length(tree2$search(seqs[1],  1),  5L)
   expect_length(tree2$search(seqs[1], 18),  8L)
@@ -237,9 +235,9 @@ test_that("low-level BKtree wrapper functions work as expected", {
   expect_identical(tree$size, 0)
   expect_identical(tree2$size, 0)
   expect_identical(tree3$size, n)
-  expect_is(tree3$remove(seqs[1]), "NULL")
+  expect_type(tree3$remove(seqs[1]), "NULL")
   expect_identical(tree3$size, n - 1)
-  expect_is(tree3$insert(seqs[1]), "NULL")
+  expect_type(tree3$insert(seqs[1]), "NULL")
   expect_identical(tree3$size, n)
   
   # check existing elements
@@ -251,8 +249,8 @@ test_that("low-level BKtree wrapper functions work as expected", {
     tree$insert(s)
     tree2$insert(s)
   }
-  expect_is(res <- tree$get_all(), "character")
-  expect_is(res2 <- tree2$get_all(), "character")
+  expect_type(res <- tree$get_all(), "character")
+  expect_type(res2 <- tree2$get_all(), "character")
   expect_identical(seqs, res)
   expect_identical(seqs, res2)
   set.seed(43)
@@ -261,8 +259,8 @@ test_that("low-level BKtree wrapper functions work as expected", {
     tree$remove(seqs[ii])
     tree2$remove(seqs[ii])
   }
-  expect_is(res <- tree$get_all(), "character")
-  expect_is(res2 <- tree2$get_all(), "character")
+  expect_type(res <- tree$get_all(), "character")
+  expect_type(res2 <- tree2$get_all(), "character")
   expect_identical(seqs[-i], res)
   expect_identical(seqs[-i], res2)
   

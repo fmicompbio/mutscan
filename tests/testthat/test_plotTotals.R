@@ -1,5 +1,3 @@
-context("plotTotals")
-
 se <- readRDS(system.file("extdata/GSE102901_cis_se.rds", package = "mutscan"))
 se <- se[1:1000, 1:3]
 SummarizedExperiment::rowData(se)$categ <- sample(LETTERS[1:3], nrow(se), replace = TRUE)
@@ -21,11 +19,11 @@ test_that("plotTotals fails with incorrect arguments", {
 
 test_that("plotTotals works as expected", {
     ## Defaults
-    expect_is(plotTotals(se = se, selAssay = "counts",
-                         groupBy = NULL), "ggplot")
+    expect_s3_class(plotTotals(se = se, selAssay = "counts",
+                               groupBy = NULL), "ggplot")
 
     ## Group by column
-    expect_is(plotTotals(se = se, selAssay = "counts",
-                         groupBy = "categ"), "ggplot")
+    expect_s3_class(plotTotals(se = se, selAssay = "counts",
+                               groupBy = "categ"), "ggplot")
     
 })

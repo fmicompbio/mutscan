@@ -1,5 +1,3 @@
-context("generateQCReport")
-
 se <- readRDS(system.file("extdata/GSE102901_cis_se.rds", package = "mutscan"))
 se <- se[1:100, ]
 outFile <- tempfile(fileext = ".html")

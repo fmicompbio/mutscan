@@ -1,5 +1,3 @@
-context("summarizeExperiment")
-
 Ldef <- list(
     mergeForwardReverse = FALSE, 
     minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
@@ -91,10 +89,12 @@ test_that("summarizeExperiment works as expected with reads output", {
     expect_equal(ncol(se), 2)
     expect_equal(sort(rownames(se)), 
                  sort(union(out1$summaryTable$mutantName, out2$summaryTable$mutantName)))
-    expect_equivalent(Matrix::colSums(SummarizedExperiment::assay(se, "counts")),
-                      c(out1$filterSummary$nbrRetained, out2$filterSummary$nbrRetained))
-    expect_equivalent(Matrix::colSums(SummarizedExperiment::assay(se, "counts")),
-                      c(sum(out1$summaryTable$nbrReads), sum(out2$summaryTable$nbrReads)))
+    expect_equal(Matrix::colSums(SummarizedExperiment::assay(se, "counts")),
+                 c(out1$filterSummary$nbrRetained, out2$filterSummary$nbrRetained),
+                 ignore_attr = TRUE)
+    expect_equal(Matrix::colSums(SummarizedExperiment::assay(se, "counts")),
+                 c(sum(out1$summaryTable$nbrReads), sum(out2$summaryTable$nbrReads)),
+                 ignore_attr = TRUE)
     
     for (cn in colnames(out1$filterSummary)) {
         expect_equal(SummarizedExperiment::colData(se)["sample1", cn],
@@ -122,8 +122,9 @@ test_that("summarizeExperiment works as expected with umis output", {
     expect_equal(ncol(se), 2)
     expect_equal(sort(rownames(se)), 
                  sort(union(out1$summaryTable$mutantName, out2$summaryTable$mutantName)))
-    expect_equivalent(Matrix::colSums(SummarizedExperiment::assay(se, "counts")),
-                      c(sum(out1$summaryTable$nbrUmis), sum(out2$summaryTable$nbrUmis)))
+    expect_equal(Matrix::colSums(SummarizedExperiment::assay(se, "counts")),
+                 c(sum(out1$summaryTable$nbrUmis), sum(out2$summaryTable$nbrUmis)),
+                 ignore_attr = TRUE)
     
     for (cn in colnames(out1$filterSummary)) {
         expect_equal(SummarizedExperiment::colData(se)["sample1", cn],

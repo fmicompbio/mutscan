@@ -1,5 +1,3 @@
-context("parallel processing")
-
 test_that("parallel processing works (cis)", {
   fqc1 <- system.file("extdata/cisInput_1.fastq.gz", package = "mutscan")
   fqc2 <- system.file("extdata/cisInput_2.fastq.gz", package = "mutscan")

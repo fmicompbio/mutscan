@@ -1,5 +1,3 @@
-context("digestFastqs - primers")
-
 test_that("digestFastqs works as expected for primer experiments", {
   fqt1 <- system.file("extdata/leujunt0_1.fastq.gz", package = "mutscan")
   fqt2 <- system.file("extdata/leujunt0_2.fastq.gz", package = "mutscan")
@@ -111,7 +109,7 @@ test_that("digestFastqs works as expected for primer experiments", {
   expect_equal(res$filterSummary$nbrRetained, 600L)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
-    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+    expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)

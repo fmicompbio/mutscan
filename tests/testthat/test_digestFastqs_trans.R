@@ -1,5 +1,3 @@
-context("digestFastqs - trans")
-
 test_that("digestFastqs works as expected for trans experiments", {
   fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
   fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
@@ -71,7 +69,7 @@ test_that("digestFastqs works as expected for trans experiments", {
   expect_equal(res$summaryTable$nbrUmis, res2$summaryTable$nbrUmis)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
-    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+    expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
@@ -139,8 +137,6 @@ test_that("digestFastqs works as expected for trans experiments", {
 ## ----------------------------------------------------------------------------
 ## Constant seq mismatch filtering
 ## ----------------------------------------------------------------------------
-context("digestFastqs - trans - filter based on constant sequence")
-
 test_that("digestFastqs works as expected for trans experiments, filter based on constant seq mismatches", {
   fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
   fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
@@ -205,7 +201,7 @@ test_that("digestFastqs works as expected for trans experiments, filter based on
   expect_equal(res$filterSummary$nbrRetained, 251L)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
-    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+    expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
@@ -259,7 +255,7 @@ test_that("digestFastqs works as expected for trans experiments, filter based on
   expect_equal(res$filterSummary$nbrRetained, 275L)
   
   for (nm in setdiff(names(L), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
-    expect_equivalent(res$parameters[[nm]], L[[nm]])
+    expect_equal(res$parameters[[nm]], L[[nm]], ignore_attr = TRUE)
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
@@ -318,7 +314,7 @@ test_that("digestFastqs works as expected for trans experiments, filter based on
   expect_equal(res$filterSummary$nbrRetained, 253L)
   
   for (nm in setdiff(names(L), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
-    expect_equivalent(res$parameters[[nm]], L[[nm]])
+    expect_equal(res$parameters[[nm]], L[[nm]], ignore_attr = TRUE)
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
@@ -359,7 +355,7 @@ test_that("digestFastqs works as expected for trans experiments, filter based on
   expect_equal(res$filterSummary$nbrRetained, 251L)
   
   for (nm in setdiff(names(L), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
-    expect_equivalent(res$parameters[[nm]], L[[nm]])
+    expect_equal(res$parameters[[nm]], L[[nm]], ignore_attr = TRUE)
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
@@ -394,8 +390,6 @@ test_that("digestFastqs works as expected for trans experiments, filter based on
 ## ----------------------------------------------------------------------------
 ## Read composition specification
 ## ----------------------------------------------------------------------------
-context("digestFastqs - trans - read composition specification")
-
 test_that("digestFastqs works as expected for trans experiments - no UMI specified", {
   fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
   fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
@@ -526,7 +520,7 @@ test_that("digestFastqs works as expected for trans experiments, when variable s
   expect_equal(res$filterSummary$nbrRetained, 279L)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
-    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+    expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
@@ -574,7 +568,6 @@ test_that("digestFastqs works as expected for trans experiments, when variable s
 ## ----------------------------------------------------------------------------
 ## Multiple wildtype sequences
 ## ----------------------------------------------------------------------------
-context("digestFastqs - trans - multiple reference sequences")
 test_that("digestFastqs works as expected for trans experiments when multiple reference sequences are provided", {
   fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
   fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
@@ -642,7 +635,7 @@ test_that("digestFastqs works as expected for trans experiments when multiple re
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "nThreads",
                                     "forbiddenMutatedCodonsReverse", "verbose"))) {
-    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+    expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
@@ -715,8 +708,6 @@ test_that("digestFastqs works as expected for trans experiments when multiple re
 ## ----------------------------------------------------------------------------
 ## Only forward read
 ## ----------------------------------------------------------------------------
-context("digestFastqs - only forward read given")
-
 test_that("digestFastqs works as expected for experiments with only forward read", {
   fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
   fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
@@ -790,9 +781,9 @@ test_that("digestFastqs works as expected for experiments with only forward read
   for (nm in setdiff(names(Ldef), c("fastqReverse", "forbiddenMutatedCodonsForward",
                                     "forbiddenMutatedCodonsReverse", "verbose",
                                     "elementLengthsReverse"))) {
-    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+    expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
   }
-  expect_equivalent(res$parameters[["fastqReverse"]], "")
+  expect_equal(res$parameters[["fastqReverse"]], "", ignore_attr = TRUE)
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
   expect_equal(res$summaryTable$nbrReads, res$summaryTable$maxNbrReads)
@@ -824,8 +815,6 @@ test_that("digestFastqs works as expected for experiments with only forward read
 ## ----------------------------------------------------------------------------
 ## Save filtered reads to fastq files
 ## ----------------------------------------------------------------------------
-context("digestFastqs - trans - save filtered reads to files")
-
 test_that("writing filtered reads to file works", {
   fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
   fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
@@ -894,7 +883,7 @@ test_that("writing filtered reads to file works", {
   expect_equal(res$filterSummary$nbrRetained, 279L)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
-    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+    expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
   }
   
   out1 <- Biostrings::readQualityScaledDNAStringSet(outfile1)

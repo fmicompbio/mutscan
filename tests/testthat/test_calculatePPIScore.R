@@ -1,5 +1,3 @@
-context("PPI score calculations")
-
 Ldef <- list(
     mergeForwardReverse = TRUE, 
     minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
@@ -97,7 +95,7 @@ test_that("calculatePPIScore works as expected", {
     expect_equal(rownames(ppi), rownames(secoll))
     expect_equal(ncol(ppi), 2)
     expect_equal(colnames(ppi), c("output_vs_input_repl1", "output_vs_input_repl2"))
-    expect_equivalent(ppi["f.0.NA", ], c(1, 1))
+    expect_equal(ppi["f.0.NA", ], c(1, 1), ignore_attr = TRUE)
     
     ## Test "replicate 1"
     w <- SummarizedExperiment::colData(secoll)$Condition == "output" & 

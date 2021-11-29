@@ -1,5 +1,3 @@
-context("collapse mutants by amino acid")
-
 Ldef <- list(
   mergeForwardReverse = TRUE, 
   minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
@@ -89,14 +87,14 @@ test_that("collapseMutantsByAA works as expected", {
   tmp <- table(rep(aapos, SummarizedExperiment::assay(se, "counts")[, 1]))
   tmp <- tmp[rownames(secoll)]
   tmp[is.na(tmp)] <- 0
-  expect_equivalent(SummarizedExperiment::assay(secoll, "counts")[, 1],
-                    as.numeric(tmp))
+  expect_equal(SummarizedExperiment::assay(secoll, "counts")[, 1],
+               as.numeric(tmp), ignore_attr = TRUE)
   
   tmp <- table(rep(aapos, SummarizedExperiment::assay(se, "counts")[, 2]))
   tmp <- tmp[rownames(secoll)]
   tmp[is.na(tmp)] <- 0
-  expect_equivalent(SummarizedExperiment::assay(secoll, "counts")[, 2],
-                    as.numeric(tmp))
+  expect_equal(SummarizedExperiment::assay(secoll, "counts")[, 2],
+               as.numeric(tmp), ignore_attr = TRUE)
 })
 
 
