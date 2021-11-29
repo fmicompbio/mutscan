@@ -39,5 +39,5 @@ into a \code{\link[SummarizedExperiment]{SummarizedExperiment}}, with
 observed variable sequences (sequence pairs) in rows and samples in columns.
 }
 \author{
-Michael Stadler
+Michael Stadler, Charlotte Soneson
 }

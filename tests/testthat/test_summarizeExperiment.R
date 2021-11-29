@@ -112,6 +112,15 @@ test_that("summarizeExperiment works as expected with reads output", {
     
     expect_equal(S4Vectors::metadata(se)$parameters[["sample1"]], out1$parameters)
     expect_equal(S4Vectors::metadata(se)$parameters[["sample2"]], out2$parameters)
+
+    ## Check that the number of mutated codons are correct (=equal to the number of 
+    ## entries in the mutant name that don't contain WT)    
+    expect_equal(sapply(strsplit(SummarizedExperiment::rowData(se)$mutantName, "_"), 
+                        function(w) length(w[!grepl("WT", w)])),
+                 SummarizedExperiment::rowData(se)$minNbrMutCodons, ignore_attr = TRUE)
+    expect_equal(sapply(strsplit(SummarizedExperiment::rowData(se)$mutantName, "_"), 
+                        function(w) length(w[!grepl("WT", w)])),
+                 SummarizedExperiment::rowData(se)$maxNbrMutCodons, ignore_attr = TRUE)
 })
 
 test_that("summarizeExperiment works as expected with umis output", {
