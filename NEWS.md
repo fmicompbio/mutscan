@@ -1,3 +1,9 @@
+# mutscan 0.2.23
+
+* Changed default value of forbidden codons to ""
+* Make result plots more flexible
+* Propagate information about the number of mutated bases/codons in `summarizeExperiment()`
+
 # mutscan 0.2.22
 
 * Added argument to specify the title of the QC report.

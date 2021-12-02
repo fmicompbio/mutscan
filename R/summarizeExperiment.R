@@ -36,13 +36,14 @@
 #'         \item{colData(x)}{containing the metadata provided by \code{coldata}.}
 #'     }
 #'
-#' @author Michael Stadler
+#' @author Michael Stadler, Charlotte Soneson
 #' 
 #' @export
 #' 
 #' @importFrom SummarizedExperiment SummarizedExperiment colData
 #' @importFrom BiocGenerics paste
 #' @importFrom S4Vectors DataFrame
+#' @importFrom IRanges IntegerList
 #' @importFrom methods is new
 #' @importFrom dplyr bind_rows distinct left_join %>% mutate
 #' @importFrom tidyr unite
@@ -107,8 +108,33 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
         dplyr::mutate(sequence = vapply(sequence, function(x) {
             paste(unique(strsplit(x, ",")[[1]]), collapse = ",")
         }, ""))
+    allSequences <- S4Vectors::DataFrame(allSequences)
     allSamples <- names(x)
     names(allSamples) <- allSamples
+    
+    ## Add info about nbr mutated bases/codons
+    allNbrMutBases <- do.call(dplyr::bind_rows, 
+                              lapply(x, function(w) 
+                                  w$summaryTable[, c("mutantName", "nbrMutBases")])) %>%
+        dplyr::distinct()
+    allNbrMutBases <- as(split(allNbrMutBases$nbrMutBases, f = allNbrMutBases$mutantName),
+                         "IntegerList")
+    
+    allNbrMutCodons <- do.call(dplyr::bind_rows, 
+                               lapply(x, function(w) 
+                                   w$summaryTable[, c("mutantName", "nbrMutCodons")])) %>%
+        dplyr::distinct()
+    allNbrMutCodons <- as(split(allNbrMutCodons$nbrMutCodons, f = allNbrMutCodons$mutantName),
+                          "IntegerList")
+    
+    allSequences[["nbrMutBases"]] <- allNbrMutBases[allSequences$mutantName]
+    allSequences[["nbrMutCodons"]] <- allNbrMutCodons[allSequences$mutantName]
+    
+    ## Add numeric columns in addition to the integer lists
+    allSequences[["minNbrMutBases"]] <- min(allSequences$nbrMutBases)
+    allSequences[["maxNbrMutBases"]] <- max(allSequences$nbrMutBases)
+    allSequences[["minNbrMutCodons"]] <- min(allSequences$nbrMutCodons)
+    allSequences[["maxNbrMutCodons"]] <- max(allSequences$nbrMutCodons)
     
     ## --------------------------------------------------------------------------
     ## Create a sparse matrix
@@ -130,14 +156,14 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
         x[[s]]$filterSummary %>% dplyr::mutate(Name = s)
     }))
     coldata <- dplyr::left_join(coldata, addMeta, by = "Name")
-    
+
     ## --------------------------------------------------------------------------
     ## Create SummarizedExperiment object
     ## --------------------------------------------------------------------------
     se <- SummarizedExperiment::SummarizedExperiment(
         assays = list(counts = countMat),
         colData = coldata[match(allSamples, coldata$Name), , drop = FALSE],
-        rowData = S4Vectors::DataFrame(sequence = allSequences$sequence),
+        rowData = allSequences,
         metadata = list(parameters = lapply(allSamples, function(w) x[[w]]$parameters), 
                         countType = countType,
                         mutNameDelimiter = mutnamedel)

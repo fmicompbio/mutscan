@@ -1,11 +1,12 @@
-context("calculateRelativeFC")
-
 se <- readRDS(system.file("extdata/GSE102901_cis_se.rds", package = "mutscan"))
 se <- se[1:100, ]
 design <- model.matrix(~ Replicate + Condition, data = colData(se))
 
 test_that("calculateRelativeFC fails with incorrect arguments", {
     expect_error(calculateRelativeFC(se = NULL, design = design, 
+                                     coef = "Conditioncis_output"),
+                 "'se' must not be NULL")
+    expect_error(calculateRelativeFC(se = as.matrix(assay(se)), design = design, 
                                      coef = "Conditioncis_output"),
                  "'se' must be of class 'SummarizedExperiment'")
     expect_error(calculateRelativeFC(se = se, design = NULL, 
@@ -38,7 +39,7 @@ test_that("calculateRelativeFC fails with incorrect arguments", {
     expect_error(calculateRelativeFC(se = se, design = design, 
                                      coef = "Conditioncis_output", 
                                      selAssay = 1),
-                 "'selAssay' must be of type 'character'")
+                 "'selAssay' must be of class 'character'")
     expect_error(calculateRelativeFC(se = se, design = design, 
                                      coef = "Conditioncis_output", 
                                      pseudocount = -1),

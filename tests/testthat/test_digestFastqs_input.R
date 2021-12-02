@@ -1,5 +1,3 @@
-context("digestFastqs - inputs")
-
 test_that("digestFastqs fails with incorrect arguments", {
   ## example "trans" fastq files 
   fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")

@@ -1,5 +1,3 @@
-context("digestFastqs - cis")
-
 test_that("digestFastqs works as expected for cis experiments", {
   fqc1 <- system.file("extdata/cisInput_1.fastq.gz", package = "mutscan")
   fqc2 <- system.file("extdata/cisInput_2.fastq.gz", package = "mutscan")
@@ -64,7 +62,7 @@ test_that("digestFastqs works as expected for cis experiments", {
   expect_equal(res$filterSummary$nbrRetained, 167)
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
-    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+    expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
@@ -189,7 +187,7 @@ test_that("digestFastqs works as expected when specifying max nbr of mutated bas
                                    "nbrReads", "maxNbrReads", "nbrUmis"))
   
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
-    expect_equivalent(res$parameters[[nm]], Ldef[[nm]])
+    expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
