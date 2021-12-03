@@ -11,13 +11,14 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // calcNearestStringDist
-IntegerVector calcNearestStringDist(std::vector<std::string> x);
-RcppExport SEXP _mutscan_calcNearestStringDist(SEXP xSEXP) {
+IntegerVector calcNearestStringDist(std::vector<std::string> x, int nThreads);
+RcppExport SEXP _mutscan_calcNearestStringDist(SEXP xSEXP, SEXP nThreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::vector<std::string> >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(calcNearestStringDist(x));
+    Rcpp::traits::input_parameter< int >::type nThreads(nThreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(calcNearestStringDist(x, nThreads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -209,7 +210,7 @@ END_RCPP
 RcppExport SEXP _rcpp_module_boot_mod_BKtree();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_mutscan_calcNearestStringDist", (DL_FUNC) &_mutscan_calcNearestStringDist, 1},
+    {"_mutscan_calcNearestStringDist", (DL_FUNC) &_mutscan_calcNearestStringDist, 2},
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 3},
     {"_mutscan_test_decomposeRead", (DL_FUNC) &_mutscan_test_decomposeRead, 12},
     {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 10},

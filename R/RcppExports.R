@@ -7,11 +7,12 @@
 #' to the nearest neighbor amongst all the other elements.
 #' 
 #' @param x A character vector.
+#' @param nThreads numeric(1), number of threads to use for parallel processing.
 #' 
 #' @return An integer vector of the same length as \code{x}.
 #' @export
-calcNearestStringDist <- function(x) {
-    .Call(`_mutscan_calcNearestStringDist`, x)
+calcNearestStringDist <- function(x, nThreads = 1L) {
+    .Call(`_mutscan_calcNearestStringDist`, x, nThreads)
 }
 
 compareCodonPositions <- function(a, b, mutNameDelimiter) {
