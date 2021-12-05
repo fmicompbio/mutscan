@@ -13,6 +13,12 @@
 #' @param nThreads numeric(1), number of threads to use for parallel processing.
 #' 
 #' @return An integer vector of the same length as \code{x}.
+#' 
+#' @example
+#' calcNearestStringDist(c("lazy", "hazy", "crazy"))
+#' calcNearestStringDist(c("lazy", "hazy", "crazy"), metric = "hamming_shift")
+#' calcNearestStringDist(c("lazy", "hazy", "crazy"), metric = "levenshtein")
+#' 
 #' @export
 calcNearestStringDist <- function(x, metric = "hamming", nThreads = 1L) {
     .Call(`_mutscan_calcNearestStringDist`, x, metric, nThreads)
