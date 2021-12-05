@@ -4,10 +4,16 @@
 \alias{calcNearestStringDist}
 \title{Calculate distances to the nearest string}
 \usage{
-calcNearestStringDist(x)
+calcNearestStringDist(x, metric = "hamming", nThreads = 1L)
 }
 \arguments{
 \item{x}{A character vector.}
+
+\item{metric}{A character scalar defining the string distance metric. One
+of \code{"hamming"} (default), \code{"hamming_shift"} or
+\code{"levenshtein"}.}
+
+\item{nThreads}{numeric(1), number of threads to use for parallel processing.}
 }
 \value{
 An integer vector of the same length as \code{x}.

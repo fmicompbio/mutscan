@@ -7,12 +7,15 @@
 #' to the nearest neighbor amongst all the other elements.
 #' 
 #' @param x A character vector.
+#' @param metric A character scalar defining the string distance metric. One
+#'   of \code{"hamming"} (default), \code{"hamming_shift"} or
+#'   \code{"levenshtein"}.
 #' @param nThreads numeric(1), number of threads to use for parallel processing.
 #' 
 #' @return An integer vector of the same length as \code{x}.
 #' @export
-calcNearestStringDist <- function(x, nThreads = 1L) {
-    .Call(`_mutscan_calcNearestStringDist`, x, nThreads)
+calcNearestStringDist <- function(x, metric = "hamming", nThreads = 1L) {
+    .Call(`_mutscan_calcNearestStringDist`, x, metric, nThreads)
 }
 
 compareCodonPositions <- function(a, b, mutNameDelimiter) {
