@@ -10,42 +10,16 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// levenshtein_distance
-int levenshtein_distance(const std::string& str1, const std::string& str2, int ignored_variable);
-RcppExport SEXP _mutscan_levenshtein_distance(SEXP str1SEXP, SEXP str2SEXP, SEXP ignored_variableSEXP) {
+// calcNearestStringDist
+IntegerVector calcNearestStringDist(std::vector<std::string> x, std::string metric, int nThreads);
+RcppExport SEXP _mutscan_calcNearestStringDist(SEXP xSEXP, SEXP metricSEXP, SEXP nThreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const std::string& >::type str1(str1SEXP);
-    Rcpp::traits::input_parameter< const std::string& >::type str2(str2SEXP);
-    Rcpp::traits::input_parameter< int >::type ignored_variable(ignored_variableSEXP);
-    rcpp_result_gen = Rcpp::wrap(levenshtein_distance(str1, str2, ignored_variable));
-    return rcpp_result_gen;
-END_RCPP
-}
-// hamming_distance
-int hamming_distance(const std::string& str1, const std::string& str2, int ignored_variable);
-RcppExport SEXP _mutscan_hamming_distance(SEXP str1SEXP, SEXP str2SEXP, SEXP ignored_variableSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const std::string& >::type str1(str1SEXP);
-    Rcpp::traits::input_parameter< const std::string& >::type str2(str2SEXP);
-    Rcpp::traits::input_parameter< int >::type ignored_variable(ignored_variableSEXP);
-    rcpp_result_gen = Rcpp::wrap(hamming_distance(str1, str2, ignored_variable));
-    return rcpp_result_gen;
-END_RCPP
-}
-// hamming_shift_distance
-int hamming_shift_distance(const std::string& str1, const std::string& str2, int max_abs_shift);
-RcppExport SEXP _mutscan_hamming_shift_distance(SEXP str1SEXP, SEXP str2SEXP, SEXP max_abs_shiftSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const std::string& >::type str1(str1SEXP);
-    Rcpp::traits::input_parameter< const std::string& >::type str2(str2SEXP);
-    Rcpp::traits::input_parameter< int >::type max_abs_shift(max_abs_shiftSEXP);
-    rcpp_result_gen = Rcpp::wrap(hamming_shift_distance(str1, str2, max_abs_shift));
+    Rcpp::traits::input_parameter< std::vector<std::string> >::type x(xSEXP);
+    Rcpp::traits::input_parameter< std::string >::type metric(metricSEXP);
+    Rcpp::traits::input_parameter< int >::type nThreads(nThreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(calcNearestStringDist(x, metric, nThreads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -194,19 +168,59 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// levenshtein_distance
+int levenshtein_distance(const std::string& str1, const std::string& str2, int ignored_variable);
+RcppExport SEXP _mutscan_levenshtein_distance(SEXP str1SEXP, SEXP str2SEXP, SEXP ignored_variableSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const std::string& >::type str1(str1SEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type str2(str2SEXP);
+    Rcpp::traits::input_parameter< int >::type ignored_variable(ignored_variableSEXP);
+    rcpp_result_gen = Rcpp::wrap(levenshtein_distance(str1, str2, ignored_variable));
+    return rcpp_result_gen;
+END_RCPP
+}
+// hamming_distance
+int hamming_distance(const std::string& str1, const std::string& str2, int ignored_variable);
+RcppExport SEXP _mutscan_hamming_distance(SEXP str1SEXP, SEXP str2SEXP, SEXP ignored_variableSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const std::string& >::type str1(str1SEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type str2(str2SEXP);
+    Rcpp::traits::input_parameter< int >::type ignored_variable(ignored_variableSEXP);
+    rcpp_result_gen = Rcpp::wrap(hamming_distance(str1, str2, ignored_variable));
+    return rcpp_result_gen;
+END_RCPP
+}
+// hamming_shift_distance
+int hamming_shift_distance(const std::string& str1, const std::string& str2, int max_abs_shift);
+RcppExport SEXP _mutscan_hamming_shift_distance(SEXP str1SEXP, SEXP str2SEXP, SEXP max_abs_shiftSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const std::string& >::type str1(str1SEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type str2(str2SEXP);
+    Rcpp::traits::input_parameter< int >::type max_abs_shift(max_abs_shiftSEXP);
+    rcpp_result_gen = Rcpp::wrap(hamming_shift_distance(str1, str2, max_abs_shift));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 RcppExport SEXP _rcpp_module_boot_mod_BKtree();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_mutscan_levenshtein_distance", (DL_FUNC) &_mutscan_levenshtein_distance, 3},
-    {"_mutscan_hamming_distance", (DL_FUNC) &_mutscan_hamming_distance, 3},
-    {"_mutscan_hamming_shift_distance", (DL_FUNC) &_mutscan_hamming_shift_distance, 3},
+    {"_mutscan_calcNearestStringDist", (DL_FUNC) &_mutscan_calcNearestStringDist, 3},
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 3},
     {"_mutscan_test_decomposeRead", (DL_FUNC) &_mutscan_test_decomposeRead, 12},
     {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 10},
     {"_mutscan_findClosestRefSeq", (DL_FUNC) &_mutscan_findClosestRefSeq, 4},
     {"_mutscan_findClosestRefSeqEarlyStop", (DL_FUNC) &_mutscan_findClosestRefSeqEarlyStop, 4},
     {"_mutscan_digestFastqsCpp", (DL_FUNC) &_mutscan_digestFastqsCpp, 52},
+    {"_mutscan_levenshtein_distance", (DL_FUNC) &_mutscan_levenshtein_distance, 3},
+    {"_mutscan_hamming_distance", (DL_FUNC) &_mutscan_hamming_distance, 3},
+    {"_mutscan_hamming_shift_distance", (DL_FUNC) &_mutscan_hamming_shift_distance, 3},
     {"_rcpp_module_boot_mod_BKtree", (DL_FUNC) &_rcpp_module_boot_mod_BKtree, 0},
     {NULL, NULL, 0}
 };

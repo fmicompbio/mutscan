@@ -1,3 +1,7 @@
+# mutscan 0.2.24
+
+* Added function to calculate nearest string distances
+
 # mutscan 0.2.23
 
 * Changed default value of forbidden codons to ""
