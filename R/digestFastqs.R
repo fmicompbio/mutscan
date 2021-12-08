@@ -422,10 +422,10 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
   }
   
   ## if wild type sequence is a string, make it into a vector
-  if (length(wildTypeForward) == 1) {
+  if (length(wildTypeForward) == 1 && is.null(names(wildTypeForward))) {
     wildTypeForward <- c(f = wildTypeForward)
   }
-  if (length(wildTypeReverse) == 1) {
+  if (length(wildTypeReverse) == 1 && is.null(names(wildTypeReverse))) {
     wildTypeReverse <- c(r = wildTypeReverse)
   }
   

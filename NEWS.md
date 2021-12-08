@@ -1,3 +1,7 @@
+# mutscan 0.2.25
+
+* Only add names to WT sequences if they are unnamed
+
 # mutscan 0.2.24
 
 * Added function to calculate nearest string distances
