@@ -106,11 +106,11 @@ calculatePPIScore <- function(se, pairingCol, ODCols, comparison, WTrows) {
         nWT <- rep(1, ncol(n))
     } else {
         ## geometric mean
-        tmp0 <- n[WTrows, , drop = FALSE]
-        tmp0 <- tmp0[apply(tmp0, 1, min) > 0, , drop = FALSE]
-        nWT <- apply(tmp0, 2, function(s) exp(mean(log(s))))
+        # tmp0 <- n[WTrows, , drop = FALSE]
+        # tmp0 <- tmp0[apply(tmp0, 1, min) > 0, , drop = FALSE]
+        # nWT <- apply(tmp0, 2, function(s) exp(mean(log(s))))
         ## arithmetic mean
-        # nWT <- colMeans(n[WTrows, , drop = FALSE])
+        nWT <- colMeans(n[WTrows, , drop = FALSE])
     }
     PPI <- sweep(n, MARGIN = 2, STATS = nWT, FUN = "/")
     return(PPI)
