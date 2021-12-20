@@ -67,7 +67,8 @@ calculatePPIScore <- function(se, pairingCol, ODCols, comparison, WTrows) {
     }
     
     ## WTrows exist in the SE
-    .assertVector(x = WTrows, type = "character", validValues = rownames(se))
+    .assertVector(x = WTrows, type = "character", validValues = rownames(se), 
+                  allowNULL = TRUE)
 
     ## ------------------------------------------------------------------------
     ## subset se and reorder samples by shared replicates
