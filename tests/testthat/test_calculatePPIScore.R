@@ -130,6 +130,13 @@ test_that("calculatePPIScore works as expected", {
     ratios <- ratios/ratios["f.0.NA"]
     
     expect_equal(ppi[, "output_vs_input_repl2"], ratios)
+    
+    ## Test that PPI scores of input/output gives the same as output/input
+    ppirev <- calculatePPIScore(se = secoll, pairingCol = "Replicate", 
+                                ODCols = "OD",
+                                comparison = c("Condition", "input", "output"), 
+                                WTrows = "f.0.NA")
+    expect_equal(ppirev[, "input_vs_output_repl1"], ppi[, "output_vs_input_repl1"])
 })
 
 
