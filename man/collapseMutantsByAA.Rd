@@ -15,7 +15,7 @@ all mutations that are synonymous with the wildtype as unmutated}
 }
 \value{
 A \code{\link[SummarizedExperiment]{SummarizedExperiment}} where
-  counts have been aggregated by the mutated amino acid(s).
+    counts have been aggregated by the mutated amino acid(s).
 }
 \description{
 Collapse counts by mutated amino acid
