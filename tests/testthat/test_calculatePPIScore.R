@@ -61,30 +61,45 @@ secoll <- collapseMutantsByAA(se)
 
 test_that("calculatePPIScore fails with incorrect arguments", {
     expect_error(calculatePPIScore(se = 1, pairingCol = "Replicate", ODCols = "OD",
-                                   comparison = c("Condition", "output", "input")))
+                                   comparison = c("Condition", "output", "input"),
+                                   WTrows = "f.0.NA"))
     expect_error(calculatePPIScore(se = out1, pairingCol = "Replicate", ODCols = "OD",
-                                   comparison = c("Condition", "output", "input")))
+                                   comparison = c("Condition", "output", "input"),
+                                   WTrows = "f.0.NA"))
     expect_error(calculatePPIScore(se = list(sample1 = out1, sample2 = out2), 
                                    pairingCol = "Replicate", ODCols = "OD",
-                                   comparison = c("Condition", "output", "input")))
+                                   comparison = c("Condition", "output", "input"),
+                                   WTrows = "f.0.NA"))
     expect_error(calculatePPIScore(se = secoll, pairingCol = "Unknown", ODCols = "OD",
-                                   comparison = c("Condition", "output", "input")))
+                                   comparison = c("Condition", "output", "input"),
+                                   WTrows = "f.0.NA"))
     expect_error(calculatePPIScore(se = secoll, pairingCol = 1, ODCols = "OD",
-                                   comparison = c("Condition", "output", "input")))
+                                   comparison = c("Condition", "output", "input"),
+                                   WTrows = "f.0.NA"))
     expect_error(calculatePPIScore(se = secoll, pairingCol = "OD", ODCols = "OD",
-                                   comparison = c("Condition", "output", "input")))
+                                   comparison = c("Condition", "output", "input"),
+                                   WTrows = "f.0.NA"))
     expect_error(calculatePPIScore(se = secoll, pairingCol = "Replicate", ODCols = "Unknown",
-                                   comparison = c("Condition", "output", "input")))
+                                   comparison = c("Condition", "output", "input"),
+                                   WTrows = "f.0.NA"))
     expect_error(calculatePPIScore(se = secoll, pairingCol = "Replicate", ODCols = "Condition",
-                                   comparison = c("Condition", "output", "input")))
+                                   comparison = c("Condition", "output", "input"),
+                                   WTrows = "f.0.NA"))
     expect_error(calculatePPIScore(se = secoll, pairingCol = "Replicate", ODCols = 1,
-                                   comparison = c("Condition", "output", "input")))
+                                   comparison = c("Condition", "output", "input"),
+                                   WTrows = "f.0.NA"))
     expect_error(calculatePPIScore(se = secoll, pairingCol = "Replicate", ODCols = "OD",
-                                   comparison = c("Unknown", "output", "input")))
+                                   comparison = c("Unknown", "output", "input"),
+                                   WTrows = "f.0.NA"))
     expect_error(calculatePPIScore(se = secoll, pairingCol = "Replicate", ODCols = "OD",
-                                   comparison = c("Condition", "unknown", "input")))
+                                   comparison = c("Condition", "unknown", "input"),
+                                   WTrows = "f.0.NA"))
     expect_error(calculatePPIScore(se = secoll, pairingCol = "Replicate", ODCols = "OD",
-                                   comparison = c("Condition", "output", "unknown")))
+                                   comparison = c("Condition", "output", "unknown"),
+                                   WTrows = "f.0.NA"))
+    expect_error(calculatePPIScore(se = secoll, pairingCol = "Replicate", ODCols = "OD",
+                                   comparison = c("Condition", "output", "input"),
+                                   WTrows = "f.0.NA", selAssay = "missing"))
 })
 
 test_that("calculatePPIScore works as expected", {
@@ -127,9 +142,25 @@ test_that("calculatePPIScore works as expected", {
     
     ratios <- log2(ncout/ncin)
     ratios[!is.finite(ratios)] <- NA
-    ratios <- ratios/ratios["f.0.NA"]
     
+    ## Test performance if WTrows = NULL
+    ppinull <- calculatePPIScore(se = secoll, pairingCol = "Replicate",
+                                 ODCols = "OD",
+                                 comparison = c("Condition", "output", "input"),
+                                 WTrows = NULL)
+    expect_equal(ppinull[, "output_vs_input_repl2"] , ratios)
+    
+    ## Use the WTrows
+    ratios <- ratios/ratios["f.0.NA"]
     expect_equal(ppi[, "output_vs_input_repl2"], ratios)
+    
+    ## Test that PPI scores of input/output gives the same as output/input
+    ppirev <- calculatePPIScore(se = secoll, pairingCol = "Replicate", 
+                                ODCols = "OD",
+                                comparison = c("Condition", "input", "output"), 
+                                WTrows = "f.0.NA")
+    expect_equal(ppirev[, "input_vs_output_repl1"], ppi[, "output_vs_input_repl1"])
+    
 })
 
 

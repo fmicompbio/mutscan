@@ -1,3 +1,7 @@
+# mutscan 0.2.26
+
+* Use arithmetic instead of geometric mean for PPI calculations
+
 # mutscan 0.2.25
 
 * Only add names to WT sequences if they are unnamed

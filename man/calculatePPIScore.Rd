@@ -4,39 +4,51 @@
 \alias{calculatePPIScore}
 \title{Calculate protein-protein interaction scores (PPI).}
 \usage{
-calculatePPIScore(se, pairingCol, ODCols, comparison, WTrows)
+calculatePPIScore(
+  se,
+  pairingCol,
+  ODCols,
+  comparison,
+  WTrows,
+  selAssay = "counts"
+)
 }
 \arguments{
-\item{se}{SummarizedExperiment object as returned by \code{\link{digestFastqs}}.}
+\item{se}{SummarizedExperiment object as returned by 
+\code{\link{summarizeExperiment}}.}
 
-\item{pairingCol}{Name of column in \code{colData(se)} with replicate/pairing
-information. Samples with the same value in this column will be paired.}
+\item{pairingCol}{Name of column in \code{colData(se)} with 
+replicate/pairing information. Samples with the same value in this 
+column will be paired.}
 
-\item{ODCols}{Name(s) of column(s) in \code{colData(se)} with OD values (numeric),
-used to normalize for different numbers of cells.}
+\item{ODCols}{Name(s) of column(s) in \code{colData(se)} with OD values 
+(numeric), used to normalize for different numbers of cells.}
 
-\item{comparison}{3-element character vector of the form \code{(column, numerator,
-denominator)}. \code{column} is the name of the column in \code{colData(se)}
-with experimental conditions. \code{numerator} and \code{denominator} define
-the comparison, e.g. \code{c("cond", "output", "input")} will look in the
-\code{"cond"} column and calculate PPI for the ratio of \code{"output"} over
-\code{"input"} counts.}
+\item{comparison}{3-element character vector of the form 
+\code{(column, numerator, denominator)}. \code{column} is the name of 
+the column in \code{colData(se)} with experimental conditions. 
+\code{numerator} and \code{denominator} define the comparison, 
+e.g. \code{c("cond", "output", "input")} will look in the 
+\code{"cond"} column and calculate PPI for the ratio of \code{"output"} 
+over \code{"input"} counts.}
 
 \item{WTrows}{Vector of row names that will be used as the reference when
-calculating PPI scores. If more than one value is provided, the average of
-the corresponding PPI scores is used as a reference. If NULL, no division
-by WT scores will be done.}
+calculating PPI scores. If more than one value is provided, the average 
+of the corresponding PPI scores is used as a reference. If NULL, no 
+division by WT scores will be done.}
+
+\item{selAssay}{Assay to select from \code{se} for the analysis.}
 }
 \value{
 A numeric vector with PPI scores.
 }
 \description{
 Using sequence counts before and after selection, calculate protein-protein
-interaction scores as described in Diss et al. 2018.
+interaction scores as described by Diss and Lehner (2018).
 }
 \references{
 "The genetic landscape of a physical interaction."
-  Diss G and Lehner B. Elife. 2018;7:e32472. doi: 10.7554/eLife.32472.
+    Diss G and Lehner B. Elife. 2018;7:e32472. doi: 10.7554/eLife.32472.
 }
 \author{
 Michael Stadler and Charlotte Soneson
