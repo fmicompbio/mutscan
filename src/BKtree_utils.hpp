@@ -4,9 +4,11 @@
 #include <Rcpp.h>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include <map>
-#include <bits/stdc++.h>
+#include <utility>
+#include <iostream>
 #include "stringdist.hpp"
 
 using namespace Rcpp;

@@ -774,7 +774,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   }
 #else
   if (nThreads > 1) {
-    warning("OpenMP parallelization not available. Ignoring 'nThreads'.")
+    warning("OpenMP parallelization not available. Ignoring 'nThreads'.");
   }
 #endif
 
