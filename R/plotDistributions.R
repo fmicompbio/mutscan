@@ -58,10 +58,11 @@ plotDistributions <- function(se, selAssay = "counts",
         SummarizedExperiment::assay(se, selAssay, withDimnames = TRUE)
     )) %>%
         tibble::rownames_to_column("feature") %>%
-        tidyr::gather(key = "Name", value = "value", -feature) %>%
-        dplyr::group_by(Name) %>%
-        dplyr::arrange(dplyr::desc(value)) %>%
-        dplyr::mutate(idx = seq_along(value), value = value + pseudocount) %>%
+        tidyr::gather(key = "Name", value = "value", -.data$feature) %>%
+        dplyr::group_by(.data$Name) %>%
+        dplyr::arrange(dplyr::desc(.data$value)) %>%
+        dplyr::mutate(idx = seq_along(.data$value), 
+                      value = .data$value + pseudocount) %>%
         dplyr::ungroup() %>%
         dplyr::left_join(as.data.frame(SummarizedExperiment::colData(se)),
                          by = "Name")
@@ -79,7 +80,7 @@ plotDistributions <- function(se, selAssay = "counts",
     
     ## Specify plot depending on desired type
     if (plotType == "knee") {
-        gg <- ggplot2::ggplot(df, ggplot2::aes(x = idx, y = value)) + 
+        gg <- ggplot2::ggplot(df, ggplot2::aes(x = .data$idx, y = .data$value)) + 
             ggplot2::scale_x_log10() + ggplot2::scale_y_log10() + 
             ggplot2::labs(x = "Feature (sorted)", 
                           y = paste0(selAssay, 
@@ -98,7 +99,7 @@ plotDistributions <- function(se, selAssay = "counts",
                                                        color = .data[[groupBy]]))
         }
     } else if (plotType == "density") {
-        gg <- ggplot2::ggplot(df, ggplot2::aes(x = value)) + 
+        gg <- ggplot2::ggplot(df, ggplot2::aes(x = .data$value)) + 
             ggplot2::scale_x_log10() + 
             ggplot2::labs(x = paste0(selAssay, 
                                      ifelse(pseudocount == 0, 
@@ -117,7 +118,7 @@ plotDistributions <- function(se, selAssay = "counts",
                                                           color = .data[[groupBy]]))
         }
     } else if (plotType == "histogram") {
-        gg <- ggplot2::ggplot(df, ggplot2::aes(x = value)) + 
+        gg <- ggplot2::ggplot(df, ggplot2::aes(x = .data$value)) + 
             ggplot2::scale_x_log10() + 
             ggplot2::labs(x = paste0(selAssay, 
                                      ifelse(pseudocount == 0, 
