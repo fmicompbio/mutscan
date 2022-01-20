@@ -39,7 +39,8 @@ Imports:
     rmarkdown,
     xfun,
     DT,
-    ggrepel
+    ggrepel,
+    IRanges
 Suggests: 
     testthat (>= 3.0.0),
     BiocStyle,
