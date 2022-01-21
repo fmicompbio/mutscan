@@ -223,6 +223,7 @@ checkNumericInput <- function(..., nonnegative) {
 #' }
 #'
 #' @export
+#' @import zlibbioc
 digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          mergeForwardReverse = FALSE, minOverlap = 0, maxOverlap = 0, 
                          minMergedLength = 0, maxMergedLength = 0,

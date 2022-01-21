@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include <climits>
-#include "stringdist.hpp"
+#include "stringdist.h"
 
 #ifdef _OPENMP
 #include <omp.h>

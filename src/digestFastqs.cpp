@@ -6,7 +6,7 @@
 #include <numeric>
 #include <map>
 #include <algorithm>    // std::sort
-#include "BKtree_utils.hpp"
+#include "BKtree_utils.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -21,7 +21,7 @@
 #define QUALITY_OFFSET    33
 
 // FastqBuffer_utils needs the BUFFER_SIZE to be defined
-#include "FastqBuffer_utils.hpp"
+#include "FastqBuffer_utils.h"
 
 using namespace std::placeholders;
 using namespace Rcpp;
@@ -774,7 +774,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   }
 #else
   if (nThreads > 1) {
-    warning("OpenMP parallelization not available. Ignoring 'nThreads'.")
+    warning("OpenMP parallelization not available. Ignoring 'nThreads'.");
   }
 #endif
 

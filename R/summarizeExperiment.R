@@ -44,7 +44,7 @@
 #' @importFrom BiocGenerics paste
 #' @importFrom S4Vectors DataFrame
 #' @importFrom IRanges IntegerList
-#' @importFrom methods is new
+#' @importFrom methods is new as
 #' @importFrom dplyr bind_rows distinct left_join %>% mutate
 #' @importFrom tidyr unite
 #' 
@@ -117,15 +117,17 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
                               lapply(x, function(w) 
                                   w$summaryTable[, c("mutantName", "nbrMutBases")])) %>%
         dplyr::distinct()
-    allNbrMutBases <- as(split(allNbrMutBases$nbrMutBases, f = allNbrMutBases$mutantName),
-                         "IntegerList")
+    allNbrMutBases <- methods::as(split(allNbrMutBases$nbrMutBases, 
+                                        f = allNbrMutBases$mutantName),
+                                  "IntegerList")
     
     allNbrMutCodons <- do.call(dplyr::bind_rows, 
                                lapply(x, function(w) 
                                    w$summaryTable[, c("mutantName", "nbrMutCodons")])) %>%
         dplyr::distinct()
-    allNbrMutCodons <- as(split(allNbrMutCodons$nbrMutCodons, f = allNbrMutCodons$mutantName),
-                          "IntegerList")
+    allNbrMutCodons <- methods::as(split(allNbrMutCodons$nbrMutCodons,
+                                         f = allNbrMutCodons$mutantName),
+                                   "IntegerList")
     
     allSequences[["nbrMutBases"]] <- allNbrMutBases[allSequences$mutantName]
     allSequences[["nbrMutCodons"]] <- allNbrMutCodons[allSequences$mutantName]

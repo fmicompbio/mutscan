@@ -102,10 +102,10 @@ test_that("calculateRelativeFC works", {
     expect_equal(res1a$FDR, res2b$FDR)
     
     ## With a single WT row, that one should not show any change
-    expect_equal(res1a["f.0.WT", "logFC"], 0)
-    expect_equal(res1a["f.0.WT", "logFC_shrunk"], 0)
-    expect_equal(res1a["f.0.WT", "PValue"], 1)
-    expect_equal(res1a["f.0.WT", "FDR"], 1)
+    expect_equal(res1a["f.0.WT", "logFC"], 0, tolerance = 1e-4)
+    expect_equal(res1a["f.0.WT", "logFC_shrunk"], 0, tolerance = 1e-4)
+    expect_equal(res1a["f.0.WT", "PValue"], 1, tolerance = 1e-4)
+    expect_equal(res1a["f.0.WT", "FDR"], 1, tolerance = 1e-4)
     
     ## Should also work with limma
     res3a <- calculateRelativeFC(se, design, coef = "Conditioncis_output", 

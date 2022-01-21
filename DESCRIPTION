@@ -39,13 +39,17 @@ Imports:
     rmarkdown,
     xfun,
     DT,
-    ggrepel
+    ggrepel,
+    IRanges,
+    zlibbioc,
+    utils
 Suggests: 
     testthat (>= 3.0.0),
     BiocStyle,
     knitr,
     Biostrings,
     plotly
+SystemRequirements: GNU make
 License: GPL-2
 Encoding: UTF-8
 RoxygenNote: 7.1.2

@@ -16,6 +16,7 @@
 #' @importFrom ggplot2 ggplot theme_minimal theme element_text labs 
 #'     geom_bar scale_fill_discrete aes
 #' @importFrom SummarizedExperiment assay rowData
+#' @importFrom rlang .data
 #' 
 #' @examples 
 #' se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
@@ -51,7 +52,7 @@ plotTotals <- function(se, selAssay = "counts", groupBy = NULL) {
                          total = colSums(selAssayMat))
     }
     
-    gg <- ggplot2::ggplot(df, ggplot2::aes(x = names, y = total)) + 
+    gg <- ggplot2::ggplot(df, ggplot2::aes(x = .data$names, y = .data$total)) + 
         ggplot2::theme_minimal() + 
         ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, 
                                                            vjust = 0.5, size = 12),
@@ -61,7 +62,7 @@ plotTotals <- function(se, selAssay = "counts", groupBy = NULL) {
     if (!is.null(groupBy)) {
         gg <- gg + 
             ggplot2::geom_bar(stat = "identity", position = "stack", 
-                              ggplot2::aes(fill = category)) + 
+                              ggplot2::aes(fill = .data$category)) + 
             ggplot2::scale_fill_discrete(name = groupBy)
     } else {
         gg <- gg + 

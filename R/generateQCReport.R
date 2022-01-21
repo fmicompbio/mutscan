@@ -15,6 +15,10 @@
 #' 
 #' @importFrom rmarkdown render
 #' @importFrom xfun Rscript_call
+#' @importFrom DT datatable
+#' @importFrom SummarizedExperiment colData
+#' @importFrom dplyr bind_rows full_join
+#' @importFrom S4Vectors metadata
 #' 
 #' @examples 
 #' ## Load SummarizedExperiment object
