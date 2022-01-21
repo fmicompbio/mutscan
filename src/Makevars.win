@@ -1,5 +1,6 @@
 CXX_STD=CXX11
-CXX1X=$(shell ${R_HOME}/bin/R CMD config CXX11)
+CXX1X=$(shell ${R_HOME}/bin${R_ARCH_BIN}/R CMD config CXX11)
+PKG_LIBS+=$(shell $(R_HOME)/bin/Rscript.exe -e "Rcpp:::LdFlags()") 
 ifeq ($(shell $(CXX1X) -fopenmp -E -xc++ - 2>&1 >/dev/null && echo 'true'), true)
   PKG_CXXFLAGS+=$(SHLIB_OPENMP_CXXFLAGS)
   PKG_LIBS+=$(SHLIB_OPENMP_CFLAGS)
