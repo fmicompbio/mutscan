@@ -9,7 +9,7 @@
 #include <map>
 #include <utility>
 #include <iostream>
-#include "stringdist.hpp"
+#include "stringdist.h"
 
 using namespace Rcpp;
 

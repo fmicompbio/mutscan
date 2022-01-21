@@ -1,4 +1,4 @@
-#include "stringdist.hpp"
+#include "stringdist.h"
 
 // distance metrices used by the BKtree class:
 // calculate levenshtein distance between pair of strings
