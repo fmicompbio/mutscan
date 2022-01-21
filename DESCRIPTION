@@ -40,7 +40,8 @@ Imports:
     xfun,
     DT,
     ggrepel,
-    IRanges
+    IRanges,
+    zlibbioc
 Suggests: 
     testthat (>= 3.0.0),
     BiocStyle,
