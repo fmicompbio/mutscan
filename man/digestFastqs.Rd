@@ -40,6 +40,8 @@ digestFastqs(
   forbiddenMutatedCodonsForward = "",
   forbiddenMutatedCodonsReverse = "",
   useTreeWTmatch = FALSE,
+  collapseToWTForward = FALSE,
+  collapseToWTReverse = FALSE,
   mutatedPhredMinForward = 0,
   mutatedPhredMinReverse = 0,
   mutNameDelimiter = ".",
@@ -160,6 +162,11 @@ mutated codon matching this pattern, it will be filtered out.}
 to wild type sequences be used if possible? If the number of allowed 
 mismatches is small, and the number of wild type sequences is large, 
 this is typically faster.}
+
+\item{collapseToWTForward, collapseToWTReverse}{Logical scalar, indicating 
+whether to just represent the observed variable sequence by the 
+closest wildtype sequence rather than retaining the information about 
+the mutations.}
 
 \item{mutatedPhredMinForward, mutatedPhredMinReverse}{numeric(1) Minimum Phred
 score of a mutated base for the read to be retained. If any mutated base
