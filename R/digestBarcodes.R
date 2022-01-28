@@ -101,6 +101,9 @@ digestBarcodes <- function(combinedDigestParams = list(), ...) {
     paramsSeparate <- lapply(paramsSeparate, function(parm) {
         c(parm, as.list(defaults[!(names(defaults) %in% names(parm))]))
     })
+    combinedDigestParams <- c(combinedDigestParams, 
+                              as.list(defaults[!(names(defaults) %in% 
+                                                     names(combinedDigestParams))]))
     
     ## --------------------------------------------------------------------- ##
     ## Checks
@@ -121,7 +124,7 @@ digestBarcodes <- function(combinedDigestParams = list(), ...) {
     ## the same filtering)
     argsRecEqual <- c("adapterForward", "adapterReverse", "primerForward",
                       "primerReverse", "constantForward", "constantForward",
-                      "avePhredMinForward", "avePhreadMinReverse",
+                      "avePhredMinForward", "avePhredMinReverse",
                       "constantMaxDistForward", "constantMaxDistReverse")
     for (are in argsRecEqual) {
         for (parm in paramsSeparate) {
