@@ -44,6 +44,15 @@ test_that("digestFastqs works as expected for cis experiments", {
   
   res <- do.call(digestFastqs, Ldef)
   
+  ## Specify reverse WT - check that it's ignored
+  LdefrevWT <- Ldef
+  LdefrevWT$wildTypeReverse <- "ACGT"
+  expect_warning(resrevWT <- do.call(digestFastqs, LdefrevWT), 
+                 "Ignoring 'wildTypeReverse'")
+  
+  expect_equal(res$filterSummary, resrevWT$filterSummary)
+  expect_equal(res$summaryTable, resrevWT$summaryTable)
+  
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 126L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
@@ -117,6 +126,12 @@ test_that("digestFastqs works as expected for cis experiments", {
   expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 14], 7L)
   expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 33], 1L)
   expect_equal(res$errorStatistics$nbrMismatchReverse[res$errorStatistics$PhredQuality == 37], 14L)
+  
+  ## Add an additional constant sequence of the wrong length - should fail
+  Ldefcs <- Ldef
+  Ldefcs$constantForward <- c("AACCGGAGGAGGGAGCTG", "AACCGGAGGAGGGAGCT")
+  expect_error(do.call(digestFastqs, Ldefcs),
+               "All constant sequences must be of the same length")
   
 })
 

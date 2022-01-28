@@ -116,4 +116,14 @@ test_that("plotPairs works with correct arguments", {
                               histBreaks = 40, pointsType = "points", corSizeMult = 5,
                               corSizeAdd = 2, pointSize = 0.1, pointAlpha = 0.3,
                               colorByCorrelation = FALSE), "ggmatrix")
+    
+    ## Make one correlation negative
+    seneg <- se
+    SummarizedExperiment::assay(seneg, 1)[, 2] <- 
+        1/(SummarizedExperiment::assay(seneg, 1)[, 2] + 1)
+    expect_s3_class(plotPairs(se = seneg, selAssay = "counts", doLog = TRUE,
+                              pseudocount = 1, corMethod = "pearson", 
+                              histBreaks = 40, pointsType = "points", corSizeMult = 5,
+                              corSizeAdd = 2, pointSize = 0.1, pointAlpha = 0.3,
+                              colorByCorrelation = TRUE), "ggmatrix")
 })

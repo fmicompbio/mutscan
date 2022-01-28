@@ -141,8 +141,6 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
         lower <- list(continuous = smoothscat)
     } else if (pointsType == "points") {
         lower <- list(continuous = plotpoints)
-    } else {
-        stop("Invalid 'pointsType'")
     }
     
     ## ----------------------------------------------------------------------- ##

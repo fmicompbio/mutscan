@@ -1,6 +1,7 @@
 se <- readRDS(system.file("extdata/GSE102901_cis_se.rds", package = "mutscan"))
 se <- se[1:100, ]
 outFile <- tempfile(fileext = ".html")
+outFile2 <- file.path(tempdir(), "newfolder", "newreport.html")
 
 test_that("generateQCReport fails with incorrect input", {
     expect_error(generateQCReport(se = NULL, outFile = outFile))
@@ -22,4 +23,6 @@ test_that("generateQCReport works as expected", {
     expect_error(generateQCReport(se = se, outFile = outFile, forceOverwrite = FALSE))
     expect_equal(generateQCReport(se = se, outFile = outFile, forceOverwrite = TRUE), 
                  outFile)
+    expect_equal(generateQCReport(se = se, outFile = outFile2, forceOverwrite = FALSE), 
+                 outFile2)
 })

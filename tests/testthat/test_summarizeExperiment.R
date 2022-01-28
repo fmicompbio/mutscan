@@ -79,6 +79,12 @@ test_that("summarizeExperiment fails with incorrect arguments", {
     expect_warning(summarizeExperiment(x = list(sample1 = out1, sample2 = out2,
                                                 sample3 = out1),
                                        coldata = coldata, countType = "umis"))
+    
+    ## samples must have the same mutNameDelimiter
+    tmpout2 <- out2
+    tmpout2$parameters$mutNameDelimiter <- ":"
+    expect_error(summarizeExperiment(x = list(sample1 = out1, sample2 = tmpout2),
+                                     coldata = coldata, countType = "reads"))
 })
 
 test_that("summarizeExperiment works as expected with reads output", {

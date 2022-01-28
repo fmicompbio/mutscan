@@ -140,8 +140,6 @@ plotDistributions <- function(se, selAssay = "counts",
             gg <- gg + ggplot2::geom_histogram(ggplot2::aes(group = .data$Name,
                                                             fill = .data[[groupBy]]))
         }
-    } else {
-        stop("Unknown 'plotType' (should be 'knee', 'density' or 'histogram').")
     }
     
     gg + commonTheme

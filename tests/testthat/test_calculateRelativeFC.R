@@ -81,12 +81,31 @@ test_that("calculateRelativeFC works", {
                                  contrast = NULL, WTrows = "f.0.WT", selAssay = "counts", 
                                  pseudocount = 1, method = "edgeR", 
                                  normMethod = "geomean")
+    ## If there's only one assay, it doesn't need to be named
+    senoname <- SummarizedExperiment(
+        assays = list(assay(se, "counts")),
+        rowData = rowData(se),
+        colData = colData(se),
+        metadata = metadata(se)
+    )
+    expect_warning(
+        res1c <- calculateRelativeFC(senoname, design, coef = "Conditioncis_output", 
+                                     contrast = NULL, WTrows = "f.0.WT", selAssay = "counts", 
+                                     pseudocount = 1, method = "edgeR", 
+                                     normMethod = "sum")
+    )
     expect_equal(res1a$logFC, res1b$logFC)
+    expect_equal(res1a$logFC, res1c$logFC)
     expect_equal(res1a$logFC_shrunk, res1b$logFC_shrunk)
+    expect_equal(res1a$logFC_shrunk, res1c$logFC_shrunk)
     expect_equal(res1a$logCPM, res1b$logCPM)
+    expect_equal(res1a$logCPM, res1c$logCPM)
     expect_equal(res1a$F, res1b$F)
+    expect_equal(res1a$F, res1c$F)
     expect_equal(res1a$PValue, res1b$PValue)
+    expect_equal(res1a$PValue, res1c$PValue)
     expect_equal(res1a$FDR, res1b$FDR)
+    expect_equal(res1a$FDR, res1c$FDR)
     
     ## Specifying the coef or contrast should be equivalent
     res2b <- calculateRelativeFC(se, design, coef = NULL, 
@@ -115,6 +134,16 @@ test_that("calculateRelativeFC works", {
     expect_equal(res3a["f.0.WT", "logFC"], 0, tolerance = 1e-4)
     expect_equal(res3a["f.0.WT", "P.Value"], 1, tolerance = 1e-4)
     expect_equal(res3a["f.0.WT", "adj.P.Val"], 1, tolerance = 1e-4)
+    
+    ## Also with contrast
+    res3b <- calculateRelativeFC(se, design, coef = NULL, 
+                                 contrast = as.numeric(colnames(design) == "Conditioncis_output"), 
+                                 WTrows = "f.0.WT", selAssay = "counts", 
+                                 pseudocount = 1, method = "limma", 
+                                 normMethod = "sum")
+    expect_equal(res3b["f.0.WT", "logFC"], 0, tolerance = 1e-4)
+    expect_equal(res3b["f.0.WT", "P.Value"], 1, tolerance = 1e-4)
+    expect_equal(res3b["f.0.WT", "adj.P.Val"], 1, tolerance = 1e-4)
     
     ## Correlation between edgeR and limma logFCs should be high
     expect_gt(cor(res1a$logFC, res3a$logFC), 0.98)

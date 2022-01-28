@@ -54,6 +54,7 @@ calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
             length(SummarizedExperiment::assays(se)) == 1) {
             warning("No assayNames provided in 'se', but only one ", 
                     "assay present - using that.")
+            selAssay <- 1L
         } else {
             stop("The provided 'selAssay' not present in 'se'.")
         }
@@ -84,6 +85,9 @@ calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
     if (normMethod == "csaw" && method == "limma") {
         stop("normMethod = 'csaw' can only be used with method = 'edgeR'.")
     }
+    
+    .assertScalar(x = normMethod, type = "character", 
+                  validValues = c("csaw", "TMM", "geomean", "sum"))
     
     if (is.null(coef) && is.null(contrast)) {
         stop("'coef' and 'contrast' can not both be NULL.")
@@ -118,9 +122,7 @@ calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
         ## WT rows
         tmp0 <- dge$counts[WTrows, , drop = FALSE]
         dge <- edgeR::scaleOffset(dge, log(colSums(tmp0)))
-    } else {
-        stop("Unknown 'normMethod'")
-    }
+    } 
     
     ## Fit model and perform test
     if (method == "edgeR") {
