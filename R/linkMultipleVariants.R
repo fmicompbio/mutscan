@@ -86,18 +86,18 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     ## combinedDigestParams and each element of paramsSeparate must be named
     ## lists
     .assertVector(x = combinedDigestParams, type = "list")
+    defaults <- formals(digestFastqs)
     .assertVector(x = names(combinedDigestParams), type = "character",
-                  allowNULL = FALSE)
+                  allowNULL = FALSE, validValues = names(defaults))
     for (parms in paramsSeparate) {
         .assertVector(x = parms, type = "list")
-        .assertVector(x = names(parms),
-                      type = "character", allowNULL = FALSE)
+        .assertVector(x = names(parms), type = "character", allowNULL = FALSE,
+                      validValues = names(defaults))
     }
 
     ## Fill the parameter lists with default values for all arguments
     ## that are not provided, to avoid having to check for possible
     ## NULL values downstream
-    defaults <- formals(digestFastqs)
     paramsSeparate <- lapply(paramsSeparate, function(parm) {
         c(parm, as.list(defaults[!(names(defaults) %in% names(parm))]))
     })
