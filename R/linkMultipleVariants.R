@@ -183,7 +183,7 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
                      "specified and identical between the forward and reverse ",
                      "reads in the separate runs for mergeForwardReverse=TRUE")
             }
-            ellfwd[indexVfwd] + ellrev[indexVrev]
+            ellfwd[indexVfwd]
         }
     }))
 
