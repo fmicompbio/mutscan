@@ -170,17 +170,20 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
             elsrev <- strsplit(parm$elementsReverse, "")[[1]]
             ellfwd <- parm$elementLengthsForward
             ellrev <- parm$elementLengthsReverse
-            if (sum(elsfwd == "V") != 1 || sum(elsrev == "V") != 1) {
+            indexVfwd <- which(elsfwd == "V")
+            indexVrev <- which(elsrev == "V")
+            if (length(indexVfwd) != 1 || length(indexVrev) != 1) {
                 stop("Must have exactly one V in the forward and one V in ",
-                     "the reverse read in each separate run")
+                     "the reverse read in each separate run for ",
+                     "mergeForwardReverse=TRUE")
             }
-            if ((ellfwd[which(elsfwd == "V")] != ellrev[which(elsrev == "V")]) ||
-                any(c(ellfwd[which(elsfwd == "V")],
-                      ellrev[which(elsrev == "V")]) == -1)) {
+            if ((ellfwd[indexVfwd] != ellrev[indexVrev]) ||
+                any(c(ellfwd[indexVfwd], ellrev[indexVrev]) == -1)) {
                 stop("The length of the variable sequence must be explicitly ",
                      "specified and identical between the forward and reverse ",
-                     "reads in the separate runs")
+                     "reads in the separate runs for mergeForwardReverse=TRUE")
             }
+            ellfwd[indexVfwd] + ellrev[indexVrev]
         }
     }))
 
