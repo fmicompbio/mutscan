@@ -1,6 +1,6 @@
 # mutscan 0.2.27
 
-* Add digestBarcodes function
+* Add linkMultipleVariants function
 
 # mutscan 0.2.26
 

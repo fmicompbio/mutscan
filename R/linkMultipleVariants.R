@@ -10,7 +10,7 @@
 #' of multiple variable sequences (within each of the forward and reverse
 #' reads), they will be merged and processed as a single unit.
 #'
-#' digestBarcodes will process the input in the following way:
+#' linkMultipleVariants will process the input in the following way:
 #' \itemize{
 #' \item First, run \code{digestFastqs} with the parameters provided
 #'     in \code{combinedDigestParams}. Typically, this will be a
@@ -29,7 +29,7 @@
 #'     order of the variable sequences in the combined run, in such a way
 #'     that if the variable sequences extracted in each of the separate
 #'     runs are concatenated in the order that the parameter sets are
-#'     provided to \code{digestBarcodes}, they will form the variable
+#'     provided to \code{linkMultipleVariants}, they will form the variable
 #'     sequence extracted in the combined run.
 #' \item The result of each of the separate runs is a 'conversion table',
 #'     containing the final set of identified sequence variants as well
@@ -75,7 +75,7 @@
 #' @importFrom tidyr separate separate_rows
 #' @importFrom rlang .data
 #'
-digestBarcodes <- function(combinedDigestParams = list(), ...) {
+linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
 
     ## Process additional arguments
     paramsSeparate <- list(...)
