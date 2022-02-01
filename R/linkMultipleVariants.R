@@ -113,7 +113,7 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     argsEqual <- c("mergeForwardReverse")
     for (ae in argsEqual) {
         for (parm in paramsSeparate) {
-            if (parm[[ae]] != combinedDigestParams[[ae]]) {
+            if (!identical(parm[[ae]], combinedDigestParams[[ae]])) {
                 stop("The argument ", ae, " must be the same in the ",
                      "combined and all the separate runs")
             }
@@ -128,7 +128,7 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
                       "constantMaxDistForward", "constantMaxDistReverse")
     for (are in argsRecEqual) {
         for (parm in paramsSeparate) {
-            if (parm[[are]] != combinedDigestParams[[are]]) {
+            if (!identical(parm[[are]], combinedDigestParams[[are]])) {
                 message("We recommend that the argument ", are,
                         " is set to the same value in the ",
                         "combined and all the separate runs")
