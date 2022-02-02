@@ -41,20 +41,20 @@ transform the counts and estimate observation weights before applying
 limma. In this case, the results also contain the standard errors of the
 logFCs.}
 
-\item{normMethod}{Character scalar indicating which normalization method 
-should be used to calculate size factors. Should be either \code{"TMM"} or 
-\code{"csaw"} when \code{WTrows} is \code{NULL}, and \code{"geomean"} or 
+\item{normMethod}{Character scalar indicating which normalization method
+should be used to calculate size factors. Should be either \code{"TMM"} or
+\code{"csaw"} when \code{WTrows} is \code{NULL}, and \code{"geomean"} or
 \code{"sum"} when \code{WTrows} is provided.}
 }
 \description{
-Calculate logFCs and associated p-values for a given comparison, using 
-either limma or the Negative Binomial quasi-likelihood framework of edgeR. 
+Calculate logFCs and associated p-values for a given comparison, using
+either limma or the Negative Binomial quasi-likelihood framework of edgeR.
 The observed counts for the WT variants can be used as offsets in the model.
 }
 \examples{
-se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds",
                           package = "mutscan"))[1:200, ]
-design <- model.matrix(~ Replicate + Condition, 
+design <- model.matrix(~ Replicate + Condition,
                        data = SummarizedExperiment::colData(se))
 res <- calculateRelativeFC(se, design, coef = "Conditioncis_output")
 
