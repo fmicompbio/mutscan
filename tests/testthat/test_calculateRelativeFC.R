@@ -1,5 +1,5 @@
 se <- readRDS(system.file("extdata/GSE102901_cis_se.rds", package = "mutscan"))
-se <- se[1:100, ]
+se <- se[1:200, ]
 design <- model.matrix(~ Replicate + Condition, data = colData(se))
 
 test_that("calculateRelativeFC fails with incorrect arguments", {
@@ -74,24 +74,14 @@ test_that("calculateRelativeFC fails with incorrect arguments", {
 test_that("calculateRelativeFC works", {
     ## With a single WT row, normMethod = "sum" or "geomean" should be identical
 
-    # remark: use expect_warning (twice here and also below) for
-    # limma::fitFDist "Zero sample variances detected, have been offset away from zero"
-    expect_warning(
-        expect_warning(
-            res1a <- calculateRelativeFC(se, design, coef = "Conditioncis_output",
-                                         contrast = NULL, WTrows = "f.0.WT",
-                                         selAssay = "counts", pseudocount = 1,
-                                         method = "edgeR", normMethod = "sum"),
-            "Zero sample variances detected"),
-        "Zero sample variances detected")
-    expect_warning(
-        expect_warning(
-            res1b <- calculateRelativeFC(se, design, coef = "Conditioncis_output",
-                                         contrast = NULL, WTrows = "f.0.WT",
-                                         selAssay = "counts", pseudocount = 1,
-                                         method = "edgeR", normMethod = "geomean"),
-            "Zero sample variances detected"),
-        "Zero sample variances detected")
+    res1a <- calculateRelativeFC(se, design, coef = "Conditioncis_output",
+                                 contrast = NULL, WTrows = "f.0.WT",
+                                 selAssay = "counts", pseudocount = 1,
+                                 method = "edgeR", normMethod = "sum")
+    res1b <- calculateRelativeFC(se, design, coef = "Conditioncis_output",
+                                 contrast = NULL, WTrows = "f.0.WT",
+                                 selAssay = "counts", pseudocount = 1,
+                                 method = "edgeR", normMethod = "geomean")
     ## If there's only one assay, it doesn't need to be named
     senoname <- SummarizedExperiment(
         assays = list(assay(se, "counts")),
@@ -100,15 +90,11 @@ test_that("calculateRelativeFC works", {
         metadata = metadata(se)
     )
     expect_warning(
-        expect_warning(
-            expect_warning(
-                res1c <- calculateRelativeFC(senoname, design, coef = "Conditioncis_output",
-                                     contrast = NULL, WTrows = "f.0.WT", selAssay = "counts",
-                                     pseudocount = 1, method = "edgeR",
-                                     normMethod = "sum"),
-                "No assayNames provided in 'se'"),
-            "Zero sample variances detected"),
-        "Zero sample variances detected")
+        res1c <- calculateRelativeFC(senoname, design, coef = "Conditioncis_output",
+                             contrast = NULL, WTrows = "f.0.WT", selAssay = "counts",
+                             pseudocount = 1, method = "edgeR",
+                             normMethod = "sum"),
+        "No assayNames provided in 'se'")
     expect_equal(res1a$logFC, res1b$logFC)
     expect_equal(res1a$logFC, res1c$logFC)
     expect_equal(res1a$logFC_shrunk, res1b$logFC_shrunk)
@@ -123,15 +109,11 @@ test_that("calculateRelativeFC works", {
     expect_equal(res1a$FDR, res1c$FDR)
 
     ## Specifying the coef or contrast should be equivalent
-    expect_warning(
-        expect_warning(
-            res2b <- calculateRelativeFC(se, design, coef = NULL,
-                                         contrast = as.numeric(colnames(design) == "Conditioncis_output"),
-                                         WTrows = "f.0.WT", selAssay = "counts",
-                                         pseudocount = 1, method = "edgeR",
-                                         normMethod = "sum"),
-            "Zero sample variances detected"),
-        "Zero sample variances detected")
+    res2b <- calculateRelativeFC(se, design, coef = NULL,
+                                 contrast = as.numeric(colnames(design) == "Conditioncis_output"),
+                                 WTrows = "f.0.WT", selAssay = "counts",
+                                 pseudocount = 1, method = "edgeR",
+                                 normMethod = "sum")
     expect_equal(res1a$logFC, res2b$logFC)
     expect_equal(res1a$logFC_shrunk, res2b$logFC_shrunk)
     expect_equal(res1a$logCPM, res2b$logCPM)
