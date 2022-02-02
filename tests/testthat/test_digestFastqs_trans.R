@@ -886,10 +886,14 @@ test_that("writing filtered reads to file works", {
     expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
   }
 
-  expect_warning(out1 <- Biostrings::readQualityScaledDNAStringSet(outfile1),
-                 "metadata columns")
-  expect_warning(out2 <- Biostrings::readQualityScaledDNAStringSet(outfile2),
-                 "metadata columns")
+  # Biostrings 2.63.1 on arm64 produces the following warning:
+  # Warning message:
+  # In XStringSet("DNA", x, start = start, end = end, width = width,  :
+  #   metadata columns on input DNAStringSet object were dropped
+  suppressWarnings({
+      out1 <- Biostrings::readQualityScaledDNAStringSet(outfile1)
+      out2 <- Biostrings::readQualityScaledDNAStringSet(outfile2)
+  })
 
   expect_equal(length(out1), length(out2))
   expect_equal(names(out1), gsub(" 2", " 1", names(out2)))
