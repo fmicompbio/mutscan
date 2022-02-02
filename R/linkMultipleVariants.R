@@ -244,7 +244,7 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     ## corresponding to the separate runs
     if ("forward" %in% colnames(countCombined)) {
         countCombined <- countCombined %>%
-            tidyr::separate(forward, into = paste0("V", seq_len(nbrFwdV)),
+            tidyr::separate(.data$forward, into = paste0("V", seq_len(nbrFwdV)),
                             sep = cumsum(lengthsV[seq_len(nbrFwdV - 1)]))
     } else {
         colnames(countCombined)[colnames(countCombined) == "forward"] <- "V1"
@@ -252,7 +252,7 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
 
     if ("reverse" %in% colnames(countCombined)) {
         countCombined <- countCombined %>%
-            tidyr::separate(reverse, into = paste0("V", nbrFwdV + seq_len(nbrRevV)),
+            tidyr::separate(.data$reverse, into = paste0("V", nbrFwdV + seq_len(nbrRevV)),
                             sep = cumsum(lengthsV[nbrFwdV + seq_len(nbrRevV - 1)]))
     } else {
         colnames(countCombined)[colnames(countCombined) == "reverse"] <-
