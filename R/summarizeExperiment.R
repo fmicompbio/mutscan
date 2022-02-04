@@ -8,11 +8,11 @@
 }
 
 #' Summarize and collapse multiple mutational scanning experiments
-#' 
+#'
 #' Combine multiple sequence lists (as returned by \code{\link{digestFastqs}}
 #' into a \code{\link[SummarizedExperiment]{SummarizedExperiment}}, with
 #' observed variable sequences (sequence pairs) in rows and samples in columns.
-#' 
+#'
 #' @param x A named list of objects returned by \code{\link{digestFastqs}}.
 #'     Names are used to link the objects to the metadata provided in
 #'     \code{coldata}.
@@ -37,9 +37,9 @@
 #'     }
 #'
 #' @author Michael Stadler, Charlotte Soneson
-#' 
+#'
 #' @export
-#' 
+#'
 #' @importFrom SummarizedExperiment SummarizedExperiment colData
 #' @importFrom BiocGenerics paste
 #' @importFrom S4Vectors DataFrame
@@ -47,7 +47,8 @@
 #' @importFrom methods is new as
 #' @importFrom dplyr bind_rows distinct left_join %>% mutate
 #' @importFrom tidyr unite
-#' 
+#' @importFrom rlang .data
+#'
 summarizeExperiment <- function(x, coldata, countType = "umis") {
     ## --------------------------------------------------------------------------
     ## Pre-flight checks
@@ -62,13 +63,13 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
         stop("'coldata' must be a data.frame with at least one column, named ",
              "'Name'.")
     }
-    .assertScalar(x = countType, type = "character", 
+    .assertScalar(x = countType, type = "character",
                   validValues = c("umis", "reads"))
     ## If no UMI sequences were given, then countType = "umis" should not be allowed
-    if (countType == "umis" && 
-        !(all(sapply(x, function(w) .hasReadComponent(w$parameters$elementsForward, "U") || 
+    if (countType == "umis" &&
+        !(all(sapply(x, function(w) .hasReadComponent(w$parameters$elementsForward, "U") ||
                      .hasReadComponent(w$parameters$elementsReverse, "U"))))) {
-        stop("'countType' is set to 'umis', but no UMI sequences ", 
+        stop("'countType' is set to 'umis', but no UMI sequences ",
              "were provided when quantifying. ",
              "Set 'countType' to 'reads' instead.")
     }
@@ -77,9 +78,9 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     if (length(mutnamedel) > 1) {
         stop("All samples must have the same 'mutNameDelimiter'")
     }
-    
+
     coldata$Name <- as.character(coldata$Name)
-    
+
     ## --------------------------------------------------------------------------
     ## Link elements in x with coldata
     ## --------------------------------------------------------------------------
@@ -94,14 +95,14 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     }
     x <- x[nms]
     coldata <- coldata[match(nms, coldata$Name), , drop = FALSE]
-    
+
     ## --------------------------------------------------------------------------
     ## Get all sequences, and all sample names
     ## --------------------------------------------------------------------------
-    allSequences <- Reduce(function(...) dplyr::full_join(..., by = "mutantName"), 
+    allSequences <- Reduce(function(...) dplyr::full_join(..., by = "mutantName"),
                            lapply(x, function(w) w$summaryTable[, c("mutantName", "sequence")])) %>%
         replace(., is.na(.), "") %>%
-        tidyr::unite(sequence, -mutantName, sep = ",") %>%
+        tidyr::unite(sequence, -.data$mutantName, sep = ",") %>%
         dplyr::mutate(sequence = gsub("[,]+", ",", sequence)) %>%
         dplyr::mutate(sequence = sub(",$", "", sequence)) %>%
         dplyr::mutate(sequence = sub("^,", "", sequence)) %>%
@@ -111,33 +112,33 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     allSequences <- S4Vectors::DataFrame(allSequences)
     allSamples <- names(x)
     names(allSamples) <- allSamples
-    
+
     ## Add info about nbr mutated bases/codons
-    allNbrMutBases <- do.call(dplyr::bind_rows, 
-                              lapply(x, function(w) 
+    allNbrMutBases <- do.call(dplyr::bind_rows,
+                              lapply(x, function(w)
                                   w$summaryTable[, c("mutantName", "nbrMutBases")])) %>%
         dplyr::distinct()
-    allNbrMutBases <- methods::as(split(allNbrMutBases$nbrMutBases, 
+    allNbrMutBases <- methods::as(split(allNbrMutBases$nbrMutBases,
                                         f = allNbrMutBases$mutantName),
                                   "IntegerList")
-    
-    allNbrMutCodons <- do.call(dplyr::bind_rows, 
-                               lapply(x, function(w) 
+
+    allNbrMutCodons <- do.call(dplyr::bind_rows,
+                               lapply(x, function(w)
                                    w$summaryTable[, c("mutantName", "nbrMutCodons")])) %>%
         dplyr::distinct()
     allNbrMutCodons <- methods::as(split(allNbrMutCodons$nbrMutCodons,
                                          f = allNbrMutCodons$mutantName),
                                    "IntegerList")
-    
+
     allSequences[["nbrMutBases"]] <- allNbrMutBases[allSequences$mutantName]
     allSequences[["nbrMutCodons"]] <- allNbrMutCodons[allSequences$mutantName]
-    
+
     ## Add numeric columns in addition to the integer lists
     allSequences[["minNbrMutBases"]] <- min(allSequences$nbrMutBases)
     allSequences[["maxNbrMutBases"]] <- max(allSequences$nbrMutBases)
     allSequences[["minNbrMutCodons"]] <- min(allSequences$nbrMutCodons)
     allSequences[["maxNbrMutCodons"]] <- max(allSequences$nbrMutCodons)
-    
+
     ## --------------------------------------------------------------------------
     ## Create a sparse matrix
     ## --------------------------------------------------------------------------
@@ -148,9 +149,9 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
                    j = match(s, allSamples),
                    x = as.numeric(st[, countCol]))
     }))
-    countMat <- methods::new("dgTMatrix", i = tmp$i - 1L, j = tmp$j - 1L, 
+    countMat <- methods::new("dgTMatrix", i = tmp$i - 1L, j = tmp$j - 1L,
                              x = tmp$x, Dim = c(nrow(allSequences), length(allSamples)))
-    
+
     ## --------------------------------------------------------------------------
     ## Create the colData
     ## --------------------------------------------------------------------------
@@ -166,15 +167,15 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
         assays = list(counts = countMat),
         colData = coldata[match(allSamples, coldata$Name), , drop = FALSE],
         rowData = allSequences,
-        metadata = list(parameters = lapply(allSamples, function(w) x[[w]]$parameters), 
+        metadata = list(parameters = lapply(allSamples, function(w) x[[w]]$parameters),
                         countType = countType,
                         mutNameDelimiter = mutnamedel)
     )
-    
+
     if (!any(allSequences$mutantName == "")) {
         rownames(se) <- allSequences$mutantName
-    } 
+    }
     colnames(se) <- allSamples
-    
+
     return(se)
 }
