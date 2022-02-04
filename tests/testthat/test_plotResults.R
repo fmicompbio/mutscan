@@ -1,16 +1,10 @@
 se <- readRDS(system.file("extdata/GSE102901_cis_se.rds", package = "mutscan"))
-se <- se[1:100, ]
+se <- se[1:200, ]
 design <- model.matrix(~ Replicate + Condition, data = colData(se))
-# remark: use expect_warning (twice here and also below) for
-# limma::fitFDist "Zero sample variances detected, have been offset away from zero"
-expect_warning(
-    expect_warning(
-        res0 <- calculateRelativeFC(se, design, coef = "Conditioncis_output",
-                                    contrast = NULL, WTrows = "f.0.WT", selAssay = "counts",
-                                    pseudocount = 1, method = "edgeR",
-                                    normMethod = "sum"),
-        "Zero sample variances detected"),
-    "Zero sample variances detected")
+res0 <- calculateRelativeFC(se, design, coef = "Conditioncis_output",
+                            contrast = NULL, WTrows = "f.0.WT", selAssay = "counts",
+                            pseudocount = 1, method = "edgeR",
+                            normMethod = "sum")
 
 test_that("plotResults functions fail with incorrect input", {
 
@@ -106,14 +100,10 @@ test_that("plotResults functions fail with incorrect input", {
 })
 
 test_that("plotResults functions work as expected", {
-    expect_warning(
-        expect_warning(
-            res1 <- calculateRelativeFC(se, design, coef = "Conditioncis_output",
-                                        contrast = NULL, WTrows = "f.0.WT", selAssay = "counts",
-                                        pseudocount = 1, method = "edgeR",
-                                        normMethod = "sum"),
-            "Zero sample variances detected"),
-        "Zero sample variances detected")
+    res1 <- calculateRelativeFC(se, design, coef = "Conditioncis_output",
+                                contrast = NULL, WTrows = "f.0.WT", selAssay = "counts",
+                                pseudocount = 1, method = "edgeR",
+                                normMethod = "sum")
     res2 <- calculateRelativeFC(se, design, coef = "Conditioncis_output",
                                 contrast = NULL, WTrows = "f.0.WT", selAssay = "counts",
                                 pseudocount = 1, method = "limma",
