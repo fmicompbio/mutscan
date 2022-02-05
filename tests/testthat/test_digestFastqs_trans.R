@@ -719,7 +719,7 @@ test_that("digestFastqs works as expected for experiments with only forward read
     revComplForward = FALSE, revComplReverse = FALSE,
     elementsForward = "SUCV", elementsReverse = "",
     elementLengthsForward = c(1, 10, 18, 96),
-    elementLengthsReverse = c(),
+    elementLengthsReverse = numeric(0),
     adapterForward = "GGAAGAGCACACGTC",
     adapterReverse = "",
     primerForward = "",
