@@ -243,9 +243,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          filteredReadsFastqReverse = "",
                          maxNReads = -1, verbose = FALSE,
                          nThreads = 1, chunkSize = 100000) {
-  ## --------------------------------------------------------------------------
-  ## pre-flight checks
-  ## --------------------------------------------------------------------------
+  ## pre-flight checks ---------------------------------------------------------
   ## fastq files exist
   if (length(fastqForward) < 1 || !all(file.exists(fastqForward)) ||
       (!is.null(fastqReverse) && (length(fastqReverse) != length(fastqForward) ||
@@ -523,6 +521,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
 
   .assertScalar(x = verbose, type = "logical")
 
+  ## call digestFastqsCpp ------------------------------------------------------
   ## Represent the wildtype sequences as pairs of vectors (one with sequences,
   ## one with names), to make things faster on the C++ side
   wildTypeForwardNames <- names(wildTypeForward)
@@ -585,7 +584,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          nThreads = as.integer(nThreads),
                          chunkSize = as.integer(chunkSize))
 
-  ## Add package version and processing date
+  ## Add package version and processing date -----------------------------------
   res$parameters$processingInfo <- paste0(
     "Processed by mutscan v", utils::packageVersion("mutscan"), " on ",
     Sys.time()
