@@ -28,12 +28,12 @@ compareCodonPositions <- function(a, b, mutNameDelimiter) {
     .Call(`_mutscan_compareCodonPositions`, a, b, mutNameDelimiter)
 }
 
-test_decomposeRead <- function(sseq, squal, elements, elementLengths, primerSeqs, umiSeq, varSeq, varQual, constSeq, constQual, nNoPrimer, nReadWrongLength) {
-    .Call(`_mutscan_test_decomposeRead`, sseq, squal, elements, elementLengths, primerSeqs, umiSeq, varSeq, varQual, constSeq, constQual, nNoPrimer, nReadWrongLength)
+test_decomposeRead <- function(sseq, squal, elements, elementLengths, primerSeqs, umiSeq, varSeq, varQual, varLengths, constSeq, constQual, nNoPrimer, nReadWrongLength) {
+    .Call(`_mutscan_test_decomposeRead`, sseq, squal, elements, elementLengths, primerSeqs, umiSeq, varSeq, varQual, varLengths, constSeq, constQual, nNoPrimer, nReadWrongLength)
 }
 
-test_mergeReadPairPartial <- function(seqF, qualF, seqR, qualR, minOverlap = 0L, maxOverlap = 0L, minMergedLength = 0L, maxMergedLength = 0L, maxFracMismatchOverlap = 0, greedy = TRUE) {
-    .Call(`_mutscan_test_mergeReadPairPartial`, seqF, qualF, seqR, qualR, minOverlap, maxOverlap, minMergedLength, maxMergedLength, maxFracMismatchOverlap, greedy)
+test_mergeReadPairPartial <- function(seqF, qualF, seqR, qualR, lenF, lenR, minOverlap = 0L, maxOverlap = 0L, minMergedLength = 0L, maxMergedLength = 0L, maxFracMismatchOverlap = 0, greedy = TRUE) {
+    .Call(`_mutscan_test_mergeReadPairPartial`, seqF, qualF, seqR, qualR, lenF, lenR, minOverlap, maxOverlap, minMergedLength, maxMergedLength, maxFracMismatchOverlap, greedy)
 }
 
 findClosestRefSeq <- function(varSeq, wtSeq, upperBoundMismatch, sim) {

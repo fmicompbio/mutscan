@@ -7,9 +7,9 @@ test_that("digestFastqs works as expected for trans experiments", {
     mergeForwardReverse = FALSE,
     minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE,
     revComplForward = FALSE, revComplReverse = FALSE,
-    elementsForward = "SUCV", elementsReverse = "SUCV",
-    elementLengthsForward = c(1, 10, 18, 96),
-    elementLengthsReverse = c(1, 8, 20, 96),
+    elementsForward = "SUCVV", elementsReverse = "SUCVV",
+    elementLengthsForward = c(1, 10, 18, 80, 16),
+    elementLengthsReverse = c(1, 8, 20, 16, 80),
     adapterForward = "GGAAGAGCACACGTC",
     adapterReverse = "GGAAGAGCGTCGTGT",
     primerForward = "",
@@ -98,6 +98,9 @@ test_that("digestFastqs works as expected for trans experiments", {
   expect_equal(sum(res$summaryTable$nbrMutBases == 6), 39L)
   expect_equal(sum(res$summaryTable$nbrMutCodons == 1), 14L)
   expect_equal(sum(res$summaryTable$nbrMutCodons == 2), 263L)
+
+  ## check that variable segment lengths are reported correctly
+  expect_true(all(res$summaryTable$varLengths == "80,16_16,80"))
 
   ## Check that mutant naming worked (compare to manual matching)
   example_seq <- paste0("ACTGATACAACCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTG",

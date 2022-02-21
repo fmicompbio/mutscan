@@ -37,8 +37,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // test_decomposeRead
-List test_decomposeRead(const std::string sseq, const std::string squal, const std::string elements, const std::vector<int> elementLengths, const std::vector<std::string> primerSeqs, std::string umiSeq, std::string varSeq, std::string varQual, std::string constSeq, std::string constQual, int nNoPrimer, int nReadWrongLength);
-RcppExport SEXP _mutscan_test_decomposeRead(SEXP sseqSEXP, SEXP squalSEXP, SEXP elementsSEXP, SEXP elementLengthsSEXP, SEXP primerSeqsSEXP, SEXP umiSeqSEXP, SEXP varSeqSEXP, SEXP varQualSEXP, SEXP constSeqSEXP, SEXP constQualSEXP, SEXP nNoPrimerSEXP, SEXP nReadWrongLengthSEXP) {
+List test_decomposeRead(const std::string sseq, const std::string squal, const std::string elements, const std::vector<int> elementLengths, const std::vector<std::string> primerSeqs, std::string umiSeq, std::string varSeq, std::string varQual, std::vector<int> varLengths, std::string constSeq, std::string constQual, int nNoPrimer, int nReadWrongLength);
+RcppExport SEXP _mutscan_test_decomposeRead(SEXP sseqSEXP, SEXP squalSEXP, SEXP elementsSEXP, SEXP elementLengthsSEXP, SEXP primerSeqsSEXP, SEXP umiSeqSEXP, SEXP varSeqSEXP, SEXP varQualSEXP, SEXP varLengthsSEXP, SEXP constSeqSEXP, SEXP constQualSEXP, SEXP nNoPrimerSEXP, SEXP nReadWrongLengthSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -50,17 +50,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type umiSeq(umiSeqSEXP);
     Rcpp::traits::input_parameter< std::string >::type varSeq(varSeqSEXP);
     Rcpp::traits::input_parameter< std::string >::type varQual(varQualSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type varLengths(varLengthsSEXP);
     Rcpp::traits::input_parameter< std::string >::type constSeq(constSeqSEXP);
     Rcpp::traits::input_parameter< std::string >::type constQual(constQualSEXP);
     Rcpp::traits::input_parameter< int >::type nNoPrimer(nNoPrimerSEXP);
     Rcpp::traits::input_parameter< int >::type nReadWrongLength(nReadWrongLengthSEXP);
-    rcpp_result_gen = Rcpp::wrap(test_decomposeRead(sseq, squal, elements, elementLengths, primerSeqs, umiSeq, varSeq, varQual, constSeq, constQual, nNoPrimer, nReadWrongLength));
+    rcpp_result_gen = Rcpp::wrap(test_decomposeRead(sseq, squal, elements, elementLengths, primerSeqs, umiSeq, varSeq, varQual, varLengths, constSeq, constQual, nNoPrimer, nReadWrongLength));
     return rcpp_result_gen;
 END_RCPP
 }
 // test_mergeReadPairPartial
-List test_mergeReadPairPartial(std::string seqF, std::vector<int> qualF, std::string seqR, std::vector<int> qualR, size_t minOverlap, size_t maxOverlap, size_t minMergedLength, size_t maxMergedLength, double maxFracMismatchOverlap, bool greedy);
-RcppExport SEXP _mutscan_test_mergeReadPairPartial(SEXP seqFSEXP, SEXP qualFSEXP, SEXP seqRSEXP, SEXP qualRSEXP, SEXP minOverlapSEXP, SEXP maxOverlapSEXP, SEXP minMergedLengthSEXP, SEXP maxMergedLengthSEXP, SEXP maxFracMismatchOverlapSEXP, SEXP greedySEXP) {
+List test_mergeReadPairPartial(std::string seqF, std::vector<int> qualF, std::string seqR, std::vector<int> qualR, std::vector<int> lenF, std::vector<int> lenR, size_t minOverlap, size_t maxOverlap, size_t minMergedLength, size_t maxMergedLength, double maxFracMismatchOverlap, bool greedy);
+RcppExport SEXP _mutscan_test_mergeReadPairPartial(SEXP seqFSEXP, SEXP qualFSEXP, SEXP seqRSEXP, SEXP qualRSEXP, SEXP lenFSEXP, SEXP lenRSEXP, SEXP minOverlapSEXP, SEXP maxOverlapSEXP, SEXP minMergedLengthSEXP, SEXP maxMergedLengthSEXP, SEXP maxFracMismatchOverlapSEXP, SEXP greedySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -68,13 +69,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::vector<int> >::type qualF(qualFSEXP);
     Rcpp::traits::input_parameter< std::string >::type seqR(seqRSEXP);
     Rcpp::traits::input_parameter< std::vector<int> >::type qualR(qualRSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type lenF(lenFSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type lenR(lenRSEXP);
     Rcpp::traits::input_parameter< size_t >::type minOverlap(minOverlapSEXP);
     Rcpp::traits::input_parameter< size_t >::type maxOverlap(maxOverlapSEXP);
     Rcpp::traits::input_parameter< size_t >::type minMergedLength(minMergedLengthSEXP);
     Rcpp::traits::input_parameter< size_t >::type maxMergedLength(maxMergedLengthSEXP);
     Rcpp::traits::input_parameter< double >::type maxFracMismatchOverlap(maxFracMismatchOverlapSEXP);
     Rcpp::traits::input_parameter< bool >::type greedy(greedySEXP);
-    rcpp_result_gen = Rcpp::wrap(test_mergeReadPairPartial(seqF, qualF, seqR, qualR, minOverlap, maxOverlap, minMergedLength, maxMergedLength, maxFracMismatchOverlap, greedy));
+    rcpp_result_gen = Rcpp::wrap(test_mergeReadPairPartial(seqF, qualF, seqR, qualR, lenF, lenR, minOverlap, maxOverlap, minMergedLength, maxMergedLength, maxFracMismatchOverlap, greedy));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -215,8 +218,8 @@ RcppExport SEXP _rcpp_module_boot_mod_BKtree();
 static const R_CallMethodDef CallEntries[] = {
     {"_mutscan_calcNearestStringDist", (DL_FUNC) &_mutscan_calcNearestStringDist, 3},
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 3},
-    {"_mutscan_test_decomposeRead", (DL_FUNC) &_mutscan_test_decomposeRead, 12},
-    {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 10},
+    {"_mutscan_test_decomposeRead", (DL_FUNC) &_mutscan_test_decomposeRead, 13},
+    {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 12},
     {"_mutscan_findClosestRefSeq", (DL_FUNC) &_mutscan_findClosestRefSeq, 4},
     {"_mutscan_findClosestRefSeqEarlyStop", (DL_FUNC) &_mutscan_findClosestRefSeqEarlyStop, 4},
     {"_mutscan_digestFastqsCpp", (DL_FUNC) &_mutscan_digestFastqsCpp, 54},
