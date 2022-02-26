@@ -8,16 +8,16 @@
 #' wildtype sequences or collapsing of similar sequences.
 #' In contrast, while \code{digestFastqs} allow the specification
 #' of multiple variable sequences (within each of the forward and reverse
-#' reads), they will be merged and processed as a single unit.
+#' reads), they will be concatenated and processed as a single unit.
 #'
 #' linkMultipleVariants will process the input in the following way:
 #' \itemize{
 #' \item First, run \code{digestFastqs} with the parameters provided
 #'     in \code{combinedDigestParams}. Typically, this will be a
 #'     "naive" counting run, where the frequencies of all observed
-#'     variants are tabulated. Moreover, the variable sequences
+#'     variants are tabulated. The variable sequences
 #'     within the forward and reverse reads, respectively, will be
-#'     concatenated into a single sequence.
+#'     processed as a single sequence. 
 #' \item Next, run \code{digestFastqs} with each of the additional
 #'     parameter sets provided (\code{...}). Each of these should
 #'     correspond to a single variable sequence from the combined
@@ -37,7 +37,7 @@
 #'     is then combined with the count table from the combined, "naive"
 #'     run in order to create an aggregated count table. More precisely,
 #'     each sequence in the combined run is split into the constituent
-#'     variable sequences (as specified by the element lengths), and
+#'     variable sequences, and
 #'     each variable sequence is then matched to the output from the right
 #'     separate run, from which the final feature ID (mutant name, or
 #'     collapsed sequence) will be extracted and used to replace the original
@@ -67,11 +67,17 @@
 #'
 #' @export
 #'
-#' @return A \code{tibble} with columns corresponding to each of the variable
-#' sequences, and a column with the total observed read count for the
-#' combination.
-#'
-#' @importFrom dplyr select rename group_by summarize across matches
+#' @return A list with the following elements: 
+#' \itemize{
+#' \item countAggregated - a \code{tibble} with columns corresponding to 
+#'     each of the variable sequences, and a column with the total observed 
+#'     read count for the combination.
+#' \item convSeparate - a list of conversion tables from the respective 
+#'     separate runs.
+#' \item outCombined - the \code{digestFastqs} output for the combined run.
+#' }
+#' 
+#' @importFrom dplyr select rename group_by summarize across matches mutate
 #' @importFrom tidyr separate separate_rows
 #' @importFrom rlang .data
 #'
@@ -108,97 +114,37 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     ## --------------------------------------------------------------------- ##
     ## Checks
     ## --------------------------------------------------------------------- ##
-    ## Arguments that must be the same in the combined run and all the
+    ## We can't have a fwd and a rev V in the same run unless they are merged
+    ## since this would disagree with the order in the concatenated V
+    ## Currently, each separate run can only have one V in the fwd and/or one 
+    ## in the rev (both allowed if they are matched); otherwise the lengths
+    ## extracted from the combined run don't match with those from the 
     ## separate runs
-    argsEqual <- c("mergeForwardReverse")
-    for (ae in argsEqual) {
-        for (parm in paramsSeparate) {
-            if (!identical(parm[[ae]], combinedDigestParams[[ae]])) {
-                stop("The argument ", ae, " must be the same in the ",
-                     "combined and all the separate runs")
-            }
+    for (parm in paramsSeparate) {
+        nbrFwdV <- sum(strsplit(parm$elementsForward, "")[[1]] == "V")
+        nbrRevV <- sum(strsplit(parm$elementsReverse, "")[[1]] == "V")
+        if (nbrFwdV == 0 && nbrRevV == 0) {
+            stop("Each separate run must contain at least one variable ",
+                 "segment.")
+        }
+        if (nbrFwdV > 0 && nbrRevV > 0 && 
+            !parm$mergeForwardReverse) {
+            stop("A separate run can not have variable sequences in both ",
+                 "the forward and reverse reads unless 'mergeForwardReverse' ",
+                 "is TRUE.")
+        }
+        if (nbrFwdV > 1 || nbrRevV > 1) {
+            stop("A separate run can have at most one variable segment ",
+                 "in each of the forward and reverse reads, respectively.")
         }
     }
-
-    ## Additional arguments that are recommended to be the same (e.g. to get
-    ## the same filtering)
-    argsRecEqual <- c("adapterForward", "adapterReverse", "primerForward",
-                      "primerReverse", "constantForward", "constantForward",
-                      "avePhredMinForward", "avePhredMinReverse",
-                      "constantMaxDistForward", "constantMaxDistReverse")
-    for (are in argsRecEqual) {
-        for (parm in paramsSeparate) {
-            if (!identical(parm[[are]], combinedDigestParams[[are]])) {
-                message("We recommend that the argument ", are,
-                        " is set to the same value in the ",
-                        "combined and all the separate runs")
-            }
-        }
-    }
-
-    ## Adding UMI counts after the processing may not be accurate - will
+    
+    ## Summing UMI counts after the processing may not be accurate - will
     ## always use read counts
     if (length(grep("U", paste0(combinedDigestParams$elementLengthsForward,
                                 combinedDigestParams$elementLengthsReverse))) > 0) {
         warning("Aggregating UMI counts may not be accurate - will use ",
                 "read counts instead")
-    }
-
-    ## Get number and lengths of forward and reverse variable sequences
-    nbrFwdV <- sum(strsplit(combinedDigestParams$elementsForward, "")[[1]] == "V")
-    nbrRevV <- sum(strsplit(combinedDigestParams$elementsReverse, "")[[1]] == "V")
-    ## Check each of the separate runs
-    lengthsV <- unlist(lapply(paramsSeparate, function(parm) {
-        if (!parm$mergeForwardReverse) {
-            ## Don't merge - there can be only one V in total, and the length
-            ## must be given
-            els <- c(strsplit(parm$elementsForward, "")[[1]],
-                     strsplit(parm$elementsReverse, "")[[1]])
-            ell <- c(parm$elementLengthsForward, parm$elementLengthsReverse)
-            if (sum(els == "V") != 1) {
-                stop("Must have exactly one V in each separate run")
-            }
-            if (any(ell[which(els == "V")] == -1)) {
-                stop("The length of the variable sequence must be explicitly ",
-                     "specified in the separate runs")
-            }
-            ell[which(els == "V")]
-        } else {
-            ## Merge - there must be a V in both fwd and reverse, with the
-            ## same length
-            elsfwd <- strsplit(parm$elementsForward, "")[[1]]
-            elsrev <- strsplit(parm$elementsReverse, "")[[1]]
-            ellfwd <- parm$elementLengthsForward
-            ellrev <- parm$elementLengthsReverse
-            indexVfwd <- which(elsfwd == "V")
-            indexVrev <- which(elsrev == "V")
-            if (length(indexVfwd) != 1 || length(indexVrev) != 1) {
-                stop("Must have exactly one V in the forward and one V in ",
-                     "the reverse read in each separate run for ",
-                     "mergeForwardReverse=TRUE")
-            }
-            if ((ellfwd[indexVfwd] != ellrev[indexVrev]) ||
-                any(c(ellfwd[indexVfwd], ellrev[indexVrev]) == -1)) {
-                stop("The length of the variable sequence must be explicitly ",
-                     "specified and identical between the forward and reverse ",
-                     "reads in the separate runs for mergeForwardReverse=TRUE")
-            }
-            ellfwd[indexVfwd]
-        }
-    }))
-
-    ## Check that the number of Vs in the combined run agrees with the number of
-    ## separate runs
-    if (!combinedDigestParams$mergeForwardReverse) {
-        if (nbrFwdV + nbrRevV != length(lengthsV)) {
-            stop("The number of variable sequences in the combined run does not ",
-                 "correspond to the number of separate runs")
-        }
-    } else {
-        if ((nbrFwdV != nbrRevV) || (nbrFwdV != length(lengthsV))) {
-            stop("The number of variable sequences in the combined run does not ",
-                 "correspond to the number of separate runs")
-        }
     }
 
     ## --------------------------------------------------------------------- ##
@@ -208,57 +154,66 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
 
     ## Get count matrix with "raw" (uncorrected) sequences
     countCombined <- outCombined$summaryTable %>%
-        dplyr::select(.data$sequence, .data$nbrReads)
+        dplyr::select(.data$sequence, .data$nbrReads, .data$varLengths) %>%
+        dplyr::mutate(idx = paste0("I", seq_along(.data$sequence)))
 
     ## If applicable, separate into forward and reverse sequences
-    ## (separated by _). Also check that all sequences are the same (and
-    ## correct) length
-    if (nbrFwdV > 0 && nbrRevV > 0 && !combinedDigestParams$mergeForwardReverse) {
+    if (any(grepl("_", countCombined$sequence))) {
         countCombined <- countCombined %>%
-            tidyr::separate(sequence, into = c("forward", "reverse"), sep = "_")
-        if (!all(nchar(countCombined$forward) ==
-                 sum(lengthsV[seq_len(nbrFwdV)]))) {
-            stop("Forward sequences have the wrong length")
-        }
-        if (!all(nchar(countCombined$reverse) ==
-                 sum(lengthsV[nbrFwdV + seq_len(nbrRevV)]))) {
-            stop("Reverse sequences have the wrong length")
-        }
-    } else if (nbrFwdV > 0) {
-        countCombined <- countCombined %>%
-            dplyr::rename(forward = sequence)
-        if (!all(nchar(countCombined$forward) ==
-                 sum(lengthsV[seq_len(nbrFwdV)]))) {
-            stop("Forward sequences have the wrong length")
-        }
-    } else if (nbrRevV > 0) {
-        countCombined <- countCombined %>%
-            dplyr::rename(reverse = sequence)
-        if (!all(nchar(countCombined$reverse) ==
-                 sum(lengthsV[nbrFwdV + seq_len(nbrRevV)]))) {
-            stop("Reverse sequences have the wrong length")
-        }
-    }
-
-    ## Split forward and reverse sequences, respectively, into the parts
-    ## corresponding to the separate runs
-    if ("forward" %in% colnames(countCombined)) {
-        countCombined <- countCombined %>%
-            tidyr::separate(.data$forward, into = paste0("V", seq_len(nbrFwdV)),
-                            sep = cumsum(lengthsV[seq_len(nbrFwdV - 1)]))
+            tidyr::separate(sequence, into = c("sequenceForward", 
+                                               "sequenceReverse"), 
+                            sep = "_") %>%
+            tidyr::separate(varLengths, into = c("varLengthsForward", 
+                                                 "varLengthsReverse"),
+                            sep = "_") %>%
+            dplyr::mutate(
+                nCompForward = vapply(strsplit(.data$varLengthsForward, ","), 
+                                      length, 0),
+                nCompReverse = vapply(strsplit(.data$varLengthsReverse, ","), 
+                                      length, 0))
     } else {
-        colnames(countCombined)[colnames(countCombined) == "forward"] <- "V1"
-    }
-
-    if ("reverse" %in% colnames(countCombined)) {
         countCombined <- countCombined %>%
-            tidyr::separate(.data$reverse, into = paste0("V", nbrFwdV + seq_len(nbrRevV)),
-                            sep = cumsum(lengthsV[nbrFwdV + seq_len(nbrRevV - 1)]))
-    } else {
-        colnames(countCombined)[colnames(countCombined) == "reverse"] <-
-            paste0("V", nbrFwdV + 1)
+            dplyr::rename(sequenceForward = sequence,
+                          varLengthsForward = varLengths) %>%
+            dplyr::mutate(
+                nCompForward = vapply(strsplit(.data$varLengthsForward, ","), 
+                                      length, 0))
     }
-
+    
+    offsetForward <- 0
+    ## Split forward and reverse sequences, respectively
+    if ("sequenceForward" %in% colnames(countCombined)) {
+        stopifnot("varLengthsForward" %in% colnames(countCombined))
+        ## Check that all sequences have the same number of components
+        stopifnot(length(unique(countCombined$nCompForward)) == 1)
+        offsetForward <- countCombined$nCompForward[1]
+        tmp <- split(countCombined, countCombined$varLengthsForward)
+        countCombined <- unsplit(lapply(tmp, function(df) {
+            w <- as.numeric(strsplit(df$varLengthsForward[1], ",")[[1]])
+            df <- df %>%
+                tidyr::separate(
+                    .data$sequenceForward, 
+                    into = names(paramsSeparate)[seq_along(w)],
+                    # into = paste0("V", seq_along(w)),
+                    sep = cumsum(w[seq_len(length(w) - 1)]))
+        }), countCombined$varLengthsForward)
+    }
+    if ("sequenceReverse" %in% colnames(countCombined)) {
+        stopifnot("varLengthsReverse" %in% colnames(countCombined))
+        ## Check that all sequences have the same number of components
+        stopifnot(length(unique(countCombined$nCompReverse)) == 1)
+        tmp <- split(countCombined, countCombined$varLengthsReverse)
+        countCombined <- unsplit(lapply(tmp, function(df) {
+            w <- as.numeric(strsplit(df$varLengthsReverse[1], ",")[[1]])
+            df <- df %>%
+                tidyr::separate(
+                    .data$sequenceReverse, 
+                    into = names(paramsSeparate)[offsetForward + seq_along(w)],
+                    # into = paste0("V", offsetForward + seq_along(w)),
+                    sep = cumsum(w[seq_len(length(w) - 1)]))
+        }), countCombined$varLengthsReverse)
+    }
+    
     ## --------------------------------------------------------------------- ##
     ## Quantify each variable sequence separately
     ## --------------------------------------------------------------------- ##
@@ -275,9 +230,9 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     ## --------------------------------------------------------------------- ##
     ## Replace naive sequences with corrected ones
     ## --------------------------------------------------------------------- ##
-    for (i in seq_along(convSeparate)) {
-        countCombined[[paste0("V", i)]] <-
-            convSeparate[[i]]$mutantName[match(countCombined[[paste0("V", i)]],
+    for (i in names(paramsSeparate)) {
+        countCombined[[i]] <- 
+            convSeparate[[i]]$mutantName[match(countCombined[[i]],
                                                convSeparate[[i]]$sequence)]
     }
 
@@ -287,8 +242,9 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
 
     ## Aggregate counts
     countAggregated <- countCombined %>%
-        dplyr::group_by(dplyr::across(dplyr::matches("^V[0-9]+"))) %>%
+        dplyr::group_by(dplyr::across(names(paramsSeparate))) %>%
         dplyr::summarize(nbrReads = sum(.data$nbrReads), .groups = "drop")
 
-    countAggregated
+    list(countAggregated = countAggregated, convSeparate = convSeparate,
+         outCombined = outCombined)
 }

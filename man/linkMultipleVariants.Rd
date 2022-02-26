@@ -15,9 +15,15 @@ for the separate runs (processing each variable sequence in turn).
 Each argument must be a named list of arguments to \code{digestFastqs}.}
 }
 \value{
-A \code{tibble} with columns corresponding to each of the variable
-sequences, and a column with the total observed read count for the
-combination.
+A list with the following elements: 
+\itemize{
+\item countAggregated - a \code{tibble} with columns corresponding to 
+    each of the variable sequences, and a column with the total observed 
+    read count for the combination.
+\item convSeparate - a list of conversion tables from the respective 
+    separate runs.
+\item outCombined - the \code{digestFastqs} output for the combined run.
+}
 }
 \description{
 This function enables the processing of data sets with multiple
@@ -28,7 +34,7 @@ that need to be processed differently, e.g. in terms of matching to
 wildtype sequences or collapsing of similar sequences.
 In contrast, while \code{digestFastqs} allow the specification
 of multiple variable sequences (within each of the forward and reverse
-reads), they will be merged and processed as a single unit.
+reads), they will be concatenated and processed as a single unit.
 }
 \details{
 linkMultipleVariants will process the input in the following way:
@@ -36,9 +42,9 @@ linkMultipleVariants will process the input in the following way:
 \item First, run \code{digestFastqs} with the parameters provided
     in \code{combinedDigestParams}. Typically, this will be a
     "naive" counting run, where the frequencies of all observed
-    variants are tabulated. Moreover, the variable sequences
+    variants are tabulated. The variable sequences
     within the forward and reverse reads, respectively, will be
-    concatenated into a single sequence.
+    processed as a single sequence. 
 \item Next, run \code{digestFastqs} with each of the additional
     parameter sets provided (\code{...}). Each of these should
     correspond to a single variable sequence from the combined
@@ -58,7 +64,7 @@ linkMultipleVariants will process the input in the following way:
     is then combined with the count table from the combined, "naive"
     run in order to create an aggregated count table. More precisely,
     each sequence in the combined run is split into the constituent
-    variable sequences (as specified by the element lengths), and
+    variable sequences, and
     each variable sequence is then matched to the output from the right
     separate run, from which the final feature ID (mutant name, or
     collapsed sequence) will be extracted and used to replace the original
