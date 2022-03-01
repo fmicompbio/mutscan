@@ -141,8 +141,8 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     
     ## Summing UMI counts after the processing may not be accurate - will
     ## always use read counts
-    if (length(grep("U", paste0(combinedDigestParams$elementLengthsForward,
-                                combinedDigestParams$elementLengthsReverse))) > 0) {
+    if (length(grep("U", paste0(combinedDigestParams$elementsForward,
+                                combinedDigestParams$elementsReverse))) > 0) {
         warning("Aggregating UMI counts may not be accurate - will use ",
                 "read counts instead")
     }
@@ -221,6 +221,10 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
         do.call(digestFastqs, ps)
     })
 
+    ## Filter tables
+    filtSeparate <- lapply(outSeparate, function(out) out$filterSummary)
+    
+    ## Conversion tables
     convSeparate <- lapply(outSeparate, function(out) {
         out$summaryTable %>%
             dplyr::select(.data$mutantName, .data$sequence) %>%
@@ -246,5 +250,5 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
         dplyr::summarize(nbrReads = sum(.data$nbrReads), .groups = "drop")
 
     list(countAggregated = countAggregated, convSeparate = convSeparate,
-         outCombined = outCombined)
+         outCombined = outCombined, filtSeparate = filtSeparate)
 }
