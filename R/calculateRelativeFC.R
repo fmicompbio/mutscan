@@ -156,7 +156,7 @@ calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
         fit <- limma::eBayes(fit)
         tt <- limma::topTable(fit, coef = coef,
                               confint = TRUE, number = Inf, sort.by = "none")
-        if (length(coef) == 1 && is.null(contrast)) {
+        if (length(coef) == 1) {
             tt$se.logFC <- sqrt(fit$s2.post) * fit$stdev.unscaled[, coef]
         }
     }

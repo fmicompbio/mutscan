@@ -135,7 +135,9 @@ test_that("calculateRelativeFC works", {
     expect_equal(res3a["f.0.WT", "logFC"], 0, tolerance = 1e-4)
     expect_equal(res3a["f.0.WT", "P.Value"], 1, tolerance = 1e-4)
     expect_equal(res3a["f.0.WT", "adj.P.Val"], 1, tolerance = 1e-4)
-
+    expect_named(res3a, c("logFC", "CI.L", "CI.R", "AveExpr", "t",
+                          "P.Value", "adj.P.Val", "B", "se.logFC"))
+    
     ## Also with contrast
     res3b <- calculateRelativeFC(se, design, coef = NULL,
                                  contrast = as.numeric(colnames(design) == "Conditioncis_output"),
@@ -145,7 +147,21 @@ test_that("calculateRelativeFC works", {
     expect_equal(res3b["f.0.WT", "logFC"], 0, tolerance = 1e-4)
     expect_equal(res3b["f.0.WT", "P.Value"], 1, tolerance = 1e-4)
     expect_equal(res3b["f.0.WT", "adj.P.Val"], 1, tolerance = 1e-4)
-
+    expect_named(res3b, c("logFC", "CI.L", "CI.R", "AveExpr", "t",
+                          "P.Value", "adj.P.Val", "B", "se.logFC"))
+    
+    ## Coef and contrast should be equivalent also for limma
+    expect_equal(res3a$logFC, res3b$logFC)
+    expect_equal(res3a$CI.L, res3b$CI.L)
+    expect_equal(res3a$CI.R, res3b$CI.R)
+    expect_equal(res3a$AveExpr, res3b$AveExpr)
+    expect_equal(res3a$t, res3b$t)
+    expect_equal(res3a$P.Value, res3b$P.Value)
+    expect_equal(res3a$adj.P.Val, res3b$adj.P.Val)
+    expect_equal(res3a$B, res3b$B)
+    expect_true(all(res3a$se.logFC >= 0))
+    expect_equal(res3a$se.logFC, res3b$se.logFC)
+    
     ## Correlation between edgeR and limma logFCs should be high
     expect_gt(cor(res1a$logFC, res3a$logFC), 0.98)
 
