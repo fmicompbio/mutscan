@@ -72,25 +72,19 @@ test_that("collapseMutantsByAA works as expected", {
                S4Vectors::metadata(secoll))
   expect_equal(colnames(se), colnames(secoll))
   
-  ## Number of unique amino acids/position combinations
-  unl <- base::strsplit(rownames(se), split = metadata(se)$mutNameDelimiter, fixed = TRUE)
-  unl <- lapply(unl, function(w) {
-    w[3] <- GENETIC_CODE[w[3]]
-    w
-  })
-  aapos <- sapply(unl, function(w) paste(w, collapse = metadata(se)$mutNameDelimiter))
-  
-  
-  expect_equal(nrow(secoll), length(unique(aapos)))
+  aapos <- unique(unlist(rowData(se)$mutantNameAA))
+  expect_equal(nrow(secoll), length(aapos))
   expect_equal(sort(rownames(secoll)), sort(unique(aapos)))
   
-  tmp <- table(rep(aapos, SummarizedExperiment::assay(se, "counts")[, 1]))
+  tmp <- table(rep(unlist(SummarizedExperiment::rowData(se)$mutantNameAA), 
+                   SummarizedExperiment::assay(se, "counts")[, 1]))
   tmp <- tmp[rownames(secoll)]
   tmp[is.na(tmp)] <- 0
   expect_equal(SummarizedExperiment::assay(secoll, "counts")[, 1],
                as.numeric(tmp), ignore_attr = TRUE)
   
-  tmp <- table(rep(aapos, SummarizedExperiment::assay(se, "counts")[, 2]))
+  tmp <- table(rep(unlist(SummarizedExperiment::rowData(se)$mutantNameAA), 
+                   SummarizedExperiment::assay(se, "counts")[, 2]))
   tmp <- tmp[rownames(secoll)]
   tmp[is.na(tmp)] <- 0
   expect_equal(SummarizedExperiment::assay(secoll, "counts")[, 2],

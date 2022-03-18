@@ -200,7 +200,9 @@ test_that("digestFastqs works as expected when specifying max nbr of mutated bas
 
   expect_named(res$summaryTable, c("mutantName", "sequence","nbrReads",
                                    "maxNbrReads", "nbrUmis", "nbrMutBases",
-                                   "nbrMutCodons", "varLengths"))
+                                   "nbrMutCodons", "nbrMutAAs", "varLengths",
+                                   "mutantNameAA", "mutationTypes",
+                                   "sequenceAA"))
 
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
     expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
