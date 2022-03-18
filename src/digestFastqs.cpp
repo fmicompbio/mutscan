@@ -218,7 +218,6 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
   std::set<std::string> mutatedCodons;
   std::set<std::string> mutatedBases;
   std::set<std::string> mutatedAAs;
-  std::set<std::string> mutTypes;
   std::set<std::string>::iterator mutatedCodonIt;
   bool hasLowQualMutation, hasForbidden;
   std::string varCodon, wtCodon, varAA, wtAA;
@@ -319,10 +318,6 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
   nMutBases += (int)mutatedBases.size();
   nMutCodons += (int)mutatedCodons.size();
   nMutAAs += (int)mutatedAAs.size();
-  // mutationTypes.insert(mutTypes.begin(), mutTypes.end());
-  // for (std::set<std::string>::iterator mutTypeIt = mutTypes.begin(); mutTypeIt != mutTypes.end(); mutTypeIt++) {
-  //   mutationTypes.insert(*mutTypeIt);
-  // }
 
 
   // create name for mutant
@@ -1469,7 +1464,6 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             if (wildTypeForward[0].compare("") != 0 ||
                 (!noReverse && wildTypeReverse[0].compare("") != 0)) {
               mutantName = "WT";
-              mutantNameAA = "WT";
             }
           }
           if (mutantNameAA.length() > 0) { // we have a least one mutation, or sequence-based name
