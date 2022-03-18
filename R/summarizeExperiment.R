@@ -113,7 +113,7 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     allSamples <- names(x)
     names(allSamples) <- allSamples
 
-    ## Add info about nbr mutated bases/codons
+    ## Add info about nbr mutated bases/codons/AAs
     allNbrMutBases <- do.call(dplyr::bind_rows,
                               lapply(x, function(w)
                                   w$summaryTable[, c("mutantName", "nbrMutBases")])) %>%
@@ -129,15 +129,37 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     allNbrMutCodons <- methods::as(split(allNbrMutCodons$nbrMutCodons,
                                          f = allNbrMutCodons$mutantName),
                                    "IntegerList")
+    
+    allNbrMutAAs <- do.call(dplyr::bind_rows,
+                               lapply(x, function(w)
+                                   w$summaryTable[, c("mutantName", "nbrMutAAs")])) %>%
+        dplyr::distinct()
+    allNbrMutAAs <- methods::as(split(allNbrMutAAs$nbrMutAAs,
+                                      f = allNbrMutAAs$mutantName),
+                                "IntegerList")
 
     allSequences[["nbrMutBases"]] <- allNbrMutBases[allSequences$mutantName]
     allSequences[["nbrMutCodons"]] <- allNbrMutCodons[allSequences$mutantName]
+    allSequences[["nbrMutAAs"]] <- allNbrMutAAs[allSequences$mutantName]
 
     ## Add numeric columns in addition to the integer lists
     allSequences[["minNbrMutBases"]] <- min(allSequences$nbrMutBases)
     allSequences[["maxNbrMutBases"]] <- max(allSequences$nbrMutBases)
     allSequences[["minNbrMutCodons"]] <- min(allSequences$nbrMutCodons)
     allSequences[["maxNbrMutCodons"]] <- max(allSequences$nbrMutCodons)
+    allSequences[["minNbrMutAAs"]] <- min(allSequences$nbrMutAAs)
+    allSequences[["maxNbrMutAAs"]] <- max(allSequences$nbrMutAAs)
+
+    ## varLengths, mutantNameAA, mutationTypes
+    for (v in c("varLengths", "mutantNameAA", "mutationTypes")) {
+        tmp <- do.call(dplyr::bind_rows, 
+                       lapply(x, function(w) 
+                           w$summaryTable[, c("mutantName", v)])) %>%
+            dplyr::distinct()
+        tmp <- methods::as(split(tmp[[v]], f = tmp$mutantName),
+                           "CharacterList")
+        allSequences[[v]] <- tmp[allSequences$mutantName]
+    }
 
     ## --------------------------------------------------------------------------
     ## Create a sparse matrix
