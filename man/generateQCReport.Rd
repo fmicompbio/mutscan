@@ -8,20 +8,24 @@ generateQCReport(
   se,
   outFile,
   reportTitle = "mutscan QC report",
-  forceOverwrite = FALSE
+  forceOverwrite = FALSE,
+  ...
 )
 }
 \arguments{
-\item{se}{A \code{SummarizedExperiment} object, typically generated with 
+\item{se}{A \code{SummarizedExperiment} object, typically generated with
 \code{summarizeExperiment()}.}
 
-\item{outFile}{Character string providing the name of the output file. 
+\item{outFile}{Character string providing the name of the output file.
 Should have the extension \code{.html}.}
 
 \item{reportTitle}{Character string specifying the title of the QC report.}
 
 \item{forceOverwrite}{Logical scalar, indicating whether an existing file
 with the same name as \code{outFile} should be overwritten.}
+
+\item{...}{Additional parameters to be forwarded to
+\code{\link[rmarkdown]{render}}, for example \code{quiet = TRUE}.}
 }
 \value{
 Invisibly, the path to the generated html file.
@@ -31,7 +35,7 @@ Generate QC report
 }
 \examples{
 ## Load SummarizedExperiment object
-se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds",
                           package = "mutscan"))
 ## Define output file
 outfile <- tempfile(fileext = ".html")
@@ -39,6 +43,9 @@ outfile <- tempfile(fileext = ".html")
 ## Generate QC report
 generateQCReport(se, outfile)
 
+}
+\seealso{
+\code{\link[rmarkdown]{render}} used to render the html output file.
 }
 \author{
 Charlotte Soneson

@@ -37,8 +37,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // test_decomposeRead
-List test_decomposeRead(const std::string sseq, const std::string squal, const std::string elements, const std::vector<int> elementLengths, const std::vector<std::string> primerSeqs, std::string umiSeq, std::string varSeq, std::string varQual, std::string constSeq, std::string constQual, int nNoPrimer, int nReadWrongLength);
-RcppExport SEXP _mutscan_test_decomposeRead(SEXP sseqSEXP, SEXP squalSEXP, SEXP elementsSEXP, SEXP elementLengthsSEXP, SEXP primerSeqsSEXP, SEXP umiSeqSEXP, SEXP varSeqSEXP, SEXP varQualSEXP, SEXP constSeqSEXP, SEXP constQualSEXP, SEXP nNoPrimerSEXP, SEXP nReadWrongLengthSEXP) {
+List test_decomposeRead(const std::string sseq, const std::string squal, const std::string elements, const std::vector<int> elementLengths, const std::vector<std::string> primerSeqs, std::string umiSeq, std::string varSeq, std::string varQual, std::vector<int> varLengths, std::string constSeq, std::string constQual, int nNoPrimer, int nReadWrongLength);
+RcppExport SEXP _mutscan_test_decomposeRead(SEXP sseqSEXP, SEXP squalSEXP, SEXP elementsSEXP, SEXP elementLengthsSEXP, SEXP primerSeqsSEXP, SEXP umiSeqSEXP, SEXP varSeqSEXP, SEXP varQualSEXP, SEXP varLengthsSEXP, SEXP constSeqSEXP, SEXP constQualSEXP, SEXP nNoPrimerSEXP, SEXP nReadWrongLengthSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -50,17 +50,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type umiSeq(umiSeqSEXP);
     Rcpp::traits::input_parameter< std::string >::type varSeq(varSeqSEXP);
     Rcpp::traits::input_parameter< std::string >::type varQual(varQualSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type varLengths(varLengthsSEXP);
     Rcpp::traits::input_parameter< std::string >::type constSeq(constSeqSEXP);
     Rcpp::traits::input_parameter< std::string >::type constQual(constQualSEXP);
     Rcpp::traits::input_parameter< int >::type nNoPrimer(nNoPrimerSEXP);
     Rcpp::traits::input_parameter< int >::type nReadWrongLength(nReadWrongLengthSEXP);
-    rcpp_result_gen = Rcpp::wrap(test_decomposeRead(sseq, squal, elements, elementLengths, primerSeqs, umiSeq, varSeq, varQual, constSeq, constQual, nNoPrimer, nReadWrongLength));
+    rcpp_result_gen = Rcpp::wrap(test_decomposeRead(sseq, squal, elements, elementLengths, primerSeqs, umiSeq, varSeq, varQual, varLengths, constSeq, constQual, nNoPrimer, nReadWrongLength));
     return rcpp_result_gen;
 END_RCPP
 }
 // test_mergeReadPairPartial
-List test_mergeReadPairPartial(std::string seqF, std::vector<int> qualF, std::string seqR, std::vector<int> qualR, size_t minOverlap, size_t maxOverlap, size_t minMergedLength, size_t maxMergedLength, double maxFracMismatchOverlap, bool greedy);
-RcppExport SEXP _mutscan_test_mergeReadPairPartial(SEXP seqFSEXP, SEXP qualFSEXP, SEXP seqRSEXP, SEXP qualRSEXP, SEXP minOverlapSEXP, SEXP maxOverlapSEXP, SEXP minMergedLengthSEXP, SEXP maxMergedLengthSEXP, SEXP maxFracMismatchOverlapSEXP, SEXP greedySEXP) {
+List test_mergeReadPairPartial(std::string seqF, std::vector<int> qualF, std::string seqR, std::vector<int> qualR, std::vector<int> lenF, std::vector<int> lenR, size_t minOverlap, size_t maxOverlap, size_t minMergedLength, size_t maxMergedLength, double maxFracMismatchOverlap, bool greedy);
+RcppExport SEXP _mutscan_test_mergeReadPairPartial(SEXP seqFSEXP, SEXP qualFSEXP, SEXP seqRSEXP, SEXP qualRSEXP, SEXP lenFSEXP, SEXP lenRSEXP, SEXP minOverlapSEXP, SEXP maxOverlapSEXP, SEXP minMergedLengthSEXP, SEXP maxMergedLengthSEXP, SEXP maxFracMismatchOverlapSEXP, SEXP greedySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -68,13 +69,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::vector<int> >::type qualF(qualFSEXP);
     Rcpp::traits::input_parameter< std::string >::type seqR(seqRSEXP);
     Rcpp::traits::input_parameter< std::vector<int> >::type qualR(qualRSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type lenF(lenFSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type lenR(lenRSEXP);
     Rcpp::traits::input_parameter< size_t >::type minOverlap(minOverlapSEXP);
     Rcpp::traits::input_parameter< size_t >::type maxOverlap(maxOverlapSEXP);
     Rcpp::traits::input_parameter< size_t >::type minMergedLength(minMergedLengthSEXP);
     Rcpp::traits::input_parameter< size_t >::type maxMergedLength(maxMergedLengthSEXP);
     Rcpp::traits::input_parameter< double >::type maxFracMismatchOverlap(maxFracMismatchOverlapSEXP);
     Rcpp::traits::input_parameter< bool >::type greedy(greedySEXP);
-    rcpp_result_gen = Rcpp::wrap(test_mergeReadPairPartial(seqF, qualF, seqR, qualR, minOverlap, maxOverlap, minMergedLength, maxMergedLength, maxFracMismatchOverlap, greedy));
+    rcpp_result_gen = Rcpp::wrap(test_mergeReadPairPartial(seqF, qualF, seqR, qualR, lenF, lenR, minOverlap, maxOverlap, minMergedLength, maxMergedLength, maxFracMismatchOverlap, greedy));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -107,8 +110,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // digestFastqsCpp
-List digestFastqsCpp(std::vector<std::string> fastqForwardVect, std::vector<std::string> fastqReverseVect, bool mergeForwardReverse, size_t minOverlap, size_t maxOverlap, size_t minMergedLength, size_t maxMergedLength, double maxFracMismatchOverlap, bool greedyOverlap, bool revComplForward, bool revComplReverse, std::string elementsForward, std::vector<int> elementLengthsForward, std::string elementsReverse, std::vector<int> elementLengthsReverse, std::string adapterForward, std::string adapterReverse, std::vector<std::string> primerForward, std::vector<std::string> primerReverse, std::vector<std::string> wildTypeForward, std::vector<std::string> wildTypeForwardNames, std::vector<std::string> wildTypeReverse, std::vector<std::string> wildTypeReverseNames, std::vector<std::string> constantForward, std::vector<std::string> constantReverse, double avePhredMinForward, double avePhredMinReverse, int variableNMaxForward, int variableNMaxReverse, int umiNMax, int nbrMutatedCodonsMaxForward, int nbrMutatedCodonsMaxReverse, int nbrMutatedBasesMaxForward, int nbrMutatedBasesMaxReverse, CharacterVector forbiddenMutatedCodonsForward, CharacterVector forbiddenMutatedCodonsReverse, bool useTreeWTmatch, double mutatedPhredMinForward, double mutatedPhredMinReverse, std::string mutNameDelimiter, int constantMaxDistForward, int constantMaxDistReverse, double variableCollapseMaxDist, int variableCollapseMinReads, double variableCollapseMinRatio, double umiCollapseMaxDist, std::string filteredReadsFastqForward, std::string filteredReadsFastqReverse, int maxNReads, bool verbose, int nThreads, int chunkSize);
-RcppExport SEXP _mutscan_digestFastqsCpp(SEXP fastqForwardVectSEXP, SEXP fastqReverseVectSEXP, SEXP mergeForwardReverseSEXP, SEXP minOverlapSEXP, SEXP maxOverlapSEXP, SEXP minMergedLengthSEXP, SEXP maxMergedLengthSEXP, SEXP maxFracMismatchOverlapSEXP, SEXP greedyOverlapSEXP, SEXP revComplForwardSEXP, SEXP revComplReverseSEXP, SEXP elementsForwardSEXP, SEXP elementLengthsForwardSEXP, SEXP elementsReverseSEXP, SEXP elementLengthsReverseSEXP, SEXP adapterForwardSEXP, SEXP adapterReverseSEXP, SEXP primerForwardSEXP, SEXP primerReverseSEXP, SEXP wildTypeForwardSEXP, SEXP wildTypeForwardNamesSEXP, SEXP wildTypeReverseSEXP, SEXP wildTypeReverseNamesSEXP, SEXP constantForwardSEXP, SEXP constantReverseSEXP, SEXP avePhredMinForwardSEXP, SEXP avePhredMinReverseSEXP, SEXP variableNMaxForwardSEXP, SEXP variableNMaxReverseSEXP, SEXP umiNMaxSEXP, SEXP nbrMutatedCodonsMaxForwardSEXP, SEXP nbrMutatedCodonsMaxReverseSEXP, SEXP nbrMutatedBasesMaxForwardSEXP, SEXP nbrMutatedBasesMaxReverseSEXP, SEXP forbiddenMutatedCodonsForwardSEXP, SEXP forbiddenMutatedCodonsReverseSEXP, SEXP useTreeWTmatchSEXP, SEXP mutatedPhredMinForwardSEXP, SEXP mutatedPhredMinReverseSEXP, SEXP mutNameDelimiterSEXP, SEXP constantMaxDistForwardSEXP, SEXP constantMaxDistReverseSEXP, SEXP variableCollapseMaxDistSEXP, SEXP variableCollapseMinReadsSEXP, SEXP variableCollapseMinRatioSEXP, SEXP umiCollapseMaxDistSEXP, SEXP filteredReadsFastqForwardSEXP, SEXP filteredReadsFastqReverseSEXP, SEXP maxNReadsSEXP, SEXP verboseSEXP, SEXP nThreadsSEXP, SEXP chunkSizeSEXP) {
+List digestFastqsCpp(std::vector<std::string> fastqForwardVect, std::vector<std::string> fastqReverseVect, bool mergeForwardReverse, size_t minOverlap, size_t maxOverlap, size_t minMergedLength, size_t maxMergedLength, double maxFracMismatchOverlap, bool greedyOverlap, bool revComplForward, bool revComplReverse, std::string elementsForward, std::vector<int> elementLengthsForward, std::string elementsReverse, std::vector<int> elementLengthsReverse, std::string adapterForward, std::string adapterReverse, std::vector<std::string> primerForward, std::vector<std::string> primerReverse, std::vector<std::string> wildTypeForward, std::vector<std::string> wildTypeForwardNames, std::vector<std::string> wildTypeReverse, std::vector<std::string> wildTypeReverseNames, std::vector<std::string> constantForward, std::vector<std::string> constantReverse, double avePhredMinForward, double avePhredMinReverse, int variableNMaxForward, int variableNMaxReverse, int umiNMax, int nbrMutatedCodonsMaxForward, int nbrMutatedCodonsMaxReverse, int nbrMutatedBasesMaxForward, int nbrMutatedBasesMaxReverse, CharacterVector forbiddenMutatedCodonsForward, CharacterVector forbiddenMutatedCodonsReverse, bool useTreeWTmatch, bool collapseToWTForward, bool collapseToWTReverse, double mutatedPhredMinForward, double mutatedPhredMinReverse, std::string mutNameDelimiter, int constantMaxDistForward, int constantMaxDistReverse, double variableCollapseMaxDist, int variableCollapseMinReads, double variableCollapseMinRatio, double umiCollapseMaxDist, std::string filteredReadsFastqForward, std::string filteredReadsFastqReverse, int maxNReads, bool verbose, int nThreads, int chunkSize);
+RcppExport SEXP _mutscan_digestFastqsCpp(SEXP fastqForwardVectSEXP, SEXP fastqReverseVectSEXP, SEXP mergeForwardReverseSEXP, SEXP minOverlapSEXP, SEXP maxOverlapSEXP, SEXP minMergedLengthSEXP, SEXP maxMergedLengthSEXP, SEXP maxFracMismatchOverlapSEXP, SEXP greedyOverlapSEXP, SEXP revComplForwardSEXP, SEXP revComplReverseSEXP, SEXP elementsForwardSEXP, SEXP elementLengthsForwardSEXP, SEXP elementsReverseSEXP, SEXP elementLengthsReverseSEXP, SEXP adapterForwardSEXP, SEXP adapterReverseSEXP, SEXP primerForwardSEXP, SEXP primerReverseSEXP, SEXP wildTypeForwardSEXP, SEXP wildTypeForwardNamesSEXP, SEXP wildTypeReverseSEXP, SEXP wildTypeReverseNamesSEXP, SEXP constantForwardSEXP, SEXP constantReverseSEXP, SEXP avePhredMinForwardSEXP, SEXP avePhredMinReverseSEXP, SEXP variableNMaxForwardSEXP, SEXP variableNMaxReverseSEXP, SEXP umiNMaxSEXP, SEXP nbrMutatedCodonsMaxForwardSEXP, SEXP nbrMutatedCodonsMaxReverseSEXP, SEXP nbrMutatedBasesMaxForwardSEXP, SEXP nbrMutatedBasesMaxReverseSEXP, SEXP forbiddenMutatedCodonsForwardSEXP, SEXP forbiddenMutatedCodonsReverseSEXP, SEXP useTreeWTmatchSEXP, SEXP collapseToWTForwardSEXP, SEXP collapseToWTReverseSEXP, SEXP mutatedPhredMinForwardSEXP, SEXP mutatedPhredMinReverseSEXP, SEXP mutNameDelimiterSEXP, SEXP constantMaxDistForwardSEXP, SEXP constantMaxDistReverseSEXP, SEXP variableCollapseMaxDistSEXP, SEXP variableCollapseMinReadsSEXP, SEXP variableCollapseMinRatioSEXP, SEXP umiCollapseMaxDistSEXP, SEXP filteredReadsFastqForwardSEXP, SEXP filteredReadsFastqReverseSEXP, SEXP maxNReadsSEXP, SEXP verboseSEXP, SEXP nThreadsSEXP, SEXP chunkSizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -149,6 +152,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< CharacterVector >::type forbiddenMutatedCodonsForward(forbiddenMutatedCodonsForwardSEXP);
     Rcpp::traits::input_parameter< CharacterVector >::type forbiddenMutatedCodonsReverse(forbiddenMutatedCodonsReverseSEXP);
     Rcpp::traits::input_parameter< bool >::type useTreeWTmatch(useTreeWTmatchSEXP);
+    Rcpp::traits::input_parameter< bool >::type collapseToWTForward(collapseToWTForwardSEXP);
+    Rcpp::traits::input_parameter< bool >::type collapseToWTReverse(collapseToWTReverseSEXP);
     Rcpp::traits::input_parameter< double >::type mutatedPhredMinForward(mutatedPhredMinForwardSEXP);
     Rcpp::traits::input_parameter< double >::type mutatedPhredMinReverse(mutatedPhredMinReverseSEXP);
     Rcpp::traits::input_parameter< std::string >::type mutNameDelimiter(mutNameDelimiterSEXP);
@@ -164,7 +169,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
     Rcpp::traits::input_parameter< int >::type nThreads(nThreadsSEXP);
     Rcpp::traits::input_parameter< int >::type chunkSize(chunkSizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(digestFastqsCpp(fastqForwardVect, fastqReverseVect, mergeForwardReverse, minOverlap, maxOverlap, minMergedLength, maxMergedLength, maxFracMismatchOverlap, greedyOverlap, revComplForward, revComplReverse, elementsForward, elementLengthsForward, elementsReverse, elementLengthsReverse, adapterForward, adapterReverse, primerForward, primerReverse, wildTypeForward, wildTypeForwardNames, wildTypeReverse, wildTypeReverseNames, constantForward, constantReverse, avePhredMinForward, avePhredMinReverse, variableNMaxForward, variableNMaxReverse, umiNMax, nbrMutatedCodonsMaxForward, nbrMutatedCodonsMaxReverse, nbrMutatedBasesMaxForward, nbrMutatedBasesMaxReverse, forbiddenMutatedCodonsForward, forbiddenMutatedCodonsReverse, useTreeWTmatch, mutatedPhredMinForward, mutatedPhredMinReverse, mutNameDelimiter, constantMaxDistForward, constantMaxDistReverse, variableCollapseMaxDist, variableCollapseMinReads, variableCollapseMinRatio, umiCollapseMaxDist, filteredReadsFastqForward, filteredReadsFastqReverse, maxNReads, verbose, nThreads, chunkSize));
+    rcpp_result_gen = Rcpp::wrap(digestFastqsCpp(fastqForwardVect, fastqReverseVect, mergeForwardReverse, minOverlap, maxOverlap, minMergedLength, maxMergedLength, maxFracMismatchOverlap, greedyOverlap, revComplForward, revComplReverse, elementsForward, elementLengthsForward, elementsReverse, elementLengthsReverse, adapterForward, adapterReverse, primerForward, primerReverse, wildTypeForward, wildTypeForwardNames, wildTypeReverse, wildTypeReverseNames, constantForward, constantReverse, avePhredMinForward, avePhredMinReverse, variableNMaxForward, variableNMaxReverse, umiNMax, nbrMutatedCodonsMaxForward, nbrMutatedCodonsMaxReverse, nbrMutatedBasesMaxForward, nbrMutatedBasesMaxReverse, forbiddenMutatedCodonsForward, forbiddenMutatedCodonsReverse, useTreeWTmatch, collapseToWTForward, collapseToWTReverse, mutatedPhredMinForward, mutatedPhredMinReverse, mutNameDelimiter, constantMaxDistForward, constantMaxDistReverse, variableCollapseMaxDist, variableCollapseMinReads, variableCollapseMinRatio, umiCollapseMaxDist, filteredReadsFastqForward, filteredReadsFastqReverse, maxNReads, verbose, nThreads, chunkSize));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -213,11 +218,11 @@ RcppExport SEXP _rcpp_module_boot_mod_BKtree();
 static const R_CallMethodDef CallEntries[] = {
     {"_mutscan_calcNearestStringDist", (DL_FUNC) &_mutscan_calcNearestStringDist, 3},
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 3},
-    {"_mutscan_test_decomposeRead", (DL_FUNC) &_mutscan_test_decomposeRead, 12},
-    {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 10},
+    {"_mutscan_test_decomposeRead", (DL_FUNC) &_mutscan_test_decomposeRead, 13},
+    {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 12},
     {"_mutscan_findClosestRefSeq", (DL_FUNC) &_mutscan_findClosestRefSeq, 4},
     {"_mutscan_findClosestRefSeqEarlyStop", (DL_FUNC) &_mutscan_findClosestRefSeqEarlyStop, 4},
-    {"_mutscan_digestFastqsCpp", (DL_FUNC) &_mutscan_digestFastqsCpp, 52},
+    {"_mutscan_digestFastqsCpp", (DL_FUNC) &_mutscan_digestFastqsCpp, 54},
     {"_mutscan_levenshtein_distance", (DL_FUNC) &_mutscan_levenshtein_distance, 3},
     {"_mutscan_hamming_distance", (DL_FUNC) &_mutscan_hamming_distance, 3},
     {"_mutscan_hamming_shift_distance", (DL_FUNC) &_mutscan_hamming_shift_distance, 3},

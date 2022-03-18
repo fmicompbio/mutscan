@@ -1,3 +1,7 @@
+# mutscan 0.2.27
+
+* Add linkMultipleVariants function
+
 # mutscan 0.2.26
 
 * Use arithmetic instead of geometric mean for PPI calculations

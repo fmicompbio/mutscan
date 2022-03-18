@@ -40,6 +40,8 @@ digestFastqs(
   forbiddenMutatedCodonsForward = "",
   forbiddenMutatedCodonsReverse = "",
   useTreeWTmatch = FALSE,
+  collapseToWTForward = FALSE,
+  collapseToWTReverse = FALSE,
   mutatedPhredMinForward = 0,
   mutatedPhredMinReverse = 0,
   mutNameDelimiter = ".",
@@ -61,7 +63,7 @@ digestFastqs(
 \item{fastqForward, fastqReverse}{character vector, paths to gzipped FASTQ files
 corresponding to forward and reverse reads, respectively. If more than one
 forward/reverse sequence file is given, they need to be provided in the
-same order. Note that if multiple fastq files are provided, they are all 
+same order. Note that if multiple fastq files are provided, they are all
 assumed to correspond to the same sample, and will effectively be concatenated.}
 
 \item{mergeForwardReverse}{logical(1), whether to fuse the forward and
@@ -73,15 +75,15 @@ overlap between the forward and reverse reads when merging. Only used if
 covering the full length of the shortest of the two reads will be
 considered.}
 
-\item{minMergedLength, maxMergedLength}{numeric(1), the minimal and maximal 
-allowed total length of the merged product (if \code{mergeForwardReverse} is 
+\item{minMergedLength, maxMergedLength}{numeric(1), the minimal and maximal
+allowed total length of the merged product (if \code{mergeForwardReverse} is
 \code{TRUE}). If set to 0, any length is allowed.}
 
 \item{maxFracMismatchOverlap}{numeric(1), maximal mismatch rate in the
 overlap. Only used if \code{mergeForwardReverse} is \code{TRUE}.}
 
 \item{greedyOverlap}{logical(1). If \code{TRUE}, the first overlap satisfying
-\code{minOverlap}, \code{maxOverlap}, \code{minMergedLength}, 
+\code{minOverlap}, \code{maxOverlap}, \code{minMergedLength},
 \code{maxMergedLength} and \code{maxFracMismatchOverlap} will
 be retained. If \code{FALSE}, all valid overlaps will be scored and the one
 with the highest score (largest number of matches) will be retained.}
@@ -95,26 +97,26 @@ corresponding adapter sequence, the sequence pair will be filtered out.
 If set to \code{NULL}, no adapter filtering is performed. The number of
 filtered read pairs are reported in the return value.}
 
-\item{elementsForward, elementsReverse}{Character strings representing the 
+\item{elementsForward, elementsReverse}{Character strings representing the
 composition of the forward and reverse reads, respectively. The strings should
-consist only of the letters S (skip), C (constant), U (umi), P (primer), 
-V (variable), and cover the full extent of the read. Most combinations 
-are allowed (and a given letter can appear multiple times), but there 
-can be at most one occurrence of P. If a given letter is included 
+consist only of the letters S (skip), C (constant), U (umi), P (primer),
+V (variable), and cover the full extent of the read. Most combinations
+are allowed (and a given letter can appear multiple times), but there
+can be at most one occurrence of P. If a given letter is included
 multiple times, the corresponding sequences will be concatenated in the output.}
 
-\item{elementLengthsForward, elementLengthsReverse}{Numeric vectors containing 
+\item{elementLengthsForward, elementLengthsReverse}{Numeric vectors containing
 the lengths of each read component from \code{elementsForward}/\code{elementsReverse},
-respectively. If the length of one element is set to -1, it will be inferred 
-from the other lengths (as the remainder of the read). At most one number 
-(or one number on each side of the primer P) can be set to -1. The indicated 
+respectively. If the length of one element is set to -1, it will be inferred
+from the other lengths (as the remainder of the read). At most one number
+(or one number on each side of the primer P) can be set to -1. The indicated
 length of the primer is not used (instead it's inferred from the provided primer
 sequence) and can also be set to -1.}
 
-\item{primerForward, primerReverse}{Character vectors, representing the primer 
-sequence(s) for forward/reverse reads, respectively. Only read pairs that 
-contain perfect matches to both the forward and reverse primers (if given) 
-will be retained. Multiple primers can be specified - they will be 
+\item{primerForward, primerReverse}{Character vectors, representing the primer
+sequence(s) for forward/reverse reads, respectively. Only read pairs that
+contain perfect matches to both the forward and reverse primers (if given)
+will be retained. Multiple primers can be specified - they will be
 considered in order and the first match will be used.}
 
 \item{wildTypeForward, wildTypeReverse}{character(1) or named character
@@ -122,8 +124,8 @@ vector, the wild type sequence for the forward and reverse variable region.
 If given as a single string, the reference sequence will be named 'f' (for
 forward) or 'r' (for reverse).}
 
-\item{constantForward, constantReverse}{character(1) or character vector, 
-the expected constant forward and reverse sequences. If a vector, all 
+\item{constantForward, constantReverse}{character(1) or character vector,
+the expected constant forward and reverse sequences. If a vector, all
 elements must have the same length.}
 
 \item{avePhredMinForward, avePhredMinReverse}{numeric(1) Minimum average Phred
@@ -138,17 +140,17 @@ Ns allowed in the variable region for a read to be retained.}
 to be retained.}
 
 \item{nbrMutatedCodonsMaxForward, nbrMutatedCodonsMaxReverse}{numeric(1)
-Maximum number of mutated codons that are allowed. Note that for the 
-forward and reverse sequence, respectively, exactly one of  
-\code{nbrMutatedCodonsMax} and \code{nbrMutatedBasesMax} must be -1, 
-and the other must be a non-negative number. The one that is not -1 
+Maximum number of mutated codons that are allowed. Note that for the
+forward and reverse sequence, respectively, exactly one of
+\code{nbrMutatedCodonsMax} and \code{nbrMutatedBasesMax} must be -1,
+and the other must be a non-negative number. The one that is not -1
 will be used to filter and name the identified mutants.}
 
 \item{nbrMutatedBasesMaxForward, nbrMutatedBasesMaxReverse}{numeric(1)
-Maximum number of mutated bases that are allowed. Note that for the 
-forward and reverse sequence, respectively, exactly one of  
-\code{nbrMutatedCodonsMax} and \code{nbrMutatedBasesMax} must be -1, 
-and the other must be a non-negative number. The one that is not -1 
+Maximum number of mutated bases that are allowed. Note that for the
+forward and reverse sequence, respectively, exactly one of
+\code{nbrMutatedCodonsMax} and \code{nbrMutatedBasesMax} must be -1,
+and the other must be a non-negative number. The one that is not -1
 will be used to filter and name the identified mutants.}
 
 \item{forbiddenMutatedCodonsForward, forbiddenMutatedCodonsReverse}{character
@@ -156,10 +158,15 @@ vector of codons (can contain ambiguous IUPAC characters, see
 \code{\link[Biostrings]{IUPAC_CODE_MAP}}). If a read pair contains a
 mutated codon matching this pattern, it will be filtered out.}
 
-\item{useTreeWTmatch}{logical(1). Should a tree-based matching 
-to wild type sequences be used if possible? If the number of allowed 
-mismatches is small, and the number of wild type sequences is large, 
+\item{useTreeWTmatch}{logical(1). Should a tree-based matching
+to wild type sequences be used if possible? If the number of allowed
+mismatches is small, and the number of wild type sequences is large,
 this is typically faster.}
+
+\item{collapseToWTForward, collapseToWTReverse}{Logical scalar, indicating
+whether to just represent the observed variable sequence by the
+closest wildtype sequence rather than retaining the information about
+the mutations.}
 
 \item{mutatedPhredMinForward, mutatedPhredMinReverse}{numeric(1) Minimum Phred
 score of a mutated base for the read to be retained. If any mutated base
@@ -173,10 +180,10 @@ mutated codon. Here, {.} is the provided \code{mutNameDelimiter}. The
 delimiter must be a single character (not "_"), and can not appear in any
 of the provided reference sequence names.}
 
-\item{constantMaxDistForward, constantMaxDistReverse}{numeric(1) maximum 
+\item{constantMaxDistForward, constantMaxDistReverse}{numeric(1) maximum
 allowed Hamming distance between the extracted and expected constant sequence.
 If multiple constant sequences are provided, the most similar one is used.
-Reads with a larger distance to the expected constant sequence are 
+Reads with a larger distance to the expected constant sequence are
 discarded. If set to -1, no filtering is done.}
 
 \item{variableCollapseMaxDist, umiCollapseMaxDist}{A \code{numeric} scalar
@@ -193,15 +200,15 @@ collapsed if they are all of the same length and no wild type sequences
 number of reads for the read to be considered for collapsing with similar
 sequences.}
 
-\item{variableCollapseMinRatio}{A \code{numeric} scalar. During collapsing of 
+\item{variableCollapseMinRatio}{A \code{numeric} scalar. During collapsing of
 similar variable sequences, a low-frequency sequence will be collapsed with
-a higher-frequency sequence only if the ratio between the high-frequency 
-and the low-frequency sequences is at least this high. The default value 
+a higher-frequency sequence only if the ratio between the high-frequency
+and the low-frequency sequences is at least this high. The default value
 of 0 indicates that no such check is performed.}
 
-\item{filteredReadsFastqForward, filteredReadsFastqReverse}{character(1), the 
+\item{filteredReadsFastqForward, filteredReadsFastqReverse}{character(1), the
 name of a (pair of) FASTQ file(s) where filtered-out reads will be written.
-The name(s) should end in .gz (the output will always be compressed). If 
+The name(s) should end in .gz (the output will always be compressed). If
 empty, filtered reads will not be written to a file.}
 
 \item{maxNReads}{integer(1) Maximal number of reads to process. If set to -1,
@@ -211,7 +218,7 @@ all reads will be processed.}
 
 \item{nThreads}{numeric(1), number of threads to use for parallel processing.}
 
-\item{chunkSize}{numeric(1), number of read (pairs) to keep in memory for 
+\item{chunkSize}{numeric(1), number of read (pairs) to keep in memory for
 parallel processing. Reduce from the default value if you run out of memory.}
 }
 \value{
@@ -220,9 +227,9 @@ A list with four entries:
 \item{summaryTable}{A \code{data.frame} that contains, for each observed
 mutation combination, the corresponding variable region sequences (or pair of
 sequences), the number of observed such sequences, and the number of unique
-UMIs observed for the sequence. It also has a column named 'maxNbrReads', 
-which contains the number of reads for the most frequent observed sequence 
-represented by the feature (only relevant if similar variable regions are 
+UMIs observed for the sequence. It also has a column named 'maxNbrReads',
+which contains the number of reads for the most frequent observed sequence
+represented by the feature (only relevant if similar variable regions are
 collapsed).}
 \item{filterSummary}{A \code{data.frame} that contains the number of input
 reads, the number of reads filtered out in the processing, and the number of
@@ -255,7 +262,7 @@ The processing of a read pair goes as follows:
  reverse read.
  \item If primer sequences are provided, search for perfect matches, and
  filter out the read pair if not all provided primer sequences can be found.
- \item Extract the UMI, constant and variable sequence from forward and 
+ \item Extract the UMI, constant and variable sequence from forward and
  reverse reads, based on the definition of the respective read composition.
  \item If requested, collapse forward and reverse variable regions by
  retaining, for each position, the base with the highest reported base
@@ -281,8 +288,8 @@ The processing of a read pair goes as follows:
  \item Assign a 'mutation name' to the read. This name is a combination of
  parts of the form XX{.}YY{.}NNN, where XX is the name of the most similar
  reference sequence, YY is the mutated codon number, and NNN is the mutated
- codon. {.} is a delimiter, specified via \code{mutNameDelimiter}. If no 
- wildtype sequences are provided, the read sequence will be used as the 
+ codon. {.} is a delimiter, specified via \code{mutNameDelimiter}. If no
+ wildtype sequences are provided, the read sequence will be used as the
  'mutation name'.
 }
 

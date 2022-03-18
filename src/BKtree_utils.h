@@ -30,11 +30,11 @@ public:
     // node constructor / destructor
     node(int i): index(i) {}
     ~node() {
-      for (const std::pair<int, node*>&p : children) {
+      for (const std::pair<const int, BKtree::node*>&p : children) {
         delete p.second;
       }
     }
-    
+
     // node capacity (memory consumption of node and its children)
     int capacity(){
       int sz = sizeof(index);
@@ -45,9 +45,9 @@ public:
       return sz;
     }
   };
-  
+
   size_t size; // number of strings in tree
-  
+
   // tree constructors
   BKtree(const std::string dmetric = "hamming", int mshift = -1) { // empty tree
     size = 0;
@@ -56,7 +56,7 @@ public:
     _set_distance_function_pointer();
     root = nullptr;
   }
-  
+
   BKtree(const std::vector<std::string>& v,
          const std::string dmetric = "hamming", int mshift = -1) { // from a vector of strings
     metric = dmetric;
@@ -70,13 +70,13 @@ public:
   // add a new string into to tree
   void insert(std::string str) {
     size++;
-    
+
     // remove it from deleted map if necessary
     if (deleted.find(str) != deleted.end()){
       deleted.erase(str);
       return;
     }
-    
+
     // add it to items and get its index (zero-based)
     int index = items.size();
     items.push_back(str);
@@ -87,7 +87,7 @@ public:
       items.pop_back();
     }
   }
-  
+
   // remove a string from the tree
   // - string is only remembered as deleted, but not yet removed from the tree
   // - if too many deleted strings exist, rebuild whole tree from scratch
@@ -113,7 +113,7 @@ public:
       }
     }
   }
-  
+
   // remove all elements from tree
   void remove_all() {
     if (size > 0) {
@@ -124,7 +124,7 @@ public:
       deleted.clear();
     }
   }
-  
+
   // get all (non-deleted) elements from the tree
   std::vector<std::string> get_all() {
     std::vector<std::string> all;
@@ -147,7 +147,7 @@ public:
     _search(str, tol, root, vec); // start recursive search at the root
     return vec;
   }
-  
+
   // does the tree contain a string within distance tol of str?
   bool has(std::string str, int tol = 0) {
     if (size <= 0) {
@@ -156,7 +156,7 @@ public:
     }
     return _has(str, tol, root); // start  recursive search at the root
   }
-  
+
   // get first non-deleted element (in the order of items)
   std::string first() {
     std::string res = "";
@@ -180,7 +180,7 @@ public:
     }
   }
 
-  // tree capacity (memory consumption of tree plus root node and its children)    
+  // tree capacity (memory consumption of tree plus root node and its children)
   int capacity() {
     int sz = sizeof(size) + sizeof(node*) + sizeof(items) + sizeof(deleted);
     for (std::string &s: items) {
@@ -194,22 +194,22 @@ public:
     }
     return sz;
   }
-  
+
   // return the distance metric used by a tree instance
   std::string distance_metric() {
     return metric;
   }
-  
+
   // return the maximal shift used in hamming_shift_distance()
   int maximal_absolute_shift() {
     return max_absolute_shift;
   }
-  
+
   inline std::vector<std::string>::iterator begin() noexcept { return items.begin(); }
   inline std::vector<std::string>::const_iterator cbegin() const noexcept { return items.cbegin(); }
   inline std::vector<std::string>::iterator end() noexcept { return items.end(); }
   inline std::vector<std::string>::const_iterator cend() const noexcept { return items.end(); }
-  
+
 private:
   std::vector<std::string> items;            // all strings added to the tree in the order of addition
                                              // (including potentially deleted ones)
@@ -226,7 +226,7 @@ private:
 
     } else if (metric == "hamming_shift") {
       distance = &hamming_shift_distance;
-      
+
     } else if (metric == "levenshtein") {
       distance = &levenshtein_distance;
 
@@ -234,7 +234,7 @@ private:
       stop("unknown distance metric '%s'", metric);
     }
   }
-  
+
   // build new tree from string elements in vector v
   void _build_from_items(const std::vector<std::string>& v) {
     if (size < 1) {
@@ -263,7 +263,7 @@ private:
       items.resize(size);
     }
   }
-  
+
   // rebuild tree from items and release elements stored in deleted
   void _rebuild() {
     // reorder items (move deleted items to the end)
@@ -281,7 +281,7 @@ private:
     // truncate items to just the non-deleted elements
     items.resize(i);
     */
-    
+
     // alternative implementation (preserving order in items)
     std::vector<std::string> newitems;
     for (size_t i = 0; i < items.size(); i++) {
@@ -293,32 +293,32 @@ private:
     items.clear();
     items.insert(items.begin(), newitems.begin(), newitems.end());
     // items = newitems;
-    
+
     // ... and empty deleted
     deleted.clear();
-    
+
     // build up new tree from cleaned items
     delete root;
     size = items.size();
     _build_from_items(items);
   }
-  
+
   // add items[index] as a new node to tree
   bool _add_from_items(int index) {
     std::string str = items[index];
     bool res = false;
-    
+
     if(root == nullptr) { // tree is empty -> make it root
       root = new node(index);
       res = true;
-      
+
     } else {
       node* t = root; // start with root
       node* new_node = new node(index); // create new node
-      
+
       // distance of new item to current node
       int dist = distance(items[t->index], str, max_absolute_shift);
-      
+
       // while current node t already has a child at that distance dist
       while (t->children.find(dist) != t->children.end()) {
         // descend to the children of that child
@@ -326,7 +326,7 @@ private:
         // ... and calculate new distance
         dist = distance(items[t->index], str, max_absolute_shift);
       }
-      
+
       // t now points to a node without children at distance dist
       if (dist > 0) { // non-zero distance -> insert new string as child at distance dist
         t->children.insert(std::pair<int, node*>(dist, new_node));
@@ -336,51 +336,51 @@ private:
         res = false;
       }
     }
-    
+
     return res;
   }
-  
+
   // recursively search for elements within tol of str in subtree of node r, add results to vec
   void _search(std::string str, int tol, node* r, std::vector<std::string>& vec) {
     std::string r_val = items[r->index];
     int dist = distance(r_val, str, max_absolute_shift);
-    
+
     if (dist <= tol) { // found element within tolerance
       // only add to results if not deleted
       if (deleted.find(r_val) == deleted.end()) {
         vec.push_back(r_val);
       }
     }
-    
+
     // apply BK tree triangle inequality to
     // calculate boundaries for potential further hits relative to current hit
     int gte = dist - tol, lte = dist + tol;
-    
-    for (const std::pair<int, node*>& p: r->children) {
+
+    for (const std::pair<const int, BKtree::node*>& p: r->children) {
       if(p.first >= gte && p.first <= lte) {
         // ... and recurse search on children in that range
         _search(str, tol, p.second, vec);
       }
     }
   }
-  
+
   // recursively check if subtree of node r has an element within tol of str
   bool _has(std::string str, int tol, node* r) {
     std::string r_val = items[r->index];
     int dist = distance(r_val, str, max_absolute_shift);
-    
+
     if (dist <= tol) { // found an element within tolerance
       // only return true if not deleted
       if (deleted.find(r_val) == deleted.end()) {
         return true;
       }
     }
-    
+
     // apply BK tree triangle inequality to
     // calculate boundaries for potential further hits relative to current hit
     int gte = dist - tol, lte = dist + tol;
-    
-    for (const std::pair<int, node*>&p: r->children) {
+
+    for (const std::pair<const int, BKtree::node*>&p: r->children) {
       if (p.first >= gte && p.first <= lte) {
         // ... and start recursive search on children in that range
         if (_has(str, tol, p.second)) {
@@ -388,10 +388,10 @@ private:
         }
       }
     }
-    
+
     return false;
   }
-  
+
   // recursively print subtree underneath node n:
   // first print node n (child of node r), indented by depth tabs
   // and the recurse on all children of n
@@ -402,18 +402,18 @@ private:
     if (r == nullptr) {
       r = root;
     }
-    
+
     for (int i = 0; i < depth; ++i) {
       Rcout << "\t";
     }
-    
+
     std::string n_val = items[n->index], r_val = items[r->index];
     if(deleted.find(n_val) != deleted.end()) {
       // if node n is deleted, prefix it with D*
       Rcout << "D*";
     }
     Rcout << distance(r_val, n_val, max_absolute_shift) << ": " << n_val << std::endl;
-    for (const std::pair<int, node*>&x: n->children) {
+    for (const std::pair<const int, BKtree::node*>&x: n->children) {
       // recursively print all children of n
       _print(n, x.second, depth + 1);
     }
@@ -451,9 +451,9 @@ RCPP_MODULE(mod_BKtree) {
   ;
 }
 
-// TODO: Attempting to export this function here gives a warning: 
-// Invalid parameter: 'std::string&' for Rcpp::export attribute at BKtree_utils.hpp:467 
-// For now, don't export it. 
+// TODO: Attempting to export this function here gives a warning:
+// Invalid parameter: 'std::string&' for Rcpp::export attribute at BKtree_utils.hpp:467
+// For now, don't export it.
 int findClosestRefSeqFaster(std::string&, BKtree&, std::map<std::string, int>&, int&);
 
 #endif

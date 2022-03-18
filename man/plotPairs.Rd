@@ -20,32 +20,32 @@ plotPairs(
 )
 }
 \arguments{
-\item{se}{A SummarizedExperiment object, e.g. the output of 
+\item{se}{A SummarizedExperiment object, e.g. the output of
 \code{summarizeExperiment}}
 
-\item{selAssay}{Character scalar, the assay to use as the basis for the 
+\item{selAssay}{Character scalar, the assay to use as the basis for the
 pairs plot.}
 
-\item{doLog}{Logical scalar, whether or not to log-transform the values 
+\item{doLog}{Logical scalar, whether or not to log-transform the values
 before plotting.}
 
-\item{pseudocount}{Numeric scalar, the pseudocount to add to the values 
+\item{pseudocount}{Numeric scalar, the pseudocount to add to the values
 before log-transforming (if \code{doLog} is \code{TRUE}).}
 
-\item{corMethod}{Either "pearson" or "spearman", the type of correlation 
+\item{corMethod}{Either "pearson" or "spearman", the type of correlation
 to calculate.}
 
 \item{histBreaks}{Numeric scalar, the number of breaks in the histograms
 to put in the diagonal panels.}
 
-\item{pointsType}{Either "points" or "smoothscatter", determining the 
+\item{pointsType}{Either "points" or "smoothscatter", determining the
 type of plots that will be made.}
 
-\item{corSizeMult, corSizeAdd}{Numeric scalars determining how the 
-absolute correlation value is transformed into a font size. The 
+\item{corSizeMult, corSizeAdd}{Numeric scalars determining how the
+absolute correlation value is transformed into a font size. The
 transformation is corSizeMult * abs(corr) + corSizeAdd.}
 
-\item{pointSize, pointAlpha}{Numeric scalars determining the size and 
+\item{pointSize, pointAlpha}{Numeric scalars determining the size and
 opacity of points in the plot.}
 
 \item{colorByCorrelation}{Logical scalar, indicating whether the correlation
@@ -55,9 +55,9 @@ panels should be colored according to the correlation value.}
 A \code{ggplot} object.
 }
 \description{
-Construct a pairs plot of all columns of a given assay. The lower-triangular 
-panels display the scatter plots, the upper-triangular ones print out 
-the (Pearson or Spearman) correlations, and the diagonal panels show 
+Construct a pairs plot of all columns of a given assay. The lower-triangular
+panels display the scatter plots, the upper-triangular ones print out
+the (Pearson or Spearman) correlations, and the diagonal panels show
 histograms of the respective columns.
 }
 \author{
