@@ -1769,7 +1769,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   std::vector<std::string> dfMutAAs(dfLen, ""), dfVarLengths(dfLen, "");
   std::vector<std::string> dfMutantNameAA(dfLen, ""), dfSeqAA(dfLen, "");
   std::vector<std::string> dfMutationTypes(dfLen, "");
-  int i = 0;
+  int j = 0;
   for (mutantSummaryIt = mutantSummary.begin(); mutantSummaryIt != mutantSummary.end(); mutantSummaryIt++) {
     // collapse all sequences associated with the mutant
     std::vector<std::string> sequenceVector((*mutantSummaryIt).second.sequence.begin(),
@@ -1778,7 +1778,9 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     for (size_t i = 0; i < sequenceVector.size(); i++) {
       collapsedSequence += sequenceVector[i] + ",";
     }
-    collapsedSequence.pop_back(); // remove final ","
+    if (!collapsedSequence.empty()) {
+      collapsedSequence.pop_back(); // remove final ","
+    }
     
     // mutantNameAA
     std::vector<std::string> mutantNameAAVector((*mutantSummaryIt).second.mutantNameAA.begin(),
@@ -1787,7 +1789,9 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     for (size_t i = 0; i < mutantNameAAVector.size(); i++) {
       collapsedMutantNameAA += mutantNameAAVector[i] + ",";
     }
-    collapsedMutantNameAA.pop_back(); // remove final ","
+    if (!collapsedMutantNameAA.empty()) {
+      collapsedMutantNameAA.pop_back(); // remove final ","
+    }
     
     // mutationTypes
     std::vector<std::string> mutationTypesVector((*mutantSummaryIt).second.mutationTypes.begin(),
@@ -1796,7 +1800,9 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     for (size_t i = 0; i < mutationTypesVector.size(); i++) {
       collapsedMutationTypes += mutationTypesVector[i] + ",";
     }
-    collapsedMutationTypes.pop_back(); // remove final ","
+    if (!collapsedMutationTypes.empty()) {
+      collapsedMutationTypes.pop_back(); // remove final ","
+    }
     
     // collapse all aa sequences associated with the mutant
     std::vector<std::string> sequenceAAVector((*mutantSummaryIt).second.sequenceAA.begin(),
@@ -1805,8 +1811,10 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     for (size_t i = 0; i < sequenceAAVector.size(); i++) {
       collapsedSequenceAA += sequenceAAVector[i] + ",";
     }
-    collapsedSequenceAA.pop_back(); // remove final ","
-
+    if (!collapsedSequenceAA.empty()) {
+      collapsedSequenceAA.pop_back(); // remove final ","
+    }
+    
     // collapse all observed nMutBases/nMutCodons
     std::vector<int> nMutBasesVector((*mutantSummaryIt).second.nMutBases.begin(),
                                      (*mutantSummaryIt).second.nMutBases.end());
@@ -1814,7 +1822,10 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     for (size_t i = 0; i < nMutBasesVector.size(); i++) {
       collapsedNMutBases += (std::to_string(nMutBasesVector[i]) + ",");
     }
-    collapsedNMutBases.pop_back();
+    if (!collapsedNMutBases.empty()) {
+      collapsedNMutBases.pop_back();
+    }
+    
     // codons
     std::vector<int> nMutCodonsVector((*mutantSummaryIt).second.nMutCodons.begin(),
                                       (*mutantSummaryIt).second.nMutCodons.end());
@@ -1822,7 +1833,10 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     for (size_t i = 0; i < nMutCodonsVector.size(); i++) {
       collapsedNMutCodons += std::to_string(nMutCodonsVector[i]) + ",";
     }
-    collapsedNMutCodons.pop_back();
+    if (!collapsedNMutCodons.empty()) {
+      collapsedNMutCodons.pop_back();
+    }
+    
     // AAs
     std::vector<int> nMutAAsVector((*mutantSummaryIt).second.nMutAAs.begin(),
                                    (*mutantSummaryIt).second.nMutAAs.end());
@@ -1830,22 +1844,25 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     for (size_t i = 0; i < nMutAAsVector.size(); i++) {
       collapsedNMutAAs += std::to_string(nMutAAsVector[i]) + ",";
     }
-    collapsedNMutAAs.pop_back();
-
-    dfName[i] = (*mutantSummaryIt).first;
-    dfSeq[i] = collapsedSequence;
-    dfReads[i] = (*mutantSummaryIt).second.nReads;
-    dfMaxReads[i] = (*mutantSummaryIt).second.maxNReads;
-    dfUmis[i] = (*mutantSummaryIt).second.umi.size();
-    dfMutBases[i] = collapsedNMutBases;
-    dfMutCodons[i] = collapsedNMutCodons;
-    dfMutAAs[i] = collapsedNMutAAs;
-    dfMutantNameAA[i] = collapsedMutantNameAA;
-    dfMutationTypes[i] = collapsedMutationTypes;
-    dfSeqAA[i] = collapsedSequenceAA;
-    dfVarLengths[i] = (*mutantSummaryIt).second.varLengths;
-    i++;
+    if (!collapsedNMutAAs.empty()) {
+      collapsedNMutAAs.pop_back();
+    }
+    
+    dfName[j] = (*mutantSummaryIt).first;
+    dfSeq[j] = collapsedSequence;
+    dfReads[j] = (*mutantSummaryIt).second.nReads;
+    dfMaxReads[j] = (*mutantSummaryIt).second.maxNReads;
+    dfUmis[j] = (*mutantSummaryIt).second.umi.size();
+    dfMutBases[j] = collapsedNMutBases;
+    dfMutCodons[j] = collapsedNMutCodons;
+    dfMutAAs[j] = collapsedNMutAAs;
+    dfMutantNameAA[j] = collapsedMutantNameAA;
+    dfMutationTypes[j] = collapsedMutationTypes;
+    dfSeqAA[j] = collapsedSequenceAA;
+    dfVarLengths[j] = (*mutantSummaryIt).second.varLengths;
+    j++;
   }
+  
   // put back wildtype sequences and names in Rcpp::StringVector
   Rcpp::StringVector wildTypeForwardRcpp(wildTypeForward.size());
   wildTypeForwardRcpp = wildTypeForward;
