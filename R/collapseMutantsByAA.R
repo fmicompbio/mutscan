@@ -17,6 +17,8 @@
 #' @importFrom utils relist
 #' @importFrom S4Vectors unstrsplit metadata
 #' @importFrom SummarizedExperiment assay SummarizedExperiment colData
+#' @importFrom dplyr across everything group_by summarize
+#' @importFrom tibble column_to_rownames
 #'
 collapseMutantsByAA <- function(se, nameCol = "mutantNameAA") {
     .assertVector(x = se, type = "SummarizedExperiment")
@@ -37,7 +39,8 @@ collapseMutantsByAA <- function(se, nameCol = "mutantNameAA") {
     ## Collapse rowData
     rd <- as.data.frame(SummarizedExperiment::rowData(se)) %>%
         dplyr::group_by(.data$collapseCol) %>%
-        dplyr::summarize(across(everything(), function(x) paste(x, collapse = ";"))) %>%
+        dplyr::summarize(dplyr::across(dplyr::everything(), 
+                                       function(x) paste(x, collapse = ";"))) %>%
         as.data.frame() %>%
         tibble::column_to_rownames("collapseCol")
 

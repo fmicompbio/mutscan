@@ -163,8 +163,8 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
             tidyr::separate(sequence, into = c("sequenceForward", 
                                                "sequenceReverse"), 
                             sep = "_") %>%
-            tidyr::separate(varLengths, into = c("varLengthsForward", 
-                                                 "varLengthsReverse"),
+            tidyr::separate(.data$varLengths, into = c("varLengthsForward", 
+                                                       "varLengthsReverse"),
                             sep = "_") %>%
             dplyr::mutate(
                 nCompForward = vapply(strsplit(.data$varLengthsForward, ","), 
