@@ -48,12 +48,11 @@ test_that("parallel processing works (cis)", {
   
   ## Increase number of threads
   Ldef1 <- Ldef; Ldef1$nThreads <- 3
-  ## Capture warnings from missing OpenMP
+  ## Capture warnings from missing OpenMP/not enough threads
   a <- capture_warnings({
       res1 <- do.call(digestFastqs, Ldef1)
   })
-  expect_equal(a, "OpenMP")
-  expect_equal(sum(grepl("OpenMP", a)), length(a))
+  expect_equal(sum(grepl("OpenMP|available", a)), length(a))
 
   expect_equal(res$filterSummary$nbrTotal, res1$filterSummary$nbrTotal)
   expect_equal(res$filterSummary$f1_nbrAdapter, res1$filterSummary$f1_nbrAdapter)
@@ -78,11 +77,11 @@ test_that("parallel processing works (cis)", {
   
   ## Increase chunk size
   Ldef1 <- Ldef; Ldef1$nThreads <- 3; Ldef1$chunkSize <- 100
-  ## Capture warnings from missing OpenMP
+  ## Capture warnings from missing OpenMP/not enough threads
   a <- capture_warnings({
       res1 <- do.call(digestFastqs, Ldef1)
   })
-  expect_equal(sum(grepl("OpenMP", a)), length(a))
+  expect_equal(sum(grepl("OpenMP|available", a)), length(a))
   
   expect_equal(res$filterSummary$nbrTotal, res1$filterSummary$nbrTotal)
   expect_equal(res$filterSummary$f1_nbrAdapter, res1$filterSummary$f1_nbrAdapter)
@@ -107,11 +106,11 @@ test_that("parallel processing works (cis)", {
   
   ## With tree matching
   Ldef1 <- Ldef; Ldef1$useTreeWTmatch <- TRUE; Ldef1$nThreads <- 3; Ldef1$chunkSize <- 100
-  ## Capture warnings from missing OpenMP
+  ## Capture warnings from missing OpenMP/not enough threads
   a <- capture_warnings({
       res1 <- do.call(digestFastqs, Ldef1)
   })
-  expect_equal(sum(grepl("OpenMP", a)), length(a))
+  expect_equal(sum(grepl("OpenMP|available", a)), length(a))
   
   expect_equal(res$filterSummary$nbrTotal, res1$filterSummary$nbrTotal)
   expect_equal(res$filterSummary$f1_nbrAdapter, res1$filterSummary$f1_nbrAdapter)
@@ -183,11 +182,11 @@ test_that("parallel processing works (trans)", {
   
   ## Increase number of threads
   Ldef1 <- Ldef; Ldef1$nThreads <- 3
-  ## Capture warnings from missing OpenMP
+  ## Capture warnings from missing OpenMP/not enough threads
   a <- capture_warnings({
       res1 <- do.call(digestFastqs, Ldef1)
   })
-  expect_equal(sum(grepl("OpenMP", a)), length(a))
+  expect_equal(sum(grepl("OpenMP|available", a)), length(a))
   
   expect_equal(res$filterSummary$nbrTotal, res1$filterSummary$nbrTotal)
   expect_equal(res$filterSummary$f1_nbrAdapter, res1$filterSummary$f1_nbrAdapter)
@@ -212,11 +211,11 @@ test_that("parallel processing works (trans)", {
   
   ## Increase chunk size
   Ldef1 <- Ldef; Ldef1$nThreads <- 3; Ldef1$chunkSize <- 100
-  ## Capture warnings from missing OpenMP
+  ## Capture warnings from missing OpenMP/not enough threads
   a <- capture_warnings({
       res1 <- do.call(digestFastqs, Ldef1)
   })
-  expect_equal(sum(grepl("OpenMP", a)), length(a))
+  expect_equal(sum(grepl("OpenMP|available", a)), length(a))
   
   expect_equal(res$filterSummary$nbrTotal, res1$filterSummary$nbrTotal)
   expect_equal(res$filterSummary$f1_nbrAdapter, res1$filterSummary$f1_nbrAdapter)
@@ -241,11 +240,11 @@ test_that("parallel processing works (trans)", {
   
   ## With tree matching
   Ldef1 <- Ldef; Ldef1$useTreeWTmatch <- TRUE; Ldef1$nThreads <- 3; Ldef1$chunkSize <- 100
-  ## Capture warnings from missing OpenMP
+  ## Capture warnings from missing OpenMP/not enough threads
   a <- capture_warnings({
       res1 <- do.call(digestFastqs, Ldef1)
   })
-  expect_equal(sum(grepl("OpenMP", a)), length(a))
+  expect_equal(sum(grepl("OpenMP|available", a)), length(a))
   
   expect_equal(res$filterSummary$nbrTotal, res1$filterSummary$nbrTotal)
   expect_equal(res$filterSummary$f1_nbrAdapter, res1$filterSummary$f1_nbrAdapter)
