@@ -586,11 +586,11 @@ se_collapsed <- collapseMutantsByAA(se)
 ppis <- calculatePPIScore(se = se_collapsed, pairingCol = "Replicate", 
                           ODCols = c("OD1", "OD2"),
                           comparison = c("Condition", "cis_output", "cis_input"),
-                          WTrows = "f.0.NA")
+                          WTrows = "f.0.WT")
 head(ppis[order(abs(rowMeans(ppis)), decreasing = TRUE), , drop = FALSE])
 
 ## The PPI score for the WT sequence is 1, by construction
-ppis["f.0.NA", , drop = FALSE]
+ppis["f.0.WT", , drop = FALSE]
 ```
 
 # Scoring mutations with `edgeR` or `limma`
@@ -622,22 +622,22 @@ edger_scores <- calculateRelativeFC(
     se = se_collapsed,
     design = model.matrix(~ Replicate + Condition,
                           data = colData(se_collapsed)),
-    coef = "Conditioncis_output", pseudocount = 1, WTrows = "f.0.NA",
+    coef = "Conditioncis_output", pseudocount = 1, WTrows = "f.0.WT",
     method = "edgeR")
 head(edger_scores[order(edger_scores$PValue), , drop = FALSE])
 ## As before, the WT sequence has a logFC close to 0, by construction
-edger_scores["f.0.NA", , drop = FALSE]
+edger_scores["f.0.WT", , drop = FALSE]
 
 ## limma
 limma_scores <- calculateRelativeFC(
     se = se_collapsed,
     design = model.matrix(~ Replicate + Condition,
                           data = colData(se_collapsed)),
-    coef = "Conditioncis_output", pseudocount = 1, WTrows = "f.0.NA",
+    coef = "Conditioncis_output", pseudocount = 1, WTrows = "f.0.WT",
     method = "limma")
 head(limma_scores[order(limma_scores$P.Value), , drop = FALSE])
 ## As before, the WT sequence has a logFC close to 0, by construction
-limma_scores["f.0.NA", , drop = FALSE]
+limma_scores["f.0.WT", , drop = FALSE]
 ```
 
 `mutscan` also contains functions for plotting the results of the statistical 
