@@ -52,6 +52,7 @@ test_that("parallel processing works (cis)", {
   a <- capture_warnings({
       res1 <- do.call(digestFastqs, Ldef1)
   })
+  expect_equal(a, "OpenMP")
   expect_equal(sum(grepl("OpenMP", a)), length(a))
 
   expect_equal(res$filterSummary$nbrTotal, res1$filterSummary$nbrTotal)
