@@ -40,7 +40,7 @@ collapseMutantsByAA <- function(se, nameCol = "mutantNameAA") {
     rd <- as.data.frame(SummarizedExperiment::rowData(se)) %>%
         dplyr::group_by(.data$collapseCol) %>%
         dplyr::summarize(dplyr::across(dplyr::everything(), 
-                                       function(x) paste(x, collapse = ";"))) %>%
+                                       function(x) paste(unique(x), collapse = ";"))) %>%
         as.data.frame() %>%
         tibble::column_to_rownames("collapseCol")
 

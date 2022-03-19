@@ -114,41 +114,17 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     names(allSamples) <- allSamples
 
     ## Add info about nbr mutated bases/codons/AAs
-    allNbrMutBases <- do.call(dplyr::bind_rows,
-                              lapply(x, function(w)
-                                  w$summaryTable[, c("mutantName", "nbrMutBases")])) %>%
-        dplyr::distinct()
-    allNbrMutBases <- methods::as(split(allNbrMutBases$nbrMutBases,
-                                        f = allNbrMutBases$mutantName),
-                                  "IntegerList")
-
-    allNbrMutCodons <- do.call(dplyr::bind_rows,
-                               lapply(x, function(w)
-                                   w$summaryTable[, c("mutantName", "nbrMutCodons")])) %>%
-        dplyr::distinct()
-    allNbrMutCodons <- methods::as(split(allNbrMutCodons$nbrMutCodons,
-                                         f = allNbrMutCodons$mutantName),
-                                   "IntegerList")
-    
-    allNbrMutAAs <- do.call(dplyr::bind_rows,
-                               lapply(x, function(w)
-                                   w$summaryTable[, c("mutantName", "nbrMutAAs")])) %>%
-        dplyr::distinct()
-    allNbrMutAAs <- methods::as(split(allNbrMutAAs$nbrMutAAs,
-                                      f = allNbrMutAAs$mutantName),
-                                "IntegerList")
-
-    allSequences[["nbrMutBases"]] <- allNbrMutBases[allSequences$mutantName]
-    allSequences[["nbrMutCodons"]] <- allNbrMutCodons[allSequences$mutantName]
-    allSequences[["nbrMutAAs"]] <- allNbrMutAAs[allSequences$mutantName]
-
-    ## Add numeric columns in addition to the integer lists
-    allSequences[["minNbrMutBases"]] <- min(allSequences$nbrMutBases)
-    allSequences[["maxNbrMutBases"]] <- max(allSequences$nbrMutBases)
-    allSequences[["minNbrMutCodons"]] <- min(allSequences$nbrMutCodons)
-    allSequences[["maxNbrMutCodons"]] <- max(allSequences$nbrMutCodons)
-    allSequences[["minNbrMutAAs"]] <- min(allSequences$nbrMutAAs)
-    allSequences[["maxNbrMutAAs"]] <- max(allSequences$nbrMutAAs)
+    for (v in c("nbrMutBases", "nbrMutCodons", "nbrMutAAs")) {
+        tmp <- do.call(dplyr::bind_rows,
+                       lapply(x, function(w)
+                           w$summaryTable[, c("mutantName", v)])) %>%
+            dplyr::distinct()
+        tmp <- methods::as(split(tmp[[v]], f = tmp$mutantName),
+                           "IntegerList")
+        allSequences[[v]] <- tmp[allSequences$mutantName]
+        allSequences[[paste0("min", sub("^n", "N", v))]] <- min(allSequences[[v]])
+        allSequences[[paste0("max", sub("^n", "N", v))]] <- max(allSequences[[v]])
+    }
 
     ## varLengths, mutantNameAA, mutationTypes
     for (v in c("varLengths", "mutantNameAA", "mutationTypes")) {
