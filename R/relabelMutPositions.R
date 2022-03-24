@@ -18,6 +18,7 @@
 #' @param mutNameDelimiter The delimiter used in the mutation name ({.} above).
 #' 
 #' @author Charlotte Soneson
+#' @export
 #' 
 #' @return A SummarizedExperiment object with modified row names.
 #' 
