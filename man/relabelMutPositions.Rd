@@ -33,9 +33,12 @@ A SummarizedExperiment object with modified row names.
 Relabel the positions of mutations in the designated ID
 }
 \examples{
+x <- readRDS(system.file("extdata", "GSE102901_cis_se.rds",
+                         package = "mutscan"))
 conversionTable <- data.frame(seqname = "f", position = 0:32) 
 conversionTable$name = paste0((conversionTable$position - 1) \%/\% 7 + 1, 
                               c("", rep(letters[1:7], 6))[1:33])
+out <- relabelMutPositions(x, conversionTable)
 
 }
 \author{
