@@ -30,7 +30,10 @@ test_that("digestFastqs fails with incorrect arguments", {
     forbiddenMutatedCodonsForward = "NNW",
     forbiddenMutatedCodonsReverse = "NNW",
     useTreeWTmatch = TRUE,
-    mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+    collapseToWTForward = FALSE,
+    collapseToWTReverse = FALSE,
+    mutatedPhredMinForward = 0.0, 
+    mutatedPhredMinReverse = 0.0,
     mutNameDelimiter = ".",
     constantMaxDistForward = -1,
     constantMaxDistReverse = -1,
@@ -254,8 +257,13 @@ test_that("digestFastqs fails with incorrect arguments", {
   expect_error(do.call(digestFastqs, L))
   
   ## Invalid value of verbose
-  L <- Ldef; L[["verbose"]] <- 2
-  expect_error(do.call(digestFastqs, L))
-  L <- Ldef; L[["verbose"]] <- "TRUE"
-  expect_error(do.call(digestFastqs, L))
+  for (v in c("verbose", "collapseToWTForward", "collapseToWTReverse")) {
+    L <- Ldef; L[[v]] <- 2
+    expect_error(do.call(digestFastqs, L))
+    L <- Ldef; L[[v]] <- "TRUE"
+    expect_error(do.call(digestFastqs, L))
+    L <- Ldef; L[[v]] <- c(TRUE, FALSE)
+    expect_error(do.call(digestFastqs, L))
+    
+  }
 })
