@@ -89,6 +89,84 @@ test_that("collapseMutantsByAA works as expected", {
   tmp[is.na(tmp)] <- 0
   expect_equal(SummarizedExperiment::assay(secoll, "counts")[, 2],
                as.numeric(tmp), ignore_attr = TRUE)
+  
+  for (mn in rownames(secoll)) {
+    expect_equal(SummarizedExperiment::assay(secoll, "counts")[mn, ],
+                 colSums(SummarizedExperiment::assay(se, "counts")[SummarizedExperiment::rowData(se)$mutantNameAA == mn, , drop = FALSE]))
+  }
+  expect_equal(min(SummarizedExperiment::rowData(se)$nbrMutBases), 
+               SummarizedExperiment::rowData(se)$minNbrMutBases)
+  expect_equal(min(SummarizedExperiment::rowData(se)$nbrMutCodons), 
+               SummarizedExperiment::rowData(se)$minNbrMutCodons)
+  expect_equal(min(SummarizedExperiment::rowData(se)$nbrMutAAs), 
+               SummarizedExperiment::rowData(se)$minNbrMutAAs)
+  expect_equal(max(SummarizedExperiment::rowData(se)$nbrMutBases), 
+               SummarizedExperiment::rowData(se)$maxNbrMutBases)
+  expect_equal(max(SummarizedExperiment::rowData(se)$nbrMutCodons), 
+               SummarizedExperiment::rowData(se)$maxNbrMutCodons)
+  expect_equal(max(SummarizedExperiment::rowData(se)$nbrMutAAs), 
+               SummarizedExperiment::rowData(se)$maxNbrMutAAs)
 })
+
+test_that("collapseMutantsByAA works as expected - collapseToWT", {
+  Ldef1$collapseToWTForward <- TRUE
+  Ldef2$collapseToWTForward <- TRUE
+  out1 <- do.call(digestFastqs, Ldef1)
+  out2 <- do.call(digestFastqs, Ldef2)
+  
+  se <- summarizeExperiment(x = list(sample1 = out1, sample2 = out2),
+                            coldata = coldata, countType = "umis")
+  
+  secoll <- collapseMutantsByAA(se)
+  expect_equal(SummarizedExperiment::colData(se), 
+               SummarizedExperiment::colData(secoll))
+  expect_equal(S4Vectors::metadata(se), 
+               S4Vectors::metadata(secoll))
+  expect_equal(colnames(se), colnames(secoll))
+  
+  aapos <- unique(unlist(rowData(se)$mutantNameAA))
+  expect_equal(nrow(secoll), length(aapos))
+  expect_equal(sort(rownames(secoll)), sort(unique(aapos)))
+  
+  tmp <- table(rep(unlist(SummarizedExperiment::rowData(se)$mutantNameAA), 
+                   SummarizedExperiment::assay(se, "counts")[, 1]))
+  tmp <- tmp[rownames(secoll)]
+  tmp[is.na(tmp)] <- 0
+  expect_equal(SummarizedExperiment::assay(secoll, "counts")[, 1],
+               as.numeric(tmp), ignore_attr = TRUE)
+  
+  tmp <- table(rep(unlist(SummarizedExperiment::rowData(se)$mutantNameAA), 
+                   SummarizedExperiment::assay(se, "counts")[, 2]))
+  tmp <- tmp[rownames(secoll)]
+  tmp[is.na(tmp)] <- 0
+  expect_equal(SummarizedExperiment::assay(secoll, "counts")[, 2],
+               as.numeric(tmp), ignore_attr = TRUE)
+  
+  for (mn in rownames(secoll)) {
+    expect_equal(SummarizedExperiment::assay(secoll, "counts")[mn, ],
+                 colSums(SummarizedExperiment::assay(se, "counts")[SummarizedExperiment::rowData(se)$mutantNameAA == mn, , drop = FALSE]))
+  }
+  expect_equal(min(SummarizedExperiment::rowData(se)$nbrMutBases), 
+               SummarizedExperiment::rowData(se)$minNbrMutBases)
+  expect_equal(min(SummarizedExperiment::rowData(se)$nbrMutCodons), 
+               SummarizedExperiment::rowData(se)$minNbrMutCodons)
+  expect_equal(min(SummarizedExperiment::rowData(se)$nbrMutAAs), 
+               SummarizedExperiment::rowData(se)$minNbrMutAAs)
+  expect_equal(max(SummarizedExperiment::rowData(se)$nbrMutBases), 
+               SummarizedExperiment::rowData(se)$maxNbrMutBases)
+  expect_equal(max(SummarizedExperiment::rowData(se)$nbrMutCodons), 
+               SummarizedExperiment::rowData(se)$maxNbrMutCodons)
+  expect_equal(max(SummarizedExperiment::rowData(se)$nbrMutAAs), 
+               SummarizedExperiment::rowData(se)$maxNbrMutAAs)
+  
+  expect_equal(nrow(secoll), 1L)
+  expect_equal(ncol(secoll), 2L)
+  expect_equal(SummarizedExperiment::rowData(secoll)$nbrMutBases[[1]], c(0, 1, 2))
+  expect_equal(SummarizedExperiment::rowData(secoll)$nbrMutCodons[[1]], c(0, 1))
+  expect_equal(SummarizedExperiment::rowData(secoll)$nbrMutAAs[[1]], c(0, 1))
+  expect_equal(SummarizedExperiment::rowData(secoll)$mutationTypes, 
+               "nonsynonymous,silent,stop")
+})
+
 
 

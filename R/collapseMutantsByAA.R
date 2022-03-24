@@ -16,7 +16,7 @@
 #' @importFrom Matrix.utils aggregate.Matrix
 #' @importFrom utils relist
 #' @importFrom S4Vectors unstrsplit metadata
-#' @importFrom SummarizedExperiment assay SummarizedExperiment colData
+#' @importFrom SummarizedExperiment assays rowData SummarizedExperiment colData
 #' @importFrom dplyr across everything group_by summarize
 #' @importFrom tibble column_to_rownames
 #'
@@ -24,26 +24,41 @@ collapseMutantsByAA <- function(se, nameCol = "mutantNameAA") {
     .assertVector(x = se, type = "SummarizedExperiment")
     .assertScalar(x = nameCol, type = "character")
     
-    SummarizedExperiment::rowData(se)$collapseCol <- 
-        vapply(SummarizedExperiment::rowData(se)[[nameCol]], 
-               function(w) w[[1]], "")
-
     ## Collapse assays
     aList <- lapply(SummarizedExperiment::assays(se), function(a) {
         Matrix.utils::aggregate.Matrix(
             x = a,
-            groupings = factor(SummarizedExperiment::rowData(se)$collapseCol),
+            groupings = factor(SummarizedExperiment::rowData(se)[[nameCol]]),
             fun = "colSums")
     })
     
-    ## Collapse rowData
+    ## Collapse rowData - simple columns
     rd <- as.data.frame(SummarizedExperiment::rowData(se)) %>%
-        dplyr::group_by(.data$collapseCol) %>%
-        dplyr::summarize(dplyr::across(dplyr::everything(), 
-                                       function(x) paste(unique(x), collapse = ";"))) %>%
-        as.data.frame() %>%
-        tibble::column_to_rownames("collapseCol")
-
+        dplyr::group_by(.data[[nameCol]]) %>%
+        dplyr::summarize(
+            dplyr::across(c("mutantName", "sequence", "sequenceAA",
+                            "mutationTypes"), 
+                          function(x) gsub(",$", "", gsub("^,", "", paste(unique(unlist(strsplit(paste(x, collapse = ","), ","))), collapse = ",")))),
+            dplyr::across(c("minNbrMutBases", "minNbrMutCodons",
+                            "minNbrMutAAs"),
+                          function(x) min(x)),
+            dplyr::across(c("maxNbrMutBases", "maxNbrMutCodons",
+                            "maxNbrMutAAs"),
+                          function(x) max(x)),
+            dplyr::across(c("nbrMutBases", "nbrMutCodons",
+                            "nbrMutAAs"),
+                          function(x) paste(sort(unique(unlist(x))), 
+                                            collapse = ",")))
+    
+    rd <- S4Vectors::DataFrame(rd)
+    rownames(rd) <- rd[[nameCol]]
+    
+    ## List columns (varLengths columns are not interpretable on the AA level,
+    ## so will be removed)
+    for (cl in c("nbrMutBases", "nbrMutCodons", "nbrMutAAs")) {
+        rd[[cl]] <- as(strsplit(rd[[cl]], ","), "IntegerList")
+    }
+    
     ## Create SummarizedExperiment
     SummarizedExperiment::SummarizedExperiment(
         assays = aList,
