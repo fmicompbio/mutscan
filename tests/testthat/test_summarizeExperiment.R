@@ -23,6 +23,8 @@ Ldef <- list(
     forbiddenMutatedCodonsForward = "NNW",
     forbiddenMutatedCodonsReverse = "NNW",
     useTreeWTmatch = FALSE,
+    collapseToWTForward = FALSE,
+    collapseToWTReverse = FALSE, 
     mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
     mutNameDelimiter = ".",
     constantMaxDistForward = -1,
@@ -119,6 +121,14 @@ test_that("summarizeExperiment works as expected with reads output", {
     expect_equal(S4Vectors::metadata(se)$parameters[["sample1"]], out1$parameters)
     expect_equal(S4Vectors::metadata(se)$parameters[["sample2"]], out2$parameters)
 
+    expect_true(all(c("mutantName", "sequence", "nbrMutBases",
+                      "minNbrMutBases", "maxNbrMutBases",
+                      "nbrMutCodons", "minNbrMutCodons", "maxNbrMutCodons",
+                      "nbrMutAAs", "minNbrMutAAs", "maxNbrMutAAs",
+                      "sequenceAA", "mutantNameAA", "mutationTypes",
+                      "varLengths", "uniqueVarLengths") %in% 
+                        colnames(SummarizedExperiment::rowData(se))))
+    
     ## Check that the number of mutated codons are correct (=equal to the number of
     ## entries in the mutant name that don't contain WT)
     expect_equal(sapply(strsplit(SummarizedExperiment::rowData(se)$mutantName, "_"),
@@ -127,6 +137,16 @@ test_that("summarizeExperiment works as expected with reads output", {
     expect_equal(sapply(strsplit(SummarizedExperiment::rowData(se)$mutantName, "_"),
                         function(w) length(w[!grepl("WT", w)])),
                  SummarizedExperiment::rowData(se)$maxNbrMutCodons, ignore_attr = TRUE)
+    
+    ## variable lengths
+    expect_equal(SummarizedExperiment::rowData(se)$uniqueVarLengths, 
+                 rep("96_96", nrow(se)), ignore_attr = TRUE)
+    
+    expect_true(all(grepl("WT", SummarizedExperiment::rowData(se)$mutantNameAA[SummarizedExperiment::rowData(se)$maxNbrMutAAs == 0])))
+    expect_equal(SummarizedExperiment::rowData(se)["f.0.WT_r.0.WT", ]$mutationTypes, "")
+    expect_true(all(SummarizedExperiment::rowData(se)$mutationTypes[SummarizedExperiment::rowData(se)$maxNbrMutAAs == 0 & SummarizedExperiment::rowData(se)$maxNbrMutBases > 0] == "silent"))
+    expect_equal(SummarizedExperiment::rowData(se)$sequenceAA[3], 
+                 mutscan:::translate(SummarizedExperiment::rowData(se)$sequence[3]))
 })
 
 test_that("summarizeExperiment works as expected with umis output", {
@@ -181,7 +201,70 @@ test_that("summarizeExperiment recognizes the presence of UMI counts correctly",
 
 })
 
-
+test_that("summarizeExperiment works as expected when collapsing to WT", {
+    Ldef1$collapseToWTForward <- TRUE
+    Ldef2$collapseToWTForward <- TRUE
+    
+    out1 <- do.call(digestFastqs, Ldef1)
+    out2 <- do.call(digestFastqs, Ldef2)
+    
+    se <- summarizeExperiment(x = list(sample1 = out1, sample2 = out2),
+                              coldata = coldata, countType = "reads")
+    expect_equal(nrow(se), length(union(out1$summaryTable$mutantName,
+                                        out2$summaryTable$mutantName)))
+    expect_equal(ncol(se), 2)
+    expect_equal(sort(rownames(se)),
+                 sort(union(out1$summaryTable$mutantName, out2$summaryTable$mutantName)))
+    expect_equal(Matrix::colSums(SummarizedExperiment::assay(se, "counts")),
+                 c(out1$filterSummary$nbrRetained, out2$filterSummary$nbrRetained),
+                 ignore_attr = TRUE)
+    expect_equal(Matrix::colSums(SummarizedExperiment::assay(se, "counts")),
+                 c(sum(out1$summaryTable$nbrReads), sum(out2$summaryTable$nbrReads)),
+                 ignore_attr = TRUE)
+    
+    for (cn in colnames(out1$filterSummary)) {
+        expect_equal(SummarizedExperiment::colData(se)["sample1", cn],
+                     out1$filterSummary[, cn])
+        expect_equal(SummarizedExperiment::colData(se)["sample2", cn],
+                     out2$filterSummary[, cn])
+    }
+    
+    for (cn in colnames(coldata)) {
+        expect_equal(SummarizedExperiment::colData(se)["sample1", cn],
+                     coldata[1, cn])
+        expect_equal(SummarizedExperiment::colData(se)["sample2", cn],
+                     coldata[2, cn])
+    }
+    
+    expect_equal(S4Vectors::metadata(se)$parameters[["sample1"]], out1$parameters)
+    expect_equal(S4Vectors::metadata(se)$parameters[["sample2"]], out2$parameters)
+    
+    expect_true(all(c("mutantName", "sequence", "nbrMutBases",
+                      "minNbrMutBases", "maxNbrMutBases",
+                      "nbrMutCodons", "minNbrMutCodons", "maxNbrMutCodons",
+                      "nbrMutAAs", "minNbrMutAAs", "maxNbrMutAAs",
+                      "sequenceAA", "mutantNameAA", "mutationTypes",
+                      "varLengths", "uniqueVarLengths") %in% 
+                        colnames(SummarizedExperiment::rowData(se))))
+    
+    ## variable lengths
+    expect_equal(SummarizedExperiment::rowData(se)$uniqueVarLengths, 
+                 rep("96_96", nrow(se)), ignore_attr = TRUE)
+    
+    expect_equal(SummarizedExperiment::rowData(se)$sequenceAA[3], 
+                 mutscan:::translate(SummarizedExperiment::rowData(se)$sequence[3]))
+    expect_s4_class(SummarizedExperiment::rowData(se)$nbrMutBases, 
+                    "IntegerList")
+    expect_s4_class(SummarizedExperiment::rowData(se)$nbrMutCodons, 
+                    "IntegerList")
+    expect_s4_class(SummarizedExperiment::rowData(se)$nbrMutAAs, 
+                    "IntegerList")
+    expect_equal(SummarizedExperiment::rowData(se)$nbrMutBases[[which(SummarizedExperiment::rowData(se)$mutantName == "f_r.0.WT")]], c(0, 1, 2, 3))
+    expect_equal(SummarizedExperiment::rowData(se)$nbrMutCodons[[which(SummarizedExperiment::rowData(se)$mutantName == "f_r.0.WT")]], c(0, 1))
+    expect_equal(SummarizedExperiment::rowData(se)$nbrMutAAs[[which(SummarizedExperiment::rowData(se)$mutantName == "f_r.0.WT")]], c(0, 1))
+    
+    expect_true(all(grepl("stop", SummarizedExperiment::rowData(se)$mutationTypes[grep("\\*", SummarizedExperiment::rowData(se)$mutantNameAA)])))
+})
 
 
 

@@ -1003,3 +1003,88 @@ test_that("writing filtered reads to file works", {
 
 })
 
+test_that("digestFastqs works as expected for trans experiments, if collapsing to WT", {
+  fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
+  fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
+  ## default arguments
+  Ldef <- list(
+    fastqForward = fqt1, fastqReverse = fqt2,
+    mergeForwardReverse = FALSE,
+    minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE,
+    revComplForward = FALSE, revComplReverse = FALSE,
+    elementsForward = "SUCVV", elementsReverse = "SUCVV",
+    elementLengthsForward = c(1, 10, 18, 80, 16),
+    elementLengthsReverse = c(1, 8, 20, 16, 80),
+    adapterForward = "GGAAGAGCACACGTC",
+    adapterReverse = "GGAAGAGCGTCGTGT",
+    primerForward = "",
+    primerReverse = "",
+    wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+    wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT",
+    constantForward = "AACCGGAGGAGGGAGCTG",
+    constantReverse = "GAAAAAGGAAGCTGGAGAGA",
+    avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+    variableNMaxForward = 0, variableNMaxReverse = 0,
+    umiNMax = 0,
+    nbrMutatedCodonsMaxForward = 1,
+    nbrMutatedCodonsMaxReverse = 1,
+    nbrMutatedBasesMaxForward = -1,
+    nbrMutatedBasesMaxReverse = -1,
+    forbiddenMutatedCodonsForward = "NNW",
+    forbiddenMutatedCodonsReverse = "NNW",
+    useTreeWTmatch = FALSE,
+    collapseToWTForward = TRUE,
+    collapseToWTReverse = TRUE, 
+    mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+    mutNameDelimiter = ".",
+    constantMaxDistForward = -1,
+    constantMaxDistReverse = -1,
+    variableCollapseMaxDist = 0,
+    variableCollapseMinReads = 0,
+    variableCollapseMinRatio = 0,
+    umiCollapseMaxDist = 0,
+    filteredReadsFastqForward = "",
+    filteredReadsFastqReverse = "",
+    maxNReads = -1, verbose = FALSE,
+    nThreads = 1, chunkSize = 1000
+  )
+  
+  res <- do.call(digestFastqs, Ldef)
+
+  expect_equal(res$filterSummary$nbrTotal, 1000L)
+  expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
+  expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
+  expect_equal(res$filterSummary$f3_nbrReadWrongLength, 0L)
+  expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
+  expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 7L)
+  expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 0L)
+  expect_equal(res$filterSummary$f7_nbrTooManyNinUMI, 0L)
+  expect_equal(res$filterSummary$f8_nbrTooManyBestWTHits, 0L)
+  expect_equal(res$filterSummary$f9_nbrMutQualTooLow, 0L)
+  expect_equal(res$filterSummary$f10a_nbrTooManyMutCodons, 192L + 95L + 68L + 37L)
+  expect_equal(res$filterSummary$f10b_nbrTooManyMutBases, 0L)
+  expect_equal(res$filterSummary$f11_nbrForbiddenCodons, 6L + 2L)
+  expect_equal(res$filterSummary$f12_nbrTooManyMutConstant, 0L)
+  expect_equal(res$filterSummary$f13_nbrTooManyBestConstantHits, 0L)
+  expect_equal(res$filterSummary$nbrRetained, 279L)
+  
+  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
+    expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
+  }
+  
+  expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
+  expect_equal(res$summaryTable$nbrReads, res$summaryTable$maxNbrReads)
+  expect_equal(nrow(res$summaryTable), 1L)
+  expect_true(all(res$summaryTable$nbrReads == res$summaryTable$nbrUmis))
+  
+  ## Check the number of reads with a given number of mismatches
+  expect_equal(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == "1,2,3,4,5,6"], 279L)
+  expect_equal(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == "1,2"], 279L)
+  expect_equal(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == "0,1,2"], 279L)
+  expect_equal(res$summaryTable$mutationTypes, "nonsynonymous,silent,stop")
+  expect_equal(res$summaryTable$mutantNameAA, "f_r")
+  
+  ## check that variable segment lengths are reported correctly
+  expect_equal(res$summaryTable$varLengths, "80,16_16,80")
+})
+

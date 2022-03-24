@@ -45,8 +45,9 @@
 #' @importFrom S4Vectors DataFrame
 #' @importFrom IRanges IntegerList
 #' @importFrom methods is new as
-#' @importFrom dplyr bind_rows distinct left_join %>% mutate
-#' @importFrom tidyr unite
+#' @importFrom dplyr bind_rows distinct left_join %>% mutate filter group_by
+#'     summarize
+#' @importFrom tidyr unite separate_rows
 #' @importFrom rlang .data
 #'
 summarizeExperiment <- function(x, coldata, countType = "umis") {
@@ -96,46 +97,76 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     x <- x[nms]
     coldata <- coldata[match(nms, coldata$Name), , drop = FALSE]
 
-    ## --------------------------------------------------------------------------
-    ## Get all sequences, and all sample names
-    ## --------------------------------------------------------------------------
-    allSequences <- Reduce(function(...) dplyr::full_join(..., by = "mutantName"),
-                           lapply(x, function(w) w$summaryTable[, c("mutantName", "sequence")])) %>%
-        replace(., is.na(.), "") %>%
-        tidyr::unite(sequence, -.data$mutantName, sep = ",") %>%
-        dplyr::mutate(sequence = gsub("[,]+", ",", sequence)) %>%
-        dplyr::mutate(sequence = sub(",$", "", sequence)) %>%
-        dplyr::mutate(sequence = sub("^,", "", sequence)) %>%
-        dplyr::mutate(sequence = vapply(sequence, function(x) {
-            paste(unique(strsplit(x, ",")[[1]]), collapse = ",")
-        }, ""))
-    allSequences <- S4Vectors::DataFrame(allSequences)
+    ## All sample names
     allSamples <- names(x)
     names(allSamples) <- allSamples
-
+    
+    ## ------------------------------------------------------------------------
+    ## Get all observed sequences for each mutant name
+    ## For a given sample, the same mutant name can correspond to multiple 
+    ## sequences, separated by ,
+    ## ------------------------------------------------------------------------
+    allSequences <- do.call(
+        dplyr::bind_rows,
+        lapply(x, function(w) w$summaryTable[, c("mutantName", "sequence")])) %>%
+        tidyr::separate_rows(sequence, sep = ",") %>%
+        dplyr::filter(sequence != "") %>%
+        dplyr::group_by(mutantName) %>%
+        dplyr::summarize(sequence = paste(unique(sequence), collapse = ","))
+    allSequences <- S4Vectors::DataFrame(allSequences)
+    
+    ## ------------------------------------------------------------------------
     ## Add info about nbr mutated bases/codons/AAs
+    ## Also here, each column can contain multiple values separated with ,
+    ## (e.g. if variable sequences were collapsed to WT in digestFastqs)
+    ## ------------------------------------------------------------------------
     for (v in c("nbrMutBases", "nbrMutCodons", "nbrMutAAs")) {
         tmp <- do.call(dplyr::bind_rows,
                        lapply(x, function(w)
                            w$summaryTable[, c("mutantName", v)])) %>%
+            tidyr::separate_rows(.data[[v]], sep = ",") %>%
             dplyr::distinct()
-        tmp <- methods::as(split(tmp[[v]], f = tmp$mutantName),
-                           "IntegerList")
+        tmp <- methods::as(
+            lapply(split(as.integer(tmp[[v]]), f = tmp$mutantName), sort),
+            "IntegerList")
         allSequences[[v]] <- tmp[allSequences$mutantName]
         allSequences[[paste0("min", sub("^n", "N", v))]] <- min(allSequences[[v]])
         allSequences[[paste0("max", sub("^n", "N", v))]] <- max(allSequences[[v]])
     }
 
-    ## varLengths, mutantNameAA, mutationTypes
-    for (v in c("varLengths", "mutantNameAA", "mutationTypes")) {
+    ## ------------------------------------------------------------------------
+    ## Add info about sequenceAA, mutantNameAA, mutationTypes, varLengths
+    ## ------------------------------------------------------------------------
+    for (v in c("sequenceAA", "mutantNameAA", "mutationTypes")) {
         tmp <- do.call(dplyr::bind_rows, 
                        lapply(x, function(w) 
                            w$summaryTable[, c("mutantName", v)])) %>%
-            dplyr::distinct()
-        tmp <- methods::as(split(tmp[[v]], f = tmp$mutantName),
-                           "CharacterList")
-        allSequences[[v]] <- tmp[allSequences$mutantName]
+            tidyr::separate_rows(.data[[v]], sep = ",") %>%
+            dplyr::distinct() %>%
+            dplyr::group_by(mutantName) %>%
+            dplyr::summarize("{v}" := paste(.data[[v]], collapse = ","))
+        allSequences[[v]] <- tmp[[v]][match(allSequences$mutantName,
+                                            tmp$mutantName)]
     }
+    
+    ## There is only one varLengths value per sample, by construction 
+    ## This is only useful when there's no wildtype sequence, so we use the 
+    ## representative sequence only
+    tmp <- do.call(dplyr::bind_rows, 
+                   lapply(x, function(w) 
+                       w$summaryTable[, c("mutantName", "varLengths")])) %>%
+        dplyr::distinct()
+    tmp <- methods::as(split(tmp$varLengths, f = tmp$mutantName),
+                       "CharacterList")
+    if (any(lengths(tmp) != 1)) {
+        warning("There are sequences with multiple different values for ",
+                "varLengths. The uniqueVarLengths column will contain a ",
+                "randomly selected one.")
+    }
+    allSequences$varLengths <- tmp[allSequences$mutantName]
+    allSequences$uniqueVarLengths <- vapply(allSequences$varLengths,
+                                            "[", 1, FUN.VALUE = "")
+
 
     ## --------------------------------------------------------------------------
     ## Create a sparse matrix
