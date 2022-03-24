@@ -60,10 +60,17 @@ collapseMutantsByAA <- function(se, nameCol = "mutantNameAA") {
     }
     
     ## Create SummarizedExperiment
+    rn1 <- rownames(aList[[1]])
+    cn1 <- colnames(aList[[1]])
+    for (i in seq_along(aList)) {
+        stopifnot(all(rownames(aList[[i]]) == rn1))
+        stopifnot(all(colnames(aList[[i]]) == cn1))
+    }
+    stopifnot(cn1 == rownames(SummarizedExperiment::colData(se)))
     SummarizedExperiment::SummarizedExperiment(
         assays = aList,
         colData = SummarizedExperiment::colData(se),
         metadata = S4Vectors::metadata(se),
-        rowData = DataFrame(rd[rownames(aList[[1]]), ])
+        rowData = rd[rn1, ]
     )
 }
