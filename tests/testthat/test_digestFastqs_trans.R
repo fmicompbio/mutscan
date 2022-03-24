@@ -88,6 +88,9 @@ test_that("digestFastqs works as expected for trans experiments", {
   expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 6]), 39L)
   expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 1]), 15L)
   expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 2]), 264L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == 0]), 1L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == 1]), 37L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == 2]), 241L)
 
   ## Similarly but for the number of unique sequences
   expect_equal(sum(res$summaryTable$nbrMutBases == 1), 3L)
@@ -98,6 +101,9 @@ test_that("digestFastqs works as expected for trans experiments", {
   expect_equal(sum(res$summaryTable$nbrMutBases == 6), 39L)
   expect_equal(sum(res$summaryTable$nbrMutCodons == 1), 14L)
   expect_equal(sum(res$summaryTable$nbrMutCodons == 2), 263L)
+  expect_equal(sum(res$summaryTable$nbrMutAAs == 0), 1L)
+  expect_equal(sum(res$summaryTable$nbrMutAAs == 1), 36L)
+  expect_equal(sum(res$summaryTable$nbrMutAAs == 2), 240L)
 
   ## check that variable segment lengths are reported correctly
   expect_true(all(res$summaryTable$varLengths == "80,16_16,80"))
@@ -109,6 +115,13 @@ test_that("digestFastqs works as expected for trans experiments", {
                         "CAACATGCTCAGGGAACAGGTGGCACAGCTT")
   expect_equal(res$summaryTable$mutantName[res$summaryTable$sequence == example_seq],
                "f.4.ACC_r.9.GGC")
+  expect_equal(res$summaryTable$mutantNameAA[res$summaryTable$sequence == example_seq],
+               "f.4.T_r.9.G")
+  
+  expect_equal(sum(grepl("WT", res$summaryTable$mutantNameAA) & res$summaryTable$nbrMutBases > 0), 37L)
+  expect_true(all(grepl("silent", res$summaryTable$mutationTypes[grepl("WT", res$summaryTable$mutantNameAA) & grepl("f\\.[1-9]", res$summaryTable$mutantName) & grepl("r\\.[1-9]", res$summaryTable$mutantName)])))
+  expect_true(all(grepl("nonsynonymous|stop", res$summaryTable$mutationTypes[grepl("\\.[1-9][0-9]*\\.", res$summaryTable$mutantNameAA)])))
+  expect_true(all(grepl("stop", res$summaryTable$mutationTypes[grepl("TAG|TAA|TGA", res$summaryTable$mutantName)])))
 
   expect_equal(sum(res$errorStatistics$nbrMatchForward + res$errorStatistics$nbrMismatchForward),
                nchar(Ldef$constantForward[1]) * res$filterSummary$nbrRetained)
@@ -214,6 +227,33 @@ test_that("digestFastqs works as expected for trans experiments, filter based on
   expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
                sort(c("f.26.TAG_r.8.AGG")))
 
+  ## Check the number of reads with a given number of mismatches
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 1]), 3L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 2]), 14L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 3]), 46L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 4]), 76L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 5]), 75L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 6]), 37L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 1]), 14L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 2]), 237L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == 0]), 1L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == 1]), 35L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == 2]), 215L)
+  
+  ## Similarly but for the number of unique sequences
+  expect_equal(sum(res$summaryTable$nbrMutBases == 1), 3L)
+  expect_equal(sum(res$summaryTable$nbrMutBases == 2), 14L)
+  expect_equal(sum(res$summaryTable$nbrMutBases == 3), 46L)
+  expect_equal(sum(res$summaryTable$nbrMutBases == 4), 75L)
+  expect_equal(sum(res$summaryTable$nbrMutBases == 5), 75L)
+  expect_equal(sum(res$summaryTable$nbrMutBases == 6), 37L)
+  expect_equal(sum(res$summaryTable$nbrMutCodons == 1), 14L)
+  expect_equal(sum(res$summaryTable$nbrMutCodons == 2), 236L)
+  expect_equal(sum(res$summaryTable$nbrMutAAs == 0), 1L)
+  expect_equal(sum(res$summaryTable$nbrMutAAs == 1), 35L)
+  expect_equal(sum(res$summaryTable$nbrMutAAs == 2), 214L)
+  
+  
   expect_equal(sum(res$errorStatistics$nbrMatchForward + res$errorStatistics$nbrMismatchForward),
                nchar(Ldef$constantForward[1]) * res$filterSummary$nbrRetained)
   expect_equal(sum(res$errorStatistics$nbrMatchReverse + res$errorStatistics$nbrMismatchReverse),
@@ -792,6 +832,27 @@ test_that("digestFastqs works as expected for experiments with only forward read
   expect_equal(res$summaryTable$nbrReads, res$summaryTable$maxNbrReads)
   expect_equal(sum(res$summaryTable$nbrReads == 2), 29L)
 
+  ## Check the number of reads with a given number of mismatches
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 0]), 10L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 1]), 47L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 2]), 123L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 3]), 92L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 0]), 10L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 1]), 262L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == 0]), 21L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == 1]), 251L)
+
+  ## Similarly but for the number of unique sequences
+  expect_equal(sum(res$summaryTable$nbrMutBases == 0), 1L)
+  expect_equal(sum(res$summaryTable$nbrMutBases == 1), 43L)
+  expect_equal(sum(res$summaryTable$nbrMutBases == 2), 102L)
+  expect_equal(sum(res$summaryTable$nbrMutBases == 3), 78L)
+  expect_equal(sum(res$summaryTable$nbrMutCodons == 0), 1L)
+  expect_equal(sum(res$summaryTable$nbrMutCodons == 1), 223L)
+  expect_equal(sum(res$summaryTable$nbrMutAAs == 0), 10L)
+  expect_equal(sum(res$summaryTable$nbrMutAAs == 1), 214L)
+
+  
   ## Check that mutant naming worked (compare to manual matching)
   example_seq <- paste0("ACTGATACAACCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTG",
                         "CAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")

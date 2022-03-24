@@ -323,7 +323,7 @@ processReadsTrans <- function(Ldef) {
   mutCodons <- mutCodons[keep]
   uniqueMutCodons <- uniqueMutCodons[keep]
   mutNames <- mutNames[keep]
-  
+
   if (!is.null(nbrMutBasesTot)) {
     nbrMutBasesTot <- nbrMutBasesTot[keep]
     nbrMutCodonsTot <- nbrMutCodonsTot[keep]
@@ -331,9 +331,13 @@ processReadsTrans <- function(Ldef) {
     varForwardFinal <- Biostrings::subseq(
       fq1, start = Ldef$skipForward + Ldef$umiLengthForward + 
         Ldef$constantLengthForward + 1, width = Ldef$variableLengthForward)
-    varReverseFinal <- Biostrings::subseq(
-      fq2, start = Ldef$skipReverse + Ldef$umiLengthReverse + 
-        Ldef$constantLengthReverse + 1, width = Ldef$variableLengthReverse)
+    if (!is.null(Ldef$fastqReverse)) {
+      varReverseFinal <- Biostrings::subseq(
+        fq2, start = Ldef$skipReverse + Ldef$umiLengthReverse + 
+          Ldef$constantLengthReverse + 1, width = Ldef$variableLengthReverse)
+    } else {
+      varReverseFinal <- ""
+    }
     message("Number of mutated codons per retained read: ")
     print(table(nbrMutCodonsTot))
     message("Number of different reads with each number of mismatched codons: ")
@@ -343,6 +347,44 @@ processReadsTrans <- function(Ldef) {
     message("Number of different reads with each number of mismatched bases: ")
     print(table(nbrMutBasesTot[!duplicated(paste0(varForwardFinal, "_", varReverseFinal))]))
     
+    ## Number of mutated amino acids
+    ## Forward
+    p_aa <- Biostrings::translate(DNAStringSet(rep(Ldef$wildTypeForward, length(varForwardFinal))))
+    pattern_width_aa <- width(p_aa)
+    varForwardFinal_aa <- Biostrings::translate(varForwardFinal)
+    subject_width_aa <- width(varForwardFinal_aa)
+    unlisted_ans_aa <- which(as.raw(unlist(p_aa)) != as.raw(unlist(varForwardFinal_aa)))
+    breakpoints_aa <- cumsum(pattern_width_aa)
+    ans_eltlens_aa <- tabulate(findInterval(unlisted_ans_aa - 1L,
+                                            breakpoints_aa) + 1L,
+                               nbins = length(p_aa))
+    skeleton_aa <- IRanges::PartitioningByEnd(cumsum(ans_eltlens_aa))
+    aaMismatchesForward <- BiocGenerics::relist(unlisted_ans_aa, skeleton_aa)
+    ## Reverse
+    if (!is.null(Ldef$fastqReverse)) {
+      p_aa <- Biostrings::translate(DNAStringSet(rep(Ldef$wildTypeReverse, length(varReverseFinal))))
+      pattern_width_aa <- width(p_aa)
+      varReverseFinal_aa <- Biostrings::translate(varReverseFinal)
+      subject_width_aa <- width(varReverseFinal_aa)
+      unlisted_ans_aa <- which(as.raw(unlist(p_aa)) != as.raw(unlist(varReverseFinal_aa)))
+      breakpoints_aa <- cumsum(pattern_width_aa)
+      ans_eltlens_aa <- tabulate(findInterval(unlisted_ans_aa - 1L,
+                                              breakpoints_aa) + 1L,
+                                 nbins = length(p_aa))
+      skeleton_aa <- IRanges::PartitioningByEnd(cumsum(ans_eltlens_aa))
+      aaMismatchesReverse <- BiocGenerics::relist(unlisted_ans_aa, skeleton_aa)
+     
+      message("Number of mutated aas per retained read: ")
+      print(table(lengths(aaMismatchesForward) + lengths(aaMismatchesReverse)))
+      message("Number of different reads with each number of mismatched aas: ")
+      print(table((lengths(aaMismatchesForward) + lengths(aaMismatchesReverse))[!duplicated(paste0(varForwardFinal, "_", varReverseFinal))]))
+    } else {
+      message("Number of mutated aas per retained read: ")
+      print(table(lengths(aaMismatchesForward)))
+      message("Number of different reads with each number of mismatched aas: ")
+      print(table(lengths(aaMismatchesForward)[!duplicated(varForwardFinal)])) 
+      
+    }
   }
 
   mutNames <- gsub("^_", "", gsub("_$", "", mutNames))

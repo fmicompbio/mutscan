@@ -299,6 +299,11 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
   expect_equal(nrow(res$summaryTable), 673L)
   expect_equal(sum(res$summaryTable$nbrUmis), 679)
+  
+  ## Don't consider mutations here since we're collapsing (i.e., we have no wildtype)
+  expect_equal(sum(res$summaryTable$nbrMutBases == 0), nrow(res$summaryTable))
+  expect_equal(sum(res$summaryTable$nbrMutCodons == 0), nrow(res$summaryTable))
+  expect_equal(sum(res$summaryTable$nbrMutAAs == 0), nrow(res$summaryTable))
 })
 
 test_that("digestFastqs works as expected for trans experiments, when similar sequences are collapsed (only high ratio)", {
