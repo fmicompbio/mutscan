@@ -33,12 +33,17 @@ collapseMutantsByAA <- function(se, nameCol = "mutantNameAA") {
     })
     
     ## Collapse rowData - simple columns
-    rd <- as.data.frame(SummarizedExperiment::rowData(se)) %>%
+    rd <- mergeValues(SummarizedExperiment::rowData(se)[[nameCol]],
+                      SummarizedExperiment::rowData(se)$sequence) %>%
+        setNames(c(nameCol, "sequence"))
+    for (v in c("mutantName", "sequenceAA", "mutationTypes")) {
+        tmp <- mergeValues(SummarizedExperiment::rowData(se)[[nameCol]],
+                           SummarizedExperiment::rowData(se)[[v]])
+        rd[[v]] <- tmp$value[match(rd[[nameCol]], tmp$mutantName)]
+    }
+    rd0 <- as.data.frame(SummarizedExperiment::rowData(se)) %>%
         dplyr::group_by(.data[[nameCol]]) %>%
         dplyr::summarize(
-            dplyr::across(c("mutantName", "sequence", "sequenceAA",
-                            "mutationTypes"), 
-                          function(x) gsub(",$", "", gsub("^,", "", paste(unique(unlist(strsplit(paste(x, collapse = ","), ","))), collapse = ",")))),
             dplyr::across(c("minNbrMutBases", "minNbrMutCodons",
                             "minNbrMutAAs"),
                           function(x) min(x)),
@@ -49,6 +54,8 @@ collapseMutantsByAA <- function(se, nameCol = "mutantNameAA") {
                             "nbrMutAAs"),
                           function(x) paste(sort(unique(unlist(x))), 
                                             collapse = ",")))
+    rd <- rd %>% 
+        dplyr::full_join(rd0, by = nameCol)
     
     rd <- S4Vectors::DataFrame(rd)
     rownames(rd) <- rd[[nameCol]]

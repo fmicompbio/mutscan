@@ -138,15 +138,39 @@ test_that("summarizeExperiment works as expected with reads output", {
                         function(w) length(w[!grepl("WT", w)])),
                  SummarizedExperiment::rowData(se)$maxNbrMutCodons, ignore_attr = TRUE)
     
+    ## Check that the number of mutated bases is not larger than 3x the number of mutated codons
+    expect_true(all(SummarizedExperiment::rowData(se)$maxNbrMutBases <=  
+                        3 * SummarizedExperiment::rowData(se)$maxNbrMutCodons))
+    expect_true(all(SummarizedExperiment::rowData(se)$maxNbrMutAAs <= 
+                        SummarizedExperiment::rowData(se)$maxNbrMutCodons))
+    
     ## variable lengths
     expect_equal(SummarizedExperiment::rowData(se)$uniqueVarLengths, 
                  rep("96_96", nrow(se)), ignore_attr = TRUE)
     
+    ## All variants with no mutated AAs must have a WT in the name
     expect_true(all(grepl("WT", SummarizedExperiment::rowData(se)$mutantNameAA[SummarizedExperiment::rowData(se)$maxNbrMutAAs == 0])))
+    ## No mutation for the complete WT
     expect_equal(SummarizedExperiment::rowData(se)["f.0.WT_r.0.WT", ]$mutationTypes, "")
+    ## Mutation types for variants with no mutated AAs, but mutated bases, should be silent
     expect_true(all(SummarizedExperiment::rowData(se)$mutationTypes[SummarizedExperiment::rowData(se)$maxNbrMutAAs == 0 & SummarizedExperiment::rowData(se)$maxNbrMutBases > 0] == "silent"))
+    ## check translation
     expect_equal(SummarizedExperiment::rowData(se)$sequenceAA[3], 
                  mutscan:::translate(SummarizedExperiment::rowData(se)$sequence[3]))
+    
+    ## Spot checks
+    expect_equal(SummarizedExperiment::rowData(se)$minNbrMutBases[SummarizedExperiment::rowData(se)$mutantName == "f.0.WT_r.13.CTC"], 3)  ## WT: GCT
+    expect_equal(SummarizedExperiment::rowData(se)$minNbrMutCodons[SummarizedExperiment::rowData(se)$mutantName == "f.0.WT_r.13.CTC"], 1)  ## WT: GCT
+    expect_equal(SummarizedExperiment::rowData(se)$minNbrMutAAs[SummarizedExperiment::rowData(se)$mutantName == "f.0.WT_r.13.CTC"], 1)  ## WT: A
+    expect_equal(SummarizedExperiment::rowData(se)$mutantNameAA[SummarizedExperiment::rowData(se)$mutantName == "f.0.WT_r.13.CTC"], "f.0.WT_r.13.L")  ## WT: A
+    expect_equal(SummarizedExperiment::rowData(se)$mutationTypes[SummarizedExperiment::rowData(se)$mutantName == "f.0.WT_r.13.CTC"], "nonsynonymous")  ## WT: A
+    
+    expect_equal(SummarizedExperiment::rowData(se)$minNbrMutBases[SummarizedExperiment::rowData(se)$mutantName == "f.0.WT_r.13.GCG"], 1)  ## WT: GCT
+    expect_equal(SummarizedExperiment::rowData(se)$minNbrMutCodons[SummarizedExperiment::rowData(se)$mutantName == "f.0.WT_r.13.GCG"], 1)  ## WT: GCT
+    expect_equal(SummarizedExperiment::rowData(se)$minNbrMutAAs[SummarizedExperiment::rowData(se)$mutantName == "f.0.WT_r.13.GCG"], 0)  ## WT: A
+    expect_equal(SummarizedExperiment::rowData(se)$mutantNameAA[SummarizedExperiment::rowData(se)$mutantName == "f.0.WT_r.13.GCG"], "f.0.WT_r.0.WT")  ## WT: A
+    expect_equal(SummarizedExperiment::rowData(se)$mutationTypes[SummarizedExperiment::rowData(se)$mutantName == "f.0.WT_r.13.GCG"], "silent")  ## WT: A
+    
 })
 
 test_that("summarizeExperiment works as expected with umis output", {
@@ -251,6 +275,8 @@ test_that("summarizeExperiment works as expected when collapsing to WT", {
     expect_equal(SummarizedExperiment::rowData(se)$uniqueVarLengths, 
                  rep("96_96", nrow(se)), ignore_attr = TRUE)
     
+    expect_false(any(grepl("^,", SummarizedExperiment::rowData(se)$mutationTypes)))
+    expect_false(any(grepl(",$", SummarizedExperiment::rowData(se)$mutationTypes)))
     expect_equal(SummarizedExperiment::rowData(se)$sequenceAA[3], 
                  mutscan:::translate(SummarizedExperiment::rowData(se)$sequence[3]))
     expect_s4_class(SummarizedExperiment::rowData(se)$nbrMutBases, 
@@ -266,6 +292,21 @@ test_that("summarizeExperiment works as expected when collapsing to WT", {
     expect_true(all(grepl("stop", SummarizedExperiment::rowData(se)$mutationTypes[grep("\\*", SummarizedExperiment::rowData(se)$mutantNameAA)])))
 })
 
+test_that("mergeValues works", {
+    res <- mergeValues(c("A", "B", "C", "A", "D", "B"),
+                       c("a,b", "b,c", "c", "b,c", "b,a", "d"))
+    expect_s3_class(res, "data.frame")
+    expect_named(res, c("mutantName", "value"))
+    expect_equal(res$mutantName, c("A", "B", "C", "D"))
+    expect_equal(res$value, c("a,b,c", "b,c,d", "c", "a,b"))
+    
+    res <- mergeValues(c("B", "A", "C", "D"),
+                       c("a,b", "c", "c", "d"))
+    expect_s3_class(res, "data.frame")
+    expect_named(res, c("mutantName", "value"))
+    expect_equal(res$mutantName, c("A", "B", "C", "D"))
+    expect_equal(res$value, c("c", "a,b", "c", "d"))
+})
 
 
 

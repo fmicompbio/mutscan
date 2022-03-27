@@ -106,13 +106,10 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     ## For a given sample, the same mutant name can correspond to multiple 
     ## sequences, separated by ,
     ## ------------------------------------------------------------------------
-    allSequences <- do.call(
-        dplyr::bind_rows,
-        lapply(x, function(w) w$summaryTable[, c("mutantName", "sequence")])) %>%
-        tidyr::separate_rows(sequence, sep = ",") %>%
-        dplyr::filter(sequence != "") %>%
-        dplyr::group_by(mutantName) %>%
-        dplyr::summarize(sequence = paste(unique(sequence), collapse = ","))
+    tmpdf <- do.call(dplyr::bind_rows, lapply(x, function(w) w$summaryTable))
+    
+    allSequences <- mergeValues(tmpdf$mutantName, tmpdf$sequence) %>%
+        setNames(c("mutantName", "sequence"))
     allSequences <- S4Vectors::DataFrame(allSequences)
     
     ## ------------------------------------------------------------------------
@@ -121,15 +118,13 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     ## (e.g. if variable sequences were collapsed to WT in digestFastqs)
     ## ------------------------------------------------------------------------
     for (v in c("nbrMutBases", "nbrMutCodons", "nbrMutAAs")) {
-        tmp <- do.call(dplyr::bind_rows,
-                       lapply(x, function(w)
-                           w$summaryTable[, c("mutantName", v)])) %>%
-            tidyr::separate_rows(.data[[v]], sep = ",") %>%
-            dplyr::distinct()
-        tmp <- methods::as(
-            lapply(split(as.integer(tmp[[v]]), f = tmp$mutantName), sort),
+        tmp <- mergeValues(tmpdf$mutantName, tmpdf[[v]]) %>%
+            setNames(c("mutantName", v))
+        tmp[[v]] <- methods::as(
+            lapply(strsplit(tmp[[v]], ","), function(w) sort(as.integer(w))),
             "IntegerList")
-        allSequences[[v]] <- tmp[allSequences$mutantName]
+        allSequences[[v]] <- tmp[[v]][match(allSequences$mutantName,
+                                            tmp$mutantName)]
         allSequences[[paste0("min", sub("^n", "N", v))]] <- min(allSequences[[v]])
         allSequences[[paste0("max", sub("^n", "N", v))]] <- max(allSequences[[v]])
     }
@@ -138,13 +133,8 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     ## Add info about sequenceAA, mutantNameAA, mutationTypes, varLengths
     ## ------------------------------------------------------------------------
     for (v in c("sequenceAA", "mutantNameAA", "mutationTypes")) {
-        tmp <- do.call(dplyr::bind_rows, 
-                       lapply(x, function(w) 
-                           w$summaryTable[, c("mutantName", v)])) %>%
-            tidyr::separate_rows(.data[[v]], sep = ",") %>%
-            dplyr::distinct() %>%
-            dplyr::group_by(mutantName) %>%
-            dplyr::summarize("{v}" := paste(.data[[v]], collapse = ","))
+        tmp <- mergeValues(tmpdf$mutantName, tmpdf[[v]]) %>%
+            setNames(c("mutantName", v))
         allSequences[[v]] <- tmp[[v]][match(allSequences$mutantName,
                                             tmp$mutantName)]
     }
@@ -152,18 +142,18 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     ## There is only one varLengths value per sample, by construction 
     ## This is only useful when there's no wildtype sequence, so we use the 
     ## representative sequence only
-    tmp <- do.call(dplyr::bind_rows, 
-                   lapply(x, function(w) 
-                       w$summaryTable[, c("mutantName", "varLengths")])) %>%
-        dplyr::distinct()
-    tmp <- methods::as(split(tmp$varLengths, f = tmp$mutantName),
-                       "CharacterList")
-    if (any(lengths(tmp) != 1)) {
+    tmp <- mergeValues(tmpdf$mutantName, tmpdf$varLengths) %>%
+        setNames(c("mutantName", "varLengths"))
+    tmp$varLengths <- methods::as(
+        lapply(strsplit(tmp$varLengths, ","), function(w) unique(w)),
+        "CharacterList")
+    if (any(lengths(tmp$varLengths) != 1)) {
         warning("There are sequences with multiple different values for ",
                 "varLengths. The uniqueVarLengths column will contain a ",
                 "randomly selected one.")
     }
-    allSequences$varLengths <- tmp[allSequences$mutantName]
+    allSequences$varLengths <- tmp$varLengths[match(allSequences$mutantName,
+                                                    tmp$mutantName)]
     allSequences$uniqueVarLengths <- vapply(allSequences$varLengths,
                                             "[", 1, FUN.VALUE = "")
 

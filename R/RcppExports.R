@@ -52,6 +52,10 @@ digestFastqsCpp <- function(fastqForwardVect, fastqReverseVect, mergeForwardReve
     .Call(`_mutscan_digestFastqsCpp`, fastqForwardVect, fastqReverseVect, mergeForwardReverse, minOverlap, maxOverlap, minMergedLength, maxMergedLength, maxFracMismatchOverlap, greedyOverlap, revComplForward, revComplReverse, elementsForward, elementLengthsForward, elementsReverse, elementLengthsReverse, adapterForward, adapterReverse, primerForward, primerReverse, wildTypeForward, wildTypeForwardNames, wildTypeReverse, wildTypeReverseNames, constantForward, constantReverse, avePhredMinForward, avePhredMinReverse, variableNMaxForward, variableNMaxReverse, umiNMax, nbrMutatedCodonsMaxForward, nbrMutatedCodonsMaxReverse, nbrMutatedBasesMaxForward, nbrMutatedBasesMaxReverse, forbiddenMutatedCodonsForward, forbiddenMutatedCodonsReverse, useTreeWTmatch, collapseToWTForward, collapseToWTReverse, mutatedPhredMinForward, mutatedPhredMinReverse, mutNameDelimiter, constantMaxDistForward, constantMaxDistReverse, variableCollapseMaxDist, variableCollapseMinReads, variableCollapseMinRatio, umiCollapseMaxDist, filteredReadsFastqForward, filteredReadsFastqReverse, maxNReads, verbose, nThreads, chunkSize)
 }
 
+mergeValues <- function(mutNamesIn, valuesIn) {
+    .Call(`_mutscan_mergeValues`, mutNamesIn, valuesIn)
+}
+
 levenshtein_distance <- function(str1, str2, ignored_variable = -1L) {
     .Call(`_mutscan_levenshtein_distance`, str1, str2, ignored_variable)
 }
