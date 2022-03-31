@@ -1,7 +1,7 @@
-#' Calculate protein-protein interaction scores (PPI).
+#' Calculate fitness scores.
 #' 
-#' Using sequence counts before and after selection, calculate protein-protein
-#' interaction scores as described by Diss and Lehner (2018).
+#' Using sequence counts before and after selection, calculate fitness scores 
+#' as described by Diss and Lehner (2018).
 #' 
 #' @param se SummarizedExperiment object as returned by 
 #'     \code{\link{summarizeExperiment}}.
@@ -15,15 +15,15 @@
 #'     the column in \code{colData(se)} with experimental conditions. 
 #'     \code{numerator} and \code{denominator} define the comparison, 
 #'     e.g. \code{c("cond", "output", "input")} will look in the 
-#'     \code{"cond"} column and calculate PPI for the ratio of \code{"output"} 
-#'     over \code{"input"} counts.
+#'     \code{"cond"} column and calculate fitness for the ratio of 
+#'     \code{"output"} over \code{"input"} counts.
 #' @param WTrows Vector of row names that will be used as the reference when
-#'     calculating PPI scores. If more than one value is provided, the average 
-#'     of the corresponding PPI scores is used as a reference. If NULL, no 
-#'     division by WT scores will be done.
+#'     calculating fitness scores. If more than one value is provided, the 
+#'     average of the corresponding fitness scores is used as a reference. 
+#'     If NULL, no division by WT scores will be done.
 #' @param selAssay Assay to select from \code{se} for the analysis.
 #'   
-#' @return A numeric vector with PPI scores.
+#' @return A numeric vector with fitness scores.
 #' 
 #' @author Michael Stadler and Charlotte Soneson
 #' 
@@ -35,8 +35,8 @@
 #' @importFrom Matrix colSums
 #' 
 #' @export
-calculatePPIScore <- function(se, pairingCol, ODCols, comparison, WTrows,
-                              selAssay = "counts") {
+calculateFitnessScore <- function(se, pairingCol, ODCols, comparison, WTrows,
+                                  selAssay = "counts") {
     ## ------------------------------------------------------------------------
     ## pre-flight checks
     ## ------------------------------------------------------------------------
@@ -107,13 +107,13 @@ calculatePPIScore <- function(se, pairingCol, ODCols, comparison, WTrows,
     
     
     ## ------------------------------------------------------------------------
-    ## calculate PPI = n_i / n_WT
+    ## calculate fitness = n_i / n_WT
     ## ------------------------------------------------------------------------
     if (is.null(WTrows)) {
         nWT <- rep(1, ncol(n))
     } else {
         nWT <- colMeans(n[WTrows, , drop = FALSE])
     }
-    PPI <- sweep(n, MARGIN = 2, STATS = nWT, FUN = "/")
-    return(PPI)
+    fitness <- sweep(n, MARGIN = 2, STATS = nWT, FUN = "/")
+    return(fitness)
 }

@@ -49,6 +49,7 @@
 #'     summarize
 #' @importFrom tidyr unite separate_rows
 #' @importFrom rlang .data
+#' @importFrom stats setNames
 #'
 summarizeExperiment <- function(x, coldata, countType = "umis") {
     ## --------------------------------------------------------------------------
@@ -109,7 +110,7 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     tmpdf <- do.call(dplyr::bind_rows, lapply(x, function(w) w$summaryTable))
     
     allSequences <- mergeValues(tmpdf$mutantName, tmpdf$sequence) %>%
-        setNames(c("mutantName", "sequence"))
+        stats::setNames(c("mutantName", "sequence"))
     allSequences <- S4Vectors::DataFrame(allSequences)
     
     ## ------------------------------------------------------------------------
@@ -119,7 +120,7 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     ## ------------------------------------------------------------------------
     for (v in c("nbrMutBases", "nbrMutCodons", "nbrMutAAs")) {
         tmp <- mergeValues(tmpdf$mutantName, tmpdf[[v]]) %>%
-            setNames(c("mutantName", v))
+            stats::setNames(c("mutantName", v))
         tmp[[v]] <- methods::as(
             lapply(strsplit(tmp[[v]], ","), function(w) sort(as.integer(w))),
             "IntegerList")
@@ -134,7 +135,7 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     ## ------------------------------------------------------------------------
     for (v in c("sequenceAA", "mutantNameAA", "mutationTypes")) {
         tmp <- mergeValues(tmpdf$mutantName, tmpdf[[v]]) %>%
-            setNames(c("mutantName", v))
+            stats::setNames(c("mutantName", v))
         allSequences[[v]] <- tmp[[v]][match(allSequences$mutantName,
                                             tmp$mutantName)]
     }
@@ -143,7 +144,7 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     ## This is only useful when there's no wildtype sequence, so we use the 
     ## representative sequence only
     tmp <- mergeValues(tmpdf$mutantName, tmpdf$varLengths) %>%
-        setNames(c("mutantName", "varLengths"))
+        stats::setNames(c("mutantName", "varLengths"))
     tmp$varLengths <- methods::as(
         lapply(strsplit(tmp$varLengths, ","), function(w) unique(w)),
         "CharacterList")

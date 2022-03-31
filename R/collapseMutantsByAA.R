@@ -19,6 +19,7 @@
 #' @importFrom SummarizedExperiment assays rowData SummarizedExperiment colData
 #' @importFrom dplyr across everything group_by summarize
 #' @importFrom tibble column_to_rownames
+#' @importFrom stats setNames
 #'
 collapseMutantsByAA <- function(se, nameCol = "mutantNameAA") {
     .assertVector(x = se, type = "SummarizedExperiment")
@@ -35,7 +36,7 @@ collapseMutantsByAA <- function(se, nameCol = "mutantNameAA") {
     ## Collapse rowData - simple columns
     rd <- mergeValues(SummarizedExperiment::rowData(se)[[nameCol]],
                       SummarizedExperiment::rowData(se)$sequence) %>%
-        setNames(c(nameCol, "sequence"))
+        stats::setNames(c(nameCol, "sequence"))
     for (v in c("mutantName", "sequenceAA", "mutationTypes")) {
         tmp <- mergeValues(SummarizedExperiment::rowData(se)[[nameCol]],
                            SummarizedExperiment::rowData(se)[[v]])

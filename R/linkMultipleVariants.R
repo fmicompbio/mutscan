@@ -173,8 +173,8 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
                                       length, 0))
     } else {
         countCombined <- countCombined %>%
-            dplyr::rename(sequenceForward = sequence,
-                          varLengthsForward = varLengths) %>%
+            dplyr::rename(sequenceForward = .data$sequence,
+                          varLengthsForward = .data$varLengths) %>%
             dplyr::mutate(
                 nCompForward = vapply(strsplit(.data$varLengthsForward, ","), 
                                       length, 0))

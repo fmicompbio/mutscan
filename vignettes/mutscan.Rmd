@@ -565,9 +565,9 @@ generateQCReport(se, outFile = tempfile(fileext = ".html"))
 ```
 
 
-# Calculating PPI scores
+# Calculating fitness scores
 
-The function `calculatePPIScore()` can be used to calculate PPI scores as 
+The function `calculateFitnessScore()` can be used to calculate fitness scores as 
 described in [@Diss2018]. The function requires the user to specify a `pairingCol`,
 containing the replicate ID for each sample; one or more `ODCols`, containing
 the optical density for each sample, and a `comparison`, which is a character
@@ -577,16 +577,16 @@ the column in `colData(se)` that contains the grouping information, and
 `numerator` and `denominator` specify the values of this column representing the
 two groups to be compared.
 
-Here, we illustrate the application of `calculatePPIScore()` on the
+Here, we illustrate the application of `calculateFitnessScore()` on the
 SummarizedExperiment object containing all the three CIS
 replicates from [@Diss2018].
 
 ```{r}
 se_collapsed <- collapseMutantsByAA(se)
-ppis <- calculatePPIScore(se = se_collapsed, pairingCol = "Replicate", 
-                          ODCols = c("OD1", "OD2"),
-                          comparison = c("Condition", "cis_output", "cis_input"),
-                          WTrows = "f.0.WT")
+ppis <- calculateFitnessScore(se = se_collapsed, pairingCol = "Replicate", 
+                              ODCols = c("OD1", "OD2"),
+                              comparison = c("Condition", "cis_output", "cis_input"),
+                              WTrows = "f.0.WT")
 head(ppis[order(abs(rowMeans(ppis)), decreasing = TRUE), , drop = FALSE])
 
 ## The PPI score for the WT sequence is 1, by construction
@@ -595,7 +595,7 @@ ppis["f.0.WT", , drop = FALSE]
 
 # Scoring mutations with `edgeR` or `limma`
 
-As an alternative to the PPI scoring, `mutscan` can be used to model the observed
+As an alternative to the fitness scoring, `mutscan` can be used to model the observed
 counts using a generalized linear model (with `edgeR`) or a general linear model
 (with `limma`) and estimate a logFC and a p-value for the enrichment of each
 variant betwen two conditions (or more generally, in association with any
