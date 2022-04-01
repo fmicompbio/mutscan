@@ -5,13 +5,13 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Deep mutational scanning analysis with `mutscan` • mutscan</title>
+<title>Multiplexed assays of variant effect analysis with `mutscan` • mutscan</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="Deep mutational scanning analysis with `mutscan`">
+<script src="../pkgdown.js"></script><meta property="og:title" content="Multiplexed assays of variant effect analysis with `mutscan`">
 <meta property="og:description" content="mutscan">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.26</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.28</span>
       </span>
     </div>
 
@@ -62,11 +62,11 @@
       </header><script src="mutscan_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Deep mutational scanning analysis with <code>mutscan</code>
+      <h1 data-toc-skip>Multiplexed assays of variant effect analysis with <code>mutscan</code>
 </h1>
                         <h4 data-toc-skip class="author">Charlotte Soneson and Michael Stadler</h4>
             
-            <h4 data-toc-skip class="date">21 January 2022</h4>
+            <h4 data-toc-skip class="date">1 April 2022</h4>
       
       
       <div class="hidden name"><code>mutscan.Rmd</code></div>
@@ -81,11 +81,11 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p><code>mutscan</code> provides functionality for processing and visualizing Deep Mutational Scanning and other similar types of data, starting from single-end or paired-end FASTQ files. A broad range of library designs can be processed, encompassing both TRANS experiments (considering pairs of proteins) and CIS experiments (studying a single protein).</p>
+<p><code>mutscan</code> provides functionality for processing and visualizing Multiplexed Assays of Variant Effect (MAVE) and other similar types of data, starting from single-end or paired-end FASTQ files. A broad range of library designs can be processed, encompassing experiments considering either a single protein or combinations of multiple proteins (e.g., aimed at studying protein-protein interactions).</p>
 <p>The figure below provides a high-level overview of the <code>mutscan</code> functionality, which will be described in more detail in the following sections.</p>
 <div class="figure" style="text-align: center">
-<img src="mutscan-overview.001.png" alt="Overview of the `mutscan` functionality. The `digestFastqs()` function processes each sequencing library separately, and generates an output object containing, among other things, the count table and a summary of the filtering steps. The `summarizeExperiment()` function takes one or more of these objects and combines them into a `SummarizedExperiment` object, that can then be used for downstream analysis such as plotting and statistical testing." width="100%"><p class="caption">
-Overview of the <code>mutscan</code> functionality. The <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> function processes each sequencing library separately, and generates an output object containing, among other things, the count table and a summary of the filtering steps. The <code><a href="../reference/summarizeExperiment.html">summarizeExperiment()</a></code> function takes one or more of these objects and combines them into a <code>SummarizedExperiment</code> object, that can then be used for downstream analysis such as plotting and statistical testing.
+<img src="mutscan-overview.001.png" alt="Overview of the `mutscan` functionality. The `digestFastqs()` function processes each sequencing library, possibly consisting of multiple (pairs of) FASTQ files, separately, and generates an output object containing, among other things, the count table and a summary of the filtering steps. The `summarizeExperiment()` function takes one or more of these objects and combines them into a `SummarizedExperiment` object, that can then be used for downstream analysis such as plotting and statistical testing." width="100%"><p class="caption">
+Overview of the <code>mutscan</code> functionality. The <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> function processes each sequencing library, possibly consisting of multiple (pairs of) FASTQ files, separately, and generates an output object containing, among other things, the count table and a summary of the filtering steps. The <code><a href="../reference/summarizeExperiment.html">summarizeExperiment()</a></code> function takes one or more of these objects and combines them into a <code>SummarizedExperiment</code> object, that can then be used for downstream analysis such as plotting and statistical testing.
 </p>
 </div>
 </div>
@@ -96,10 +96,13 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">datadir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">dir</a></span><span class="op">(</span><span class="va">datadir</span><span class="op">)</span>
-<span class="co">#&gt;  [1] "cisInput_1.fastq.gz"    "cisInput_2.fastq.gz"    "cisOutput_1.fastq.gz"  </span>
-<span class="co">#&gt;  [4] "cisOutput_2.fastq.gz"   "GSE102901_cis_se.rds"   "leujunt0_1.fastq.gz"   </span>
-<span class="co">#&gt;  [7] "leujunt0_2.fastq.gz"    "transInput_1.fastq.gz"  "transInput_2.fastq.gz" </span>
-<span class="co">#&gt; [10] "transOutput_1.fastq.gz" "transOutput_2.fastq.gz"</span></code></pre></div>
+<span class="co">#&gt;  [1] "cisInput_1.fastq.gz"                 "cisInput_2.fastq.gz"                </span>
+<span class="co">#&gt;  [3] "cisOutput_1.fastq.gz"                "cisOutput_2.fastq.gz"               </span>
+<span class="co">#&gt;  [5] "GSE102901_cis_se.rds"                "leujunt0_1.fastq.gz"                </span>
+<span class="co">#&gt;  [7] "leujunt0_2.fastq.gz"                 "multipleVariableRegions_R1.fastq.gz"</span>
+<span class="co">#&gt;  [9] "multipleVariableRegions_R2.fastq.gz" "multipleVariableRegions_truth.rds"  </span>
+<span class="co">#&gt; [11] "transInput_1.fastq.gz"               "transInput_2.fastq.gz"              </span>
+<span class="co">#&gt; [13] "transOutput_1.fastq.gz"              "transOutput_2.fastq.gz"</span></code></pre></div>
 <ul>
 <li>
 <code>transInput_{1,2}.fastq.gz</code>, <code>transOutput_{1,2}.fastq.gz</code> - data from TRANS experiment in <span class="citation">[@Diss2018]</span>. The forward and reverse reads correspond to the mutated <em>FOS</em> and <em>JUN</em> sequences, respectively. Each read consists of a UMI sequence, followed by a constant sequence and the variable region.</li>
@@ -112,12 +115,12 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 </ul>
 </div>
 <div class="section level2">
-<h2 id="processing-deep-mutational-scanning-data">Processing Deep Mutational Scanning data<a class="anchor" aria-label="anchor" href="#processing-deep-mutational-scanning-data"></a>
+<h2 id="processing-multiplexed-assays-of-variant-effect-data">Processing Multiplexed Assays of Variant Effect data<a class="anchor" aria-label="anchor" href="#processing-multiplexed-assays-of-variant-effect-data"></a>
 </h2>
 <div class="section level3">
 <h3 id="read-composition-specification">Read composition specification<a class="anchor" aria-label="anchor" href="#read-composition-specification"></a>
 </h3>
-<p>The main function for processing the Deep Mutational Scanning FASTQ files is <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code>. This function requires the specification of paths to compressed FASTQ file(s) and the composition of the reads in these files. The composition is specified by the user, and is given in the form of a character string indicating the parts constituting the respective read, and an integer vector specifying the lengths of the individual parts. The permitted components are:</p>
+<p>The main function for processing the Multiplexed Assays of Variant Effect FASTQ files is <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code>. This function requires the specification of paths to compressed FASTQ file(s) and the composition of the reads in these files. The composition is specified by the user, and is given in the form of a character string indicating the parts constituting the respective read, and an integer vector specifying the lengths of the individual parts. The permitted components are:</p>
 <ul>
 <li>
 <code>S</code> (skip) - nucleotide(s) to skip</li>
@@ -130,7 +133,7 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <li>
 <code>P</code> (primer) - a primer sequence, which may appear in a nonspecified position in the read but whose position defines the start or end position of other components.</li>
 </ul>
-<p>A read can have several components of the same type (e.g., skipped nucleotides both in the beginning or the end, or two variable regions separated by a primer). In such cases, <code>mutscan</code> will concatenate all components of the same type in the analysis.</p>
+<p>A read can have several components of the same type (e.g., skipped nucleotides both in the beginning or the end, or two variable regions separated by a primer). In such cases, <code>mutscan</code> will concatenate all components of the same type in the processing, while recording the lengths of the individual components.</p>
 <p>As an example, a read with the following composition:</p>
 <p>[1 skipped nt] - [10 nt UMI] - [18 nt constant sequence] - [96 nt variable region]</p>
 <p>would be specified to <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> by an elements string <code>"SUCV"</code>, and an element length vector <code>c(1, 10, 18, 96)</code>.</p>
@@ -151,43 +154,51 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <li>Filter out read pair if the average quality in the variable region is below <code>avePhredMin</code> in either the forward or reverse read (or the consensus sequence if they are merged).</li>
 <li>Filter out read pair if the number of Ns in the variable region exceeds <code>variableNMax</code>.</li>
 <li>Filter out read pair if the number of Ns in the combined forward and reverse UMI sequence exceeds <code>umiNMax</code>.</li>
+<li>If wild type (reference) sequences are provided (via <code>wildTypeForward</code> and/or <code>wildTypeReverse</code>), filter out reads if there are multiple best matches among the provided wild type sequences.</li>
 <li>Filter out read pair if any mutated base has a quality below <code>mutatedPhredMin</code>.</li>
 <li>Filter out read pair if the number of mutated codons exceeds <code>nbrMutatedCodonsMax</code> or the number of mutated nucleotides exceeds <code>nbrMutatedBasesMax</code>.</li>
-<li>Filter out read pair of there are multiple equally close best hits among the provided wild type sequences.</li>
 <li>Filter out read pair if any of the mutated codons match any of the codons encoded by <code>forbiddenMutatedCodons</code>.</li>
 <li>Filter out read pair if there are too many mutations in the constant sequence, or if there are multiple equally close best hits among the provided constant sequences.</li>
 </ul>
+<p>Reads that are filtered out in one step will not be processed further (and thus will not contribute to the count of reads being filtered out for any other reasons).</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="processing-trans-data">Processing TRANS data<a class="anchor" aria-label="anchor" href="#processing-trans-data"></a>
 </h2>
-<p>Here, we illustrate the processing of the provided TRANS experiment example data. We filter out reads with any adapter match, an average phred quality below 20, any Ns in the UMI or variable sequence, more than one mutated codon, or a mutated codon ending with A or T (represented by the <code>NNW</code> value of the <code>forbiddenMutatedCodonsForward</code> and <code>forbiddenMutatedCodonsReverse</code> arguments).</p>
+<p>Here, we illustrate the processing of the provided TRANS experiment example data. We filter out reads with any adapter match, an average phred quality below 20, any Ns in the UMI or variable sequence, more than one mutated codon, or a mutated codon ending with A or T (represented by the <code>NNW</code> value of the <code>forbiddenMutatedCodonsForward</code> and <code>forbiddenMutatedCodonsReverse</code> arguments). In order to identify the number of mutations, we have to provide the wild type sequences of <em>FOS</em> and <em>JUN</em> (forward and reverse reads, respectively). This will additionally name the final mutants according to the positions and sequences of the mutated codons.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">transInput</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/digestFastqs.html">digestFastqs</a></span><span class="op">(</span>
     fastqForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">datadir</span>, <span class="st">"transInput_1.fastq.gz"</span><span class="op">)</span>,
     fastqReverse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">datadir</span>, <span class="st">"transInput_2.fastq.gz"</span><span class="op">)</span>,
     mergeForwardReverse <span class="op">=</span> <span class="cn">FALSE</span>, 
-    revComplForward <span class="op">=</span> <span class="cn">FALSE</span>, revComplReverse <span class="op">=</span> <span class="cn">FALSE</span>,
+    revComplForward <span class="op">=</span> <span class="cn">FALSE</span>, 
+    revComplReverse <span class="op">=</span> <span class="cn">FALSE</span>,
     adapterForward <span class="op">=</span> <span class="st">"GGAAGAGCACACGTC"</span>, 
     adapterReverse <span class="op">=</span> <span class="st">"GGAAGAGCGTCGTGT"</span>, 
-    elementsForward <span class="op">=</span> <span class="st">"SUCV"</span>, elementsReverse <span class="op">=</span> <span class="st">"SUCV"</span>,
+    elementsForward <span class="op">=</span> <span class="st">"SUCV"</span>,
+    elementsReverse <span class="op">=</span> <span class="st">"SUCV"</span>,
     elementLengthsForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">18</span>, <span class="fl">96</span><span class="op">)</span>,
     elementLengthsReverse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">8</span>, <span class="fl">20</span>, <span class="fl">96</span><span class="op">)</span>,
     constantForward <span class="op">=</span> <span class="st">"AACCGGAGGAGGGAGCTG"</span>,
     constantReverse <span class="op">=</span> <span class="st">"GAAAAAGGAAGCTGGAGAGA"</span>, 
-    avePhredMinForward <span class="op">=</span> <span class="fl">20</span>, avePhredMinReverse <span class="op">=</span> <span class="fl">20</span>,
-    variableNMaxForward <span class="op">=</span> <span class="fl">0</span>, variableNMaxReverse <span class="op">=</span> <span class="fl">0</span>, umiNMax <span class="op">=</span> <span class="fl">0</span>,
-    wildTypeForward <span class="op">=</span> <span class="st">"ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"</span>, 
-    wildTypeReverse <span class="op">=</span> <span class="st">"ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT"</span>, 
-    nbrMutatedCodonsMaxForward <span class="op">=</span> <span class="fl">1</span>, nbrMutatedCodonsMaxReverse <span class="op">=</span> <span class="fl">1</span>,
-    forbiddenMutatedCodonsForward <span class="op">=</span> <span class="st">"NNW"</span>, forbiddenMutatedCodonsReverse <span class="op">=</span> <span class="st">"NNW"</span>,
+    avePhredMinForward <span class="op">=</span> <span class="fl">20</span>, 
+    avePhredMinReverse <span class="op">=</span> <span class="fl">20</span>,
+    variableNMaxForward <span class="op">=</span> <span class="fl">0</span>, 
+    variableNMaxReverse <span class="op">=</span> <span class="fl">0</span>, 
+    umiNMax <span class="op">=</span> <span class="fl">0</span>,
+    wildTypeForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>FOS <span class="op">=</span> <span class="st">"ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"</span><span class="op">)</span>, 
+    wildTypeReverse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>JUN <span class="op">=</span> <span class="st">"ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT"</span><span class="op">)</span>, 
+    nbrMutatedCodonsMaxForward <span class="op">=</span> <span class="fl">1</span>, 
+    nbrMutatedCodonsMaxReverse <span class="op">=</span> <span class="fl">1</span>,
+    forbiddenMutatedCodonsForward <span class="op">=</span> <span class="st">"NNW"</span>, 
+    forbiddenMutatedCodonsReverse <span class="op">=</span> <span class="st">"NNW"</span>,
     mutNameDelimiter <span class="op">=</span> <span class="st">"."</span>, 
     constantMaxDistForward <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,
     constantMaxDistReverse <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,
     verbose <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span></code></pre></div>
-<p>The <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> function returns a list with four elements. The <code>parameters</code> list records all parameter values used during the processing, as well as the package version and time of processing.</p>
+<p>The <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> function returns a list with four elements. The <code>parameters</code> list records all parameter values used during the processing, as well as the <code>mutscan</code> version and time of processing.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">transInput</span><span class="op">$</span><span class="va">parameters</span>
 <span class="co">#&gt; $fastqForward</span>
@@ -248,11 +259,11 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span class="co">#&gt; [1] ""</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $wildTypeForward</span>
-<span class="co">#&gt;                                                                                                  f </span>
+<span class="co">#&gt;                                                                                                FOS </span>
 <span class="co">#&gt; "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA" </span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $wildTypeReverse</span>
-<span class="co">#&gt;                                                                                                  r </span>
+<span class="co">#&gt;                                                                                                JUN </span>
 <span class="co">#&gt; "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT" </span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $constantForward</span>
@@ -301,6 +312,12 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span class="co">#&gt; $useTreeWTmatch</span>
 <span class="co">#&gt; [1] FALSE</span>
 <span class="co">#&gt; </span>
+<span class="co">#&gt; $collapseToWTForward</span>
+<span class="co">#&gt; [1] FALSE</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $collapseToWTReverse</span>
+<span class="co">#&gt; [1] FALSE</span>
+<span class="co">#&gt; </span>
 <span class="co">#&gt; $mutatedPhredMinForward</span>
 <span class="co">#&gt; [1] 0</span>
 <span class="co">#&gt; </span>
@@ -344,7 +361,7 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span class="co">#&gt; [1] 100000</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $processingInfo</span>
-<span class="co">#&gt; [1] "Processed by mutscan v0.2.26 on 2022-01-21 14:31:53"</span></code></pre></div>
+<span class="co">#&gt; [1] "Processed by mutscan v0.2.28 on 2022-04-01 21:20:01"</span></code></pre></div>
 <p>The <code>filterSummary</code> data.frame contains a summary of the number of reads filtered out in each step. Note that for any given filtering step, only the reads retained by the previous filters are considered. The numbers in the filter column names indicate the order of the filters.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">transInput</span><span class="op">$</span><span class="va">filterSummary</span>
@@ -358,16 +375,16 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span class="co">#&gt; 1                      392                       0                      8</span>
 <span class="co">#&gt;   f12_nbrTooManyMutConstant f13_nbrTooManyBestConstantHits nbrRetained</span>
 <span class="co">#&gt; 1                         0                              0         279</span></code></pre></div>
-<p>The <code>summaryTable</code> provides the number of reads and unique UMIs observed for each variable sequence pair. In addition, it contains a column <code>mutantName</code>, which provides a shorthand notation for each mutant. The format of the values in this column is a combination of <code>WTS.xx.NNN</code> (separated by <code>_</code>), where <code>WTS</code> provides the name of the closest matching wild type sequence (if only one, unnamed wild type sequence is provided, the name will be <code>f/r</code> depending on if it corresponds to the forward/reverse read, respectively). The <code>xx</code> part indicates the mutated codon or nucleotide number, and <code>NNN</code> gives the observed sequence for the mutated codon or nucleotide. A sequence without mutations is named <code>WTS.0.WT</code>, where, again, <code>WTS</code> is the name of the matching wild type sequence.</p>
+<p>The <code>summaryTable</code> provides the number of reads and unique UMIs observed for each variable sequence pair. The underscore in the strings in the sequence column indicate the separation between the forward and reverse wild type sequences. In addition, the table contains a column <code>mutantName</code>, which provides a shorthand notation for each mutant. The format of the values in this column is a combination of <code>WTS.xx.NNN</code> (separated by <code>_</code>), where <code>WTS</code> provides the name of the closest matching wild type sequence (if only one, unnamed wild type sequence is provided, the name will be <code>f/r</code> depending on if it corresponds to the forward/reverse read, respectively). The <code>xx</code> part indicates the mutated codon or nucleotide number, and <code>NNN</code> gives the observed sequence for the mutated codon or nucleotide. A sequence without mutations is named <code>WTS.0.WT</code>, where, again, <code>WTS</code> is the name of the matching wild type sequence.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">transInput</span><span class="op">$</span><span class="va">summaryTable</span><span class="op">)</span>
-<span class="co">#&gt;        mutantName</span>
-<span class="co">#&gt; 1 f.0.WT_r.13.CCC</span>
-<span class="co">#&gt; 2 f.0.WT_r.13.CTC</span>
-<span class="co">#&gt; 3  f.0.WT_r.2.TCC</span>
-<span class="co">#&gt; 4 f.0.WT_r.20.ACC</span>
-<span class="co">#&gt; 5 f.0.WT_r.30.AGG</span>
-<span class="co">#&gt; 6 f.0.WT_r.30.GGG</span>
+<span class="co">#&gt;            mutantName</span>
+<span class="co">#&gt; 1 FOS.0.WT_JUN.13.CCC</span>
+<span class="co">#&gt; 2 FOS.0.WT_JUN.13.CTC</span>
+<span class="co">#&gt; 3  FOS.0.WT_JUN.2.TCC</span>
+<span class="co">#&gt; 4 FOS.0.WT_JUN.20.ACC</span>
+<span class="co">#&gt; 5 FOS.0.WT_JUN.30.AGG</span>
+<span class="co">#&gt; 6 FOS.0.WT_JUN.30.GGG</span>
 <span class="co">#&gt;                                                                                                                                                                                            sequence</span>
 <span class="co">#&gt; 1 ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA_ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAACCCCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT</span>
 <span class="co">#&gt; 2 ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA_ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAACTCCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT</span>
@@ -375,13 +392,27 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span class="co">#&gt; 4 ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA_ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGACCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT</span>
 <span class="co">#&gt; 5 ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA_ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGAGGCAGCTT</span>
 <span class="co">#&gt; 6 ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA_ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGGGCAGCTT</span>
-<span class="co">#&gt;   nbrMutBases nbrMutCodons nbrReads maxNbrReads nbrUmis</span>
-<span class="co">#&gt; 1           2            1        1           1       1</span>
-<span class="co">#&gt; 2           3            1        1           1       1</span>
-<span class="co">#&gt; 3           1            1        1           1       1</span>
-<span class="co">#&gt; 4           1            1        1           1       1</span>
-<span class="co">#&gt; 5           3            1        1           1       1</span>
-<span class="co">#&gt; 6           2            1        1           1       1</span></code></pre></div>
+<span class="co">#&gt;   nbrReads maxNbrReads nbrUmis nbrMutBases nbrMutCodons nbrMutAAs varLengths</span>
+<span class="co">#&gt; 1        1           1       1           2            1         1      96_96</span>
+<span class="co">#&gt; 2        1           1       1           3            1         1      96_96</span>
+<span class="co">#&gt; 3        1           1       1           1            1         1      96_96</span>
+<span class="co">#&gt; 4        1           1       1           1            1         1      96_96</span>
+<span class="co">#&gt; 5        1           1       1           3            1         1      96_96</span>
+<span class="co">#&gt; 6        1           1       1           2            1         1      96_96</span>
+<span class="co">#&gt;        mutantNameAA mutationTypes</span>
+<span class="co">#&gt; 1 FOS.0.WT_JUN.13.P nonsynonymous</span>
+<span class="co">#&gt; 2 FOS.0.WT_JUN.13.L nonsynonymous</span>
+<span class="co">#&gt; 3  FOS.0.WT_JUN.2.S nonsynonymous</span>
+<span class="co">#&gt; 4 FOS.0.WT_JUN.20.T nonsynonymous</span>
+<span class="co">#&gt; 5 FOS.0.WT_JUN.30.R nonsynonymous</span>
+<span class="co">#&gt; 6 FOS.0.WT_JUN.30.G nonsynonymous</span>
+<span class="co">#&gt;                                                          sequenceAA</span>
+<span class="co">#&gt; 1 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_IARLEEKVKTLKPQNSELASTANMLREQVAQL</span>
+<span class="co">#&gt; 2 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_IARLEEKVKTLKLQNSELASTANMLREQVAQL</span>
+<span class="co">#&gt; 3 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_ISRLEEKVKTLKAQNSELASTANMLREQVAQL</span>
+<span class="co">#&gt; 4 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_IARLEEKVKTLKAQNSELATTANMLREQVAQL</span>
+<span class="co">#&gt; 5 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_IARLEEKVKTLKAQNSELASTANMLREQVRQL</span>
+<span class="co">#&gt; 6 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_IARLEEKVKTLKAQNSELASTANMLREQVGQL</span></code></pre></div>
 <p>Finally, the <code>errorStatistics</code> data.frame lists the number of matching and mismatching bases in the constant sequences, stratified by the phred quality score (from 0 to 99).</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">transInput</span><span class="op">$</span><span class="va">errorStatistics</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">transInput</span><span class="op">$</span><span class="va">errorStatistics</span><span class="op">[</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span> <span class="op">!=</span> <span class="fl">0</span>, <span class="op">]</span>
@@ -409,29 +440,39 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <div class="section level2">
 <h2 id="processing-cis-data">Processing CIS data<a class="anchor" aria-label="anchor" href="#processing-cis-data"></a>
 </h2>
-<p>Here, we illustrate the processing of the provided CIS experiment example data. As for the TRANS data, we filter out reads with any adapter match, an average phred quality below 20, any Ns in the UMI or variable sequence, more than one mutated codon, or a mutated codon ending with A or T (represented by the <code>NNW</code> value of the <code>forbiddenMutatedCodonsForward</code> argument). In this case, the forward and reverse variable sequences will be merged into one variable sequence (since <code>mergeForwardReverse</code> is <code>TRUE</code>) and thus only one wild type sequence is provided (the <code>wildTypeReverse</code> argument will be ignored if specified).</p>
+<p>Next, we illustrate the processing of the provided CIS experiment example data. Recall that in this case, both the forward and reverse variable sequence correspond to the same mutated <em>FOS</em> sequence, and before matching to the wild type sequence, the two components need to be merged to generate a single variable sequence (this is specified via the <code>mergeForwardReverse</code> argument). As for the TRANS data, we filter out reads with any adapter match, an average phred quality below 20, any Ns in the UMI or variable sequence, more than one mutated codon, or a mutated codon ending with A or T (represented by the <code>NNW</code> value of the <code>forbiddenMutatedCodonsForward</code> argument). Since the forward and reverse variable sequences are merged into one variable sequence, only one wild type sequence is provided (the <code>wildTypeReverse</code> argument will be ignored if specified).</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cisInput</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/digestFastqs.html">digestFastqs</a></span><span class="op">(</span>
     fastqForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">datadir</span>, <span class="st">"cisInput_1.fastq.gz"</span><span class="op">)</span>,
     fastqReverse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">datadir</span>, <span class="st">"cisInput_2.fastq.gz"</span><span class="op">)</span>,
     mergeForwardReverse <span class="op">=</span> <span class="cn">TRUE</span>, 
-    minOverlap <span class="op">=</span> <span class="fl">0</span>, maxOverlap <span class="op">=</span> <span class="fl">0</span>, 
-    maxFracMismatchOverlap <span class="op">=</span> <span class="fl">1</span>, greedyOverlap <span class="op">=</span> <span class="cn">TRUE</span>, 
-    revComplForward <span class="op">=</span> <span class="cn">FALSE</span>, revComplReverse <span class="op">=</span> <span class="cn">TRUE</span>,
+    minOverlap <span class="op">=</span> <span class="fl">0</span>, 
+    maxOverlap <span class="op">=</span> <span class="fl">0</span>, 
+    maxFracMismatchOverlap <span class="op">=</span> <span class="fl">1</span>, 
+    greedyOverlap <span class="op">=</span> <span class="cn">TRUE</span>, 
+    revComplForward <span class="op">=</span> <span class="cn">FALSE</span>, 
+    revComplReverse <span class="op">=</span> <span class="cn">TRUE</span>,
     adapterForward <span class="op">=</span> <span class="st">"GGAAGAGCACACGTC"</span>, 
     adapterReverse <span class="op">=</span> <span class="st">"GGAAGAGCGTCGTGT"</span>, 
-    elementsForward <span class="op">=</span> <span class="st">"SUCV"</span>, elementsReverse <span class="op">=</span> <span class="st">"SUCVS"</span>,
+    elementsForward <span class="op">=</span> <span class="st">"SUCV"</span>, 
+    elementsReverse <span class="op">=</span> <span class="st">"SUCVS"</span>,
     elementLengthsForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">18</span>, <span class="fl">96</span><span class="op">)</span>,
     elementLengthsReverse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">7</span>, <span class="fl">17</span>, <span class="fl">96</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>,
     constantForward <span class="op">=</span> <span class="st">"AACCGGAGGAGGGAGCTG"</span>,
     constantReverse <span class="op">=</span> <span class="st">"GAGTTCATCCTGGCAGC"</span>, 
-    primerForward <span class="op">=</span> <span class="st">""</span>, primerReverse <span class="op">=</span> <span class="st">""</span>,
-    avePhredMinForward <span class="op">=</span> <span class="fl">20</span>, avePhredMinReverse <span class="op">=</span> <span class="fl">20</span>,
-    variableNMaxForward <span class="op">=</span> <span class="fl">0</span>, variableNMaxReverse <span class="op">=</span> <span class="fl">0</span>, umiNMax <span class="op">=</span> <span class="fl">0</span>,
-    wildTypeForward <span class="op">=</span> <span class="st">"ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"</span>, 
+    primerForward <span class="op">=</span> <span class="st">""</span>, 
+    primerReverse <span class="op">=</span> <span class="st">""</span>,
+    avePhredMinForward <span class="op">=</span> <span class="fl">20</span>, 
+    avePhredMinReverse <span class="op">=</span> <span class="fl">20</span>,
+    variableNMaxForward <span class="op">=</span> <span class="fl">0</span>, 
+    variableNMaxReverse <span class="op">=</span> <span class="fl">0</span>, 
+    umiNMax <span class="op">=</span> <span class="fl">0</span>,
+    wildTypeForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>FOS <span class="op">=</span> <span class="st">"ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"</span><span class="op">)</span>, 
     wildTypeReverse <span class="op">=</span> <span class="st">""</span>, 
-    nbrMutatedCodonsMaxForward <span class="op">=</span> <span class="fl">1</span>, nbrMutatedCodonsMaxReverse <span class="op">=</span> <span class="fl">1</span>, 
-    forbiddenMutatedCodonsForward <span class="op">=</span> <span class="st">"NNW"</span>, forbiddenMutatedCodonsReverse <span class="op">=</span> <span class="st">"NNW"</span>,
+    nbrMutatedCodonsMaxForward <span class="op">=</span> <span class="fl">1</span>, 
+    nbrMutatedCodonsMaxReverse <span class="op">=</span> <span class="fl">1</span>, 
+    forbiddenMutatedCodonsForward <span class="op">=</span> <span class="st">"NNW"</span>, 
+    forbiddenMutatedCodonsReverse <span class="op">=</span> <span class="st">"NNW"</span>,
     mutNameDelimiter <span class="op">=</span> <span class="st">"."</span>, 
     constantMaxDistForward <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,
     constantMaxDistReverse <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,
@@ -503,7 +544,7 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span class="co">#&gt; [1] ""</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $wildTypeForward</span>
-<span class="co">#&gt;                                                                                                  f </span>
+<span class="co">#&gt;                                                                                                FOS </span>
 <span class="co">#&gt; "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA" </span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $wildTypeReverse</span>
@@ -556,6 +597,12 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span class="co">#&gt; $useTreeWTmatch</span>
 <span class="co">#&gt; [1] FALSE</span>
 <span class="co">#&gt; </span>
+<span class="co">#&gt; $collapseToWTForward</span>
+<span class="co">#&gt; [1] FALSE</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $collapseToWTReverse</span>
+<span class="co">#&gt; [1] FALSE</span>
+<span class="co">#&gt; </span>
 <span class="co">#&gt; $mutatedPhredMinForward</span>
 <span class="co">#&gt; [1] 0</span>
 <span class="co">#&gt; </span>
@@ -599,7 +646,7 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span class="co">#&gt; [1] 100000</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $processingInfo</span>
-<span class="co">#&gt; [1] "Processed by mutscan v0.2.26 on 2022-01-21 14:31:54"</span>
+<span class="co">#&gt; [1] "Processed by mutscan v0.2.28 on 2022-04-01 21:20:02"</span>
 <span class="va">cisInput</span><span class="op">$</span><span class="va">filterSummary</span>
 <span class="co">#&gt;   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span>
 <span class="co">#&gt; 1     1000           126              0                     0</span>
@@ -626,16 +673,16 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span class="co">#&gt; 28                  0</span>
 <span class="co">#&gt; 34                  1</span>
 <span class="co">#&gt; 38                 14</span></code></pre></div>
-<p>The <code>summaryTable</code> now provides the number of reads and unique UMIs observed for each variable sequence, and all values in the <code>mutNames</code> column will start with <code>f</code>.</p>
+<p>The <code>summaryTable</code> now provides the number of reads and unique UMIs observed for each variable sequence, and all values in the <code>mutNames</code> column will start with <code>FOS</code>.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cisInput</span><span class="op">$</span><span class="va">summaryTable</span><span class="op">)</span>
 <span class="co">#&gt;   mutantName</span>
-<span class="co">#&gt; 1     f.0.WT</span>
-<span class="co">#&gt; 2    f.1.ACC</span>
-<span class="co">#&gt; 3    f.1.ACG</span>
-<span class="co">#&gt; 4   f.11.CTG</span>
-<span class="co">#&gt; 5   f.13.GAC</span>
-<span class="co">#&gt; 6   f.13.GAG</span>
+<span class="co">#&gt; 1   FOS.0.WT</span>
+<span class="co">#&gt; 2  FOS.1.ACC</span>
+<span class="co">#&gt; 3  FOS.1.ACG</span>
+<span class="co">#&gt; 4 FOS.11.CTG</span>
+<span class="co">#&gt; 5 FOS.13.GAC</span>
+<span class="co">#&gt; 6 FOS.13.GAG</span>
 <span class="co">#&gt;                                                                                           sequence</span>
 <span class="co">#&gt; 1 ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
 <span class="co">#&gt; 2 ACCGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
@@ -643,18 +690,25 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span class="co">#&gt; 4 ACTGATACACTCCAAGCGGAGACAGACCAACTGGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
 <span class="co">#&gt; 5 ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGACGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
 <span class="co">#&gt; 6 ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGAGGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
-<span class="co">#&gt;   nbrMutBases nbrMutCodons nbrReads maxNbrReads nbrUmis</span>
-<span class="co">#&gt; 1           0            0       77          77      77</span>
-<span class="co">#&gt; 2           1            1        2           2       2</span>
-<span class="co">#&gt; 3           1            1        1           1       1</span>
-<span class="co">#&gt; 4           1            1        1           1       1</span>
-<span class="co">#&gt; 5           1            1        1           1       1</span>
-<span class="co">#&gt; 6           1            1        1           1       1</span></code></pre></div>
+<span class="co">#&gt;   nbrReads maxNbrReads nbrUmis nbrMutBases nbrMutCodons nbrMutAAs varLengths</span>
+<span class="co">#&gt; 1       77          77      77           0            0         0         96</span>
+<span class="co">#&gt; 2        2           2       2           1            1         0         96</span>
+<span class="co">#&gt; 3        1           1       1           1            1         0         96</span>
+<span class="co">#&gt; 4        1           1       1           1            1         0         96</span>
+<span class="co">#&gt; 5        1           1       1           1            1         0         96</span>
+<span class="co">#&gt; 6        1           1       1           1            1         1         96</span>
+<span class="co">#&gt;   mutantNameAA mutationTypes                       sequenceAA</span>
+<span class="co">#&gt; 1     FOS.0.WT               TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="co">#&gt; 2     FOS.0.WT        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="co">#&gt; 3     FOS.0.WT        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="co">#&gt; 4     FOS.0.WT        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="co">#&gt; 5     FOS.0.WT        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="co">#&gt; 6     FOS.13.E nonsynonymous TDTLQAETDQLEEEKSALQTEIANLLKEKEKL</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="processing-trans-data-with-primers">Processing TRANS data with primers<a class="anchor" aria-label="anchor" href="#processing-trans-data-with-primers"></a>
 </h2>
-<p>Here, we illustrate the processing of the provided example data, where the first read corresponds to one of 46 leucine zipper sequences, and the second read is a mutated <em>JUN</em> sequence. We first need to define the possible sequences for the forward read. If multiple wild type sequences are provided like here, <code>mutscan</code> will match each read against all of them and find the most similar one in each case.</p>
+<p>Finally, we illustrate the processing of the provided example data, where the first read corresponds to one of 46 leucine zipper sequences, and the second read is a mutated <em>JUN</em> sequence. We first need to define the possible sequences for the forward read. If multiple wild type sequences are provided like here, <code>mutscan</code> will match each read against all of them and find the most similar one for each read.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">leu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>
     ATF2 <span class="op">=</span> <span class="st">"GATCCTGATGAAAAAAGGAGAAAGTTTTTAGAGCGAAATAGAGCAGCAGCTTCAAGATGCCGACAAAAAAGGAAAGTCTGGGTTCAGTCTTTAGAGAAGAAAGCTGAAGACTTGAGTTCATTAAATGGTCAGCTGCAGAGTGAAGTCACCCTGCTGAGAAATGAAGTGGCACAGCTGAAACAGCTTCTTCTGGCT"</span>,
@@ -710,23 +764,31 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
     fastqForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">datadir</span>, <span class="st">"leujunt0_1.fastq.gz"</span><span class="op">)</span>,
     fastqReverse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">datadir</span>, <span class="st">"leujunt0_2.fastq.gz"</span><span class="op">)</span>,
     mergeForwardReverse <span class="op">=</span> <span class="cn">FALSE</span>, 
-    revComplForward <span class="op">=</span> <span class="cn">FALSE</span>, revComplReverse <span class="op">=</span> <span class="cn">FALSE</span>,
-    elementsForward <span class="op">=</span> <span class="st">"SPV"</span>, elementsReverse <span class="op">=</span> <span class="st">"SPVS"</span>,
+    revComplForward <span class="op">=</span> <span class="cn">FALSE</span>, 
+    revComplReverse <span class="op">=</span> <span class="cn">FALSE</span>,
+    elementsForward <span class="op">=</span> <span class="st">"SPV"</span>, 
+    elementsReverse <span class="op">=</span> <span class="st">"SPVS"</span>,
     elementLengthsForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">19</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>,
     elementLengthsReverse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">20</span>, <span class="fl">96</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>,
-    constantForward <span class="op">=</span> <span class="st">""</span>, constantReverse <span class="op">=</span> <span class="st">""</span>, 
-    adapterForward <span class="op">=</span> <span class="st">""</span>, adapterReverse <span class="op">=</span> <span class="st">""</span>, 
+    constantForward <span class="op">=</span> <span class="st">""</span>, 
+    constantReverse <span class="op">=</span> <span class="st">""</span>, 
+    adapterForward <span class="op">=</span> <span class="st">""</span>,
+    adapterReverse <span class="op">=</span> <span class="st">""</span>, 
     primerForward <span class="op">=</span> <span class="st">"GTCAGGTGGAGGCGGATCC"</span>, 
     primerReverse <span class="op">=</span> <span class="st">"GAAAAAGGAAGCTGGAGAGA"</span>,
-    avePhredMinForward <span class="op">=</span> <span class="fl">20</span>, avePhredMinReverse <span class="op">=</span> <span class="fl">20</span>, 
-    variableNMaxForward <span class="op">=</span> <span class="fl">0</span>, variableNMaxReverse <span class="op">=</span> <span class="fl">0</span>, umiNMax <span class="op">=</span> <span class="fl">0</span>,
+    avePhredMinForward <span class="op">=</span> <span class="fl">20</span>, 
+    avePhredMinReverse <span class="op">=</span> <span class="fl">20</span>, 
+    variableNMaxForward <span class="op">=</span> <span class="fl">0</span>, 
+    variableNMaxReverse <span class="op">=</span> <span class="fl">0</span>, 
+    umiNMax <span class="op">=</span> <span class="fl">0</span>,
     wildTypeForward <span class="op">=</span> <span class="va">leu</span>, 
-    wildTypeReverse <span class="op">=</span> <span class="st">"ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT"</span>, 
+    wildTypeReverse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>JUN <span class="op">=</span> <span class="st">"ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT"</span><span class="op">)</span>, 
     nbrMutatedCodonsMaxForward <span class="op">=</span> <span class="fl">0</span>, 
     nbrMutatedCodonsMaxReverse <span class="op">=</span> <span class="fl">1</span>, 
     forbiddenMutatedCodonsForward <span class="op">=</span> <span class="st">""</span>,
     forbiddenMutatedCodonsReverse <span class="op">=</span> <span class="st">"NNW"</span>,
-    mutatedPhredMinForward <span class="op">=</span> <span class="fl">0.0</span>, mutatedPhredMinReverse <span class="op">=</span> <span class="fl">0.0</span>,
+    mutatedPhredMinForward <span class="op">=</span> <span class="fl">0.0</span>, 
+    mutatedPhredMinReverse <span class="op">=</span> <span class="fl">0.0</span>,
     mutNameDelimiter <span class="op">=</span> <span class="st">"."</span>, 
     verbose <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span>
@@ -890,7 +952,7 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span class="co">#&gt; "CAGAAGGATGAAAAGTACTGGACAAGACGCAAGAAGAACAACGTGGCAGCTAAACGGTCACGGGATGCCCGGCGCCTGAAAGAGAATCAGATCACCATCCGGGCAGCCTTCCTGGAGAAGGAGAACACAGCCCTGCGGACGGAGGTGGCCGAGCTACGCAAGGAGGTGGGCAAGTGCAAGACCATCGTGTCCAAG" </span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $wildTypeReverse</span>
-<span class="co">#&gt;                                                                                                  r </span>
+<span class="co">#&gt;                                                                                                JUN </span>
 <span class="co">#&gt; "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT" </span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $constantForward</span>
@@ -937,6 +999,12 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span class="co">#&gt; $useTreeWTmatch</span>
 <span class="co">#&gt; [1] FALSE</span>
 <span class="co">#&gt; </span>
+<span class="co">#&gt; $collapseToWTForward</span>
+<span class="co">#&gt; [1] FALSE</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $collapseToWTReverse</span>
+<span class="co">#&gt; [1] FALSE</span>
+<span class="co">#&gt; </span>
 <span class="co">#&gt; $mutatedPhredMinForward</span>
 <span class="co">#&gt; [1] 0</span>
 <span class="co">#&gt; </span>
@@ -980,7 +1048,7 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span class="co">#&gt; [1] 100000</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $processingInfo</span>
-<span class="co">#&gt; [1] "Processed by mutscan v0.2.26 on 2022-01-21 14:31:54"</span>
+<span class="co">#&gt; [1] "Processed by mutscan v0.2.28 on 2022-04-01 21:20:02"</span>
 <span class="va">leujunt0</span><span class="op">$</span><span class="va">filterSummary</span>
 <span class="co">#&gt;   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span>
 <span class="co">#&gt; 1     1000             0            126                     0</span>
@@ -994,13 +1062,13 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span class="co">#&gt; 1                         0                              0         600</span></code></pre></div>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">leujunt0</span><span class="op">$</span><span class="va">summaryTable</span><span class="op">)</span>
-<span class="co">#&gt;           mutantName</span>
-<span class="co">#&gt; 1 ATF2.0.WT_r.13.CCC</span>
-<span class="co">#&gt; 2 ATF2.0.WT_r.20.TGG</span>
-<span class="co">#&gt; 3 ATF2.0.WT_r.32.CGG</span>
-<span class="co">#&gt; 4  ATF2.0.WT_r.4.ATG</span>
-<span class="co">#&gt; 5  ATF2.0.WT_r.5.ATG</span>
-<span class="co">#&gt; 6  ATF2.0.WT_r.6.GAG</span>
+<span class="co">#&gt;             mutantName</span>
+<span class="co">#&gt; 1 ATF2.0.WT_JUN.13.CCC</span>
+<span class="co">#&gt; 2 ATF2.0.WT_JUN.20.TGG</span>
+<span class="co">#&gt; 3 ATF2.0.WT_JUN.32.CGG</span>
+<span class="co">#&gt; 4  ATF2.0.WT_JUN.4.ATG</span>
+<span class="co">#&gt; 5  ATF2.0.WT_JUN.5.ATG</span>
+<span class="co">#&gt; 6  ATF2.0.WT_JUN.6.GAG</span>
 <span class="co">#&gt;                                                                                                                                                                                                     sequence</span>
 <span class="co">#&gt; 1 GATCCTGATGAAAAAAGGAGAAAGTTTTTAGAGCGAAATAGAGCAGCAGCTTCAAGATGCCGACAAAAAAGGAAAGTCTGGGTTCAGTCTTTAGAGAAGAAAGCT_ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAACCCCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT</span>
 <span class="co">#&gt; 2   GATCCTGATGAAAAAAGGAGAAAGTTTTTAGAGCGAAATAGAGCAGCAGCTTCAAGATGCCGACAAAAAAGGAAAGTCTGGGTTCAGTCTTTAGAGAAGAAAG_ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTGGACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT</span>
@@ -1008,38 +1076,60 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span class="co">#&gt; 4  GATCCTGATGAAAAAAGGAGAAAGTTTTTAGAGCGAAATAGAGCAGCAGCTTCAAGATGCCGACAAAAAAGGAAAGTCTGGGTTCAGTCTTTAGAGAAGAAAGC_ATCGCCCGGATGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT</span>
 <span class="co">#&gt; 5 GATCCTGATGAAAAAAGGAGAAAGTTTTTAGAGCGAAATAGAGCAGCAGCTTCAAGATGCCGACAAAAAAGGAAAGTCTGGGTTCAGTCTTTAGAGAAGAAAGCT_ATCGCCCGGCTGATGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT</span>
 <span class="co">#&gt; 6 GATCCTGATGAAAAAAGGAGAAAGTTTTTAGAGCGAAATAGAGCAGCAGCTTCAAGATGCCGACAAAAAAGGAAAGTCTGGGTTCAGTCTTTAGAGAAGAAAGCT_ATCGCCCGGCTGGAGGAGAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT</span>
-<span class="co">#&gt;   nbrMutBases nbrMutCodons nbrReads maxNbrReads nbrUmis</span>
-<span class="co">#&gt; 1           2            1        1           1       0</span>
-<span class="co">#&gt; 2           2            1        1           1       0</span>
-<span class="co">#&gt; 3           2            1        1           1       0</span>
-<span class="co">#&gt; 4           1            1        1           1       0</span>
-<span class="co">#&gt; 5           2            1        1           1       0</span>
-<span class="co">#&gt; 6           1            1        1           1       0</span></code></pre></div>
+<span class="co">#&gt;   nbrReads maxNbrReads nbrUmis nbrMutBases nbrMutCodons nbrMutAAs varLengths</span>
+<span class="co">#&gt; 1        1           1       0           2            1         1     105_96</span>
+<span class="co">#&gt; 2        1           1       0           2            1         1     103_96</span>
+<span class="co">#&gt; 3        1           1       0           2            1         1     104_96</span>
+<span class="co">#&gt; 4        1           1       0           1            1         1     104_96</span>
+<span class="co">#&gt; 5        1           1       0           2            1         1     105_96</span>
+<span class="co">#&gt; 6        1           1       0           1            1         0     105_96</span>
+<span class="co">#&gt;         mutantNameAA mutationTypes</span>
+<span class="co">#&gt; 1 ATF2.0.WT_JUN.13.P nonsynonymous</span>
+<span class="co">#&gt; 2 ATF2.0.WT_JUN.20.W nonsynonymous</span>
+<span class="co">#&gt; 3 ATF2.0.WT_JUN.32.R nonsynonymous</span>
+<span class="co">#&gt; 4  ATF2.0.WT_JUN.4.M nonsynonymous</span>
+<span class="co">#&gt; 5  ATF2.0.WT_JUN.5.M nonsynonymous</span>
+<span class="co">#&gt; 6 ATF2.0.WT_JUN.0.WT        silent</span>
+<span class="co">#&gt;                                                             sequenceAA</span>
+<span class="co">#&gt; 1 DPDEKRRKFLERNRAAASRCRQKRKVWVQSLEKKA_IARLEEKVKTLKPQNSELASTANMLREQVAQL</span>
+<span class="co">#&gt; 2  DPDEKRRKFLERNRAAASRCRQKRKVWVQSLEKK_VARLEEKVKTLKAQNSELAWTANMLREQVAQL</span>
+<span class="co">#&gt; 3  DPDEKRRKFLERNRAAASRCRQKRKVWVQSLEKK_EARLEEKVKTLKAQNSELASTANMLREQVAQR</span>
+<span class="co">#&gt; 4  DPDEKRRKFLERNRAAASRCRQKRKVWVQSLEKK_EARMEEKVKTLKAQNSELASTANMLREQVAQL</span>
+<span class="co">#&gt; 5 DPDEKRRKFLERNRAAASRCRQKRKVWVQSLEKKA_IARLMEKVKTLKAQNSELASTANMLREQVAQL</span>
+<span class="co">#&gt; 6 DPDEKRRKFLERNRAAASRCRQKRKVWVQSLEKKA_IARLEEKVKTLKAQNSELASTANMLREQVAQL</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="combining-samples">Combining samples<a class="anchor" aria-label="anchor" href="#combining-samples"></a>
 </h2>
-<p>The <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> function processes each sample (pair of FASTQ files) separately. In order to prepare the data for downstream statistical analysis and plotting, the <code><a href="../reference/summarizeExperiment.html">summarizeExperiment()</a></code> function takes a named list of outputs from <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code>, and a <code>data.frame</code> with sample annotations, and generates a , with an <code>assay</code> containing either UMI or read counts. To illustrate this, we process also the output sample for the TRANS experiment for which we processed the input sample above, and feed both samples to <code><a href="../reference/summarizeExperiment.html">summarizeExperiment()</a></code>.</p>
+<p>The <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> function processes each sample (pair of FASTQ files) separately. In order to prepare the data for downstream statistical analysis and plotting, the <code><a href="../reference/summarizeExperiment.html">summarizeExperiment()</a></code> function takes a named list of outputs from <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code>, and a <code>data.frame</code> with sample annotations, and generates a <code>SummarizedExperiment</code> object, with an <code>assay</code> containing either UMI or read counts. To illustrate this, we process also the output sample for the TRANS experiment for which we processed the input sample above, and feed both outputs to <code><a href="../reference/summarizeExperiment.html">summarizeExperiment()</a></code>.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">transOutput</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/digestFastqs.html">digestFastqs</a></span><span class="op">(</span>
     fastqForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">datadir</span>, <span class="st">"transOutput_1.fastq.gz"</span><span class="op">)</span>,
     fastqReverse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">datadir</span>, <span class="st">"transOutput_2.fastq.gz"</span><span class="op">)</span>,
     mergeForwardReverse <span class="op">=</span> <span class="cn">FALSE</span>, 
-    revComplForward <span class="op">=</span> <span class="cn">FALSE</span>, revComplReverse <span class="op">=</span> <span class="cn">FALSE</span>,
+    revComplForward <span class="op">=</span> <span class="cn">FALSE</span>, 
+    revComplReverse <span class="op">=</span> <span class="cn">FALSE</span>,
     adapterForward <span class="op">=</span> <span class="st">"GGAAGAGCACACGTC"</span>, 
     adapterReverse <span class="op">=</span> <span class="st">"GGAAGAGCGTCGTGT"</span>, 
-    elementsForward <span class="op">=</span> <span class="st">"SUCV"</span>, elementsReverse <span class="op">=</span> <span class="st">"SUCV"</span>,
+    elementsForward <span class="op">=</span> <span class="st">"SUCV"</span>, 
+    elementsReverse <span class="op">=</span> <span class="st">"SUCV"</span>,
     elementLengthsForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">18</span>, <span class="fl">96</span><span class="op">)</span>,
     elementLengthsReverse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">8</span>, <span class="fl">20</span>, <span class="fl">96</span><span class="op">)</span>,
     constantForward <span class="op">=</span> <span class="st">"AACCGGAGGAGGGAGCTG"</span>,
     constantReverse <span class="op">=</span> <span class="st">"GAAAAAGGAAGCTGGAGAGA"</span>, 
-    primerForward <span class="op">=</span> <span class="st">""</span>, primerReverse <span class="op">=</span> <span class="st">""</span>,
-    avePhredMinForward <span class="op">=</span> <span class="fl">20</span>, avePhredMinReverse <span class="op">=</span> <span class="fl">20</span>,
-    variableNMaxForward <span class="op">=</span> <span class="fl">0</span>, variableNMaxReverse <span class="op">=</span> <span class="fl">0</span>, umiNMax <span class="op">=</span> <span class="fl">0</span>,
-    wildTypeForward <span class="op">=</span> <span class="st">"ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"</span>, 
-    wildTypeReverse <span class="op">=</span> <span class="st">"ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT"</span>, 
-    nbrMutatedCodonsMaxForward <span class="op">=</span> <span class="fl">1</span>, nbrMutatedCodonsMaxReverse <span class="op">=</span> <span class="fl">1</span>, 
-    forbiddenMutatedCodonsForward <span class="op">=</span> <span class="st">"NNW"</span>, forbiddenMutatedCodonsReverse <span class="op">=</span> <span class="st">"NNW"</span>,
+    primerForward <span class="op">=</span> <span class="st">""</span>, 
+    primerReverse <span class="op">=</span> <span class="st">""</span>,
+    avePhredMinForward <span class="op">=</span> <span class="fl">20</span>, 
+    avePhredMinReverse <span class="op">=</span> <span class="fl">20</span>,
+    variableNMaxForward <span class="op">=</span> <span class="fl">0</span>, 
+    variableNMaxReverse <span class="op">=</span> <span class="fl">0</span>, 
+    umiNMax <span class="op">=</span> <span class="fl">0</span>,
+    wildTypeForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>FOS <span class="op">=</span> <span class="st">"ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"</span><span class="op">)</span>, 
+    wildTypeReverse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>JUN <span class="op">=</span> <span class="st">"ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT"</span><span class="op">)</span>, 
+    nbrMutatedCodonsMaxForward <span class="op">=</span> <span class="fl">1</span>, 
+    nbrMutatedCodonsMaxReverse <span class="op">=</span> <span class="fl">1</span>, 
+    forbiddenMutatedCodonsForward <span class="op">=</span> <span class="st">"NNW"</span>, 
+    forbiddenMutatedCodonsReverse <span class="op">=</span> <span class="st">"NNW"</span>,
     mutNameDelimiter <span class="op">=</span> <span class="st">"."</span>, 
     constantMaxDistForward <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,
     constantMaxDistReverse <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,
@@ -1061,42 +1151,58 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span class="co">## respectively.</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">se</span>, <span class="st">"counts"</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; 6 x 2 sparse Matrix of class "dgTMatrix"</span>
-<span class="co">#&gt;                 sample1 sample2</span>
-<span class="co">#&gt; f.0.WT_r.13.CCC       1       .</span>
-<span class="co">#&gt; f.0.WT_r.13.CTC       1       .</span>
-<span class="co">#&gt; f.0.WT_r.2.TCC        1       .</span>
-<span class="co">#&gt; f.0.WT_r.20.ACC       1       .</span>
-<span class="co">#&gt; f.0.WT_r.30.AGG       1       .</span>
-<span class="co">#&gt; f.0.WT_r.30.GGG       1       .</span>
+<span class="co">#&gt;                     sample1 sample2</span>
+<span class="co">#&gt; FOS.0.WT_JUN.0.WT         .       1</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.CCC       1       .</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.CTC       1       .</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.GCG       .       1</span>
+<span class="co">#&gt; FOS.0.WT_JUN.2.TCC        1       .</span>
+<span class="co">#&gt; FOS.0.WT_JUN.20.ACC       1       .</span>
 <span class="fu">Matrix</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">se</span>, <span class="st">"counts"</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; sample1 sample2 </span>
 <span class="co">#&gt;     279     285</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">rowData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; DataFrame with 6 rows and 8 columns</span>
-<span class="co">#&gt;                      mutantName               sequence   nbrMutBases</span>
-<span class="co">#&gt;                     &lt;character&gt;            &lt;character&gt; &lt;IntegerList&gt;</span>
-<span class="co">#&gt; f.0.WT_r.13.CCC f.0.WT_r.13.CCC ACTGATACACTCCAAGCGGA..             2</span>
-<span class="co">#&gt; f.0.WT_r.13.CTC f.0.WT_r.13.CTC ACTGATACACTCCAAGCGGA..             3</span>
-<span class="co">#&gt; f.0.WT_r.2.TCC   f.0.WT_r.2.TCC ACTGATACACTCCAAGCGGA..             1</span>
-<span class="co">#&gt; f.0.WT_r.20.ACC f.0.WT_r.20.ACC ACTGATACACTCCAAGCGGA..             1</span>
-<span class="co">#&gt; f.0.WT_r.30.AGG f.0.WT_r.30.AGG ACTGATACACTCCAAGCGGA..             3</span>
-<span class="co">#&gt; f.0.WT_r.30.GGG f.0.WT_r.30.GGG ACTGATACACTCCAAGCGGA..             2</span>
-<span class="co">#&gt;                  nbrMutCodons minNbrMutBases maxNbrMutBases minNbrMutCodons</span>
-<span class="co">#&gt;                 &lt;IntegerList&gt;      &lt;integer&gt;      &lt;integer&gt;       &lt;integer&gt;</span>
-<span class="co">#&gt; f.0.WT_r.13.CCC             1              2              2               1</span>
-<span class="co">#&gt; f.0.WT_r.13.CTC             1              3              3               1</span>
-<span class="co">#&gt; f.0.WT_r.2.TCC              1              1              1               1</span>
-<span class="co">#&gt; f.0.WT_r.20.ACC             1              1              1               1</span>
-<span class="co">#&gt; f.0.WT_r.30.AGG             1              3              3               1</span>
-<span class="co">#&gt; f.0.WT_r.30.GGG             1              2              2               1</span>
-<span class="co">#&gt;                 maxNbrMutCodons</span>
-<span class="co">#&gt;                       &lt;integer&gt;</span>
-<span class="co">#&gt; f.0.WT_r.13.CCC               1</span>
-<span class="co">#&gt; f.0.WT_r.13.CTC               1</span>
-<span class="co">#&gt; f.0.WT_r.2.TCC                1</span>
-<span class="co">#&gt; f.0.WT_r.20.ACC               1</span>
-<span class="co">#&gt; f.0.WT_r.30.AGG               1</span>
-<span class="co">#&gt; f.0.WT_r.30.GGG               1</span>
+<span class="co">#&gt; DataFrame with 6 rows and 15 columns</span>
+<span class="co">#&gt;                              mutantName               sequence nbrMutBases</span>
+<span class="co">#&gt;                             &lt;character&gt;            &lt;character&gt; &lt;character&gt;</span>
+<span class="co">#&gt; FOS.0.WT_JUN.0.WT     FOS.0.WT_JUN.0.WT ACTGATACACTCCAAGCGGA..           0</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.CCC FOS.0.WT_JUN.13.CCC ACTGATACACTCCAAGCGGA..           2</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.CTC FOS.0.WT_JUN.13.CTC ACTGATACACTCCAAGCGGA..           3</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.GCG FOS.0.WT_JUN.13.GCG ACTGATACACTCCAAGCGGA..           1</span>
+<span class="co">#&gt; FOS.0.WT_JUN.2.TCC   FOS.0.WT_JUN.2.TCC ACTGATACACTCCAAGCGGA..           1</span>
+<span class="co">#&gt; FOS.0.WT_JUN.20.ACC FOS.0.WT_JUN.20.ACC ACTGATACACTCCAAGCGGA..           1</span>
+<span class="co">#&gt;                     minNbrMutBases maxNbrMutBases nbrMutCodons minNbrMutCodons</span>
+<span class="co">#&gt;                          &lt;integer&gt;      &lt;integer&gt;  &lt;character&gt;       &lt;integer&gt;</span>
+<span class="co">#&gt; FOS.0.WT_JUN.0.WT                0              0            0               0</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.CCC              2              2            1               1</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.CTC              3              3            1               1</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.GCG              1              1            1               1</span>
+<span class="co">#&gt; FOS.0.WT_JUN.2.TCC               1              1            1               1</span>
+<span class="co">#&gt; FOS.0.WT_JUN.20.ACC              1              1            1               1</span>
+<span class="co">#&gt;                     maxNbrMutCodons   nbrMutAAs minNbrMutAAs maxNbrMutAAs</span>
+<span class="co">#&gt;                           &lt;integer&gt; &lt;character&gt;    &lt;integer&gt;    &lt;integer&gt;</span>
+<span class="co">#&gt; FOS.0.WT_JUN.0.WT                 0           0            0            0</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.CCC               1           1            1            1</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.CTC               1           1            1            1</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.GCG               1           0            0            0</span>
+<span class="co">#&gt; FOS.0.WT_JUN.2.TCC                1           1            1            1</span>
+<span class="co">#&gt; FOS.0.WT_JUN.20.ACC               1           1            1            1</span>
+<span class="co">#&gt;                                 sequenceAA      mutantNameAA mutationTypes</span>
+<span class="co">#&gt;                                &lt;character&gt;       &lt;character&gt;   &lt;character&gt;</span>
+<span class="co">#&gt; FOS.0.WT_JUN.0.WT   TDTLQAETDQLEDEKSALQT.. FOS.0.WT_JUN.0.WT              </span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.CCC TDTLQAETDQLEDEKSALQT.. FOS.0.WT_JUN.13.P nonsynonymous</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.CTC TDTLQAETDQLEDEKSALQT.. FOS.0.WT_JUN.13.L nonsynonymous</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.GCG TDTLQAETDQLEDEKSALQT.. FOS.0.WT_JUN.0.WT        silent</span>
+<span class="co">#&gt; FOS.0.WT_JUN.2.TCC  TDTLQAETDQLEDEKSALQT..  FOS.0.WT_JUN.2.S nonsynonymous</span>
+<span class="co">#&gt; FOS.0.WT_JUN.20.ACC TDTLQAETDQLEDEKSALQT.. FOS.0.WT_JUN.20.T nonsynonymous</span>
+<span class="co">#&gt;                      varLengths</span>
+<span class="co">#&gt;                     &lt;character&gt;</span>
+<span class="co">#&gt; FOS.0.WT_JUN.0.WT         96_96</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.CCC       96_96</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.CTC       96_96</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.GCG       96_96</span>
+<span class="co">#&gt; FOS.0.WT_JUN.2.TCC        96_96</span>
+<span class="co">#&gt; FOS.0.WT_JUN.20.ACC       96_96</span>
 <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span>
 <span class="co">#&gt; DataFrame with 2 rows and 20 columns</span>
 <span class="co">#&gt;                Name   Condition   Replicate        OD  nbrTotal f1_nbrAdapter</span>
@@ -1136,13 +1242,13 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <code class="sourceCode R"><span class="va">se_collapsed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/collapseMutantsByAA.html">collapseMutantsByAA</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">se_collapsed</span>, <span class="st">"counts"</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; 6 x 2 sparse Matrix of class "dgCMatrix"</span>
-<span class="co">#&gt;               sample1 sample2</span>
-<span class="co">#&gt; f.0.NA_r.0.NA       .       1</span>
-<span class="co">#&gt; f.0.NA_r.13.A       .       1</span>
-<span class="co">#&gt; f.0.NA_r.13.L       1       .</span>
-<span class="co">#&gt; f.0.NA_r.13.P       1       .</span>
-<span class="co">#&gt; f.0.NA_r.2.S        1       .</span>
-<span class="co">#&gt; f.0.NA_r.20.T       1       .</span>
+<span class="co">#&gt;                   sample1 sample2</span>
+<span class="co">#&gt; FOS.0.WT_JUN.0.WT       1       3</span>
+<span class="co">#&gt; FOS.0.WT_JUN.10.S       .       1</span>
+<span class="co">#&gt; FOS.0.WT_JUN.12.L       .       1</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.K       1       .</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.L       1       .</span>
+<span class="co">#&gt; FOS.0.WT_JUN.13.P       1       .</span>
 <span class="fu">Matrix</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">se_collapsed</span>, <span class="st">"counts"</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; sample1 sample2 </span>
 <span class="co">#&gt;     279     285</span>
@@ -1202,115 +1308,112 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <p><img src="mutscan_files/figure-html/unnamed-chunk-19-2.png" width="700"></p>
 <p>Finally, we can create a full QC report as follows:</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/generateQCReport.html">generateQCReport</a></span><span class="op">(</span><span class="va">se</span>, outFile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">"html"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="../reference/generateQCReport.html">generateQCReport</a></span><span class="op">(</span><span class="va">se</span>, outFile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".html"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="calculating-ppi-scores">Calculating PPI scores<a class="anchor" aria-label="anchor" href="#calculating-ppi-scores"></a>
+<h2 id="calculating-fitness-scores">Calculating fitness scores<a class="anchor" aria-label="anchor" href="#calculating-fitness-scores"></a>
 </h2>
-<p>The function <code><a href="../reference/calculatePPIScore.html">calculatePPIScore()</a></code> can be used to calculate PPI scores as described in <span class="citation">[@Diss2018]</span>. The function requires the user to specify a <code>pairingCol</code>, containing the replicate ID for each sample; one or more <code>ODCols</code>, containing the optical density for each sample, and a <code>comparison</code>, which is a character vector of length 3 specifying the comparison to perform, of the form (<code>groupColumn</code>, <code>numerator</code>, <code>denominator</code>). Here, <code>groupColumn</code> is the name of the column in <code>colData(se)</code> that contains the grouping information, and <code>numerator</code> and <code>denominator</code> specify the values of this column representing the two groups to be compared.</p>
-<p>Here, we illustrate the application of <code><a href="../reference/calculatePPIScore.html">calculatePPIScore()</a></code> on the SummarizedExperiment object containing all the three CIS replicates from <span class="citation">[@Diss2018]</span>.</p>
+<p>The function <code><a href="../reference/calculateFitnessScore.html">calculateFitnessScore()</a></code> can be used to calculate fitness scores as described in <span class="citation">[@Diss2018]</span>. The function requires the user to specify a <code>pairingCol</code>, containing the replicate ID for each sample; one or more <code>ODCols</code>, containing the optical density for each sample, and a <code>comparison</code>, which is a character vector of length 3 specifying the comparison to perform, of the form (<code>groupColumn</code>, <code>numerator</code>, <code>denominator</code>). Here, <code>groupColumn</code> is the name of the column in <code>colData(se)</code> that contains the grouping information, and <code>numerator</code> and <code>denominator</code> specify the values of this column representing the two groups to be compared.</p>
+<p>Here, we illustrate the application of <code><a href="../reference/calculateFitnessScore.html">calculateFitnessScore()</a></code> on the SummarizedExperiment object containing all the three CIS replicates from <span class="citation">[@Diss2018]</span>.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">se_collapsed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/collapseMutantsByAA.html">collapseMutantsByAA</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span>
-<span class="va">ppis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calculatePPIScore.html">calculatePPIScore</a></span><span class="op">(</span>se <span class="op">=</span> <span class="va">se_collapsed</span>, pairingCol <span class="op">=</span> <span class="st">"Replicate"</span>, 
-                          ODCols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"OD1"</span>, <span class="st">"OD2"</span><span class="op">)</span>,
-                          comparison <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Condition"</span>, <span class="st">"cis_output"</span>, <span class="st">"cis_input"</span><span class="op">)</span>,
-                          WTrows <span class="op">=</span> <span class="st">"f.0.NA"</span><span class="op">)</span>
+<span class="va">ppis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calculateFitnessScore.html">calculateFitnessScore</a></span><span class="op">(</span>se <span class="op">=</span> <span class="va">se_collapsed</span>, pairingCol <span class="op">=</span> <span class="st">"Replicate"</span>, 
+                              ODCols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"OD1"</span>, <span class="st">"OD2"</span><span class="op">)</span>,
+                              comparison <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Condition"</span>, <span class="st">"cis_output"</span>, <span class="st">"cis_input"</span><span class="op">)</span>,
+                              WTrows <span class="op">=</span> <span class="st">"f.0.WT"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ppis</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">ppis</span><span class="op">)</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span>
 <span class="co">#&gt;        cis_output_vs_cis_input_repl1 cis_output_vs_cis_input_repl2</span>
-<span class="co">#&gt; f.8.M                       1.078839                      1.077029</span>
-<span class="co">#&gt; f.8.A                       1.077068                      1.087273</span>
-<span class="co">#&gt; f.2.Q                       1.093031                      1.065204</span>
-<span class="co">#&gt; f.3.M                       1.083608                      1.077612</span>
-<span class="co">#&gt; f.9.K                       1.085180                      1.037331</span>
-<span class="co">#&gt; f.13.K                      1.042529                      1.045749</span>
+<span class="co">#&gt; f.8.M                       1.079682                      1.077555</span>
+<span class="co">#&gt; f.8.A                       1.077780                      1.087804</span>
+<span class="co">#&gt; f.2.Q                       1.093753                      1.065724</span>
+<span class="co">#&gt; f.3.M                       1.084323                      1.078138</span>
+<span class="co">#&gt; f.9.K                       1.085896                      1.037838</span>
+<span class="co">#&gt; f.13.K                      1.043217                      1.046260</span>
 <span class="co">#&gt;        cis_output_vs_cis_input_repl3</span>
-<span class="co">#&gt; f.8.M                       1.116606</span>
-<span class="co">#&gt; f.8.A                       1.102605</span>
-<span class="co">#&gt; f.2.Q                       1.064832</span>
-<span class="co">#&gt; f.3.M                       1.050167</span>
-<span class="co">#&gt; f.9.K                       1.061854</span>
-<span class="co">#&gt; f.13.K                      1.094965</span>
+<span class="co">#&gt; f.8.M                       1.117395</span>
+<span class="co">#&gt; f.8.A                       1.103149</span>
+<span class="co">#&gt; f.2.Q                       1.065259</span>
+<span class="co">#&gt; f.3.M                       1.050588</span>
+<span class="co">#&gt; f.9.K                       1.062279</span>
+<span class="co">#&gt; f.13.K                      1.095404</span>
 
 <span class="co">## The PPI score for the WT sequence is 1, by construction</span>
-<span class="va">ppis</span><span class="op">[</span><span class="st">"f.0.NA"</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span>
+<span class="va">ppis</span><span class="op">[</span><span class="st">"f.0.WT"</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span>
 <span class="co">#&gt;        cis_output_vs_cis_input_repl1 cis_output_vs_cis_input_repl2</span>
-<span class="co">#&gt; f.0.NA                             1                             1</span>
+<span class="co">#&gt; f.0.WT                             1                             1</span>
 <span class="co">#&gt;        cis_output_vs_cis_input_repl3</span>
-<span class="co">#&gt; f.0.NA                             1</span></code></pre></div>
+<span class="co">#&gt; f.0.WT                             1</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="scoring-mutations-with-edger-or-limma">Scoring mutations with <code>edgeR</code> or <code>limma</code><a class="anchor" aria-label="anchor" href="#scoring-mutations-with-edger-or-limma"></a>
 </h2>
-<p>As an alternative to the PPI scoring, <code>mutscan</code> can be used to model the observed counts using a generalized linear model (with <code>edgeR</code>) or a general linear model (with <code>limma</code>) and estimate a logFC and a p-value for the enrichment of each variant betwen two conditions (or more generally, in association with any predictor), compared to one or more WT sequences. Note that for this, at least two replicates are required.</p>
+<p>As an alternative to the fitness scoring, <code>mutscan</code> can be used to model the observed counts using a generalized linear model (with <code>edgeR</code>) or a general linear model (with <code>limma</code>) and estimate a logFC and a p-value for the enrichment of each variant betwen two conditions (or more generally, in association with any predictor), compared to one or more WT sequences. Note that for this, at least two replicates are required.</p>
 <p>We start by looking at the design matrix, in order to determine which of the coefficients to specify for the testing in <code><a href="../reference/calculateRelativeFC.html">calculateRelativeFC()</a></code>. For more information about how to set up and interpret design matrices in <code>edgeR</code> or <code>limma</code>, see e.g. <a href="https://f1000research.com/articles/9-1444" class="external-link">Law et al (2020)</a>, or <a href="https://f1000research.com/articles/9-512" class="external-link">Soneson et al (2020)</a>.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Replicate</span> <span class="op">+</span> <span class="va">Condition</span>,
              data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">se_collapsed</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt;            (Intercept) Replicate2 Replicate3 Conditioncis_output</span>
-<span class="co">#&gt; SRR5952435           1          0          0                   0</span>
-<span class="co">#&gt; SRR5952436           1          1          0                   0</span>
-<span class="co">#&gt; SRR5952437           1          0          1                   0</span>
-<span class="co">#&gt; SRR5952438           1          0          0                   1</span>
-<span class="co">#&gt; SRR5952439           1          1          0                   1</span>
-<span class="co">#&gt; SRR5952440           1          0          1                   1</span>
+<span class="co">#&gt;            (Intercept) Replicate Conditioncis_output</span>
+<span class="co">#&gt; SRR5952435           1         1                   0</span>
+<span class="co">#&gt; SRR5952436           1         2                   0</span>
+<span class="co">#&gt; SRR5952437           1         3                   0</span>
+<span class="co">#&gt; SRR5952438           1         1                   1</span>
+<span class="co">#&gt; SRR5952439           1         2                   1</span>
+<span class="co">#&gt; SRR5952440           1         3                   1</span>
 <span class="co">#&gt; attr(,"assign")</span>
-<span class="co">#&gt; [1] 0 1 1 2</span>
+<span class="co">#&gt; [1] 0 1 2</span>
 <span class="co">#&gt; attr(,"contrasts")</span>
-<span class="co">#&gt; attr(,"contrasts")$Replicate</span>
-<span class="co">#&gt; [1] "contr.treatment"</span>
-<span class="co">#&gt; </span>
 <span class="co">#&gt; attr(,"contrasts")$Condition</span>
 <span class="co">#&gt; [1] "contr.treatment"</span></code></pre></div>
 <p>Next, we apply either <code>edgeR</code> or <code>limma</code> to extract the logFCs of the mutants, compared to the wildtype sequence.</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## edgeR</span>
 <span class="va">edger_scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calculateRelativeFC.html">calculateRelativeFC</a></span><span class="op">(</span>
-  se <span class="op">=</span> <span class="va">se_collapsed</span>,
-  design <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Replicate</span> <span class="op">+</span> <span class="va">Condition</span>,
-                        data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">se_collapsed</span><span class="op">)</span><span class="op">)</span>,
-  coef <span class="op">=</span> <span class="st">"Conditioncis_output"</span>, pseudocount <span class="op">=</span> <span class="fl">1</span>, WTrows <span class="op">=</span> <span class="st">"f.0.NA"</span>,
-  method <span class="op">=</span> <span class="st">"edgeR"</span><span class="op">)</span>
+    se <span class="op">=</span> <span class="va">se_collapsed</span>,
+    design <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Replicate</span> <span class="op">+</span> <span class="va">Condition</span>,
+                          data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">se_collapsed</span><span class="op">)</span><span class="op">)</span>,
+    coef <span class="op">=</span> <span class="st">"Conditioncis_output"</span>, pseudocount <span class="op">=</span> <span class="fl">1</span>, WTrows <span class="op">=</span> <span class="st">"f.0.WT"</span>,
+    method <span class="op">=</span> <span class="st">"edgeR"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">edger_scores</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">edger_scores</span><span class="op">$</span><span class="va">PValue</span><span class="op">)</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span>
 <span class="co">#&gt;            logFC   logCPM        F       PValue          FDR logFC_shrunk</span>
-<span class="co">#&gt; f.27.* -4.508548 11.12488 21848.85 8.040788e-23 2.396903e-20    -4.507885</span>
-<span class="co">#&gt; f.7.G  -4.189336 11.14507 21833.58 8.078333e-23 2.396903e-20    -4.188817</span>
-<span class="co">#&gt; f.28.G -3.950089 11.21692 20884.26 1.086210e-22 2.396903e-20    -3.949669</span>
-<span class="co">#&gt; f.28.* -4.392247 11.14109 19422.47 1.761245e-22 2.914860e-20    -4.391639</span>
-<span class="co">#&gt; f.7.*  -4.465149 10.87741 18497.72 2.437401e-22 3.227119e-20    -4.464383</span>
-<span class="co">#&gt; f.14.* -4.378119 10.90439 17510.04 3.512726e-22 3.742515e-20    -4.377415</span>
+<span class="co">#&gt; f.27.* -4.503490 11.12474 19954.36 3.500910e-19 1.298895e-16    -4.502844</span>
+<span class="co">#&gt; f.7.G  -4.184509 11.14499 19421.34 4.059046e-19 1.298895e-16    -4.183978</span>
+<span class="co">#&gt; f.28.* -4.387531 11.14116 17094.10 8.152093e-19 1.365013e-16    -4.386918</span>
+<span class="co">#&gt; f.7.*  -4.460199 10.87738 16070.29 1.142351e-18 1.365013e-16    -4.459434</span>
+<span class="co">#&gt; f.28.G -3.942549 11.21716 15792.11 1.256685e-18 1.365013e-16    -3.942146</span>
+<span class="co">#&gt; f.14.* -4.373690 10.90447 15739.73 1.279700e-18 1.365013e-16    -4.372998</span>
 <span class="co">## As before, the WT sequence has a logFC close to 0, by construction</span>
-<span class="va">edger_scores</span><span class="op">[</span><span class="st">"f.0.NA"</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span>
-<span class="co">#&gt;                logFC   logCPM             F PValue FDR logFC_shrunk</span>
-<span class="co">#&gt; f.0.NA -4.230076e-15 18.99263 -1.549382e-08      1   1 1.061987e-15</span>
+<span class="va">edger_scores</span><span class="op">[</span><span class="st">"f.0.WT"</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span>
+<span class="co">#&gt;               logFC   logCPM F PValue FDR  logFC_shrunk</span>
+<span class="co">#&gt; f.0.WT 8.767248e-16 19.30433 0      1   1 -2.328145e-15</span>
 
 <span class="co">## limma</span>
 <span class="va">limma_scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calculateRelativeFC.html">calculateRelativeFC</a></span><span class="op">(</span>
-  se <span class="op">=</span> <span class="va">se_collapsed</span>,
-  design <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Replicate</span> <span class="op">+</span> <span class="va">Condition</span>,
-                        data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">se_collapsed</span><span class="op">)</span><span class="op">)</span>,
-  coef <span class="op">=</span> <span class="st">"Conditioncis_output"</span>, pseudocount <span class="op">=</span> <span class="fl">1</span>, WTrows <span class="op">=</span> <span class="st">"f.0.NA"</span>,
-  method <span class="op">=</span> <span class="st">"limma"</span><span class="op">)</span>
+    se <span class="op">=</span> <span class="va">se_collapsed</span>,
+    design <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Replicate</span> <span class="op">+</span> <span class="va">Condition</span>,
+                          data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">se_collapsed</span><span class="op">)</span><span class="op">)</span>,
+    coef <span class="op">=</span> <span class="st">"Conditioncis_output"</span>, pseudocount <span class="op">=</span> <span class="fl">1</span>, WTrows <span class="op">=</span> <span class="st">"f.0.WT"</span>,
+    method <span class="op">=</span> <span class="st">"limma"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">limma_scores</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">limma_scores</span><span class="op">$</span><span class="va">P.Value</span><span class="op">)</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span>
 <span class="co">#&gt;            logFC      CI.L      CI.R   AveExpr         t      P.Value</span>
-<span class="co">#&gt; f.4.F  -2.901012 -2.972503 -2.829522 11.116487 -83.86175 1.550530e-30</span>
-<span class="co">#&gt; f.28.G -3.949985 -4.048503 -3.851466 10.298829 -82.85952 2.052780e-30</span>
-<span class="co">#&gt; f.7.G  -4.189243 -4.295813 -4.082673 10.124214 -81.23885 3.254876e-30</span>
-<span class="co">#&gt; f.27.* -4.508302 -4.624500 -4.392103  9.963169 -80.18203 4.417988e-30</span>
-<span class="co">#&gt; f.28.* -4.392002 -4.505390 -4.278614 10.031157 -80.04944 4.591925e-30</span>
-<span class="co">#&gt; f.4.V  -3.391374 -3.480293 -3.302456 10.866682 -78.82166 6.585796e-30</span>
+<span class="co">#&gt; f.27.* -4.503226 -4.619422 -4.387029  9.963039 -85.86612 3.260493e-16</span>
+<span class="co">#&gt; f.28.* -4.387913 -4.502516 -4.273311 10.031042 -84.83135 3.699633e-16</span>
+<span class="co">#&gt; f.7.G  -4.183232 -4.293439 -4.073026 10.124077 -84.10010 4.048945e-16</span>
+<span class="co">#&gt; f.4.F  -2.897268 -2.973849 -2.820687 11.116524 -83.82173 4.191290e-16</span>
+<span class="co">#&gt; f.21.G -4.080282 -4.194244 -3.966321 10.116854 -79.32743 7.442910e-16</span>
+<span class="co">#&gt; f.29.* -4.469094 -4.593984 -4.344205 10.036584 -79.28394 7.485561e-16</span>
 <span class="co">#&gt;           adj.P.Val        B   se.logFC</span>
-<span class="co">#&gt; f.4.F  6.079709e-28 60.12115 0.03459279</span>
-<span class="co">#&gt; f.28.G 6.079709e-28 59.82096 0.04767086</span>
-<span class="co">#&gt; f.7.G  6.079709e-28 59.32763 0.05156699</span>
-<span class="co">#&gt; f.27.* 6.079709e-28 58.97200 0.05622583</span>
-<span class="co">#&gt; f.28.* 6.079709e-28 58.96010 0.05486612</span>
-<span class="co">#&gt; f.4.V  6.200353e-28 58.69311 0.04302592</span>
+<span class="co">#&gt; f.27.* 6.706064e-14 27.81637 0.05244474</span>
+<span class="co">#&gt; f.28.* 6.706064e-14 27.72307 0.05172514</span>
+<span class="co">#&gt; f.7.G  6.706064e-14 27.66804 0.04974111</span>
+<span class="co">#&gt; f.4.F  6.706064e-14 27.65008 0.03456464</span>
+<span class="co">#&gt; f.21.G 6.895977e-14 27.09024 0.05143595</span>
+<span class="co">#&gt; f.29.* 6.895977e-14 27.05613 0.05636821</span>
 <span class="co">## As before, the WT sequence has a logFC close to 0, by construction</span>
-<span class="va">limma_scores</span><span class="op">[</span><span class="st">"f.0.NA"</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span>
-<span class="co">#&gt;               logFC         CI.L        CI.R AveExpr            t   P.Value</span>
-<span class="co">#&gt; f.0.NA 4.426619e-09 -0.008386242 0.008386251 18.9826 1.090858e-06 0.9999991</span>
+<span class="va">limma_scores</span><span class="op">[</span><span class="st">"f.0.WT"</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span>
+<span class="co">#&gt;               logFC        CI.L       CI.R  AveExpr            t   P.Value</span>
+<span class="co">#&gt; f.0.WT 2.842423e-08 -0.01353281 0.01353286 19.29458 4.653621e-06 0.9999964</span>
 <span class="co">#&gt;        adj.P.Val         B    se.logFC</span>
-<span class="co">#&gt; f.0.NA 0.9999991 -11.27198 0.004057922</span></code></pre></div>
+<span class="co">#&gt; f.0.WT 0.9999964 -10.83369 0.006107981</span></code></pre></div>
 <p><code>mutscan</code> also contains functions for plotting the results of the statistical testing - in particular, MA (mean-difference) plots and volcano plots can be easily generated.</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/plotMeanDiff.html">plotMeanDiff</a></span><span class="op">(</span><span class="va">edger_scores</span>, pointSize <span class="op">=</span> <span class="st">"large"</span><span class="op">)</span></code></pre></div>
@@ -1320,14 +1423,23 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <p><img src="mutscan_files/figure-html/unnamed-chunk-24-2.png" width="700"></p>
 </div>
 <div class="section level2">
+<h2 id="faq">FAQ<a class="anchor" aria-label="anchor" href="#faq"></a>
+</h2>
+<div class="section level4">
+<h4 id="can-digestfastqs-process-a-sample-where-the-reads-are-spread-across-multiple-pairs-of-fastq-files">Can <code>digestFastqs</code> process a sample where the reads are spread across multiple (pairs of) FASTQ files?<a class="anchor" aria-label="anchor" href="#can-digestfastqs-process-a-sample-where-the-reads-are-spread-across-multiple-pairs-of-fastq-files"></a>
+</h4>
+<p>Yes, you can specify a vector of FASTQ files to <code>fastqForward</code>/<code>fastqReverse</code>. In this case, the reads from all (pairs of) files will be analyzed as if they came from a single FASTQ file. In case of paired-end data, take care to specify the forward and reverse FASTQ files in the same order.</p>
+</div>
+</div>
+<div class="section level2">
 <h2 id="session-info">Session info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
 <p>This vignette was compiled on the following system:</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span>
-<span class="co">#&gt; R version 4.1.2 (2021-11-01)</span>
+<span class="co">#&gt; R version 4.1.3 (2022-03-10)</span>
 <span class="co">#&gt; Platform: x86_64-apple-darwin17.0 (64-bit)</span>
-<span class="co">#&gt; Running under: macOS Big Sur 10.16</span>
+<span class="co">#&gt; Running under: macOS Big Sur/Monterey 10.16</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Matrix products: default</span>
 <span class="co">#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib</span>
@@ -1341,42 +1453,42 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span class="co">#&gt; [8] base     </span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; other attached packages:</span>
-<span class="co">#&gt;  [1] mutscan_0.2.26              SummarizedExperiment_1.24.0</span>
+<span class="co">#&gt;  [1] mutscan_0.2.28              SummarizedExperiment_1.24.0</span>
 <span class="co">#&gt;  [3] Biobase_2.54.0              GenomicRanges_1.46.1       </span>
-<span class="co">#&gt;  [5] GenomeInfoDb_1.30.0         IRanges_2.28.0             </span>
-<span class="co">#&gt;  [7] S4Vectors_0.32.3            BiocGenerics_0.40.0        </span>
+<span class="co">#&gt;  [5] GenomeInfoDb_1.30.1         IRanges_2.28.0             </span>
+<span class="co">#&gt;  [7] S4Vectors_0.32.4            BiocGenerics_0.40.0        </span>
 <span class="co">#&gt;  [9] MatrixGenerics_1.6.0        matrixStats_0.61.0         </span>
 <span class="co">#&gt; [11] BiocStyle_2.22.0           </span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; loaded via a namespace (and not attached):</span>
-<span class="co">#&gt;  [1] tidyr_1.1.4            edgeR_3.36.0           sass_0.4.0            </span>
-<span class="co">#&gt;  [4] splines_4.1.2          jsonlite_1.7.3         bslib_0.3.1           </span>
-<span class="co">#&gt;  [7] highr_0.9              BiocManager_1.30.16    GenomeInfoDbData_1.2.7</span>
-<span class="co">#&gt; [10] Rsamtools_2.10.0       ggrepel_0.9.1          yaml_2.2.1            </span>
-<span class="co">#&gt; [13] pillar_1.6.4           lattice_0.20-45        limma_3.50.0          </span>
-<span class="co">#&gt; [16] glue_1.6.0             digest_0.6.29          RColorBrewer_1.1-2    </span>
-<span class="co">#&gt; [19] XVector_0.34.0         colorspace_2.0-2       htmltools_0.5.2       </span>
-<span class="co">#&gt; [22] Matrix_1.4-0           plyr_1.8.6             pkgconfig_2.0.3       </span>
-<span class="co">#&gt; [25] csaw_1.28.0            bookdown_0.24          zlibbioc_1.40.0       </span>
-<span class="co">#&gt; [28] purrr_0.3.4            scales_1.1.1           BiocParallel_1.28.3   </span>
-<span class="co">#&gt; [31] tibble_3.1.6           farver_2.1.0           generics_0.1.1        </span>
-<span class="co">#&gt; [34] grr_0.9.5              ggplot2_3.3.5          ellipsis_0.3.2        </span>
-<span class="co">#&gt; [37] DT_0.20                cachem_1.0.6           magrittr_2.0.1        </span>
-<span class="co">#&gt; [40] crayon_1.4.2           memoise_2.0.1          evaluate_0.14         </span>
-<span class="co">#&gt; [43] GGally_2.1.2           fs_1.5.2               fansi_1.0.2           </span>
-<span class="co">#&gt; [46] textshaping_0.3.6      tools_4.1.2            lifecycle_1.0.1       </span>
-<span class="co">#&gt; [49] stringr_1.4.0          locfit_1.5-9.4         munsell_0.5.0         </span>
-<span class="co">#&gt; [52] DelayedArray_0.20.0    Biostrings_2.62.0      compiler_4.1.2        </span>
-<span class="co">#&gt; [55] pkgdown_2.0.2.9000     jquerylib_0.1.4        systemfonts_1.0.3     </span>
-<span class="co">#&gt; [58] rlang_0.4.12           grid_4.1.2             Matrix.utils_0.9.8    </span>
-<span class="co">#&gt; [61] RCurl_1.98-1.5         htmlwidgets_1.5.4      labeling_0.4.2        </span>
-<span class="co">#&gt; [64] bitops_1.0-7           rmarkdown_2.11         gtable_0.3.0          </span>
-<span class="co">#&gt; [67] reshape_0.8.8          R6_2.5.1               knitr_1.37            </span>
-<span class="co">#&gt; [70] dplyr_1.0.7            fastmap_1.1.0          utf8_1.2.2            </span>
-<span class="co">#&gt; [73] rprojroot_2.0.2        ragg_1.2.1             metapod_1.2.0         </span>
-<span class="co">#&gt; [76] desc_1.4.0             stringi_1.7.6          parallel_4.1.2        </span>
-<span class="co">#&gt; [79] Rcpp_1.0.8             vctrs_0.3.8            tidyselect_1.1.1      </span>
-<span class="co">#&gt; [82] xfun_0.29</span></code></pre></div>
+<span class="co">#&gt;  [1] bitops_1.0-7           fs_1.5.2               RColorBrewer_1.1-2    </span>
+<span class="co">#&gt;  [4] rprojroot_2.0.2        tools_4.1.3            bslib_0.3.1           </span>
+<span class="co">#&gt;  [7] utf8_1.2.2             R6_2.5.1               DT_0.22               </span>
+<span class="co">#&gt; [10] colorspace_2.0-3       tidyselect_1.1.2       GGally_2.1.2          </span>
+<span class="co">#&gt; [13] compiler_4.1.3         textshaping_0.3.6      cli_3.2.0             </span>
+<span class="co">#&gt; [16] csaw_1.28.0            desc_1.4.1             DelayedArray_0.20.0   </span>
+<span class="co">#&gt; [19] labeling_0.4.2         bookdown_0.25          sass_0.4.1            </span>
+<span class="co">#&gt; [22] scales_1.1.1           pkgdown_2.0.2.9000     systemfonts_1.0.4     </span>
+<span class="co">#&gt; [25] stringr_1.4.0          digest_0.6.29          Rsamtools_2.10.0      </span>
+<span class="co">#&gt; [28] rmarkdown_2.13         XVector_0.34.0         pkgconfig_2.0.3       </span>
+<span class="co">#&gt; [31] htmltools_0.5.2        fastmap_1.1.0          limma_3.50.1          </span>
+<span class="co">#&gt; [34] highr_0.9              htmlwidgets_1.5.4      rlang_1.0.2           </span>
+<span class="co">#&gt; [37] jquerylib_0.1.4        generics_0.1.2         farver_2.1.0          </span>
+<span class="co">#&gt; [40] jsonlite_1.8.0         BiocParallel_1.28.3    dplyr_1.0.8           </span>
+<span class="co">#&gt; [43] RCurl_1.98-1.6         magrittr_2.0.3         GenomeInfoDbData_1.2.7</span>
+<span class="co">#&gt; [46] Matrix_1.4-1           Rcpp_1.0.8.3           munsell_0.5.0         </span>
+<span class="co">#&gt; [49] fansi_1.0.3            lifecycle_1.0.1        stringi_1.7.6         </span>
+<span class="co">#&gt; [52] yaml_2.3.5             edgeR_3.36.0           zlibbioc_1.40.0       </span>
+<span class="co">#&gt; [55] plyr_1.8.7             grid_4.1.3             parallel_4.1.3        </span>
+<span class="co">#&gt; [58] ggrepel_0.9.1          crayon_1.5.1           lattice_0.20-45       </span>
+<span class="co">#&gt; [61] Biostrings_2.62.0      splines_4.1.3          locfit_1.5-9.5        </span>
+<span class="co">#&gt; [64] metapod_1.2.0          knitr_1.38             pillar_1.7.0          </span>
+<span class="co">#&gt; [67] glue_1.6.2             evaluate_0.15          BiocManager_1.30.16   </span>
+<span class="co">#&gt; [70] vctrs_0.4.0            gtable_0.3.0           grr_0.9.5             </span>
+<span class="co">#&gt; [73] purrr_0.3.4            tidyr_1.2.0            reshape_0.8.8         </span>
+<span class="co">#&gt; [76] cachem_1.0.6           ggplot2_3.3.5          xfun_0.30             </span>
+<span class="co">#&gt; [79] ragg_1.2.2             tibble_3.1.6           Matrix.utils_0.9.8    </span>
+<span class="co">#&gt; [82] memoise_2.0.1          ellipsis_0.3.2</span></code></pre></div>
 </div>
   </div>
 

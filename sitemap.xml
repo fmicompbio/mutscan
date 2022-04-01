@@ -22,13 +22,10 @@
     <loc>/reference/calcNearestStringDist.html</loc>
   </url>
   <url>
-    <loc>/reference/calculatePPIScore.html</loc>
+    <loc>/reference/calculateFitnessScore.html</loc>
   </url>
   <url>
     <loc>/reference/calculateRelativeFC.html</loc>
-  </url>
-  <url>
-    <loc>/reference/checkNumericInput.html</loc>
   </url>
   <url>
     <loc>/reference/collapseMutantsByAA.html</loc>
@@ -41,6 +38,9 @@
   </url>
   <url>
     <loc>/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/linkMultipleVariants.html</loc>
   </url>
   <url>
     <loc>/reference/plotDistributions.html</loc>
