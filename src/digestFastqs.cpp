@@ -138,7 +138,7 @@ bool compareCodonPositions(std::string a, std::string b, const char mutNameDelim
 
 // translate sequence
 // [[Rcpp::export]]
-std::string translate(std::string& s) {
+std::string translateString(std::string& s) {
   const char* tr = "KQE*TPASRRG*ILVLNHDYTPASSRGCILVFKQE*TPASRRGWMLVLNHDYTPASSRGCILVF";
   std::string aa = "";
   size_t i = 0, j = 0;
@@ -249,8 +249,8 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
         varSeq.substr((int)(i), 1) +
         std::string("_"));
       // }
-      varAA = translate(varCodon);
-      wtAA = translate(wtCodon);
+      varAA = translateString(varCodon);
+      wtAA = translateString(wtCodon);
       if (varAA != wtAA) {
         // add to mutatedAA
         mutatedAAs.insert(codonPrefix + mutNameDelimiter + 
@@ -1275,7 +1275,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             }
           } else if (varSeqForward.length() > 0) { // variable seq, but no reference -> add variable seq to mutantName
             mutantName += (varSeqForward + std::string("_"));
-            mutantNameAA += (translate(varSeqForward) + std::string("_"));
+            mutantNameAA += (translateString(varSeqForward) + std::string("_"));
           }
           // convert varLengthsForward to string
           if (varLengthsForward.size() > 0) {
@@ -1334,7 +1334,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             }
           } else if (!noReverse && varSeqReverse.length() > 0) { // variable seq, but no reference -> add variable seq to mutantName
             mutantName += (varSeqReverse + std::string("_"));
-            mutantNameAA += (translate(varSeqReverse) + std::string("_"));
+            mutantNameAA += (translateString(varSeqReverse) + std::string("_"));
           }
           // convert varLengthsReverse to string
           if (varLengthsReverse.size() > 0) {
@@ -1498,7 +1498,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             (*mutantSummaryParIt).second.nMutAAs.insert(nMutAAs);
             (*mutantSummaryParIt).second.mutationTypes.insert(mutationTypes.begin(), mutationTypes.end());
             (*mutantSummaryParIt).second.mutantNameAA.insert(mutantNameAA);
-            (*mutantSummaryParIt).second.sequenceAA.insert(translate(varSeqForward));
+            (*mutantSummaryParIt).second.sequenceAA.insert(translateString(varSeqForward));
           } else {
             // ... ... create mutantInfo instance for this mutant and add it to mutantSummary
             mutantInfo newMutant;
@@ -1514,7 +1514,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             newMutant.varLengths = varLengthsForwardStr;
             newMutant.mutationTypes.insert(mutationTypes.begin(), mutationTypes.end());
             newMutant.mutantNameAA.insert(mutantNameAA);
-            newMutant.sequenceAA.insert(translate(varSeqForward));
+            newMutant.sequenceAA.insert(translateString(varSeqForward));
             mutantSummary.insert(std::pair<std::string,mutantInfo>(mutantName, newMutant));
           }
 }

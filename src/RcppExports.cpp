@@ -36,14 +36,14 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// translate
-std::string translate(std::string& s);
-RcppExport SEXP _mutscan_translate(SEXP sSEXP) {
+// translateString
+std::string translateString(std::string& s);
+RcppExport SEXP _mutscan_translateString(SEXP sSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string& >::type s(sSEXP);
-    rcpp_result_gen = Rcpp::wrap(translate(s));
+    rcpp_result_gen = Rcpp::wrap(translateString(s));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -241,7 +241,7 @@ RcppExport SEXP _rcpp_module_boot_mod_BKtree();
 static const R_CallMethodDef CallEntries[] = {
     {"_mutscan_calcNearestStringDist", (DL_FUNC) &_mutscan_calcNearestStringDist, 3},
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 3},
-    {"_mutscan_translate", (DL_FUNC) &_mutscan_translate, 1},
+    {"_mutscan_translateString", (DL_FUNC) &_mutscan_translateString, 1},
     {"_mutscan_test_decomposeRead", (DL_FUNC) &_mutscan_test_decomposeRead, 13},
     {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 12},
     {"_mutscan_findClosestRefSeq", (DL_FUNC) &_mutscan_findClosestRefSeq, 4},

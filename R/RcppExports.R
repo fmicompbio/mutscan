@@ -28,8 +28,8 @@ compareCodonPositions <- function(a, b, mutNameDelimiter) {
     .Call(`_mutscan_compareCodonPositions`, a, b, mutNameDelimiter)
 }
 
-translate <- function(s) {
-    .Call(`_mutscan_translate`, s)
+translateString <- function(s) {
+    .Call(`_mutscan_translateString`, s)
 }
 
 test_decomposeRead <- function(sseq, squal, elements, elementLengths, primerSeqs, umiSeq, varSeq, varQual, varLengths, constSeq, constQual, nNoPrimer, nReadWrongLength) {

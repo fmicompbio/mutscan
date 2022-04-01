@@ -156,7 +156,7 @@ test_that("summarizeExperiment works as expected with reads output", {
     expect_true(all(SummarizedExperiment::rowData(se)$mutationTypes[SummarizedExperiment::rowData(se)$maxNbrMutAAs == 0 & SummarizedExperiment::rowData(se)$maxNbrMutBases > 0] == "silent"))
     ## check translation
     expect_equal(SummarizedExperiment::rowData(se)$sequenceAA[3], 
-                 mutscan:::translate(SummarizedExperiment::rowData(se)$sequence[3]))
+                 mutscan:::translateString(SummarizedExperiment::rowData(se)$sequence[3]))
     
     ## Spot checks
     expect_equal(SummarizedExperiment::rowData(se)$minNbrMutBases[SummarizedExperiment::rowData(se)$mutantName == "f.0.WT_r.13.CTC"], 3)  ## WT: GCT
@@ -278,7 +278,7 @@ test_that("summarizeExperiment works as expected when collapsing to WT", {
     expect_false(any(grepl("^,", SummarizedExperiment::rowData(se)$mutationTypes)))
     expect_false(any(grepl(",$", SummarizedExperiment::rowData(se)$mutationTypes)))
     expect_equal(SummarizedExperiment::rowData(se)$sequenceAA[3], 
-                 mutscan:::translate(SummarizedExperiment::rowData(se)$sequence[3]))
+                 mutscan:::translateString(SummarizedExperiment::rowData(se)$sequence[3]))
     expect_s4_class(SummarizedExperiment::rowData(se)$nbrMutBases, 
                     "IntegerList")
     expect_s4_class(SummarizedExperiment::rowData(se)$nbrMutCodons, 
