@@ -37,7 +37,8 @@ collapseMutantsByAA <- function(se, nameCol = "mutantNameAA") {
     rd <- mergeValues(SummarizedExperiment::rowData(se)[[nameCol]],
                       SummarizedExperiment::rowData(se)$sequence) %>%
         stats::setNames(c(nameCol, "sequence"))
-    for (v in c("mutantName", "sequenceAA", "mutationTypes")) {
+    for (v in c("mutantName", "sequenceAA", "mutationTypes",
+                "nbrMutBases", "nbrMutCodons", "nbrMutAAs")) {
         tmp <- mergeValues(SummarizedExperiment::rowData(se)[[nameCol]],
                            SummarizedExperiment::rowData(se)[[v]])
         rd[[v]] <- tmp$value[match(rd[[nameCol]], tmp$mutantName)]
@@ -50,22 +51,12 @@ collapseMutantsByAA <- function(se, nameCol = "mutantNameAA") {
                           function(x) min(x)),
             dplyr::across(c("maxNbrMutBases", "maxNbrMutCodons",
                             "maxNbrMutAAs"),
-                          function(x) max(x)),
-            dplyr::across(c("nbrMutBases", "nbrMutCodons",
-                            "nbrMutAAs"),
-                          function(x) paste(sort(unique(unlist(x))), 
-                                            collapse = ",")))
+                          function(x) max(x)))
     rd <- rd %>% 
         dplyr::full_join(rd0, by = nameCol)
     
     rd <- S4Vectors::DataFrame(rd)
     rownames(rd) <- rd[[nameCol]]
-    
-    ## List columns (varLengths columns are not interpretable on the AA level,
-    ## so will be removed)
-    for (cl in c("nbrMutBases", "nbrMutCodons", "nbrMutAAs")) {
-        rd[[cl]] <- as(strsplit(rd[[cl]], ","), "IntegerList")
-    }
     
     ## Create SummarizedExperiment
     rn1 <- rownames(aList[[1]])

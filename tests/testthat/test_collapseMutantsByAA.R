@@ -94,18 +94,30 @@ test_that("collapseMutantsByAA works as expected", {
     expect_equal(SummarizedExperiment::assay(secoll, "counts")[mn, ],
                  colSums(SummarizedExperiment::assay(se, "counts")[SummarizedExperiment::rowData(se)$mutantNameAA == mn, , drop = FALSE]))
   }
-  expect_equal(min(SummarizedExperiment::rowData(se)$nbrMutBases), 
-               SummarizedExperiment::rowData(se)$minNbrMutBases)
-  expect_equal(min(SummarizedExperiment::rowData(se)$nbrMutCodons), 
-               SummarizedExperiment::rowData(se)$minNbrMutCodons)
-  expect_equal(min(SummarizedExperiment::rowData(se)$nbrMutAAs), 
-               SummarizedExperiment::rowData(se)$minNbrMutAAs)
-  expect_equal(max(SummarizedExperiment::rowData(se)$nbrMutBases), 
-               SummarizedExperiment::rowData(se)$maxNbrMutBases)
-  expect_equal(max(SummarizedExperiment::rowData(se)$nbrMutCodons), 
-               SummarizedExperiment::rowData(se)$maxNbrMutCodons)
-  expect_equal(max(SummarizedExperiment::rowData(se)$nbrMutAAs), 
-               SummarizedExperiment::rowData(se)$maxNbrMutAAs)
+  expect_equal(min(methods::as(
+      lapply(strsplit(SummarizedExperiment::rowData(se)$nbrMutBases, ","), function(w) sort(as.integer(w))),
+      "IntegerList")), 
+      SummarizedExperiment::rowData(se)$minNbrMutBases)
+  expect_equal(min(methods::as(
+      lapply(strsplit(SummarizedExperiment::rowData(se)$nbrMutCodons, ","), function(w) sort(as.integer(w))),
+      "IntegerList")), 
+      SummarizedExperiment::rowData(se)$minNbrMutCodons)
+  expect_equal(min(methods::as(
+      lapply(strsplit(SummarizedExperiment::rowData(se)$nbrMutAAs, ","), function(w) sort(as.integer(w))),
+      "IntegerList")), 
+      SummarizedExperiment::rowData(se)$minNbrMutAAs)
+  expect_equal(max(methods::as(
+      lapply(strsplit(SummarizedExperiment::rowData(se)$nbrMutBases, ","), function(w) sort(as.integer(w))),
+      "IntegerList")), 
+      SummarizedExperiment::rowData(se)$maxNbrMutBases)
+  expect_equal(max(methods::as(
+      lapply(strsplit(SummarizedExperiment::rowData(se)$nbrMutCodons, ","), function(w) sort(as.integer(w))),
+      "IntegerList")), 
+      SummarizedExperiment::rowData(se)$maxNbrMutCodons)
+  expect_equal(max(methods::as(
+      lapply(strsplit(SummarizedExperiment::rowData(se)$nbrMutAAs, ","), function(w) sort(as.integer(w))),
+      "IntegerList")), 
+      SummarizedExperiment::rowData(se)$maxNbrMutAAs)
 })
 
 test_that("collapseMutantsByAA works as expected - collapseToWT", {
@@ -146,24 +158,36 @@ test_that("collapseMutantsByAA works as expected - collapseToWT", {
     expect_equal(SummarizedExperiment::assay(secoll, "counts")[mn, ],
                  colSums(SummarizedExperiment::assay(se, "counts")[SummarizedExperiment::rowData(se)$mutantNameAA == mn, , drop = FALSE]))
   }
-  expect_equal(min(SummarizedExperiment::rowData(se)$nbrMutBases), 
-               SummarizedExperiment::rowData(se)$minNbrMutBases)
-  expect_equal(min(SummarizedExperiment::rowData(se)$nbrMutCodons), 
-               SummarizedExperiment::rowData(se)$minNbrMutCodons)
-  expect_equal(min(SummarizedExperiment::rowData(se)$nbrMutAAs), 
-               SummarizedExperiment::rowData(se)$minNbrMutAAs)
-  expect_equal(max(SummarizedExperiment::rowData(se)$nbrMutBases), 
-               SummarizedExperiment::rowData(se)$maxNbrMutBases)
-  expect_equal(max(SummarizedExperiment::rowData(se)$nbrMutCodons), 
-               SummarizedExperiment::rowData(se)$maxNbrMutCodons)
-  expect_equal(max(SummarizedExperiment::rowData(se)$nbrMutAAs), 
-               SummarizedExperiment::rowData(se)$maxNbrMutAAs)
+  expect_equal(min(methods::as(
+      lapply(strsplit(SummarizedExperiment::rowData(se)$nbrMutBases, ","), function(w) sort(as.integer(w))),
+      "IntegerList")), 
+      SummarizedExperiment::rowData(se)$minNbrMutBases)
+  expect_equal(min(methods::as(
+      lapply(strsplit(SummarizedExperiment::rowData(se)$nbrMutCodons, ","), function(w) sort(as.integer(w))),
+      "IntegerList")), 
+      SummarizedExperiment::rowData(se)$minNbrMutCodons)
+  expect_equal(min(methods::as(
+      lapply(strsplit(SummarizedExperiment::rowData(se)$nbrMutAAs, ","), function(w) sort(as.integer(w))),
+      "IntegerList")), 
+      SummarizedExperiment::rowData(se)$minNbrMutAAs)
+  expect_equal(max(methods::as(
+      lapply(strsplit(SummarizedExperiment::rowData(se)$nbrMutBases, ","), function(w) sort(as.integer(w))),
+      "IntegerList")), 
+      SummarizedExperiment::rowData(se)$maxNbrMutBases)
+  expect_equal(max(methods::as(
+      lapply(strsplit(SummarizedExperiment::rowData(se)$nbrMutCodons, ","), function(w) sort(as.integer(w))),
+      "IntegerList")), 
+      SummarizedExperiment::rowData(se)$maxNbrMutCodons)
+  expect_equal(max(methods::as(
+      lapply(strsplit(SummarizedExperiment::rowData(se)$nbrMutAAs, ","), function(w) sort(as.integer(w))),
+      "IntegerList")), 
+      SummarizedExperiment::rowData(se)$maxNbrMutAAs)
   
   expect_equal(nrow(secoll), 1L)
   expect_equal(ncol(secoll), 2L)
-  expect_equal(SummarizedExperiment::rowData(secoll)$nbrMutBases[[1]], c(0, 1, 2))
-  expect_equal(SummarizedExperiment::rowData(secoll)$nbrMutCodons[[1]], c(0, 1))
-  expect_equal(SummarizedExperiment::rowData(secoll)$nbrMutAAs[[1]], c(0, 1))
+  expect_equal(SummarizedExperiment::rowData(secoll)$nbrMutBases[[1]], "0,1,2")
+  expect_equal(SummarizedExperiment::rowData(secoll)$nbrMutCodons[[1]], "0,1")
+  expect_equal(SummarizedExperiment::rowData(secoll)$nbrMutAAs[[1]], "0,1")
   expect_equal(SummarizedExperiment::rowData(secoll)$mutationTypes, 
                "nonsynonymous,silent,stop")
 })

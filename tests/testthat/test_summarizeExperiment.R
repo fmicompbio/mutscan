@@ -126,7 +126,7 @@ test_that("summarizeExperiment works as expected with reads output", {
                       "nbrMutCodons", "minNbrMutCodons", "maxNbrMutCodons",
                       "nbrMutAAs", "minNbrMutAAs", "maxNbrMutAAs",
                       "sequenceAA", "mutantNameAA", "mutationTypes",
-                      "varLengths", "uniqueVarLengths") %in% 
+                      "varLengths") %in% 
                         colnames(SummarizedExperiment::rowData(se))))
     
     ## Check that the number of mutated codons are correct (=equal to the number of
@@ -145,7 +145,7 @@ test_that("summarizeExperiment works as expected with reads output", {
                         SummarizedExperiment::rowData(se)$maxNbrMutCodons))
     
     ## variable lengths
-    expect_equal(SummarizedExperiment::rowData(se)$uniqueVarLengths, 
+    expect_equal(SummarizedExperiment::rowData(se)$varLengths, 
                  rep("96_96", nrow(se)), ignore_attr = TRUE)
     
     ## All variants with no mutated AAs must have a WT in the name
@@ -268,26 +268,23 @@ test_that("summarizeExperiment works as expected when collapsing to WT", {
                       "nbrMutCodons", "minNbrMutCodons", "maxNbrMutCodons",
                       "nbrMutAAs", "minNbrMutAAs", "maxNbrMutAAs",
                       "sequenceAA", "mutantNameAA", "mutationTypes",
-                      "varLengths", "uniqueVarLengths") %in% 
+                      "varLengths") %in% 
                         colnames(SummarizedExperiment::rowData(se))))
     
     ## variable lengths
-    expect_equal(SummarizedExperiment::rowData(se)$uniqueVarLengths, 
+    expect_equal(SummarizedExperiment::rowData(se)$varLengths, 
                  rep("96_96", nrow(se)), ignore_attr = TRUE)
     
     expect_false(any(grepl("^,", SummarizedExperiment::rowData(se)$mutationTypes)))
     expect_false(any(grepl(",$", SummarizedExperiment::rowData(se)$mutationTypes)))
     expect_equal(SummarizedExperiment::rowData(se)$sequenceAA[3], 
                  mutscan:::translateString(SummarizedExperiment::rowData(se)$sequence[3]))
-    expect_s4_class(SummarizedExperiment::rowData(se)$nbrMutBases, 
-                    "IntegerList")
-    expect_s4_class(SummarizedExperiment::rowData(se)$nbrMutCodons, 
-                    "IntegerList")
-    expect_s4_class(SummarizedExperiment::rowData(se)$nbrMutAAs, 
-                    "IntegerList")
-    expect_equal(SummarizedExperiment::rowData(se)$nbrMutBases[[which(SummarizedExperiment::rowData(se)$mutantName == "f_r.0.WT")]], c(0, 1, 2, 3))
-    expect_equal(SummarizedExperiment::rowData(se)$nbrMutCodons[[which(SummarizedExperiment::rowData(se)$mutantName == "f_r.0.WT")]], c(0, 1))
-    expect_equal(SummarizedExperiment::rowData(se)$nbrMutAAs[[which(SummarizedExperiment::rowData(se)$mutantName == "f_r.0.WT")]], c(0, 1))
+    expect_type(SummarizedExperiment::rowData(se)$nbrMutBases, "character")
+    expect_type(SummarizedExperiment::rowData(se)$nbrMutCodons, "character")
+    expect_type(SummarizedExperiment::rowData(se)$nbrMutAAs, "character")
+    expect_equal(SummarizedExperiment::rowData(se)$nbrMutBases[[which(SummarizedExperiment::rowData(se)$mutantName == "f_r.0.WT")]], "0,1,2,3")
+    expect_equal(SummarizedExperiment::rowData(se)$nbrMutCodons[[which(SummarizedExperiment::rowData(se)$mutantName == "f_r.0.WT")]], "0,1")
+    expect_equal(SummarizedExperiment::rowData(se)$nbrMutAAs[[which(SummarizedExperiment::rowData(se)$mutantName == "f_r.0.WT")]], "0,1")
     
     expect_true(all(grepl("stop", SummarizedExperiment::rowData(se)$mutationTypes[grep("\\*", SummarizedExperiment::rowData(se)$mutantNameAA)])))
 })

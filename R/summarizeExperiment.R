@@ -114,50 +114,26 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     allSequences <- S4Vectors::DataFrame(allSequences)
     
     ## ------------------------------------------------------------------------
-    ## Add info about nbr mutated bases/codons/AAs
+    ## Add info about nbr mutated bases/codons/AAs,
+    ## sequenceAA, mutantNameAA, mutationTypes, varLengths
     ## Also here, each column can contain multiple values separated with ,
     ## (e.g. if variable sequences were collapsed to WT in digestFastqs)
     ## ------------------------------------------------------------------------
-    for (v in c("nbrMutBases", "nbrMutCodons", "nbrMutAAs")) {
-        tmp <- mergeValues(tmpdf$mutantName, tmpdf[[v]]) %>%
-            stats::setNames(c("mutantName", v))
-        tmp[[v]] <- methods::as(
-            lapply(strsplit(tmp[[v]], ","), function(w) sort(as.integer(w))),
-            "IntegerList")
-        allSequences[[v]] <- tmp[[v]][match(allSequences$mutantName,
-                                            tmp$mutantName)]
-        allSequences[[paste0("min", sub("^n", "N", v))]] <- min(allSequences[[v]])
-        allSequences[[paste0("max", sub("^n", "N", v))]] <- max(allSequences[[v]])
-    }
-
-    ## ------------------------------------------------------------------------
-    ## Add info about sequenceAA, mutantNameAA, mutationTypes, varLengths
-    ## ------------------------------------------------------------------------
-    for (v in c("sequenceAA", "mutantNameAA", "mutationTypes")) {
+    for (v in c("nbrMutBases", "nbrMutCodons", "nbrMutAAs",
+                "sequenceAA", "mutantNameAA", "mutationTypes", "varLengths")) {
         tmp <- mergeValues(tmpdf$mutantName, tmpdf[[v]]) %>%
             stats::setNames(c("mutantName", v))
         allSequences[[v]] <- tmp[[v]][match(allSequences$mutantName,
                                             tmp$mutantName)]
+        
+        if (v %in% c("nbrMutBases", "nbrMutCodons", "nbrMutAAs")) {
+            tmpList <- methods::as(
+                lapply(strsplit(allSequences[[v]], ","), function(w) sort(as.integer(w))),
+                "IntegerList")
+            allSequences[[paste0("min", sub("^n", "N", v))]] <- min(tmpList)
+            allSequences[[paste0("max", sub("^n", "N", v))]] <- max(tmpList)
+        }
     }
-    
-    ## There is only one varLengths value per sample, by construction 
-    ## This is only useful when there's no wildtype sequence, so we use the 
-    ## representative sequence only
-    tmp <- mergeValues(tmpdf$mutantName, tmpdf$varLengths) %>%
-        stats::setNames(c("mutantName", "varLengths"))
-    tmp$varLengths <- methods::as(
-        lapply(strsplit(tmp$varLengths, ","), function(w) unique(w)),
-        "CharacterList")
-    if (any(lengths(tmp$varLengths) != 1)) {
-        warning("There are sequences with multiple different values for ",
-                "varLengths. The uniqueVarLengths column will contain a ",
-                "randomly selected one.")
-    }
-    allSequences$varLengths <- tmp$varLengths[match(allSequences$mutantName,
-                                                    tmp$mutantName)]
-    allSequences$uniqueVarLengths <- vapply(allSequences$varLengths,
-                                            "[", 1, FUN.VALUE = "")
-
 
     ## --------------------------------------------------------------------------
     ## Create a sparse matrix
