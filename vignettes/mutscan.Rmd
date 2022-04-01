@@ -565,9 +565,9 @@ generateQCReport(se, outFile = tempfile(fileext = ".html"))
 ```
 
 
-# Calculating PPI scores
+# Calculating fitness scores
 
-The function `calculatePPIScore()` can be used to calculate PPI scores as 
+The function `calculateFitnessScore()` can be used to calculate fitness scores as 
 described in [@Diss2018]. The function requires the user to specify a `pairingCol`,
 containing the replicate ID for each sample; one or more `ODCols`, containing
 the optical density for each sample, and a `comparison`, which is a character
@@ -577,25 +577,25 @@ the column in `colData(se)` that contains the grouping information, and
 `numerator` and `denominator` specify the values of this column representing the
 two groups to be compared.
 
-Here, we illustrate the application of `calculatePPIScore()` on the
+Here, we illustrate the application of `calculateFitnessScore()` on the
 SummarizedExperiment object containing all the three CIS
 replicates from [@Diss2018].
 
 ```{r}
 se_collapsed <- collapseMutantsByAA(se)
-ppis <- calculatePPIScore(se = se_collapsed, pairingCol = "Replicate", 
-                          ODCols = c("OD1", "OD2"),
-                          comparison = c("Condition", "cis_output", "cis_input"),
-                          WTrows = "f.0.NA")
+ppis <- calculateFitnessScore(se = se_collapsed, pairingCol = "Replicate", 
+                              ODCols = c("OD1", "OD2"),
+                              comparison = c("Condition", "cis_output", "cis_input"),
+                              WTrows = "f.0.WT")
 head(ppis[order(abs(rowMeans(ppis)), decreasing = TRUE), , drop = FALSE])
 
 ## The PPI score for the WT sequence is 1, by construction
-ppis["f.0.NA", , drop = FALSE]
+ppis["f.0.WT", , drop = FALSE]
 ```
 
 # Scoring mutations with `edgeR` or `limma`
 
-As an alternative to the PPI scoring, `mutscan` can be used to model the observed
+As an alternative to the fitness scoring, `mutscan` can be used to model the observed
 counts using a generalized linear model (with `edgeR`) or a general linear model
 (with `limma`) and estimate a logFC and a p-value for the enrichment of each
 variant betwen two conditions (or more generally, in association with any
@@ -622,22 +622,22 @@ edger_scores <- calculateRelativeFC(
     se = se_collapsed,
     design = model.matrix(~ Replicate + Condition,
                           data = colData(se_collapsed)),
-    coef = "Conditioncis_output", pseudocount = 1, WTrows = "f.0.NA",
+    coef = "Conditioncis_output", pseudocount = 1, WTrows = "f.0.WT",
     method = "edgeR")
 head(edger_scores[order(edger_scores$PValue), , drop = FALSE])
 ## As before, the WT sequence has a logFC close to 0, by construction
-edger_scores["f.0.NA", , drop = FALSE]
+edger_scores["f.0.WT", , drop = FALSE]
 
 ## limma
 limma_scores <- calculateRelativeFC(
     se = se_collapsed,
     design = model.matrix(~ Replicate + Condition,
                           data = colData(se_collapsed)),
-    coef = "Conditioncis_output", pseudocount = 1, WTrows = "f.0.NA",
+    coef = "Conditioncis_output", pseudocount = 1, WTrows = "f.0.WT",
     method = "limma")
 head(limma_scores[order(limma_scores$P.Value), , drop = FALSE])
 ## As before, the WT sequence has a logFC close to 0, by construction
-limma_scores["f.0.NA", , drop = FALSE]
+limma_scores["f.0.WT", , drop = FALSE]
 ```
 
 `mutscan` also contains functions for plotting the results of the statistical 

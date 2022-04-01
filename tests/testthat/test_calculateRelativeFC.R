@@ -1,6 +1,7 @@
 se <- readRDS(system.file("extdata/GSE102901_cis_se.rds", package = "mutscan"))
 se <- se[1:200, ]
-design <- model.matrix(~ Replicate + Condition, data = colData(se))
+design <- stats::model.matrix(~ Replicate + Condition, 
+                              data = SummarizedExperiment::colData(se))
 
 test_that("calculateRelativeFC fails with incorrect arguments", {
     expect_error(calculateRelativeFC(se = NULL, design = design,

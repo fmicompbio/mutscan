@@ -150,9 +150,9 @@ processReadsCis <- function(Ldef) {
   mutNames <- encodedMutCodonsForward
   mutNames <- gsub("^_", "", gsub("_$", "", mutNames))
   mutNames[mutNames <- ""] <- "WT"
-  message("Number of variants seen thrice: ", sum(table(mutNames) == 3))  ## 11
+  message("Number of variants seen thrice: ", sum(table(mutNames) == 3))  ## 5
   message("Variants seen thrice: ")
-  print(which(table(mutNames) == 3))  ## f12G f17T f60G f85T f91G f96G
+  print(which(table(mutNames) == 3))  
   
   ## Retained reads
   message("Number of retained reads: ", length(fq1))  ## 167
@@ -166,6 +166,23 @@ processReadsCis <- function(Ldef) {
   print(table(nbrMutBases))
   message("Number of different reads with each number of mismatched bases: ")
   print(table(nbrMutBases[!duplicated(varForward)]))
+  
+  ## Number of mutated amino acids
+  p_aa <- Biostrings::translate(DNAStringSet(rep(Ldef$wildTypeForward, length(varForward))))
+  pattern_width_aa <- width(p_aa)
+  varForward_aa <- Biostrings::translate(varForward)
+  subject_width_aa <- width(varForward_aa)
+  unlisted_ans_aa <- which(as.raw(unlist(p_aa)) != as.raw(unlist(varForward_aa)))
+  breakpoints_aa <- cumsum(pattern_width_aa)
+  ans_eltlens_aa <- tabulate(findInterval(unlisted_ans_aa - 1L,
+                                       breakpoints_aa) + 1L,
+                          nbins = length(p_aa))
+  skeleton_aa <- IRanges::PartitioningByEnd(cumsum(ans_eltlens_aa))
+  aaMismatches <- BiocGenerics::relist(unlisted_ans_aa, skeleton_aa)
+  message("Number of mutated aas per retained read: ")
+  print(table(lengths(aaMismatches)))  ## 97, 70
+  message("Number of different reads with each number of mismatched aas: ")
+  print(table(lengths(aaMismatches)[!duplicated(varForward)]))  ## 14, 53
   
   ## Error statistics
   ## Forward

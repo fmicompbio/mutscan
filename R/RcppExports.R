@@ -28,6 +28,10 @@ compareCodonPositions <- function(a, b, mutNameDelimiter) {
     .Call(`_mutscan_compareCodonPositions`, a, b, mutNameDelimiter)
 }
 
+translateString <- function(s) {
+    .Call(`_mutscan_translateString`, s)
+}
+
 test_decomposeRead <- function(sseq, squal, elements, elementLengths, primerSeqs, umiSeq, varSeq, varQual, varLengths, constSeq, constQual, nNoPrimer, nReadWrongLength) {
     .Call(`_mutscan_test_decomposeRead`, sseq, squal, elements, elementLengths, primerSeqs, umiSeq, varSeq, varQual, varLengths, constSeq, constQual, nNoPrimer, nReadWrongLength)
 }
@@ -46,6 +50,10 @@ findClosestRefSeqEarlyStop <- function(varSeq, wtSeq, upperBoundMismatch, sim) {
 
 digestFastqsCpp <- function(fastqForwardVect, fastqReverseVect, mergeForwardReverse, minOverlap, maxOverlap, minMergedLength, maxMergedLength, maxFracMismatchOverlap, greedyOverlap, revComplForward, revComplReverse, elementsForward, elementLengthsForward, elementsReverse, elementLengthsReverse, adapterForward, adapterReverse, primerForward, primerReverse, wildTypeForward, wildTypeForwardNames, wildTypeReverse, wildTypeReverseNames, constantForward, constantReverse, avePhredMinForward = 20.0, avePhredMinReverse = 20.0, variableNMaxForward = 0L, variableNMaxReverse = 0L, umiNMax = 0L, nbrMutatedCodonsMaxForward = 1L, nbrMutatedCodonsMaxReverse = 1L, nbrMutatedBasesMaxForward = -1L, nbrMutatedBasesMaxReverse = -1L, forbiddenMutatedCodonsForward = "NNW", forbiddenMutatedCodonsReverse = "NNW", useTreeWTmatch = FALSE, collapseToWTForward = FALSE, collapseToWTReverse = FALSE, mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0, mutNameDelimiter = ".", constantMaxDistForward = -1L, constantMaxDistReverse = -1L, variableCollapseMaxDist = 0.0, variableCollapseMinReads = 0L, variableCollapseMinRatio = 0.0, umiCollapseMaxDist = 0.0, filteredReadsFastqForward = "", filteredReadsFastqReverse = "", maxNReads = -1L, verbose = FALSE, nThreads = 1L, chunkSize = 100000L) {
     .Call(`_mutscan_digestFastqsCpp`, fastqForwardVect, fastqReverseVect, mergeForwardReverse, minOverlap, maxOverlap, minMergedLength, maxMergedLength, maxFracMismatchOverlap, greedyOverlap, revComplForward, revComplReverse, elementsForward, elementLengthsForward, elementsReverse, elementLengthsReverse, adapterForward, adapterReverse, primerForward, primerReverse, wildTypeForward, wildTypeForwardNames, wildTypeReverse, wildTypeReverseNames, constantForward, constantReverse, avePhredMinForward, avePhredMinReverse, variableNMaxForward, variableNMaxReverse, umiNMax, nbrMutatedCodonsMaxForward, nbrMutatedCodonsMaxReverse, nbrMutatedBasesMaxForward, nbrMutatedBasesMaxReverse, forbiddenMutatedCodonsForward, forbiddenMutatedCodonsReverse, useTreeWTmatch, collapseToWTForward, collapseToWTReverse, mutatedPhredMinForward, mutatedPhredMinReverse, mutNameDelimiter, constantMaxDistForward, constantMaxDistReverse, variableCollapseMaxDist, variableCollapseMinReads, variableCollapseMinRatio, umiCollapseMaxDist, filteredReadsFastqForward, filteredReadsFastqReverse, maxNReads, verbose, nThreads, chunkSize)
+}
+
+mergeValues <- function(mutNamesIn, valuesIn, delimiter = ',') {
+    .Call(`_mutscan_mergeValues`, mutNamesIn, valuesIn, delimiter)
 }
 
 levenshtein_distance <- function(str1, str2, ignored_variable = -1L) {

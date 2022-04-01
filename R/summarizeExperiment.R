@@ -45,9 +45,11 @@
 #' @importFrom S4Vectors DataFrame
 #' @importFrom IRanges IntegerList
 #' @importFrom methods is new as
-#' @importFrom dplyr bind_rows distinct left_join %>% mutate
-#' @importFrom tidyr unite
+#' @importFrom dplyr bind_rows distinct left_join %>% mutate filter group_by
+#'     summarize
+#' @importFrom tidyr unite separate_rows
 #' @importFrom rlang .data
+#' @importFrom stats setNames
 #'
 summarizeExperiment <- function(x, coldata, countType = "umis") {
     ## --------------------------------------------------------------------------
@@ -96,48 +98,42 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     x <- x[nms]
     coldata <- coldata[match(nms, coldata$Name), , drop = FALSE]
 
-    ## --------------------------------------------------------------------------
-    ## Get all sequences, and all sample names
-    ## --------------------------------------------------------------------------
-    allSequences <- Reduce(function(...) dplyr::full_join(..., by = "mutantName"),
-                           lapply(x, function(w) w$summaryTable[, c("mutantName", "sequence")])) %>%
-        replace(., is.na(.), "") %>%
-        tidyr::unite(sequence, -.data$mutantName, sep = ",") %>%
-        dplyr::mutate(sequence = gsub("[,]+", ",", sequence)) %>%
-        dplyr::mutate(sequence = sub(",$", "", sequence)) %>%
-        dplyr::mutate(sequence = sub("^,", "", sequence)) %>%
-        dplyr::mutate(sequence = vapply(sequence, function(x) {
-            paste(unique(strsplit(x, ",")[[1]]), collapse = ",")
-        }, ""))
-    allSequences <- S4Vectors::DataFrame(allSequences)
+    ## All sample names
     allSamples <- names(x)
     names(allSamples) <- allSamples
-
-    ## Add info about nbr mutated bases/codons
-    allNbrMutBases <- do.call(dplyr::bind_rows,
-                              lapply(x, function(w)
-                                  w$summaryTable[, c("mutantName", "nbrMutBases")])) %>%
-        dplyr::distinct()
-    allNbrMutBases <- methods::as(split(allNbrMutBases$nbrMutBases,
-                                        f = allNbrMutBases$mutantName),
-                                  "IntegerList")
-
-    allNbrMutCodons <- do.call(dplyr::bind_rows,
-                               lapply(x, function(w)
-                                   w$summaryTable[, c("mutantName", "nbrMutCodons")])) %>%
-        dplyr::distinct()
-    allNbrMutCodons <- methods::as(split(allNbrMutCodons$nbrMutCodons,
-                                         f = allNbrMutCodons$mutantName),
-                                   "IntegerList")
-
-    allSequences[["nbrMutBases"]] <- allNbrMutBases[allSequences$mutantName]
-    allSequences[["nbrMutCodons"]] <- allNbrMutCodons[allSequences$mutantName]
-
-    ## Add numeric columns in addition to the integer lists
-    allSequences[["minNbrMutBases"]] <- min(allSequences$nbrMutBases)
-    allSequences[["maxNbrMutBases"]] <- max(allSequences$nbrMutBases)
-    allSequences[["minNbrMutCodons"]] <- min(allSequences$nbrMutCodons)
-    allSequences[["maxNbrMutCodons"]] <- max(allSequences$nbrMutCodons)
+    
+    ## ------------------------------------------------------------------------
+    ## Get all observed sequences for each mutant name
+    ## For a given sample, the same mutant name can correspond to multiple 
+    ## sequences, separated by ,
+    ## ------------------------------------------------------------------------
+    tmpdf <- do.call(dplyr::bind_rows, lapply(x, function(w) w$summaryTable))
+    
+    allSequences <- mergeValues(tmpdf$mutantName, tmpdf$sequence) %>%
+        stats::setNames(c("mutantName", "sequence"))
+    allSequences <- S4Vectors::DataFrame(allSequences)
+    
+    ## ------------------------------------------------------------------------
+    ## Add info about nbr mutated bases/codons/AAs,
+    ## sequenceAA, mutantNameAA, mutationTypes, varLengths
+    ## Also here, each column can contain multiple values separated with ,
+    ## (e.g. if variable sequences were collapsed to WT in digestFastqs)
+    ## ------------------------------------------------------------------------
+    for (v in c("nbrMutBases", "nbrMutCodons", "nbrMutAAs",
+                "sequenceAA", "mutantNameAA", "mutationTypes", "varLengths")) {
+        tmp <- mergeValues(tmpdf$mutantName, tmpdf[[v]]) %>%
+            stats::setNames(c("mutantName", v))
+        allSequences[[v]] <- tmp[[v]][match(allSequences$mutantName,
+                                            tmp$mutantName)]
+        
+        if (v %in% c("nbrMutBases", "nbrMutCodons", "nbrMutAAs")) {
+            tmpList <- methods::as(
+                lapply(strsplit(allSequences[[v]], ","), function(w) sort(as.integer(w))),
+                "IntegerList")
+            allSequences[[paste0("min", sub("^n", "N", v))]] <- min(tmpList)
+            allSequences[[paste0("max", sub("^n", "N", v))]] <- max(tmpList)
+        }
+    }
 
     ## --------------------------------------------------------------------------
     ## Create a sparse matrix

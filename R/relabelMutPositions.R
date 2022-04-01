@@ -18,6 +18,7 @@
 #' @param mutNameDelimiter The delimiter used in the mutation name ({.} above).
 #' 
 #' @author Charlotte Soneson
+#' @export
 #' 
 #' @return A SummarizedExperiment object with modified row names.
 #' 
@@ -26,11 +27,19 @@
 #' @importFrom BiocGenerics rownames
 #' 
 #' @examples
+#' x <- readRDS(system.file("extdata", "GSE102901_cis_se.rds",
+#'                          package = "mutscan"))
 #' conversionTable <- data.frame(seqname = "f", position = 0:32) 
 #' conversionTable$name = paste0((conversionTable$position - 1) %/% 7 + 1, 
 #'                               c("", rep(letters[1:7], 6))[1:33])
+#' out <- relabelMutPositions(x, conversionTable)
 #' 
 relabelMutPositions <- function(se, conversionTable, mutNameDelimiter = ".") {
+    .assertVector(x = se, type = "SummarizedExperiment")
+    .assertVector(x = colnames(conversionTable), type = "character")
+    .assertScalar(x = mutNameDelimiter, type = "character")
+    stopifnot(all(c("position", "name", "seqname") %in% colnames(conversionTable)))
+    
     conversionTable$position <- as.character(conversionTable$position)
     spl <- base::strsplit(rownames(se), "_")
     unl <- base::unlist(spl)

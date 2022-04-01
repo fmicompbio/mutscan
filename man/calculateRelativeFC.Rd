@@ -54,8 +54,8 @@ The observed counts for the WT variants can be used as offsets in the model.
 \examples{
 se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds",
                           package = "mutscan"))[1:200, ]
-design <- model.matrix(~ Replicate + Condition,
-                       data = SummarizedExperiment::colData(se))
+design <- stats::model.matrix(~ Replicate + Condition,
+                              data = SummarizedExperiment::colData(se))
 res <- calculateRelativeFC(se, design, coef = "Conditioncis_output")
 
 }

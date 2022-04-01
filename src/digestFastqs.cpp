@@ -136,6 +136,67 @@ bool compareCodonPositions(std::string a, std::string b, const char mutNameDelim
   return (posa < posb);
 }
 
+// translate sequence
+// [[Rcpp::export]]
+std::string translateString(std::string& s) {
+  const char* tr = "KQE*TPASRRG*ILVLNHDYTPASSRGCILVFKQE*TPASRRGWMLVLNHDYTPASSRGCILVF";
+  std::string aa = "";
+  size_t i = 0, j = 0;
+  const int pow4[] = {1, 4, 16};
+  int codonVal = 0;
+  
+  for (i = 0; i < s.size(); i++) {
+    if (s[i] == '_') {
+      j = 0;
+      aa.push_back('_');
+    } else {
+      switch(s[i]) {
+        case 'A':
+        case 'a':
+          // codonVal += 0 * pow4[j];
+          break;
+        
+        case 'C':
+        case 'c':
+          codonVal += 1 * pow4[j];
+          break;
+        
+        case 'G':
+        case 'g':
+          codonVal += 2 * pow4[j];
+          break;
+        
+        case 'T':
+        case 't':
+        case 'u':
+        case 'U':
+          codonVal += 3 * pow4[j];
+          break;
+          
+        default:
+          codonVal += 64;
+          break;
+      }
+      
+      if (j == 2) {
+        if (codonVal > 63) {
+          aa.push_back('X');
+        } else {
+          aa.push_back(tr[codonVal]);
+        }
+        j = 0;
+        codonVal = 0;
+      } else {
+        j++;
+      }
+    
+    }
+    
+  }
+  return aa;
+}
+
+
 // compare read to wildtype sequence,
 // identify mutated bases/codons, filter, update counters
 // and add to the name
@@ -146,16 +207,20 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
                        const int nbrMutatedCodonsMax, const std::set<std::string> &forbiddenCodons,
                        const std::string codonPrefix, const int nbrMutatedBasesMax,
                        int &nMutQualTooLow, int &nTooManyMutCodons, int &nForbiddenCodons,
-                       int &nTooManyMutBases, std::string &mutantName, int &nMutBases,
-                       int &nMutCodons, const std::string mutNameDelimiter,
+                       int &nTooManyMutBases, std::string &mutantName, 
+                       std::string &mutantNameAA, int &nMutBases,
+                       int &nMutCodons, int &nMutAAs, std::set<std::string> &mutationTypes, 
+                       const std::string mutNameDelimiter,
                        const bool collapseToWT) {
   // exactly one of nbrMutatedCodonsMax or nbrMutatedBasesMax should be -1 (checked in the R code).
   // the one that is not -1 will be used for filtering and naming the mutant
 
   std::set<std::string> mutatedCodons;
   std::set<std::string> mutatedBases;
+  std::set<std::string> mutatedAAs;
   std::set<std::string>::iterator mutatedCodonIt;
   bool hasLowQualMutation, hasForbidden;
+  std::string varCodon, wtCodon, varAA, wtAA;
 
   // filter if there are too many mutated codons
   // mutatedCodons.clear();
@@ -170,9 +235,11 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
       // add codon or base (depending on which to consider) to mutatedCodonsOrBases
       // if (nbrMutatedCodonsMax != (-1)) {
       // consider codons
+      varCodon = varSeq.substr((int)(i / 3) * 3, 3);
+      wtCodon = wtSeq.substr((int)(i / 3) * 3, 3);
       mutatedCodons.insert(codonPrefix + mutNameDelimiter +
         std::to_string((int)(i / 3) + 1) + mutNameDelimiter +
-        varSeq.substr((int)(i / 3) * 3, 3) +
+        varCodon +
         std::string("_"));
       // } else {
         // nbrMutatedBasesMax != -1
@@ -182,6 +249,24 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
         varSeq.substr((int)(i), 1) +
         std::string("_"));
       // }
+      varAA = translateString(varCodon);
+      wtAA = translateString(wtCodon);
+      if (varAA != wtAA) {
+        // add to mutatedAA
+        mutatedAAs.insert(codonPrefix + mutNameDelimiter + 
+          std::to_string((int)(i / 3) + 1) + mutNameDelimiter +
+          varAA + 
+          std::string("_"));
+        // nonsynonymous or stop
+        if (varAA == "*") {
+          mutationTypes.insert("stop");
+        } else {
+          mutationTypes.insert("nonsynonymous");
+        }
+      } else {
+        // synonymous
+        mutationTypes.insert("silent");
+      }
     }
   }
   if (hasLowQualMutation) {
@@ -232,12 +317,15 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
 
   nMutBases += (int)mutatedBases.size();
   nMutCodons += (int)mutatedCodons.size();
+  nMutAAs += (int)mutatedAAs.size();
+
 
   // create name for mutant
   if (collapseToWT) {
     mutantName += codonPrefix + "_";
+    mutantNameAA += codonPrefix + "_";
   } else {
-    std::vector<std::string> mutatedCodonsOrBasesSorted;
+    std::vector<std::string> mutatedCodonsOrBasesSorted, mutatedAAsSorted;
     if (nbrMutatedCodonsMax != (-1)) {
       mutatedCodonsOrBasesSorted.assign(mutatedCodons.begin(), mutatedCodons.end());
     } else {
@@ -245,12 +333,21 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
     }
     std::sort(mutatedCodonsOrBasesSorted.begin(), mutatedCodonsOrBasesSorted.end(),
               std::bind(compareCodonPositions, _1, _2, *(mutNameDelimiter.c_str())));
+    mutatedAAsSorted.assign(mutatedAAs.begin(), mutatedAAs.end());
+    std::sort(mutatedAAsSorted.begin(), mutatedAAsSorted.end(),
+              std::bind(compareCodonPositions, _1, _2, *(mutNameDelimiter.c_str())));
     for (size_t i = 0; i < mutatedCodonsOrBasesSorted.size(); i++) {
       mutantName += mutatedCodonsOrBasesSorted[i];
+    }
+    for (size_t i = 0; i < mutatedAAsSorted.size(); i++) {
+      mutantNameAA += mutatedAAsSorted[i];
     }
     // if no mutant codons, name as <codonPrefix>.0.WT
     if (mutatedCodonsOrBasesSorted.size() == 0) {
       mutantName += codonPrefix + mutNameDelimiter + "0" + mutNameDelimiter + "WT_";
+    }
+    if (mutatedAAsSorted.size() == 0) {
+      mutantNameAA += codonPrefix + mutNameDelimiter + "0" + mutNameDelimiter + "WT_";
     }
   }
 
@@ -286,11 +383,13 @@ struct mutantInfo {
   int nReads;                     // number of reads
   int maxNReads;                  // maximum number of reads for an individual mutant, in case of collapsing multiple
                                   // mutants into one entry
-  //int nMutBases;                  // number of mutated bases
-  //int nMutCodons;                 // number of mutated codons
   std::set<int> nMutBases;
   std::set<int> nMutCodons;
+  std::set<int> nMutAAs;
+  std::set<std::string> mutationTypes;
   std::set<std::string> sequence; // set of sequences for that mutant
+  std::set<std::string> mutantNameAA;
+  std::set<std::string> sequenceAA;
   std::string varLengths;         // lengths of individual variable segments (e.g. "10,20" or "10,20_20,10")
 };
 
@@ -984,10 +1083,11 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           std::string varSeqForward = "", varSeqReverse = "", varQualForward = "";
           std::string varQualReverse = "", umiSeq = "", constSeqForward = "";
           std::string constSeqReverse = "", constQualForward = "", constQualReverse = "";
-          std::string mutantName = "";
+          std::string mutantName = "", mutantNameAA = "";
           std::vector<int> varLengthsForward, varLengthsReverse;
           std::string varLengthsForwardStr = "", varLengthsReverseStr = "";
-          int nMutBases = 0, nMutCodons = 0;
+          int nMutBases = 0, nMutCodons = 0, nMutAAs = 0;
+          std::set<std::string> mutationTypes;
           int maxSim = 0;
           int constantLengthForward, constantLengthReverse;
           std::map<std::string, mutantInfo>::iterator mutantSummaryParIt;
@@ -1166,14 +1266,16 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             if (compareToWildtype(varSeqForward, wtForward, varIntQualForward,
                                   mutatedPhredMinForward, nbrMutatedCodonsMaxForward, forbiddenCodonsForward,
                                   wtNameForward, nbrMutatedBasesMaxForward, nMutQualTooLow,
-                                  nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, mutantName,
-                                  nMutBases, nMutCodons, mutNameDelimiter, collapseToWTForward)) {
+                                  nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, 
+                                  mutantName, mutantNameAA, nMutBases, nMutCodons, 
+                                  nMutAAs, mutationTypes, mutNameDelimiter, collapseToWTForward)) {
               // read is to be filtered out
               chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
               continue;
             }
           } else if (varSeqForward.length() > 0) { // variable seq, but no reference -> add variable seq to mutantName
             mutantName += (varSeqForward + std::string("_"));
+            mutantNameAA += (translateString(varSeqForward) + std::string("_"));
           }
           // convert varLengthsForward to string
           if (varLengthsForward.size() > 0) {
@@ -1223,14 +1325,16 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             if (compareToWildtype(varSeqReverse, wtReverse, varIntQualReverse,
                                   mutatedPhredMinReverse, nbrMutatedCodonsMaxReverse, forbiddenCodonsReverse,
                                   wtNameReverse, nbrMutatedBasesMaxReverse, nMutQualTooLow,
-                                  nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, mutantName,
-                                  nMutBases, nMutCodons, mutNameDelimiter, collapseToWTReverse)) {
+                                  nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, 
+                                  mutantName, mutantNameAA, nMutBases, nMutCodons, 
+                                  nMutAAs, mutationTypes, mutNameDelimiter, collapseToWTReverse)) {
               // read is to be filtered out
               chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
               continue;
             }
           } else if (!noReverse && varSeqReverse.length() > 0) { // variable seq, but no reference -> add variable seq to mutantName
             mutantName += (varSeqReverse + std::string("_"));
+            mutantNameAA += (translateString(varSeqReverse) + std::string("_"));
           }
           // convert varLengthsReverse to string
           if (varLengthsReverse.size() > 0) {
@@ -1362,7 +1466,16 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
               mutantName = "WT";
             }
           }
-
+          if (mutantNameAA.length() > 0) { // we have a least one mutation, or sequence-based name
+            mutantNameAA.pop_back(); // remove '_' at the end
+          } else {
+            // will we ever go in here?
+            if (wildTypeForward[0].compare("") != 0 ||
+                (!noReverse && wildTypeReverse[0].compare("") != 0)) {
+              mutantNameAA = "WT";
+            }
+          }
+          
           if (!noReverse) { // "trans" experiment
             varSeqForward += (std::string("_") + varSeqReverse);
             varLengthsForwardStr += (std::string("_") + varLengthsReverseStr);
@@ -1382,6 +1495,10 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             (*mutantSummaryParIt).second.sequence.insert(varSeqForward);
             (*mutantSummaryParIt).second.nMutBases.insert(nMutBases);
             (*mutantSummaryParIt).second.nMutCodons.insert(nMutCodons);
+            (*mutantSummaryParIt).second.nMutAAs.insert(nMutAAs);
+            (*mutantSummaryParIt).second.mutationTypes.insert(mutationTypes.begin(), mutationTypes.end());
+            (*mutantSummaryParIt).second.mutantNameAA.insert(mutantNameAA);
+            (*mutantSummaryParIt).second.sequenceAA.insert(translateString(varSeqForward));
           } else {
             // ... ... create mutantInfo instance for this mutant and add it to mutantSummary
             mutantInfo newMutant;
@@ -1389,11 +1506,15 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             newMutant.maxNReads = 1;
             newMutant.nMutBases.insert(nMutBases);
             newMutant.nMutCodons.insert(nMutCodons);
+            newMutant.nMutAAs.insert(nMutAAs);
             if (umiSeq != "") {
               newMutant.umi.insert(umiSeq);
             }
             newMutant.sequence.insert(varSeqForward);
             newMutant.varLengths = varLengthsForwardStr;
+            newMutant.mutationTypes.insert(mutationTypes.begin(), mutationTypes.end());
+            newMutant.mutantNameAA.insert(mutantNameAA);
+            newMutant.sequenceAA.insert(translateString(varSeqForward));
             mutantSummary.insert(std::pair<std::string,mutantInfo>(mutantName, newMutant));
           }
 }
@@ -1549,16 +1670,33 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           if ((collapsedMutantSummaryIt = collapsedMutantSummary.find(collapsedName)) != collapsedMutantSummary.end()) {
             // ... fuse with existing mutantInfo
             (*collapsedMutantSummaryIt).second.nReads += (*mutantSummaryIt).second.nReads;
-            (*collapsedMutantSummaryIt).second.maxNReads = std::max((*collapsedMutantSummaryIt).second.maxNReads,
-                                                                    (*mutantSummaryIt).second.nReads);
-            (*collapsedMutantSummaryIt).second.umi.insert((*mutantSummaryIt).second.umi.begin(),
-                                                          (*mutantSummaryIt).second.umi.end());
-            (*collapsedMutantSummaryIt).second.sequence.insert((*mutantSummaryIt).second.sequence.begin(),
-                                                               (*mutantSummaryIt).second.sequence.end());
-            (*collapsedMutantSummaryIt).second.nMutBases.insert((*mutantSummaryIt).second.nMutBases.begin(),
-                                                                (*mutantSummaryIt).second.nMutBases.end());
-            (*collapsedMutantSummaryIt).second.nMutCodons.insert((*mutantSummaryIt).second.nMutCodons.begin(),
-                                                                 (*mutantSummaryIt).second.nMutCodons.end());
+            (*collapsedMutantSummaryIt).second.maxNReads = std::max(
+              (*collapsedMutantSummaryIt).second.maxNReads,
+              (*mutantSummaryIt).second.nReads);
+            (*collapsedMutantSummaryIt).second.umi.insert(
+                (*mutantSummaryIt).second.umi.begin(),
+                (*mutantSummaryIt).second.umi.end());
+            (*collapsedMutantSummaryIt).second.sequence.insert(
+                (*mutantSummaryIt).second.sequence.begin(),
+                (*mutantSummaryIt).second.sequence.end());
+            (*collapsedMutantSummaryIt).second.nMutBases.insert(
+                (*mutantSummaryIt).second.nMutBases.begin(),
+                (*mutantSummaryIt).second.nMutBases.end());
+            (*collapsedMutantSummaryIt).second.nMutCodons.insert(
+                (*mutantSummaryIt).second.nMutCodons.begin(),
+                (*mutantSummaryIt).second.nMutCodons.end());
+            (*collapsedMutantSummaryIt).second.nMutAAs.insert(
+                (*mutantSummaryIt).second.nMutAAs.begin(),
+                (*mutantSummaryIt).second.nMutAAs.end());
+            (*collapsedMutantSummaryIt).second.mutationTypes.insert(
+                (*mutantSummaryIt).second.mutationTypes.begin(),
+                (*mutantSummaryIt).second.mutationTypes.end());
+            (*collapsedMutantSummaryIt).second.mutantNameAA.insert(
+                (*mutantSummaryIt).second.mutantNameAA.begin(),
+                (*mutantSummaryIt).second.mutantNameAA.end());
+            (*collapsedMutantSummaryIt).second.sequenceAA.insert(
+                (*mutantSummaryIt).second.sequenceAA.begin(),
+                (*mutantSummaryIt).second.sequenceAA.end());
           } else {
             // ... insert first mutantInfo
             collapsedMutantSummary.insert(std::pair<std::string,mutantInfo>(collapsedName, (*mutantSummaryIt).second));
@@ -1627,8 +1765,11 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   size_t dfLen = mutantSummary.size();
   std::vector<std::string> dfSeq(dfLen, ""), dfName(dfLen, "");
   std::vector<int> dfReads(dfLen, 0), dfUmis(dfLen, 0), dfMaxReads(dfLen, 0);
-  std::vector<std::string> dfMutBases(dfLen, ""), dfMutCodons(dfLen, ""), dfVarLengths(dfLen, "");
-  int i = 0;
+  std::vector<std::string> dfMutBases(dfLen, ""), dfMutCodons(dfLen, ""); 
+  std::vector<std::string> dfMutAAs(dfLen, ""), dfVarLengths(dfLen, "");
+  std::vector<std::string> dfMutantNameAA(dfLen, ""), dfSeqAA(dfLen, "");
+  std::vector<std::string> dfMutationTypes(dfLen, "");
+  int j = 0;
   for (mutantSummaryIt = mutantSummary.begin(); mutantSummaryIt != mutantSummary.end(); mutantSummaryIt++) {
     // collapse all sequences associated with the mutant
     std::vector<std::string> sequenceVector((*mutantSummaryIt).second.sequence.begin(),
@@ -1637,8 +1778,43 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     for (size_t i = 0; i < sequenceVector.size(); i++) {
       collapsedSequence += sequenceVector[i] + ",";
     }
-    collapsedSequence.pop_back(); // remove final ","
-
+    if (!collapsedSequence.empty()) {
+      collapsedSequence.pop_back(); // remove final ","
+    }
+    
+    // mutantNameAA
+    std::vector<std::string> mutantNameAAVector((*mutantSummaryIt).second.mutantNameAA.begin(),
+                                                (*mutantSummaryIt).second.mutantNameAA.end());
+    std::string collapsedMutantNameAA = "";
+    for (size_t i = 0; i < mutantNameAAVector.size(); i++) {
+      collapsedMutantNameAA += mutantNameAAVector[i] + ",";
+    }
+    if (!collapsedMutantNameAA.empty()) {
+      collapsedMutantNameAA.pop_back(); // remove final ","
+    }
+    
+    // mutationTypes
+    std::vector<std::string> mutationTypesVector((*mutantSummaryIt).second.mutationTypes.begin(),
+                                                 (*mutantSummaryIt).second.mutationTypes.end());
+    std::string collapsedMutationTypes = "";
+    for (size_t i = 0; i < mutationTypesVector.size(); i++) {
+      collapsedMutationTypes += mutationTypesVector[i] + ",";
+    }
+    if (!collapsedMutationTypes.empty()) {
+      collapsedMutationTypes.pop_back(); // remove final ","
+    }
+    
+    // collapse all aa sequences associated with the mutant
+    std::vector<std::string> sequenceAAVector((*mutantSummaryIt).second.sequenceAA.begin(),
+                                              (*mutantSummaryIt).second.sequenceAA.end());
+    std::string collapsedSequenceAA = "";
+    for (size_t i = 0; i < sequenceAAVector.size(); i++) {
+      collapsedSequenceAA += sequenceAAVector[i] + ",";
+    }
+    if (!collapsedSequenceAA.empty()) {
+      collapsedSequenceAA.pop_back(); // remove final ","
+    }
+    
     // collapse all observed nMutBases/nMutCodons
     std::vector<int> nMutBasesVector((*mutantSummaryIt).second.nMutBases.begin(),
                                      (*mutantSummaryIt).second.nMutBases.end());
@@ -1646,7 +1822,10 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     for (size_t i = 0; i < nMutBasesVector.size(); i++) {
       collapsedNMutBases += (std::to_string(nMutBasesVector[i]) + ",");
     }
-    collapsedNMutBases.pop_back();
+    if (!collapsedNMutBases.empty()) {
+      collapsedNMutBases.pop_back();
+    }
+    
     // codons
     std::vector<int> nMutCodonsVector((*mutantSummaryIt).second.nMutCodons.begin(),
                                       (*mutantSummaryIt).second.nMutCodons.end());
@@ -1654,18 +1833,36 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     for (size_t i = 0; i < nMutCodonsVector.size(); i++) {
       collapsedNMutCodons += std::to_string(nMutCodonsVector[i]) + ",";
     }
-    collapsedNMutCodons.pop_back();
-
-    dfName[i] = (*mutantSummaryIt).first;
-    dfSeq[i] = collapsedSequence;
-    dfReads[i] = (*mutantSummaryIt).second.nReads;
-    dfMaxReads[i] = (*mutantSummaryIt).second.maxNReads;
-    dfUmis[i] = (*mutantSummaryIt).second.umi.size();
-    dfMutBases[i] = collapsedNMutBases;
-    dfMutCodons[i] = collapsedNMutCodons;
-    dfVarLengths[i] = (*mutantSummaryIt).second.varLengths;
-    i++;
+    if (!collapsedNMutCodons.empty()) {
+      collapsedNMutCodons.pop_back();
+    }
+    
+    // AAs
+    std::vector<int> nMutAAsVector((*mutantSummaryIt).second.nMutAAs.begin(),
+                                   (*mutantSummaryIt).second.nMutAAs.end());
+    std::string collapsedNMutAAs = "";
+    for (size_t i = 0; i < nMutAAsVector.size(); i++) {
+      collapsedNMutAAs += std::to_string(nMutAAsVector[i]) + ",";
+    }
+    if (!collapsedNMutAAs.empty()) {
+      collapsedNMutAAs.pop_back();
+    }
+    
+    dfName[j] = (*mutantSummaryIt).first;
+    dfSeq[j] = collapsedSequence;
+    dfReads[j] = (*mutantSummaryIt).second.nReads;
+    dfMaxReads[j] = (*mutantSummaryIt).second.maxNReads;
+    dfUmis[j] = (*mutantSummaryIt).second.umi.size();
+    dfMutBases[j] = collapsedNMutBases;
+    dfMutCodons[j] = collapsedNMutCodons;
+    dfMutAAs[j] = collapsedNMutAAs;
+    dfMutantNameAA[j] = collapsedMutantNameAA;
+    dfMutationTypes[j] = collapsedMutationTypes;
+    dfSeqAA[j] = collapsedSequenceAA;
+    dfVarLengths[j] = (*mutantSummaryIt).second.varLengths;
+    j++;
   }
+  
   // put back wildtype sequences and names in Rcpp::StringVector
   Rcpp::StringVector wildTypeForwardRcpp(wildTypeForward.size());
   wildTypeForwardRcpp = wildTypeForward;
@@ -1697,7 +1894,11 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                                    Named("nbrUmis") = dfUmis,
                                    Named("nbrMutBases") = dfMutBases,
                                    Named("nbrMutCodons") = dfMutCodons,
+                                   Named("nbrMutAAs") = dfMutAAs,
                                    Named("varLengths") = dfVarLengths,
+                                   Named("mutantNameAA") = dfMutantNameAA,
+                                   Named("mutationTypes") = dfMutationTypes,
+                                   Named("sequenceAA") = dfSeqAA,
                                    Named("stringsAsFactors") = false);
   DataFrame err = DataFrame::create(Named("PhredQuality") = seq_len(100) - 1,
                                     Named("nbrMatchForward") = nPhredCorrectForward,

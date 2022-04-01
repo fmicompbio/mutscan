@@ -87,6 +87,8 @@ test_that("digestFastqs works as expected for cis experiments", {
   expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 2]), 2L)
   expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 0]), 77L)
   expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 1]), 90L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == 0]), 97L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == 1]), 70L)
 
   ## Similarly but for the number of unique sequences
   expect_equal(sum(res$summaryTable$nbrMutBases == 0), 1L)
@@ -94,13 +96,26 @@ test_that("digestFastqs works as expected for cis experiments", {
   expect_equal(sum(res$summaryTable$nbrMutBases == 2), 2L)
   expect_equal(sum(res$summaryTable$nbrMutCodons == 0), 1L)
   expect_equal(sum(res$summaryTable$nbrMutCodons == 1), 66L)
-
+  expect_equal(sum(res$summaryTable$nbrMutAAs == 0), 14L)
+  expect_equal(sum(res$summaryTable$nbrMutAAs == 1), 53L)
 
   ## Check that mutant naming worked (compare to manual matching)
   example_seq <- paste0("ACTGATACACGCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCT",
                         "GCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")
   expect_equal(res$summaryTable$mutantName[res$summaryTable$sequence == example_seq],
                "f.4.CGC")
+  expect_equal(res$summaryTable$mutantNameAA[res$summaryTable$sequence == example_seq],
+               "f.4.R")
+  
+  expect_equal(res$summaryTable$sequenceAA, 
+               as.character(Biostrings::translate(
+                 Biostrings::DNAStringSet(res$summaryTable$sequence))))
+  expect_equal(as.numeric(res$summaryTable$varLengths), 
+               nchar(res$summaryTable$sequence))
+  expect_equal(sum(grepl("WT", res$summaryTable$mutantNameAA) & res$summaryTable$nbrMutBases > 0), 13)
+  expect_true(all(grepl("silent", res$summaryTable$mutationTypes[grepl("WT", res$summaryTable$mutantNameAA) & res$summaryTable$nbrMutBases > 0])))
+  expect_true(all(grepl("nonsynonymous|stop", res$summaryTable$mutationTypes[grepl("\\.[1-9][0-9]*\\.", res$summaryTable$mutantNameAA)])))
+  expect_true(all(grepl("stop", res$summaryTable$mutationTypes[grepl("TAG|TAA|TGA", res$summaryTable$mutantName)])))
 
   expect_equal(sum(res$errorStatistics$nbrMatchForward + res$errorStatistics$nbrMismatchForward),
                nchar(Ldef$constantForward[1]) * res$filterSummary$nbrRetained)
@@ -200,7 +215,9 @@ test_that("digestFastqs works as expected when specifying max nbr of mutated bas
 
   expect_named(res$summaryTable, c("mutantName", "sequence","nbrReads",
                                    "maxNbrReads", "nbrUmis", "nbrMutBases",
-                                   "nbrMutCodons", "varLengths"))
+                                   "nbrMutCodons", "nbrMutAAs", "varLengths",
+                                   "mutantNameAA", "mutationTypes",
+                                   "sequenceAA"))
 
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
     expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
@@ -219,6 +236,9 @@ test_that("digestFastqs works as expected when specifying max nbr of mutated bas
   expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 0]), 77L)
   expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 1]), 90L)
   expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 2]), 35L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == 0]), 98L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == 1]), 86L)
+  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == 2]), 18L)
 
   ## Similarly but for the number of unique sequences
   expect_equal(sum(res$summaryTable$nbrMutBases == 0), 1L)
@@ -227,12 +247,17 @@ test_that("digestFastqs works as expected when specifying max nbr of mutated bas
   expect_equal(sum(res$summaryTable$nbrMutCodons == 0), 1L)
   expect_equal(sum(res$summaryTable$nbrMutCodons == 1), 66L)
   expect_equal(sum(res$summaryTable$nbrMutCodons == 2), 34L)
+  expect_equal(sum(res$summaryTable$nbrMutAAs == 0), 15L)
+  expect_equal(sum(res$summaryTable$nbrMutAAs == 1), 69L)
+  expect_equal(sum(res$summaryTable$nbrMutAAs == 2), 17L)
 
   ## Check that mutant naming worked (compare to manual matching)
   example_seq <- paste0("ACTGATACACGCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCT",
                         "GCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")
   expect_equal(res$summaryTable$mutantName[res$summaryTable$sequence == example_seq],
                "f.11.G")
+  expect_equal(res$summaryTable$mutantNameAA[res$summaryTable$sequence == example_seq], 
+               "f.4.R")
 
   expect_equal(sum(res$errorStatistics$nbrMatchForward + res$errorStatistics$nbrMismatchForward),
                nchar(Ldef$constantForward[1]) * res$filterSummary$nbrRetained)

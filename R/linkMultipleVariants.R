@@ -163,8 +163,8 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
             tidyr::separate(sequence, into = c("sequenceForward", 
                                                "sequenceReverse"), 
                             sep = "_") %>%
-            tidyr::separate(varLengths, into = c("varLengthsForward", 
-                                                 "varLengthsReverse"),
+            tidyr::separate(.data$varLengths, into = c("varLengthsForward", 
+                                                       "varLengthsReverse"),
                             sep = "_") %>%
             dplyr::mutate(
                 nCompForward = vapply(strsplit(.data$varLengthsForward, ","), 
@@ -173,8 +173,8 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
                                       length, 0))
     } else {
         countCombined <- countCombined %>%
-            dplyr::rename(sequenceForward = sequence,
-                          varLengthsForward = varLengths) %>%
+            dplyr::rename(sequenceForward = .data$sequence,
+                          varLengthsForward = .data$varLengths) %>%
             dplyr::mutate(
                 nCompForward = vapply(strsplit(.data$varLengthsForward, ","), 
                                       length, 0))

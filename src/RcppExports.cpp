@@ -36,6 +36,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// translateString
+std::string translateString(std::string& s);
+RcppExport SEXP _mutscan_translateString(SEXP sSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string& >::type s(sSEXP);
+    rcpp_result_gen = Rcpp::wrap(translateString(s));
+    return rcpp_result_gen;
+END_RCPP
+}
 // test_decomposeRead
 List test_decomposeRead(const std::string sseq, const std::string squal, const std::string elements, const std::vector<int> elementLengths, const std::vector<std::string> primerSeqs, std::string umiSeq, std::string varSeq, std::string varQual, std::vector<int> varLengths, std::string constSeq, std::string constQual, int nNoPrimer, int nReadWrongLength);
 RcppExport SEXP _mutscan_test_decomposeRead(SEXP sseqSEXP, SEXP squalSEXP, SEXP elementsSEXP, SEXP elementLengthsSEXP, SEXP primerSeqsSEXP, SEXP umiSeqSEXP, SEXP varSeqSEXP, SEXP varQualSEXP, SEXP varLengthsSEXP, SEXP constSeqSEXP, SEXP constQualSEXP, SEXP nNoPrimerSEXP, SEXP nReadWrongLengthSEXP) {
@@ -173,6 +184,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// mergeValues
+DataFrame mergeValues(std::vector<std::string> mutNamesIn, std::vector<std::string> valuesIn, char delimiter);
+RcppExport SEXP _mutscan_mergeValues(SEXP mutNamesInSEXP, SEXP valuesInSEXP, SEXP delimiterSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::vector<std::string> >::type mutNamesIn(mutNamesInSEXP);
+    Rcpp::traits::input_parameter< std::vector<std::string> >::type valuesIn(valuesInSEXP);
+    Rcpp::traits::input_parameter< char >::type delimiter(delimiterSEXP);
+    rcpp_result_gen = Rcpp::wrap(mergeValues(mutNamesIn, valuesIn, delimiter));
+    return rcpp_result_gen;
+END_RCPP
+}
 // levenshtein_distance
 int levenshtein_distance(const std::string& str1, const std::string& str2, int ignored_variable);
 RcppExport SEXP _mutscan_levenshtein_distance(SEXP str1SEXP, SEXP str2SEXP, SEXP ignored_variableSEXP) {
@@ -218,11 +242,13 @@ RcppExport SEXP _rcpp_module_boot_mod_BKtree();
 static const R_CallMethodDef CallEntries[] = {
     {"_mutscan_calcNearestStringDist", (DL_FUNC) &_mutscan_calcNearestStringDist, 3},
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 3},
+    {"_mutscan_translateString", (DL_FUNC) &_mutscan_translateString, 1},
     {"_mutscan_test_decomposeRead", (DL_FUNC) &_mutscan_test_decomposeRead, 13},
     {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 12},
     {"_mutscan_findClosestRefSeq", (DL_FUNC) &_mutscan_findClosestRefSeq, 4},
     {"_mutscan_findClosestRefSeqEarlyStop", (DL_FUNC) &_mutscan_findClosestRefSeqEarlyStop, 4},
     {"_mutscan_digestFastqsCpp", (DL_FUNC) &_mutscan_digestFastqsCpp, 54},
+    {"_mutscan_mergeValues", (DL_FUNC) &_mutscan_mergeValues, 3},
     {"_mutscan_levenshtein_distance", (DL_FUNC) &_mutscan_levenshtein_distance, 3},
     {"_mutscan_hamming_distance", (DL_FUNC) &_mutscan_hamming_distance, 3},
     {"_mutscan_hamming_shift_distance", (DL_FUNC) &_mutscan_hamming_shift_distance, 3},

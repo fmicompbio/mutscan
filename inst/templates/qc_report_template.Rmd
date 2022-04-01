@@ -1,6 +1,6 @@
 ---
 title: "`r params$title`"
-subtitle: "`r paste0('Generated with mutscan v', packageVersion('mutscan'))`"
+subtitle: "`r paste0('Generated with mutscan v', utils::packageVersion('mutscan'))`"
 date: "`r Sys.time()`"
 output: 
     html_document:
