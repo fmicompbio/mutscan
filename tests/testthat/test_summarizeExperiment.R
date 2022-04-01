@@ -293,31 +293,31 @@ test_that("mergeValues works", {
     res <- mergeValues(c("A", "B", "C", "A", "D", "B"),
                        c("a,b", "b,c", "c", "b,c", "b,a", "d"))
     expect_s3_class(res, "data.frame")
-    expect_named(res, c("mutantName", "value"))
-    expect_equal(res$mutantName, c("A", "B", "C", "D"))
+    expect_named(res, c("mutantNameColl", "valueColl"))
+    expect_equal(res$mutantNameColl, c("A", "B", "C", "D"))
     expect_equal(res$value, c("a,b,c", "b,c,d", "c", "a,b"))
     
     res <- mergeValues(c("B", "A", "C", "D"),
                        c("a,b", "c", "c", "d"))
     expect_s3_class(res, "data.frame")
-    expect_named(res, c("mutantName", "value"))
-    expect_equal(res$mutantName, c("A", "B", "C", "D"))
+    expect_named(res, c("mutantNameColl", "valueColl"))
+    expect_equal(res$mutantNameColl, c("A", "B", "C", "D"))
     expect_equal(res$value, c("c", "a,b", "c", "d"))
     
     res <- mergeValues(c("A", "B", "C", "A", "D", "B"),
                        c("a:b", "b:c", "c", "b:c", "b:a", "d"),
                        delimiter = ":")
     expect_s3_class(res, "data.frame")
-    expect_named(res, c("mutantName", "value"))
-    expect_equal(res$mutantName, c("A", "B", "C", "D"))
+    expect_named(res, c("mutantNameColl", "valueColl"))
+    expect_equal(res$mutantNameColl, c("A", "B", "C", "D"))
     expect_equal(res$value, c("a:b:c", "b:c:d", "c", "a:b"))
     
     res <- mergeValues(c("A", "B", "C", "A", "D", "B"),
                        c("a,b", "b:c", "c", "b:c", "b:a", "d"),
                        delimiter = ":")
     expect_s3_class(res, "data.frame")
-    expect_named(res, c("mutantName", "value"))
-    expect_equal(res$mutantName, c("A", "B", "C", "D"))
+    expect_named(res, c("mutantNameColl", "valueColl"))
+    expect_equal(res$mutantNameColl, c("A", "B", "C", "D"))
     expect_equal(res$value, c("a,b:b:c", "b:c:d", "c", "a:b"))
 })
 

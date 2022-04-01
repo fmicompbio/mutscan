@@ -54,8 +54,8 @@ DataFrame mergeValues(std::vector<std::string> mutNamesIn, std::vector<std::stri
         j++;
     }
     
-    DataFrame df = DataFrame::create(Named("mutantName") = dfName,
-                                     Named("value") = dfValue);
+    DataFrame df = DataFrame::create(Named("mutantNameColl") = dfName,
+                                     Named("valueColl") = dfValue);
     
     return df;
 } 

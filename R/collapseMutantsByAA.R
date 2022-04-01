@@ -40,7 +40,7 @@ collapseMutantsByAA <- function(se, nameCol = "mutantNameAA") {
                 "nbrMutBases", "nbrMutCodons", "nbrMutAAs")) {
         tmp <- mergeValues(SummarizedExperiment::rowData(se)[[nameCol]],
                            SummarizedExperiment::rowData(se)[[v]])
-        rd[[v]] <- tmp$value[match(rd[[nameCol]], tmp$mutantName)]
+        rd[[v]] <- tmp$valueColl[match(rd[[nameCol]], tmp$mutantNameColl)]
     }
     rd0 <- as.data.frame(SummarizedExperiment::rowData(se)) %>%
         dplyr::group_by(.data[[nameCol]]) %>%
