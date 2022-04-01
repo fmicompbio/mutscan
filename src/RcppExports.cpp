@@ -185,14 +185,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // mergeValues
-DataFrame mergeValues(std::vector<std::string> mutNamesIn, std::vector<std::string> valuesIn);
-RcppExport SEXP _mutscan_mergeValues(SEXP mutNamesInSEXP, SEXP valuesInSEXP) {
+DataFrame mergeValues(std::vector<std::string> mutNamesIn, std::vector<std::string> valuesIn, char delimiter);
+RcppExport SEXP _mutscan_mergeValues(SEXP mutNamesInSEXP, SEXP valuesInSEXP, SEXP delimiterSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::vector<std::string> >::type mutNamesIn(mutNamesInSEXP);
     Rcpp::traits::input_parameter< std::vector<std::string> >::type valuesIn(valuesInSEXP);
-    rcpp_result_gen = Rcpp::wrap(mergeValues(mutNamesIn, valuesIn));
+    Rcpp::traits::input_parameter< char >::type delimiter(delimiterSEXP);
+    rcpp_result_gen = Rcpp::wrap(mergeValues(mutNamesIn, valuesIn, delimiter));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -247,7 +248,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mutscan_findClosestRefSeq", (DL_FUNC) &_mutscan_findClosestRefSeq, 4},
     {"_mutscan_findClosestRefSeqEarlyStop", (DL_FUNC) &_mutscan_findClosestRefSeqEarlyStop, 4},
     {"_mutscan_digestFastqsCpp", (DL_FUNC) &_mutscan_digestFastqsCpp, 54},
-    {"_mutscan_mergeValues", (DL_FUNC) &_mutscan_mergeValues, 2},
+    {"_mutscan_mergeValues", (DL_FUNC) &_mutscan_mergeValues, 3},
     {"_mutscan_levenshtein_distance", (DL_FUNC) &_mutscan_levenshtein_distance, 3},
     {"_mutscan_hamming_distance", (DL_FUNC) &_mutscan_hamming_distance, 3},
     {"_mutscan_hamming_shift_distance", (DL_FUNC) &_mutscan_hamming_shift_distance, 3},

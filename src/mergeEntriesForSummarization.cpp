@@ -18,19 +18,20 @@ std::set<std::string> splitSet(const std::string& s, char delimiter) {
 
 // Merge entries (e.g., sequences) corresponding to the same mutant
 // [[Rcpp::export]]
-DataFrame mergeValues(std::vector<std::string> mutNamesIn, std::vector<std::string> valuesIn) {
+DataFrame mergeValues(std::vector<std::string> mutNamesIn, std::vector<std::string> valuesIn,
+                      char delimiter = ',') {
     std::map<std::string, std::set<std::string>> valueSet;
     std::map<std::string, std::set<std::string>>::iterator valueSetIt;
 
     for (size_t i=0; i<mutNamesIn.size(); i++) {
         if ((valueSetIt = valueSet.find(mutNamesIn[i])) != valueSet.end()) {
             // mutant already present
-            std::set<std::string> sst = splitSet(valuesIn[i], ',');
+            std::set<std::string> sst = splitSet(valuesIn[i], delimiter);
             (*valueSetIt).second.insert(sst.begin(), sst.end());
         } else {
             // mutant not yet present
             valueSet.insert(std::pair<std::string,std::set<std::string>>(mutNamesIn[i], 
-                                                                         splitSet(valuesIn[i], ',')));
+                                                                         splitSet(valuesIn[i], delimiter)));
         }
     }
     
@@ -43,7 +44,7 @@ DataFrame mergeValues(std::vector<std::string> mutNamesIn, std::vector<std::stri
                                              (*valueSetIt).second.end());
         std::string collapsedValue = "";
         for (size_t i = 0; i < valueVector.size(); i++) {
-            collapsedValue += valueVector[i] + ",";
+            collapsedValue += valueVector[i] + std::string(1, delimiter);
         }
         if (!collapsedValue.empty()) {
             collapsedValue.pop_back(); // remove final ","
