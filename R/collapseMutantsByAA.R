@@ -14,16 +14,15 @@
 #' @export
 #'
 #' @importFrom Matrix.utils aggregate.Matrix
-#' @importFrom utils relist
-#' @importFrom S4Vectors unstrsplit metadata
+#' @importFrom S4Vectors metadata
 #' @importFrom SummarizedExperiment assays rowData SummarizedExperiment colData
-#' @importFrom dplyr across everything group_by summarize
-#' @importFrom tibble column_to_rownames
+#' @importFrom dplyr across group_by summarize
 #' @importFrom stats setNames
 #'
 collapseMutantsByAA <- function(se, nameCol = "mutantNameAA") {
     .assertVector(x = se, type = "SummarizedExperiment")
-    .assertScalar(x = nameCol, type = "character")
+    .assertScalar(x = nameCol, type = "character",
+                  validValues = colnames(SummarizedExperiment::rowData(se)))
     
     ## Collapse assays
     aList <- lapply(SummarizedExperiment::assays(se), function(a) {

@@ -62,10 +62,14 @@ test_that("collapseMutantsByAA fails with incorrect arguments", {
   expect_error(collapseMutantsByAA(se = coldata))
   expect_error(collapseMutantsByAA(se = out1))
   expect_error(collapseMutantsByAA(se = list(sample1 = out1, sample2 = out2)))
+  expect_error(collapseMutantsByAA(se = se, nameCol = 1))
+  expect_error(collapseMutantsByAA(se = se, nameCol = c("sequence", "mutantNameAA")))
+  expect_error(collapseMutantsByAA(se = se, nameCol = "missing"))
 })
 
 test_that("collapseMutantsByAA works as expected", {
   secoll <- collapseMutantsByAA(se)
+  expect_s4_class(secoll, "SummarizedExperiment")
   expect_equal(SummarizedExperiment::colData(se), 
                SummarizedExperiment::colData(secoll))
   expect_equal(S4Vectors::metadata(se), 
