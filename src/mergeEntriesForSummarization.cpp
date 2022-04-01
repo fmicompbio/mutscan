@@ -21,13 +21,12 @@ std::set<std::string> splitSet(const std::string& s, char delimiter) {
 DataFrame mergeValues(std::vector<std::string> mutNamesIn, std::vector<std::string> valuesIn) {
     std::map<std::string, std::set<std::string>> valueSet;
     std::map<std::string, std::set<std::string>>::iterator valueSetIt;
-    std::map<std::string, std::set<std::string>>::iterator valueSetParIt;
-    
+
     for (size_t i=0; i<mutNamesIn.size(); i++) {
-        if ((valueSetParIt = valueSet.find(mutNamesIn[i])) != valueSet.end()) {
+        if ((valueSetIt = valueSet.find(mutNamesIn[i])) != valueSet.end()) {
             // mutant already present
             std::set<std::string> sst = splitSet(valuesIn[i], ',');
-            (*valueSetParIt).second.insert(sst.begin(), sst.end());
+            (*valueSetIt).second.insert(sst.begin(), sst.end());
         } else {
             // mutant not yet present
             valueSet.insert(std::pair<std::string,std::set<std::string>>(mutNamesIn[i], 
