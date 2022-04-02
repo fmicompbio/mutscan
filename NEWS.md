@@ -1,3 +1,8 @@
+# mutscan 0.2.28
+
+* Rename calculatePPIScore to calculateFitnessScore
+* Add amino acid-related information (AA sequence, mutant name, number of mutated amino acid) to digestFastqs output, propagate through summarizeExperiment and collapseMutantsByAA. 
+
 # mutscan 0.2.27
 
 * Add linkMultipleVariants function
