@@ -187,10 +187,53 @@ WTV3 <- c(V3 = V3)
 constFwd <- "ACGTGATTGATCCCGGTAAATACCGG"
 constRev <- "TAAATACCGGACCTGA"
 
+## Get AA mutant name as well
+V2varAA <- vapply(V2var, function(w) {
+    w <- strsplit(w, "\\.")[[1]]
+    if (w[3] != "WT") {
+        pos0 <- ceiling(as.numeric(w[2]) / 3) - 1
+        wt <- strsplit(WTV2[w[1]], "")[[1]]
+        wt_codon <- paste(wt[(3 * pos0 + 1):(3 * pos0 + 3)], collapse = "")
+        wt_aa <- mutscan:::translateString(wt_codon)
+        wt[as.numeric(w[2])] <- w[3]
+        mut_codon <- paste(wt[(3 * pos0 + 1):(3 * pos0 + 3)], collapse = "")
+        mut_aa <- mutscan:::translateString(mut_codon)
+        if (mut_aa == wt_aa) {
+            paste(c(w[1], 0, "WT"), collapse = ".")
+        } else {
+            paste(c(w[1], pos0 + 1, mut_aa), collapse = ".")
+        }
+    } else {
+        paste(w, collapse = ".")
+    }
+}, "")
+V3varAA <- vapply(V3var, function(w) {
+    w <- strsplit(w, "\\.")[[1]]
+    if (w[3] != "WT") {
+        pos0 <- ceiling(as.numeric(w[2]) / 3) - 1
+        wt <- strsplit(WTV3[w[1]], "")[[1]]
+        wt_codon <- paste(wt[(3 * pos0 + 1):(3 * pos0 + 3)], collapse = "")
+        wt_aa <- mutscan:::translateString(wt_codon)
+        wt[as.numeric(w[2])] <- w[3]
+        mut_codon <- paste(wt[(3 * pos0 + 1):(3 * pos0 + 3)], collapse = "")
+        mut_aa <- mutscan:::translateString(mut_codon)
+        if (mut_aa == wt_aa) {
+            paste(c(w[1], 0, "WT"), collapse = ".")
+        } else {
+            paste(c(w[1], pos0 + 1, mut_aa), collapse = ".")
+        }
+    } else {
+        paste(w, collapse = ".")
+    }
+}, "")
+
+
 truth <- data.frame(read = paste0("R", seq_len(nReads)),
                     trueBarcode = barcode,
                     trueV2 = V2var,
                     trueV3 = V3var,
+                    trueV2aa = V2varAA,
+                    trueV3aa = V3varAA,
                     obsBarcode = v1,
                     status = status)
 
