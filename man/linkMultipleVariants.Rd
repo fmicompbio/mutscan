@@ -4,7 +4,7 @@
 \alias{linkMultipleVariants}
 \title{Process an experiment with multiple variable sequences}
 \usage{
-linkMultipleVariants(combinedDigestParams = list(), ...)
+linkMultipleVariants(combinedDigestParams = list(), ..., collapseToAA = FALSE)
 }
 \arguments{
 \item{combinedDigestParams}{A named list of arguments to
@@ -13,6 +13,12 @@ linkMultipleVariants(combinedDigestParams = list(), ...)
 \item{...}{Additional arguments providing arguments to \code{digestFastqs}
 for the separate runs (processing each variable sequence in turn).
 Each argument must be a named list of arguments to \code{digestFastqs}.}
+
+\item{collapseToAA}{Either \code{TRUE}, \code{FALSE}, or a character vector
+indicating for which of the separate runs the sequences should be 
+collapsed to the amino acid mutant name rather than the codon- or 
+nucleotide-level name. \code{TRUE} is equivalent to providing the 
+names of all lists provided in \code{...}.}
 }
 \value{
 A list with the following elements: 
@@ -23,6 +29,7 @@ A list with the following elements:
 \item convSeparate - a list of conversion tables from the respective 
     separate runs.
 \item outCombined - the \code{digestFastqs} output for the combined run.
+\item filtSeparate - a list of filtering tables for the separate runs.
 }
 }
 \description{

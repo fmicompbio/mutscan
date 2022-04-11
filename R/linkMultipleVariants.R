@@ -62,6 +62,11 @@
 #' @param ... Additional arguments providing arguments to \code{digestFastqs}
 #'     for the separate runs (processing each variable sequence in turn).
 #'     Each argument must be a named list of arguments to \code{digestFastqs}.
+#' @param collapseToAA Either \code{TRUE}, \code{FALSE}, or a character vector
+#'     indicating for which of the separate runs the sequences should be 
+#'     collapsed to the amino acid mutant name rather than the codon- or 
+#'     nucleotide-level name. \code{TRUE} is equivalent to providing the 
+#'     names of all lists provided in \code{...}. 
 #'
 #' @author Charlotte Soneson
 #'
@@ -75,13 +80,15 @@
 #' \item convSeparate - a list of conversion tables from the respective 
 #'     separate runs.
 #' \item outCombined - the \code{digestFastqs} output for the combined run.
+#' \item filtSeparate - a list of filtering tables for the separate runs.
 #' }
 #' 
 #' @importFrom dplyr select rename group_by summarize across matches mutate
 #' @importFrom tidyr separate separate_rows
 #' @importFrom rlang .data
 #'
-linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
+linkMultipleVariants <- function(combinedDigestParams = list(), ..., 
+                                 collapseToAA = FALSE) {
 
     ## Process additional arguments
     paramsSeparate <- list(...)
@@ -111,6 +118,24 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
                               as.list(defaults[!(names(defaults) %in%
                                                      names(combinedDigestParams))]))
 
+    ## Make sure collapseToAA is a vector containing the names of the 
+    ## runs where sequences should be collapsed to AAs
+    if (length(collapseToAA) == 1) {
+        if (is.logical(collapseToAA)) {
+            if (collapseToAA) {
+                collapseToAA <- names(paramsSeparate)
+            } else {
+                collapseToAA <- character(0)
+            }
+        } else {
+            .assertVector(x = collapseToAA, type = "character",
+                          validValues = names(paramsSeparate))
+        }
+    } else {
+        .assertVector(x = collapseToAA, type = "character",
+                      validValues = names(paramsSeparate))
+    }
+    
     ## --------------------------------------------------------------------- ##
     ## Checks
     ## --------------------------------------------------------------------- ##
@@ -227,7 +252,8 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     ## Conversion tables
     convSeparate <- lapply(outSeparate, function(out) {
         out$summaryTable %>%
-            dplyr::select(.data$mutantName, .data$sequence) %>%
+            dplyr::select(.data$mutantName, .data$mutantNameAA,
+                          .data$sequence) %>%
             tidyr::separate_rows(.data$sequence, sep = ",")
     })
 
@@ -235,9 +261,15 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     ## Replace naive sequences with corrected ones
     ## --------------------------------------------------------------------- ##
     for (i in names(paramsSeparate)) {
-        countCombined[[i]] <- 
-            convSeparate[[i]]$mutantName[match(countCombined[[i]],
-                                               convSeparate[[i]]$sequence)]
+        if (i %in% collapseToAA) {
+            countCombined[[i]] <- 
+                convSeparate[[i]]$mutantNameAA[match(countCombined[[i]],
+                                                     convSeparate[[i]]$sequence)]
+        } else {
+            countCombined[[i]] <- 
+                convSeparate[[i]]$mutantName[match(countCombined[[i]],
+                                                   convSeparate[[i]]$sequence)]
+        }
     }
 
     ## Filter out rows with NAs (the sequence was not retained)

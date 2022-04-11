@@ -16,6 +16,10 @@ test_that("linkMultipleVariants works", {
     expect_error(linkMultipleVariants(combinedDigestParams = list(fastqForward = 1),
                                       secondArg = list(unknown = 1)),
                  "All values in 'namesparms' must be one of")
+    expect_error(linkMultipleVariants(combinedDigestParams = list(fastqForward = 1),
+                                      secondArg = list(fastqForward = 1),
+                                      collapseToAA = 1),
+                 "'collapseToAA' must be of class 'character'")
     
     expect_error(linkMultipleVariants(combinedDigestParams = list(fastqForward = 1),
                                       secondArg = list(elementsForward = "CC")),
@@ -86,7 +90,8 @@ test_that("linkMultipleVariants works", {
             wildTypeForward = truth$WTV3,
             nbrMutatedCodonsMaxForward = -1, nbrMutatedBasesMaxForward = 1, 
             forbiddenMutatedCodonsForward = "", collapseToWTForward = FALSE,
-            verbose = verbose, useTreeWTmatch = TRUE)
+            verbose = verbose, useTreeWTmatch = TRUE),
+        collapseToAA = FALSE
     )
     
     ## Filter out only reads with N/deletions in the variable sequence
@@ -103,6 +108,186 @@ test_that("linkMultipleVariants works", {
     expect_equal(sum(obs$nbrReads), sum(keep))
     expect_equal(correct$trueBarcode, obs$barcode)
     expect_equal(correct$trueV2, obs$V2)
+    expect_equal(correct$trueV3, obs$V3)
+    expect_equal(correct$n, obs$nbrReads)
+    expect_equal(res$outCombined$filterSummary[, "f4_nbrNoValidOverlap"], 
+                 sum(grepl("del", truth$truth$status)))  ## del
+    expect_equal(res$outCombined$filterSummary[, "f6_nbrTooManyNinVar"], 
+                 sum(grepl("N", truth$truth$status)))   ## N
+    expect_equal(res$outCombined$filterSummary[, "nbrRetained"], 
+                 sum(!grepl("N|del", truth$truth$status)))
+    expect_equal(res$filtSeparate$barcode[, "f6_nbrTooManyNinVar"], 
+                 sum(grepl("V1N", truth$truth$status)))
+    expect_equal(res$filtSeparate$barcode[, "nbrRetained"], 
+                 sum(!grepl("V1N", truth$truth$status)))
+    expect_equal(res$filtSeparate$V2[, "f4_nbrNoValidOverlap"], 
+                 sum(grepl("del", truth$truth$status)))
+    expect_equal(res$filtSeparate$V2[, "nbrRetained"], 
+                 sum(!grepl("del", truth$truth$status)))
+    expect_equal(res$filtSeparate$V3[, "f4_nbrNoValidOverlap"], 
+                 sum(grepl("del", truth$truth$status)))
+    expect_equal(res$filtSeparate$V3[, "nbrRetained"], 
+                 sum(!grepl("del", truth$truth$status)))
+    
+    ## ------------------------------------------------------------------------
+    ## Don't filter by mutations in constant sequence, collapse by AA
+    res <- linkMultipleVariants(
+        combinedDigestParams = list(
+            fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
+                                       package = "mutscan"),
+            fastqReverse = system.file("extdata", "multipleVariableRegions_R2.fastq.gz",
+                                       package = "mutscan"),
+            elementsForward = "CVCVCV", elementLengthsForward = c(6, 24, 10, 30, 10, -1),
+            elementsReverse = "CVCV", elementLengthsReverse = c(6, 40, 10, -1),
+            mergeForwardReverse = TRUE, minOverlap = 20, 
+            maxOverlap = 30, maxFracMismatchOverlap = 0,
+            revComplForward = FALSE, revComplReverse = TRUE,
+            avePhredMinForward = 20, avePhredMinReverse = 20,
+            verbose = verbose),
+        barcode = list(
+            fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
+                                       package = "mutscan"),
+            elementsForward = "CVCSCS", elementLengthsForward = c(6, 24, 10, 30, 10, -1),
+            avePhredMinForward = 20, variableCollapseMaxDist = 1, 
+            variableCollapseMinReads = 1, variableCollapseMinRatio = 1,
+            verbose = verbose),
+        V2 = list(
+            fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
+                                       package = "mutscan"),
+            fastqReverse = system.file("extdata", "multipleVariableRegions_R2.fastq.gz",
+                                       package = "mutscan"),
+            elementsForward = "CSCVCS", elementLengthsForward = c(6, 24, 10, 30, 10, -1),
+            elementsReverse = "CSCV", elementLengthsReverse = c(6, 40, 10, -1),
+            mergeForwardReverse = TRUE, minOverlap = 10, 
+            maxOverlap = 20, maxFracMismatchOverlap = 0,
+            revComplForward = FALSE, revComplReverse = TRUE,
+            avePhredMinForward = 20, avePhredMinReverse = 20,
+            wildTypeForward = truth$WTV2,
+            nbrMutatedCodonsMaxForward = -1, nbrMutatedBasesMaxForward = 1, 
+            forbiddenMutatedCodonsForward = "", collapseToWTForward = FALSE,
+            verbose = verbose, useTreeWTmatch = TRUE),
+        V3 = list(
+            fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
+                                       package = "mutscan"),
+            fastqReverse = system.file("extdata", "multipleVariableRegions_R2.fastq.gz",
+                                       package = "mutscan"),
+            elementsForward = "CSCSCV", elementLengthsForward = c(6, 24, 10, 30, 10, -1),
+            elementsReverse = "CVCS", elementLengthsReverse = c(6, 40, 10, -1),
+            mergeForwardReverse = TRUE, minOverlap = 5, 
+            maxOverlap = 15, maxFracMismatchOverlap = 0,
+            revComplForward = FALSE, revComplReverse = TRUE,
+            avePhredMinForward = 20, avePhredMinReverse = 20,
+            wildTypeForward = truth$WTV3,
+            nbrMutatedCodonsMaxForward = -1, nbrMutatedBasesMaxForward = 1, 
+            forbiddenMutatedCodonsForward = "", collapseToWTForward = FALSE,
+            verbose = verbose, useTreeWTmatch = TRUE),
+        collapseToAA = c("V2", "V3")
+    )
+    
+    ## Filter out only reads with N/deletions in the variable sequence
+    keep <- !grepl("N|del", truth$truth$status)
+    
+    ## Truth
+    correct <- truth$truth[keep, ] %>%
+        dplyr::group_by(trueBarcode, trueV2aa, trueV3aa) %>% dplyr::tally() %>%
+        dplyr::arrange(dplyr::desc(n), trueBarcode, trueV2aa, trueV3aa)
+    
+    ## Obs
+    obs <- res$countAggregated %>% dplyr::arrange(desc(nbrReads), barcode, V2, V3)
+    
+    expect_equal(sum(obs$nbrReads), sum(keep))
+    expect_equal(correct$trueBarcode, obs$barcode)
+    expect_equal(correct$trueV2aa, obs$V2)
+    expect_equal(correct$trueV3aa, obs$V3)
+    expect_equal(correct$n, obs$nbrReads)
+    expect_equal(res$outCombined$filterSummary[, "f4_nbrNoValidOverlap"], 
+                 sum(grepl("del", truth$truth$status)))  ## del
+    expect_equal(res$outCombined$filterSummary[, "f6_nbrTooManyNinVar"], 
+                 sum(grepl("N", truth$truth$status)))   ## N
+    expect_equal(res$outCombined$filterSummary[, "nbrRetained"], 
+                 sum(!grepl("N|del", truth$truth$status)))
+    expect_equal(res$filtSeparate$barcode[, "f6_nbrTooManyNinVar"], 
+                 sum(grepl("V1N", truth$truth$status)))
+    expect_equal(res$filtSeparate$barcode[, "nbrRetained"], 
+                 sum(!grepl("V1N", truth$truth$status)))
+    expect_equal(res$filtSeparate$V2[, "f4_nbrNoValidOverlap"], 
+                 sum(grepl("del", truth$truth$status)))
+    expect_equal(res$filtSeparate$V2[, "nbrRetained"], 
+                 sum(!grepl("del", truth$truth$status)))
+    expect_equal(res$filtSeparate$V3[, "f4_nbrNoValidOverlap"], 
+                 sum(grepl("del", truth$truth$status)))
+    expect_equal(res$filtSeparate$V3[, "nbrRetained"], 
+                 sum(!grepl("del", truth$truth$status)))
+    
+    ## ------------------------------------------------------------------------
+    ## Don't filter by mutations in constant sequence, collapse by AA (only V2)
+    res <- linkMultipleVariants(
+        combinedDigestParams = list(
+            fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
+                                       package = "mutscan"),
+            fastqReverse = system.file("extdata", "multipleVariableRegions_R2.fastq.gz",
+                                       package = "mutscan"),
+            elementsForward = "CVCVCV", elementLengthsForward = c(6, 24, 10, 30, 10, -1),
+            elementsReverse = "CVCV", elementLengthsReverse = c(6, 40, 10, -1),
+            mergeForwardReverse = TRUE, minOverlap = 20, 
+            maxOverlap = 30, maxFracMismatchOverlap = 0,
+            revComplForward = FALSE, revComplReverse = TRUE,
+            avePhredMinForward = 20, avePhredMinReverse = 20,
+            verbose = verbose),
+        barcode = list(
+            fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
+                                       package = "mutscan"),
+            elementsForward = "CVCSCS", elementLengthsForward = c(6, 24, 10, 30, 10, -1),
+            avePhredMinForward = 20, variableCollapseMaxDist = 1, 
+            variableCollapseMinReads = 1, variableCollapseMinRatio = 1,
+            verbose = verbose),
+        V2 = list(
+            fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
+                                       package = "mutscan"),
+            fastqReverse = system.file("extdata", "multipleVariableRegions_R2.fastq.gz",
+                                       package = "mutscan"),
+            elementsForward = "CSCVCS", elementLengthsForward = c(6, 24, 10, 30, 10, -1),
+            elementsReverse = "CSCV", elementLengthsReverse = c(6, 40, 10, -1),
+            mergeForwardReverse = TRUE, minOverlap = 10, 
+            maxOverlap = 20, maxFracMismatchOverlap = 0,
+            revComplForward = FALSE, revComplReverse = TRUE,
+            avePhredMinForward = 20, avePhredMinReverse = 20,
+            wildTypeForward = truth$WTV2,
+            nbrMutatedCodonsMaxForward = -1, nbrMutatedBasesMaxForward = 1, 
+            forbiddenMutatedCodonsForward = "", collapseToWTForward = FALSE,
+            verbose = verbose, useTreeWTmatch = TRUE),
+        V3 = list(
+            fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
+                                       package = "mutscan"),
+            fastqReverse = system.file("extdata", "multipleVariableRegions_R2.fastq.gz",
+                                       package = "mutscan"),
+            elementsForward = "CSCSCV", elementLengthsForward = c(6, 24, 10, 30, 10, -1),
+            elementsReverse = "CVCS", elementLengthsReverse = c(6, 40, 10, -1),
+            mergeForwardReverse = TRUE, minOverlap = 5, 
+            maxOverlap = 15, maxFracMismatchOverlap = 0,
+            revComplForward = FALSE, revComplReverse = TRUE,
+            avePhredMinForward = 20, avePhredMinReverse = 20,
+            wildTypeForward = truth$WTV3,
+            nbrMutatedCodonsMaxForward = -1, nbrMutatedBasesMaxForward = 1, 
+            forbiddenMutatedCodonsForward = "", collapseToWTForward = FALSE,
+            verbose = verbose, useTreeWTmatch = TRUE),
+        collapseToAA = "V2"
+    )
+    
+    ## Filter out only reads with N/deletions in the variable sequence
+    keep <- !grepl("N|del", truth$truth$status)
+    
+    ## Truth
+    correct <- truth$truth[keep, ] %>%
+        dplyr::group_by(trueBarcode, trueV2aa, trueV3) %>% dplyr::tally() %>%
+        dplyr::arrange(dplyr::desc(n), trueBarcode, trueV2aa, trueV3)
+    
+    ## Obs
+    obs <- res$countAggregated %>% dplyr::arrange(desc(nbrReads), barcode, V2, V3)
+    
+    expect_equal(sum(obs$nbrReads), sum(keep))
+    expect_equal(correct$trueBarcode, obs$barcode)
+    expect_equal(correct$trueV2aa, obs$V2)
     expect_equal(correct$trueV3, obs$V3)
     expect_equal(correct$n, obs$nbrReads)
     expect_equal(res$outCombined$filterSummary[, "f4_nbrNoValidOverlap"], 
