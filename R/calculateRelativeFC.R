@@ -141,6 +141,9 @@ calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
         } else if (!is.null(contrast)) {
             tt$logFC_shrunk <- c(predfc %*% cbind(contrast))
         }
+        tt$df.total <- fit$df.total
+        tt$df.prior <- fit$df.prior
+        tt$df.test <- fit$df.test
     } else if (method == "limma") {
         if (!is.null(dge$offset)) {
             vm <- limma::voom(dge, design = design, lib.size = exp(dge$offset))
@@ -159,6 +162,8 @@ calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
         if (length(coef) == 1) {
             tt$se.logFC <- sqrt(fit$s2.post) * fit$stdev.unscaled[, coef]
         }
+        tt$df.total <- fit$df.total
+        tt$df.prior <- fit$df.prior
     }
     tt
 }
