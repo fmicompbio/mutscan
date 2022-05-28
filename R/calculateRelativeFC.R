@@ -141,9 +141,9 @@ calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
         } else if (!is.null(contrast)) {
             tt$logFC_shrunk <- c(predfc %*% cbind(contrast))
         }
-        tt$df.total <- fit$df.total
-        tt$df.prior <- fit$df.prior
-        tt$df.test <- fit$df.test
+        tt$df.total <- qlf$df.total
+        tt$df.prior <- qlf$df.prior
+        tt$df.test <- qlf$df.test
     } else if (method == "limma") {
         if (!is.null(dge$offset)) {
             vm <- limma::voom(dge, design = design, lib.size = exp(dge$offset))
