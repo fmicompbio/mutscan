@@ -127,6 +127,8 @@ test_that("calculateRelativeFC works", {
     expect_equal(res1a["f.0.WT", "logFC_shrunk"], 0, tolerance = 1e-4)
     expect_equal(res1a["f.0.WT", "PValue"], 1, tolerance = 1e-4)
     expect_equal(res1a["f.0.WT", "FDR"], 1, tolerance = 1e-4)
+    expect_named(res1a, c("logFC", "logCPM", "F", "PValue", "FDR",
+                          "logFC_shrunk", "df.total", "df.prior", "df.test"))
 
     ## Should also work with limma
     res3a <- calculateRelativeFC(se, design, coef = "Conditioncis_output",
@@ -137,7 +139,8 @@ test_that("calculateRelativeFC works", {
     expect_equal(res3a["f.0.WT", "P.Value"], 1, tolerance = 1e-4)
     expect_equal(res3a["f.0.WT", "adj.P.Val"], 1, tolerance = 1e-4)
     expect_named(res3a, c("logFC", "CI.L", "CI.R", "AveExpr", "t",
-                          "P.Value", "adj.P.Val", "B", "se.logFC"))
+                          "P.Value", "adj.P.Val", "B", "se.logFC", 
+                          "df.total", "df.prior"))
     
     ## Also with contrast
     res3b <- calculateRelativeFC(se, design, coef = NULL,
@@ -149,7 +152,8 @@ test_that("calculateRelativeFC works", {
     expect_equal(res3b["f.0.WT", "P.Value"], 1, tolerance = 1e-4)
     expect_equal(res3b["f.0.WT", "adj.P.Val"], 1, tolerance = 1e-4)
     expect_named(res3b, c("logFC", "CI.L", "CI.R", "AveExpr", "t",
-                          "P.Value", "adj.P.Val", "B", "se.logFC"))
+                          "P.Value", "adj.P.Val", "B", "se.logFC",
+                          "df.total", "df.prior"))
     
     ## Coef and contrast should be equivalent also for limma
     expect_equal(res3a$logFC, res3b$logFC)

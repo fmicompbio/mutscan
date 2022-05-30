@@ -1,3 +1,7 @@
+# mutscan 0.2.29
+
+* Include degrees of freedom in output from calculateRelativeFC
+
 # mutscan 0.2.28
 
 * Rename calculatePPIScore to calculateFitnessScore
