@@ -16,8 +16,9 @@ using namespace Rcpp;
 
 // simple implementation of a BK tree (https://en.wikipedia.org/wiki/BK-tree)
 // for std::string elements and Hamming (+ Shifts) or Levenshtein distance
-// based on:
-//   https://github.com/talhasaruhan/fuzzy-search/blob/master/bktree.hpp
+// based on implementation by @talhasaruhan:
+//   https://github.com/talhasaruhan/fuzzy-search/blob/1ddcefc772c8764351d2c679c266a97a58729eef/bktree.hpp
+//   available under MIT license (see https://github.com/talhasaruhan/fuzzy-search/issues/2)
 class BKtree {
 public:
 
