@@ -20,7 +20,7 @@ histograms of the respective columns."><!-- mathjax --><script src="https://cdnj
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.29</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.30</span>
       </span>
     </div>
 
@@ -56,20 +56,20 @@ histograms of the respective columns.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plotPairs</span><span class="op">(</span>
-  <span class="va">se</span>,
-  selAssay <span class="op">=</span> <span class="st">"counts"</span>,
-  doLog <span class="op">=</span> <span class="cn">TRUE</span>,
-  pseudocount <span class="op">=</span> <span class="fl">1</span>,
-  corMethod <span class="op">=</span> <span class="st">"pearson"</span>,
-  histBreaks <span class="op">=</span> <span class="fl">40</span>,
-  pointsType <span class="op">=</span> <span class="st">"points"</span>,
-  corSizeMult <span class="op">=</span> <span class="fl">5</span>,
-  corSizeAdd <span class="op">=</span> <span class="fl">2</span>,
-  pointSize <span class="op">=</span> <span class="fl">0.1</span>,
-  pointAlpha <span class="op">=</span> <span class="fl">0.3</span>,
-  colorByCorrelation <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plotPairs</span><span class="op">(</span></span>
+<span>  <span class="va">se</span>,</span>
+<span>  selAssay <span class="op">=</span> <span class="st">"counts"</span>,</span>
+<span>  doLog <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  pseudocount <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  corMethod <span class="op">=</span> <span class="st">"pearson"</span>,</span>
+<span>  histBreaks <span class="op">=</span> <span class="fl">40</span>,</span>
+<span>  pointsType <span class="op">=</span> <span class="st">"points"</span>,</span>
+<span>  corSizeMult <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  corSizeAdd <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  pointSize <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  pointAlpha <span class="op">=</span> <span class="fl">0.3</span>,</span>
+<span>  colorByCorrelation <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -77,38 +77,59 @@ histograms of the respective columns.</p>
     <dl><dt>se</dt>
 <dd><p>A SummarizedExperiment object, e.g. the output of
 <code>summarizeExperiment</code></p></dd>
+
+
 <dt>selAssay</dt>
 <dd><p>Character scalar, the assay to use as the basis for the
 pairs plot.</p></dd>
+
+
 <dt>doLog</dt>
 <dd><p>Logical scalar, whether or not to log-transform the values
 before plotting.</p></dd>
+
+
 <dt>pseudocount</dt>
 <dd><p>Numeric scalar, the pseudocount to add to the values
 before log-transforming (if <code>doLog</code> is <code>TRUE</code>).</p></dd>
+
+
 <dt>corMethod</dt>
 <dd><p>Either "pearson" or "spearman", the type of correlation
 to calculate.</p></dd>
+
+
 <dt>histBreaks</dt>
 <dd><p>Numeric scalar, the number of breaks in the histograms
 to put in the diagonal panels.</p></dd>
+
+
 <dt>pointsType</dt>
 <dd><p>Either "points" or "smoothscatter", determining the
 type of plots that will be made.</p></dd>
+
+
 <dt>corSizeMult, corSizeAdd</dt>
 <dd><p>Numeric scalars determining how the
 absolute correlation value is transformed into a font size. The
 transformation is corSizeMult * abs(corr) + corSizeAdd.</p></dd>
+
+
 <dt>pointSize, pointAlpha</dt>
 <dd><p>Numeric scalars determining the size and
 opacity of points in the plot.</p></dd>
+
+
 <dt>colorByCorrelation</dt>
 <dd><p>Logical scalar, indicating whether the correlation
 panels should be colored according to the correlation value.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A <code>ggplot</code> object.</p>
+    
+
+<p>A <code>ggplot</code> object.</p>
     </div>
     <div id="author">
     <h2>Author</h2>
@@ -127,7 +148,7 @@ panels should be colored according to the correlation value.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.9000.</p>
 </div>
 
       </footer></div>

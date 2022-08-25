@@ -25,7 +25,7 @@ reads), they will be concatenated and processed as a single unit."><!-- mathjax 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.29</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.30</span>
       </span>
     </div>
 
@@ -66,7 +66,7 @@ reads), they will be concatenated and processed as a single unit.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">linkMultipleVariants</span><span class="op">(</span>combinedDigestParams <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">linkMultipleVariants</span><span class="op">(</span>combinedDigestParams <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -74,14 +74,19 @@ reads), they will be concatenated and processed as a single unit.</p>
     <dl><dt>combinedDigestParams</dt>
 <dd><p>A named list of arguments to
 <code>digestFastqs</code> for the combined ("naive") run.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Additional arguments providing arguments to <code>digestFastqs</code>
 for the separate runs (processing each variable sequence in turn).
 Each argument must be a named list of arguments to <code>digestFastqs</code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list with the following elements:</p><ul><li><p>countAggregated - a <code>tibble</code> with columns corresponding to 
+    
+
+<p>A list with the following elements:</p><ul><li><p>countAggregated - a <code>tibble</code> with columns corresponding to 
     each of the variable sequences, and a column with the total observed 
     read count for the combination.</p></li>
 <li><p>convSeparate - a list of conversion tables from the respective 
@@ -150,7 +155,7 @@ need to swap the 'forward' and 'reverse' specifications (since
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.9000.</p>
 </div>
 
       </footer></div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.29</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.30</span>
       </span>
     </div>
 
@@ -50,7 +50,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">relabelMutPositions</span><span class="op">(</span><span class="va">se</span>, <span class="va">conversionTable</span>, mutNameDelimiter <span class="op">=</span> <span class="st">"."</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">relabelMutPositions</span><span class="op">(</span><span class="va">se</span>, <span class="va">conversionTable</span>, mutNameDelimiter <span class="op">=</span> <span class="st">"."</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -63,6 +63,8 @@ acid. . is the delimiter, to be specified in the
 <code>mutNameDelimiter</code> argument. For rows corresponding to sequences 
 with multiple mutated codons, the row names contain multiple names of 
 the form above in a single string, separated by "_".</p></dd>
+
+
 <dt>conversionTable</dt>
 <dd><p><code>data.frame</code> with at least three columns:</p><ul><li><p>seqname The reference sequence name (should match XX in the 
 mutation name)</p></li>
@@ -70,12 +72,17 @@ mutation name)</p></li>
 <li><p>name The new name for the codon (will replace AA in the mutation 
 name, if the reference sequence matches seqname)</p></li>
 </ul></dd>
+
+
 <dt>mutNameDelimiter</dt>
 <dd><p>The delimiter used in the mutation name (. above).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A SummarizedExperiment object with modified row names.</p>
+    
+
+<p>A SummarizedExperiment object with modified row names.</p>
     </div>
     <div id="author">
     <h2>Author</h2>
@@ -84,13 +91,13 @@ name, if the reference sequence matches seqname)</p></li>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE102901_cis_se.rds"</span>,</span>
-<span class="r-in">                         package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">conversionTable</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>seqname <span class="op">=</span> <span class="st">"f"</span>, position <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">32</span><span class="op">)</span> </span>
-<span class="r-in"><span class="va">conversionTable</span><span class="op">$</span><span class="va">name</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="op">(</span><span class="va">conversionTable</span><span class="op">$</span><span class="va">position</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%/%</a></span> <span class="fl">7</span> <span class="op">+</span> <span class="fl">1</span>, </span>
-<span class="r-in">                              <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">7</span><span class="op">]</span>, <span class="fl">6</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">33</span><span class="op">]</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">relabelMutPositions</span><span class="op">(</span><span class="va">x</span>, <span class="va">conversionTable</span><span class="op">)</span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE102901_cis_se.rds"</span>,</span></span>
+<span class="r-in"><span>                         package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">conversionTable</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>seqname <span class="op">=</span> <span class="st">"f"</span>, position <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">32</span><span class="op">)</span> </span></span>
+<span class="r-in"><span><span class="va">conversionTable</span><span class="op">$</span><span class="va">name</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="op">(</span><span class="va">conversionTable</span><span class="op">$</span><span class="va">position</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%/%</a></span> <span class="fl">7</span> <span class="op">+</span> <span class="fl">1</span>, </span></span>
+<span class="r-in"><span>                              <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">7</span><span class="op">]</span>, <span class="fl">6</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">33</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">relabelMutPositions</span><span class="op">(</span><span class="va">x</span>, <span class="va">conversionTable</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -105,7 +112,7 @@ name, if the reference sequence matches seqname)</p></li>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.9000.</p>
 </div>
 
       </footer></div>

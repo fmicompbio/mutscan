@@ -18,7 +18,7 @@ of the internal mutscan filtering."><!-- mathjax --><script src="https://cdnjs.c
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.29</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.30</span>
       </span>
     </div>
 
@@ -52,15 +52,15 @@ of the internal <code>mutscan</code> filtering.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plotFiltering</span><span class="op">(</span>
-  <span class="va">se</span>,
-  valueType <span class="op">=</span> <span class="st">"reads"</span>,
-  onlyActiveFilters <span class="op">=</span> <span class="cn">TRUE</span>,
-  displayNumbers <span class="op">=</span> <span class="cn">TRUE</span>,
-  numberSize <span class="op">=</span> <span class="fl">4</span>,
-  plotType <span class="op">=</span> <span class="st">"remaining"</span>,
-  facetBy <span class="op">=</span> <span class="st">"sample"</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plotFiltering</span><span class="op">(</span></span>
+<span>  <span class="va">se</span>,</span>
+<span>  valueType <span class="op">=</span> <span class="st">"reads"</span>,</span>
+<span>  onlyActiveFilters <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  displayNumbers <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  numberSize <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  plotType <span class="op">=</span> <span class="st">"remaining"</span>,</span>
+<span>  facetBy <span class="op">=</span> <span class="st">"sample"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -68,30 +68,45 @@ of the internal <code>mutscan</code> filtering.</p>
     <dl><dt>se</dt>
 <dd><p>A <code>SummarizedExperiment</code> object, e.g. from 
 <code>summarizeExperiment</code>.</p></dd>
+
+
 <dt>valueType</dt>
 <dd><p>Either "reads" or "fractions", indicating whether to 
 plot the number of reads, or the fraction of the total number of reads,
 that are retained after/filtered out in each filtering step.</p></dd>
+
+
 <dt>onlyActiveFilters</dt>
 <dd><p>Logical scalar, whether to only include the 
 active filters (i.e., where any read was filtered out in any of the samples). 
 Defaults to <code>TRUE</code>.</p></dd>
+
+
 <dt>displayNumbers</dt>
 <dd><p>Logical scalar, indicating whether to display the 
 number (or fraction) of reads retained at every filtering step.</p></dd>
+
+
 <dt>numberSize</dt>
 <dd><p>Numeric scalar, indicating the size of the displayed 
 numbers (if <code>displayNumbers</code> is <code>TRUE</code>).</p></dd>
+
+
 <dt>plotType</dt>
 <dd><p>Character scalar, indicating what to show in the plot. 
 Either <code>"remaining"</code> or <code>"filtered"</code>.</p></dd>
+
+
 <dt>facetBy</dt>
 <dd><p>Character scalar, indicating the variable by which the plots 
 should be facetted. Either <code>"sample"</code> or <code>"step"</code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A <code>ggplot</code> object.</p>
+    
+
+<p>A <code>ggplot</code> object.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -107,11 +122,11 @@ occur between the columns named <code>nbrTotal</code> and <code>nbrRetained</cod
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE102901_cis_se.rds"</span>, </span>
-<span class="r-in">                          package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">200</span>, <span class="op">]</span></span>
-<span class="r-in"><span class="fu">plotFiltering</span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE102901_cis_se.rds"</span>, </span></span>
+<span class="r-in"><span>                          package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">200</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span><span class="fu">plotFiltering</span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plotFiltering-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -126,7 +141,7 @@ occur between the columns named <code>nbrTotal</code> and <code>nbrRetained</cod
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.9000.</p>
 </div>
 
       </footer></div>

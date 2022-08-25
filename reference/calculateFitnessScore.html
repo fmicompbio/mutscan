@@ -18,7 +18,7 @@ as described by Diss and Lehner (2018)."><!-- mathjax --><script src="https://cd
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.29</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.30</span>
       </span>
     </div>
 
@@ -52,14 +52,14 @@ as described by Diss and Lehner (2018).</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">calculateFitnessScore</span><span class="op">(</span>
-  <span class="va">se</span>,
-  <span class="va">pairingCol</span>,
-  <span class="va">ODCols</span>,
-  <span class="va">comparison</span>,
-  <span class="va">WTrows</span>,
-  selAssay <span class="op">=</span> <span class="st">"counts"</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">calculateFitnessScore</span><span class="op">(</span></span>
+<span>  <span class="va">se</span>,</span>
+<span>  <span class="va">pairingCol</span>,</span>
+<span>  <span class="va">ODCols</span>,</span>
+<span>  <span class="va">comparison</span>,</span>
+<span>  <span class="va">WTrows</span>,</span>
+<span>  selAssay <span class="op">=</span> <span class="st">"counts"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -67,13 +67,19 @@ as described by Diss and Lehner (2018).</p>
     <dl><dt>se</dt>
 <dd><p>SummarizedExperiment object as returned by 
 <code><a href="summarizeExperiment.html">summarizeExperiment</a></code>.</p></dd>
+
+
 <dt>pairingCol</dt>
 <dd><p>Name of column in <code>colData(se)</code> with 
 replicate/pairing information. Samples with the same value in this 
 column will be paired.</p></dd>
+
+
 <dt>ODCols</dt>
 <dd><p>Name(s) of column(s) in <code>colData(se)</code> with OD values 
 (numeric), used to normalize for different numbers of cells.</p></dd>
+
+
 <dt>comparison</dt>
 <dd><p>3-element character vector of the form 
 <code>(column, numerator, denominator)</code>. <code>column</code> is the name of 
@@ -82,17 +88,24 @@ the column in <code>colData(se)</code> with experimental conditions.
 e.g. <code>c("cond", "output", "input")</code> will look in the 
 <code>"cond"</code> column and calculate fitness for the ratio of 
 <code>"output"</code> over <code>"input"</code> counts.</p></dd>
+
+
 <dt>WTrows</dt>
 <dd><p>Vector of row names that will be used as the reference when
 calculating fitness scores. If more than one value is provided, the 
 average of the corresponding fitness scores is used as a reference. 
 If NULL, no division by WT scores will be done.</p></dd>
+
+
 <dt>selAssay</dt>
 <dd><p>Assay to select from <code>se</code> for the analysis.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A numeric vector with fitness scores.</p>
+    
+
+<p>A numeric vector with fitness scores.</p>
     </div>
     <div id="references">
     <h2>References</h2>
@@ -116,7 +129,7 @@ If NULL, no division by WT scores will be done.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.9000.</p>
 </div>
 
       </footer></div>

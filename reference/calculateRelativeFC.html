@@ -19,7 +19,7 @@ The observed counts for the WT variants can be used as offsets in the model."><!
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.29</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.30</span>
       </span>
     </div>
 
@@ -54,50 +54,67 @@ The observed counts for the WT variants can be used as offsets in the model.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">calculateRelativeFC</span><span class="op">(</span>
-  <span class="va">se</span>,
-  <span class="va">design</span>,
-  coef <span class="op">=</span> <span class="cn">NULL</span>,
-  contrast <span class="op">=</span> <span class="cn">NULL</span>,
-  WTrows <span class="op">=</span> <span class="cn">NULL</span>,
-  selAssay <span class="op">=</span> <span class="st">"counts"</span>,
-  pseudocount <span class="op">=</span> <span class="fl">1</span>,
-  method <span class="op">=</span> <span class="st">"edgeR"</span>,
-  normMethod <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">WTrows</span><span class="op">)</span>, <span class="st">"TMM"</span>, <span class="st">"sum"</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">calculateRelativeFC</span><span class="op">(</span></span>
+<span>  <span class="va">se</span>,</span>
+<span>  <span class="va">design</span>,</span>
+<span>  coef <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  contrast <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  WTrows <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  selAssay <span class="op">=</span> <span class="st">"counts"</span>,</span>
+<span>  pseudocount <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"edgeR"</span>,</span>
+<span>  normMethod <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">WTrows</span><span class="op">)</span>, <span class="st">"TMM"</span>, <span class="st">"sum"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>se</dt>
 <dd><p>SummarizedExperiment object.</p></dd>
+
+
 <dt>design</dt>
 <dd><p>Design matrix. The rows of the design matrix must be in the
 same order as the columns in <code>se</code>.</p></dd>
+
+
 <dt>coef</dt>
 <dd><p>Coefficient(s) to test with edgeR or limma.</p></dd>
+
+
 <dt>contrast</dt>
 <dd><p>Numeric contrast to test with edgeR or limma.</p></dd>
+
+
 <dt>WTrows</dt>
 <dd><p>Vector of row names that will be used as the reference when
 calculating logFCs and statistics. If more than one value is provided, the
 sum of the corresponding counts is used to generate offsets. If NULL,
 offsets will be defined as the effective library sizes (using TMM
 normalization factors).</p></dd>
+
+
 <dt>selAssay</dt>
 <dd><p>Assay to select from <code>se</code> for the analysis.</p></dd>
+
+
 <dt>pseudocount</dt>
 <dd><p>Pseudocount to add when calculating log-fold changes.</p></dd>
+
+
 <dt>method</dt>
 <dd><p>Either 'edgeR' or 'limma'. If set to 'limma', voom is used to
 transform the counts and estimate observation weights before applying
 limma. In this case, the results also contain the standard errors of the
 logFCs.</p></dd>
+
+
 <dt>normMethod</dt>
 <dd><p>Character scalar indicating which normalization method
 should be used to calculate size factors. Should be either <code>"TMM"</code> or
 <code>"csaw"</code> when <code>WTrows</code> is <code>NULL</code>, and <code>"geomean"</code> or
 <code>"sum"</code> when <code>WTrows</code> is provided.</p></dd>
+
 </dl></div>
     <div id="author">
     <h2>Author</h2>
@@ -106,12 +123,12 @@ should be used to calculate size factors. Should be either <code>"TMM"</code> or
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE102901_cis_se.rds"</span>,</span>
-<span class="r-in">                          package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">200</span>, <span class="op">]</span></span>
-<span class="r-in"><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Replicate</span> <span class="op">+</span> <span class="va">Condition</span>,</span>
-<span class="r-in">                              data <span class="op">=</span> <span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">calculateRelativeFC</span><span class="op">(</span><span class="va">se</span>, <span class="va">design</span>, coef <span class="op">=</span> <span class="st">"Conditioncis_output"</span><span class="op">)</span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE102901_cis_se.rds"</span>,</span></span>
+<span class="r-in"><span>                          package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">200</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Replicate</span> <span class="op">+</span> <span class="va">Condition</span>,</span></span>
+<span class="r-in"><span>                              data <span class="op">=</span> <span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">calculateRelativeFC</span><span class="op">(</span><span class="va">se</span>, <span class="va">design</span>, coef <span class="op">=</span> <span class="st">"Conditioncis_output"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -126,7 +143,7 @@ should be used to calculate size factors. Should be either <code>"TMM"</code> or
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.9000.</p>
 </div>
 
       </footer></div>
