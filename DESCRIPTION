@@ -1,6 +1,6 @@
 Package: mutscan
 Title: Preprocessing and Analysis of Deep Mutational Scanning Data
-Version: 0.2.29
+Version: 0.2.30
 Authors@R: 
     c(person(given = "Charlotte",
              family = "Soneson",
@@ -11,7 +11,9 @@ Authors@R:
     	       family = "Stadler",
     	       role = c("aut"),
     	       email = "michael.stadler@fmi.ch",
-    	       comment = c(ORCID = "0000-0002-2269-4934")))
+    	       comment = c(ORCID = "0000-0002-2269-4934")),
+      person(given = "Friedrich Miescher Institute for Biomedical Research",
+             role = "cph"))
 Description: Provides functionality for preprocessing and statistical analysis 
     of deep mutational scanning data.
 Depends:
@@ -50,9 +52,9 @@ Suggests:
     Biostrings,
     plotly
 SystemRequirements: GNU make
-License: GPL-2
+License: MIT + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
 VignetteBuilder: knitr
 LinkingTo: 
     Rcpp

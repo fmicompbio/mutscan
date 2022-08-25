@@ -1,3 +1,7 @@
+# mutscan 0.2.30
+
+* Swap to MIT license
+
 # mutscan 0.2.29
 
 * Include degrees of freedom in output from calculateRelativeFC
