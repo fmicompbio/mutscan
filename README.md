@@ -1,4 +1,10 @@
+<img src="man/figures/mutscan.png" align="right" alt="mutscan" width="150"/>
+
+<br>
+
 # mutscan
+
+<br>
 
 <!-- badges: start -->
   [![R-CMD-check](https://github.com/fmicompbio/mutscan/workflows/R-CMD-check/badge.svg)](https://github.com/fmicompbio/mutscan/actions)
