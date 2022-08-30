@@ -51,6 +51,10 @@ test_that("plotPairs fails with incorrect arguments", {
     expect_error(plotPairs(se = se, selAssay = "counts", colorByCorrelation = 1))
     expect_error(plotPairs(se = se, selAssay = "counts", colorByCorrelation = "TRUE"))
     expect_error(plotPairs(se = se, selAssay = "counts", colorByCorrelation = c(TRUE, FALSE)))
+    
+    expect_error(plotPairs(se = se, selAssay = "counts", addIdentityLine = 1))
+    expect_error(plotPairs(se = se, selAssay = "counts", addIdentityLine = "TRUE"))
+    expect_error(plotPairs(se = se, selAssay = "counts", addIdentityLine = c(TRUE, FALSE)))
 })
 
 test_that("plotPairs works with correct arguments", {
@@ -59,63 +63,80 @@ test_that("plotPairs works with correct arguments", {
                               pseudocount = 1, corMethod = "pearson",
                               histBreaks = 40, pointsType = "points", corSizeMult = 5,
                               corSizeAdd = 2, pointSize = 0.1, pointAlpha = 0.3,
-                              colorByCorrelation = TRUE), "ggmatrix")
+                              colorByCorrelation = TRUE, 
+                              addIdentityLine = FALSE), "ggmatrix")
 
     ## Not log-transformed
     expect_s3_class(plotPairs(se = se, selAssay = "counts", doLog = FALSE,
                               pseudocount = 1, corMethod = "pearson",
                               histBreaks = 40, pointsType = "points", corSizeMult = 5,
                               corSizeAdd = 2, pointSize = 0.1, pointAlpha = 0.3,
-                              colorByCorrelation = TRUE), "ggmatrix")
+                              colorByCorrelation = TRUE, 
+                              addIdentityLine = FALSE), "ggmatrix")
 
     ## No pseudocount
     expect_s3_class(plotPairs(se = se, selAssay = "counts", doLog = TRUE,
                               pseudocount = 0, corMethod = "pearson",
                               histBreaks = 40, pointsType = "points", corSizeMult = 5,
                               corSizeAdd = 2, pointSize = 0.1, pointAlpha = 0.3,
-                              colorByCorrelation = TRUE), "ggmatrix")
+                              colorByCorrelation = TRUE, 
+                              addIdentityLine = FALSE), "ggmatrix")
 
     ## Spearman correlation
     expect_s3_class(plotPairs(se = se, selAssay = "counts", doLog = TRUE,
                               pseudocount = 1, corMethod = "spearman",
                               histBreaks = 40, pointsType = "points", corSizeMult = 5,
                               corSizeAdd = 2, pointSize = 0.1, pointAlpha = 0.3,
-                              colorByCorrelation = TRUE), "ggmatrix")
+                              colorByCorrelation = TRUE, 
+                              addIdentityLine = FALSE), "ggmatrix")
 
     ## Fewer breaks
     expect_s3_class(plotPairs(se = se, selAssay = "counts", doLog = TRUE,
                               pseudocount = 1, corMethod = "pearson",
                               histBreaks = 5, pointsType = "points", corSizeMult = 5,
                               corSizeAdd = 2, pointSize = 0.1, pointAlpha = 0.3,
-                              colorByCorrelation = TRUE), "ggmatrix")
+                              colorByCorrelation = TRUE, 
+                              addIdentityLine = FALSE), "ggmatrix")
 
     ## smoothScatter
     expect_s3_class(plotPairs(se = se, selAssay = "counts", doLog = TRUE,
                               pseudocount = 1, corMethod = "pearson",
                               histBreaks = 40, pointsType = "smoothscatter", corSizeMult = 5,
                               corSizeAdd = 2, pointSize = 0.1, pointAlpha = 0.3,
-                              colorByCorrelation = TRUE), "ggmatrix")
+                              colorByCorrelation = TRUE, 
+                              addIdentityLine = FALSE), "ggmatrix")
 
     ## Change font size to correlation relation
     expect_s3_class(plotPairs(se = se, selAssay = "counts", doLog = TRUE,
                               pseudocount = 1, corMethod = "pearson",
                               histBreaks = 40, pointsType = "points", corSizeMult = 2,
                               corSizeAdd = 0, pointSize = 0.1, pointAlpha = 0.3,
-                              colorByCorrelation = TRUE), "ggmatrix")
+                              colorByCorrelation = TRUE, 
+                              addIdentityLine = FALSE), "ggmatrix")
 
     ## Point size, alpha
     expect_s3_class(plotPairs(se = se, selAssay = "counts", doLog = TRUE,
                               pseudocount = 1, corMethod = "pearson",
                               histBreaks = 40, pointsType = "points", corSizeMult = 5,
                               corSizeAdd = 2, pointSize = 1, pointAlpha = 3,
-                              colorByCorrelation = TRUE), "ggmatrix")
+                              colorByCorrelation = TRUE, 
+                              addIdentityLine = FALSE), "ggmatrix")
 
     ## Don't color by correlation
     expect_s3_class(plotPairs(se = se, selAssay = "counts", doLog = TRUE,
                               pseudocount = 1, corMethod = "pearson",
                               histBreaks = 40, pointsType = "points", corSizeMult = 5,
                               corSizeAdd = 2, pointSize = 0.1, pointAlpha = 0.3,
-                              colorByCorrelation = FALSE), "ggmatrix")
+                              colorByCorrelation = FALSE, 
+                              addIdentityLine = FALSE), "ggmatrix")
+    
+    ## Add identity line
+    expect_s3_class(plotPairs(se = se, selAssay = "counts", doLog = TRUE,
+                              pseudocount = 1, corMethod = "pearson",
+                              histBreaks = 40, pointsType = "points", corSizeMult = 5,
+                              corSizeAdd = 2, pointSize = 0.1, pointAlpha = 0.3,
+                              colorByCorrelation = TRUE, 
+                              addIdentityLine = TRUE), "ggmatrix")
 
     ## Make one correlation negative
     seneg <- se

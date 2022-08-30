@@ -16,7 +16,8 @@ plotPairs(
   corSizeAdd = 2,
   pointSize = 0.1,
   pointAlpha = 0.3,
-  colorByCorrelation = TRUE
+  colorByCorrelation = TRUE,
+  addIdentityLine = FALSE
 )
 }
 \arguments{
@@ -50,6 +51,9 @@ opacity of points in the plot.}
 
 \item{colorByCorrelation}{Logical scalar, indicating whether the correlation
 panels should be colored according to the correlation value.}
+
+\item{addIdentityLine}{Logical scalar, indicating whether the identity line 
+should be added (only used if \code{pointsType = "points"}).}
 }
 \value{
 A \code{ggplot} object.

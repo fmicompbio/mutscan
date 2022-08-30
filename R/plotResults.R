@@ -144,12 +144,14 @@
 #'     average abundance (\code{logCPM} or \code{AveExpr}), log-fold 
 #'     change (\code{logFC}) and significance (\code{FDR} or 
 #'     \code{adj.P.Val}). 
-#' @param meanCol,logFCCol,padjCol Character scalars indicating which 
+#' @param meanCol,logFCCol,pvalCol,padjCol Character scalars indicating which 
 #'     columns (from \code{res}) that will be used to represent the 
-#'     mean value (x-axis), logFC (y-axis) and adjusted p-value (used 
+#'     mean value (x-axis), logFC (y-axis), nominal p-value (used to find 
+#'     the top features to label) and adjusted p-value (used 
 #'     for coloring). If \code{NULL} (default), pre-specified values 
 #'     will be used depending on the available columns 
-#'     (\code{"logCPM"} or \code{"AveExpr"}, \code{"logFC"}, and 
+#'     (\code{"logCPM"} or \code{"AveExpr"}, \code{"logFC"}, 
+#'     \code{"PValue"} or \code{"P.Value"}, and 
 #'     \code{"FDR"} or \code{"adj.P.Val"}, respectively).
 #' @param padjThreshold Numeric scalar indicating the adjusted p-value 
 #'     threshold to use for coloring the points. All features with 
@@ -161,7 +163,7 @@
 #'     over the individual points and obtain further information. 
 #' @param nTopToLabel Numeric scalar, indicating the number of points that 
 #'     should be labeled in the plot. The points will be ranked by the 
-#'     \code{padjCol} column, and the top \code{nTopToLabel} values will 
+#'     \code{pvalCol} column, and the top \code{nTopToLabel} values will 
 #'     be labeled by the corresponding row names. Only used if 
 #'     \code{interactivePlot} is \code{FALSE}.
 #' 
@@ -180,10 +182,11 @@
 #' res <- calculateRelativeFC(se, design, coef = "Conditioncis_output")
 #' plotMeanDiff(res, pointSize = "large", nTopToLabel = 3)
 #' 
-plotMeanDiff <- function(res, meanCol = NULL, logFCCol = NULL, 
+plotMeanDiff <- function(res, meanCol = NULL, logFCCol = NULL, pvalCol = NULL,
                          padjCol = NULL, padjThreshold = 0.05, pointSize = "small",
                          interactivePlot = FALSE, nTopToLabel = 0) {
-    .assertScalar(nTopToLabel, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = nTopToLabel, type = "numeric", rngIncl = c(0, Inf))
+    .assertVector(x = res, type = "data.frame")
     ## Get the columns to use
     if (is.null(meanCol)) {
         meanCol <- .getColName(res, validValues = c("logCPM", "AveExpr"), 
@@ -193,13 +196,18 @@ plotMeanDiff <- function(res, meanCol = NULL, logFCCol = NULL,
         logFCCol <- .getColName(res, validValues = c("logFC"), 
                                 aspect = "y-axis")
     }
+    if (is.null(pvalCol)) {
+        pvalCol <- .getColName(res, validValues = c("PValue", "P.Value"), 
+                               aspect = "labeling")
+    }
     if (is.null(padjCol)) {
         padjCol <- .getColName(res, validValues = c("FDR", "adj.P.Val"),
                                 aspect = "highlighting")
     }
+    .assertScalar(pvalCol, type = "character", validValues = colnames(res))
     res$feature <- rownames(res)
     if (nTopToLabel > 0) {
-        labelValues <- res[order(res[[padjCol]]), "feature"][seq_len(nTopToLabel)]
+        labelValues <- res[order(res[[pvalCol]]), "feature"][seq_len(nTopToLabel)]
     } else {
         labelValues <- c()
     }
@@ -236,7 +244,7 @@ plotMeanDiff <- function(res, meanCol = NULL, logFCCol = NULL,
 #'     over the individual points and obtain further information. 
 #' @param nTopToLabel Numeric scalar, indicating the number of points that 
 #'     should be labeled in the plot. The points will be ranked by the 
-#'     \code{padjCol} column, and the top \code{nTopToLabel} values will 
+#'     \code{pvalCol} column, and the top \code{nTopToLabel} values will 
 #'     be labeled by the corresponding row names. Only used if 
 #'     \code{interactivePlot} is \code{FALSE}.
 #' 
@@ -258,7 +266,8 @@ plotMeanDiff <- function(res, meanCol = NULL, logFCCol = NULL,
 plotVolcano <- function(res, logFCCol = NULL, pvalCol = NULL, padjCol = NULL,
                         padjThreshold = 0.05, pointSize = "small",
                         interactivePlot = FALSE, nTopToLabel = 0) {
-    .assertScalar(nTopToLabel, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = nTopToLabel, type = "numeric", rngIncl = c(0, Inf))
+    .assertVector(x = res, type = "data.frame")
     ## Get the columns to use
     if (is.null(logFCCol)) {
         logFCCol <- .getColName(res, validValues = c("logFC"), 
@@ -276,7 +285,7 @@ plotVolcano <- function(res, logFCCol = NULL, pvalCol = NULL, padjCol = NULL,
     res$negLog10P <- -log10(res[[pvalCol]])
     res$feature <- rownames(res)
     if (nTopToLabel > 0) {
-        labelValues <- res[order(res[[padjCol]]), "feature"][seq_len(nTopToLabel)]
+        labelValues <- res[order(res[[pvalCol]]), "feature"][seq_len(nTopToLabel)]
     } else {
         labelValues <- c()
     }

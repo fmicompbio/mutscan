@@ -42,7 +42,7 @@ over the individual points and obtain further information.}
 
 \item{nTopToLabel}{Numeric scalar, indicating the number of points that 
 should be labeled in the plot. The points will be ranked by the 
-\code{padjCol} column, and the top \code{nTopToLabel} values will 
+\code{pvalCol} column, and the top \code{nTopToLabel} values will 
 be labeled by the corresponding row names. Only used if 
 \code{interactivePlot} is \code{FALSE}.}
 }

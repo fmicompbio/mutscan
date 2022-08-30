@@ -8,6 +8,7 @@ plotMeanDiff(
   res,
   meanCol = NULL,
   logFCCol = NULL,
+  pvalCol = NULL,
   padjCol = NULL,
   padjThreshold = 0.05,
   pointSize = "small",
@@ -22,12 +23,14 @@ average abundance (\code{logCPM} or \code{AveExpr}), log-fold
 change (\code{logFC}) and significance (\code{FDR} or 
 \code{adj.P.Val}).}
 
-\item{meanCol, logFCCol, padjCol}{Character scalars indicating which 
+\item{meanCol, logFCCol, pvalCol, padjCol}{Character scalars indicating which 
 columns (from \code{res}) that will be used to represent the 
-mean value (x-axis), logFC (y-axis) and adjusted p-value (used 
+mean value (x-axis), logFC (y-axis), nominal p-value (used to find 
+the top features to label) and adjusted p-value (used 
 for coloring). If \code{NULL} (default), pre-specified values 
 will be used depending on the available columns 
-(\code{"logCPM"} or \code{"AveExpr"}, \code{"logFC"}, and 
+(\code{"logCPM"} or \code{"AveExpr"}, \code{"logFC"}, 
+\code{"PValue"} or \code{"P.Value"}, and 
 \code{"FDR"} or \code{"adj.P.Val"}, respectively).}
 
 \item{padjThreshold}{Numeric scalar indicating the adjusted p-value 
@@ -43,7 +46,7 @@ over the individual points and obtain further information.}
 
 \item{nTopToLabel}{Numeric scalar, indicating the number of points that 
 should be labeled in the plot. The points will be ranked by the 
-\code{padjCol} column, and the top \code{nTopToLabel} values will 
+\code{pvalCol} column, and the top \code{nTopToLabel} values will 
 be labeled by the corresponding row names. Only used if 
 \code{interactivePlot} is \code{FALSE}.}
 }

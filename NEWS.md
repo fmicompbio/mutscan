@@ -1,3 +1,8 @@
+# mutscan 0.2.31
+
+* Add option to include identity line in pairs plots
+* Select points to label in result plots based on nominal p-value
+
 # mutscan 0.2.30
 
 * Swap to MIT license
