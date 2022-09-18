@@ -2,6 +2,7 @@
 
 * Add option to include identity line in pairs plots
 * Select points to label in result plots based on nominal p-value
+* Add option to manually set the correlation range for coloring pairs plots
 
 # mutscan 0.2.30
 

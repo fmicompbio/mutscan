@@ -32,6 +32,11 @@
 #'   opacity of points in the plot.
 #' @param colorByCorrelation Logical scalar, indicating whether the correlation
 #'   panels should be colored according to the correlation value.
+#' @param corrColorRange Numeric vector of length 2, providing the lower and 
+#'   upper limits of the color scale when coloring by correlation. Both 
+#'   values should be positive; the same range is used for negative 
+#'   correlations. If \code{NULL} (the default), the range is inferred from 
+#'   the data.
 #' @param addIdentityLine Logical scalar, indicating whether the identity line 
 #'   should be added (only used if \code{pointsType = "points"}).
 #'
@@ -48,7 +53,8 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
                       corMethod = "pearson", histBreaks = 40,
                       pointsType = "points", corSizeMult = 5,
                       corSizeAdd = 2, pointSize = 0.1, pointAlpha = 0.3,
-                      colorByCorrelation = TRUE, addIdentityLine = FALSE) {
+                      colorByCorrelation = TRUE, corrColorRange = NULL,
+                      addIdentityLine = FALSE) {
 
     .assertVector(x = se, type = "SummarizedExperiment")
     .assertScalar(x = selAssay, type = "character",
@@ -65,6 +71,11 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
     .assertScalar(x = pointSize, type = "numeric", rngExcl = c(0, Inf))
     .assertScalar(x = pointAlpha, type = "numeric", rngExcl = c(0, Inf))
     .assertScalar(x = colorByCorrelation, type = "logical")
+    .assertVector(x = corrColorRange, type = "numeric", rngIncl = c(0, 1), 
+                  len = 2, allowNULL = TRUE)
+    if (!is.null(corrColorRange)) {
+        stopifnot(corrColorRange[2] >= corrColorRange[1])
+    }
     .assertScalar(x = addIdentityLine, type = "logical")
 
     ## ----------------------------------------------------------------------- ##
@@ -189,7 +200,11 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
 
     ## Calculate correlations and get range
     allCors <- stats::cor(mat, method = corMethod)
-    corRange <- range(abs(allCors[upper.tri(allCors)]))
+    if (!is.null(corrColorRange)) {
+        corRange <- corrColorRange
+    } else {
+        corRange <- range(abs(allCors[upper.tri(allCors)]))
+    }
     if (length(unique(corRange)) == 1) {
         ## Having a range with width 0 leads to problems in the rescaling of the correlations
         corRange <- c(0, 1)

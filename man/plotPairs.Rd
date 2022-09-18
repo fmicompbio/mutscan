@@ -17,6 +17,7 @@ plotPairs(
   pointSize = 0.1,
   pointAlpha = 0.3,
   colorByCorrelation = TRUE,
+  corrColorRange = NULL,
   addIdentityLine = FALSE
 )
 }
@@ -51,6 +52,12 @@ opacity of points in the plot.}
 
 \item{colorByCorrelation}{Logical scalar, indicating whether the correlation
 panels should be colored according to the correlation value.}
+
+\item{corrColorRange}{Numeric vector of length 2, providing the lower and 
+upper limits of the color scale when coloring by correlation. Both 
+values should be positive; the same range is used for negative 
+correlations. If \code{NULL} (the default), the range is inferred from 
+the data.}
 
 \item{addIdentityLine}{Logical scalar, indicating whether the identity line 
 should be added (only used if \code{pointsType = "points"}).}
