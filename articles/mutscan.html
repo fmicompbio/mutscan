@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.30</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.31</span>
       </span>
     </div>
 
@@ -66,7 +66,7 @@
 </h1>
                         <h4 data-toc-skip class="author">Charlotte Soneson and Michael Stadler</h4>
             
-            <h4 data-toc-skip class="date">25 August 2022</h4>
+            <h4 data-toc-skip class="date">25 September 2022</h4>
       
       
       <div class="hidden name"><code>mutscan.Rmd</code></div>
@@ -361,7 +361,7 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span><span class="co">#&gt; [1] 100000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $processingInfo</span></span>
-<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.30 on 2022-08-25 13:31:01"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.31 on 2022-09-25 11:14:52"</span></span></code></pre></div>
 <p>The <code>filterSummary</code> data.frame contains a summary of the number of reads filtered out in each step. Note that for any given filtering step, only the reads retained by the previous filters are considered. The numbers in the filter column names indicate the order of the filters.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">transInput</span><span class="op">$</span><span class="va">filterSummary</span></span>
@@ -646,7 +646,7 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span><span class="co">#&gt; [1] 100000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $processingInfo</span></span>
-<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.30 on 2022-08-25 13:31:02"</span></span>
+<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.31 on 2022-09-25 11:14:53"</span></span>
 <span><span class="va">cisInput</span><span class="op">$</span><span class="va">filterSummary</span></span>
 <span><span class="co">#&gt;   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span></span>
 <span><span class="co">#&gt; 1     1000           126              0                     0</span></span>
@@ -1048,7 +1048,7 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span><span class="co">#&gt; [1] 100000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $processingInfo</span></span>
-<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.30 on 2022-08-25 13:31:02"</span></span>
+<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.31 on 2022-09-25 11:14:53"</span></span>
 <span><span class="va">leujunt0</span><span class="op">$</span><span class="va">filterSummary</span></span>
 <span><span class="co">#&gt;   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span></span>
 <span><span class="co">#&gt; 1     1000             0            126                     0</span></span>
@@ -1462,9 +1462,9 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span><span class="co">#&gt; [8] base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt;  [1] mutscan_0.2.30              SummarizedExperiment_1.26.1</span></span>
+<span><span class="co">#&gt;  [1] mutscan_0.2.31              SummarizedExperiment_1.26.1</span></span>
 <span><span class="co">#&gt;  [3] Biobase_2.56.0              GenomicRanges_1.48.0       </span></span>
-<span><span class="co">#&gt;  [5] GenomeInfoDb_1.32.3         IRanges_2.30.1             </span></span>
+<span><span class="co">#&gt;  [5] GenomeInfoDb_1.32.4         IRanges_2.30.1             </span></span>
 <span><span class="co">#&gt;  [7] S4Vectors_0.34.0            BiocGenerics_0.42.0        </span></span>
 <span><span class="co">#&gt;  [9] MatrixGenerics_1.8.1        matrixStats_0.62.0         </span></span>
 <span><span class="co">#&gt; [11] BiocStyle_2.24.0           </span></span>
@@ -1472,31 +1472,31 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;  [1] bitops_1.0-7           fs_1.5.2               RColorBrewer_1.1-3    </span></span>
 <span><span class="co">#&gt;  [4] rprojroot_2.0.3        tools_4.2.1            bslib_0.4.0           </span></span>
-<span><span class="co">#&gt;  [7] utf8_1.2.2             R6_2.5.1               DT_0.24               </span></span>
+<span><span class="co">#&gt;  [7] utf8_1.2.2             R6_2.5.1               DT_0.25               </span></span>
 <span><span class="co">#&gt; [10] colorspace_2.0-3       tidyselect_1.1.2       GGally_2.1.2          </span></span>
-<span><span class="co">#&gt; [13] compiler_4.2.1         textshaping_0.3.6      cli_3.3.0             </span></span>
-<span><span class="co">#&gt; [16] csaw_1.30.1            desc_1.4.1             DelayedArray_0.22.0   </span></span>
-<span><span class="co">#&gt; [19] labeling_0.4.2         bookdown_0.28          sass_0.4.2            </span></span>
+<span><span class="co">#&gt; [13] compiler_4.2.1         textshaping_0.3.6      cli_3.4.1             </span></span>
+<span><span class="co">#&gt; [16] csaw_1.30.1            desc_1.4.2             DelayedArray_0.22.0   </span></span>
+<span><span class="co">#&gt; [19] labeling_0.4.2         bookdown_0.29          sass_0.4.2            </span></span>
 <span><span class="co">#&gt; [22] scales_1.2.1           pkgdown_2.0.6.9000     systemfonts_1.0.4     </span></span>
 <span><span class="co">#&gt; [25] stringr_1.4.1          digest_0.6.29          Rsamtools_2.12.0      </span></span>
 <span><span class="co">#&gt; [28] rmarkdown_2.16         XVector_0.36.0         pkgconfig_2.0.3       </span></span>
-<span><span class="co">#&gt; [31] htmltools_0.5.3        fastmap_1.1.0          limma_3.52.2          </span></span>
-<span><span class="co">#&gt; [34] highr_0.9              htmlwidgets_1.5.4      rlang_1.0.4           </span></span>
+<span><span class="co">#&gt; [31] htmltools_0.5.3        fastmap_1.1.0          limma_3.52.3          </span></span>
+<span><span class="co">#&gt; [34] highr_0.9              htmlwidgets_1.5.4      rlang_1.0.6           </span></span>
 <span><span class="co">#&gt; [37] jquerylib_0.1.4        generics_0.1.3         farver_2.1.1          </span></span>
-<span><span class="co">#&gt; [40] jsonlite_1.8.0         BiocParallel_1.30.3    dplyr_1.0.9           </span></span>
+<span><span class="co">#&gt; [40] jsonlite_1.8.0         BiocParallel_1.30.3    dplyr_1.0.10          </span></span>
 <span><span class="co">#&gt; [43] RCurl_1.98-1.8         magrittr_2.0.3         GenomeInfoDbData_1.2.8</span></span>
-<span><span class="co">#&gt; [46] Matrix_1.4-1           Rcpp_1.0.9             munsell_0.5.0         </span></span>
-<span><span class="co">#&gt; [49] fansi_1.0.3            lifecycle_1.0.1        stringi_1.7.8         </span></span>
+<span><span class="co">#&gt; [46] Matrix_1.5-1           Rcpp_1.0.9             munsell_0.5.0         </span></span>
+<span><span class="co">#&gt; [49] fansi_1.0.3            lifecycle_1.0.2        stringi_1.7.8         </span></span>
 <span><span class="co">#&gt; [52] yaml_2.3.5             edgeR_3.38.4           zlibbioc_1.42.0       </span></span>
 <span><span class="co">#&gt; [55] plyr_1.8.7             grid_4.2.1             parallel_4.2.1        </span></span>
 <span><span class="co">#&gt; [58] ggrepel_0.9.1          crayon_1.5.1           lattice_0.20-45       </span></span>
 <span><span class="co">#&gt; [61] splines_4.2.1          Biostrings_2.64.1      locfit_1.5-9.6        </span></span>
 <span><span class="co">#&gt; [64] metapod_1.4.0          knitr_1.40             pillar_1.8.1          </span></span>
 <span><span class="co">#&gt; [67] codetools_0.2-18       glue_1.6.2             evaluate_0.16         </span></span>
-<span><span class="co">#&gt; [70] BiocManager_1.30.18    vctrs_0.4.1            gtable_0.3.0          </span></span>
-<span><span class="co">#&gt; [73] grr_0.9.5              purrr_0.3.4            tidyr_1.2.0           </span></span>
+<span><span class="co">#&gt; [70] BiocManager_1.30.18    vctrs_0.4.1            gtable_0.3.1          </span></span>
+<span><span class="co">#&gt; [73] grr_0.9.5              purrr_0.3.4            tidyr_1.2.1           </span></span>
 <span><span class="co">#&gt; [76] reshape_0.8.9          cachem_1.0.6           ggplot2_3.3.6         </span></span>
-<span><span class="co">#&gt; [79] xfun_0.32              ragg_1.2.2             tibble_3.1.8          </span></span>
+<span><span class="co">#&gt; [79] xfun_0.33              ragg_1.2.2             tibble_3.1.8          </span></span>
 <span><span class="co">#&gt; [82] Matrix.utils_0.9.8     memoise_2.0.1          ellipsis_0.3.2</span></span></code></pre></div>
 </div>
   </div>

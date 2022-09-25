@@ -20,7 +20,7 @@ histograms of the respective columns."><!-- mathjax --><script src="https://cdnj
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.30</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.31</span>
       </span>
     </div>
 
@@ -68,7 +68,9 @@ histograms of the respective columns.</p>
 <span>  corSizeAdd <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  pointSize <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>  pointAlpha <span class="op">=</span> <span class="fl">0.3</span>,</span>
-<span>  colorByCorrelation <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  colorByCorrelation <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  corrColorRange <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  addIdentityLine <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -123,6 +125,19 @@ opacity of points in the plot.</p></dd>
 <dt>colorByCorrelation</dt>
 <dd><p>Logical scalar, indicating whether the correlation
 panels should be colored according to the correlation value.</p></dd>
+
+
+<dt>corrColorRange</dt>
+<dd><p>Numeric vector of length 2, providing the lower and 
+upper limits of the color scale when coloring by correlation. Both 
+values should be positive; the same range is used for negative 
+correlations. If <code>NULL</code> (the default), the range is inferred from 
+the data.</p></dd>
+
+
+<dt>addIdentityLine</dt>
+<dd><p>Logical scalar, indicating whether the identity line 
+should be added (only used if <code>pointsType = "points"</code>).</p></dd>
 
 </dl></div>
     <div id="value">

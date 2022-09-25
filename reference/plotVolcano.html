@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.30</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.31</span>
       </span>
     </div>
 
@@ -65,44 +65,44 @@
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>res</dt>
-<dd><p><code>data.frame</code> (typically output from 
-<code><a href="calculateRelativeFC.html">calculateRelativeFC()</a></code>) with columns corresponding to the 
-log-fold change (<code>logFC</code>), p-value (<code>PValue</code> or 
+<dd><p><code>data.frame</code> (typically output from
+<code><a href="calculateRelativeFC.html">calculateRelativeFC()</a></code>) with columns corresponding to the
+log-fold change (<code>logFC</code>), p-value (<code>PValue</code> or
 <code>P.Value</code>) and significance (<code>FDR</code> or <code>adj.P.Val</code>).</p></dd>
 
 
 <dt>logFCCol, pvalCol, padjCol</dt>
-<dd><p>Character scalars indicating which 
-columns (from <code>res</code>) that will be used to represent the 
-logFC (x-axis), p-value (y-axis) and adjusted p-value (used 
-for coloring). If <code>NULL</code> (default), pre-specified values 
-will be used depending on the available columns 
-(<code>"logFC"</code>, <code>"PValue"</code> or <code>"P.Value"</code>, and 
+<dd><p>Character scalars indicating the
+columns from <code>res</code> that will be used to represent the
+logFC (x-axis), p-value (y-axis) and adjusted p-value (used
+for coloring). If <code>NULL</code> (default), pre-specified values
+will be used depending on the available columns
+(<code>"logFC"</code>, <code>"PValue"</code> or <code>"P.Value"</code>, and
 <code>"FDR"</code> or <code>"adj.P.Val"</code>, respectively).</p></dd>
 
 
 <dt>padjThreshold</dt>
-<dd><p>Numeric scalar indicating the adjusted p-value 
-threshold to use for coloring the points. All features with 
+<dd><p>Numeric scalar indicating the adjusted p-value
+threshold to use for coloring the points. All features with
 adjusted p-value below the treshold will be shown in red.</p></dd>
 
 
 <dt>pointSize</dt>
-<dd><p>Either <code>"small"</code> or <code>"large"</code>, indicating 
+<dd><p>Either <code>"small"</code> or <code>"large"</code>, indicating
 which of the two available plot styles that will be used.</p></dd>
 
 
 <dt>interactivePlot</dt>
-<dd><p>Logical scalar, indicating whether an 
-interactive plot should be returned, in which one can hover 
+<dd><p>Logical scalar, indicating whether an
+interactive plot should be returned, in which one can hover
 over the individual points and obtain further information.</p></dd>
 
 
 <dt>nTopToLabel</dt>
-<dd><p>Numeric scalar, indicating the number of points that 
-should be labeled in the plot. The points will be ranked by the 
-<code>padjCol</code> column, and the top <code>nTopToLabel</code> values will 
-be labeled by the corresponding row names. Only used if 
+<dd><p>Numeric scalar, indicating the number of points that
+should be labeled in the plot. The points will be ranked by the
+<code>pvalCol</code> column, and the top <code>nTopToLabel</code> values will
+be labeled by the corresponding row names. Only used if
 <code>interactivePlot</code> is <code>FALSE</code>.</p></dd>
 
 </dl></div>
@@ -111,7 +111,7 @@ be labeled by the corresponding row names. Only used if
     
 
 <p>If <code>interactivePlot</code> is <code>TRUE</code>, a <code>plotly</code></p>
- 
+
 
 <p>object. If <code>interactivePlot</code> is <code>FALSE</code>, a <code>ggplot2</code></p>
 
@@ -125,9 +125,9 @@ be labeled by the corresponding row names. Only used if
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE102901_cis_se.rds"</span>, </span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE102901_cis_se.rds"</span>,</span></span>
 <span class="r-in"><span>                          package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">200</span>, <span class="op">]</span></span></span>
-<span class="r-in"><span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Replicate</span> <span class="op">+</span> <span class="va">Condition</span>, </span></span>
+<span class="r-in"><span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Replicate</span> <span class="op">+</span> <span class="va">Condition</span>,</span></span>
 <span class="r-in"><span>                       data <span class="op">=</span> <span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="calculateRelativeFC.html">calculateRelativeFC</a></span><span class="op">(</span><span class="va">se</span>, <span class="va">design</span>, coef <span class="op">=</span> <span class="st">"Conditioncis_output"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">plotVolcano</span><span class="op">(</span><span class="va">res</span>, pointSize <span class="op">=</span> <span class="st">"large"</span>, nTopToLabel <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
