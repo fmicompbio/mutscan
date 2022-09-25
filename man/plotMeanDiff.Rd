@@ -17,41 +17,41 @@ plotMeanDiff(
 )
 }
 \arguments{
-\item{res}{\code{data.frame} (typically output from 
-\code{calculateRelativeFC()}) with columns corresponding to the 
-average abundance (\code{logCPM} or \code{AveExpr}), log-fold 
-change (\code{logFC}) and significance (\code{FDR} or 
+\item{res}{\code{data.frame} (typically output from
+\code{calculateRelativeFC()}) with columns corresponding to the
+average abundance (\code{logCPM} or \code{AveExpr}), log-fold
+change (\code{logFC}) and significance (\code{FDR} or
 \code{adj.P.Val}).}
 
-\item{meanCol, logFCCol, pvalCol, padjCol}{Character scalars indicating which 
-columns (from \code{res}) that will be used to represent the 
-mean value (x-axis), logFC (y-axis), nominal p-value (used to find 
-the top features to label) and adjusted p-value (used 
-for coloring). If \code{NULL} (default), pre-specified values 
-will be used depending on the available columns 
-(\code{"logCPM"} or \code{"AveExpr"}, \code{"logFC"}, 
-\code{"PValue"} or \code{"P.Value"}, and 
+\item{meanCol, logFCCol, pvalCol, padjCol}{Character scalars indicating the
+columns from \code{res} that will be used to represent the
+mean value (x-axis), logFC (y-axis), nominal p-value (used to find
+the top features to label) and adjusted p-value (used
+for coloring). If \code{NULL} (default), pre-specified values
+will be used depending on the available columns
+(\code{"logCPM"} or \code{"AveExpr"}, \code{"logFC"},
+\code{"PValue"} or \code{"P.Value"}, and
 \code{"FDR"} or \code{"adj.P.Val"}, respectively).}
 
-\item{padjThreshold}{Numeric scalar indicating the adjusted p-value 
-threshold to use for coloring the points. All features with 
+\item{padjThreshold}{Numeric scalar indicating the adjusted p-value
+threshold to use for coloring the points. All features with
 adjusted p-value below the treshold will be shown in red.}
 
-\item{pointSize}{Either \code{"small"} or \code{"large"}, indicating 
+\item{pointSize}{Either \code{"small"} or \code{"large"}, indicating
 which of the two available plot styles that will be used.}
 
-\item{interactivePlot}{Logical scalar, indicating whether an 
-interactive plot should be returned, in which one can hover 
+\item{interactivePlot}{Logical scalar, indicating whether an
+interactive plot should be returned, in which one can hover
 over the individual points and obtain further information.}
 
-\item{nTopToLabel}{Numeric scalar, indicating the number of points that 
-should be labeled in the plot. The points will be ranked by the 
-\code{pvalCol} column, and the top \code{nTopToLabel} values will 
-be labeled by the corresponding row names. Only used if 
+\item{nTopToLabel}{Numeric scalar, indicating the number of points that
+should be labeled in the plot. The points will be ranked by the
+\code{pvalCol} column, and the top \code{nTopToLabel} values will
+be labeled by the corresponding row names. Only used if
 \code{interactivePlot} is \code{FALSE}.}
 }
 \value{
-If \code{interactivePlot} is \code{TRUE}, a \code{plotly} 
+If \code{interactivePlot} is \code{TRUE}, a \code{plotly}
     object. If \code{interactivePlot} is \code{FALSE}, a \code{ggplot2}
     object.
 }
@@ -59,9 +59,9 @@ If \code{interactivePlot} is \code{TRUE}, a \code{plotly}
 Construct an MA (mean-difference) plot
 }
 \examples{
-se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds",
                           package = "mutscan"))[1:200, ]
-design <- model.matrix(~ Replicate + Condition, 
+design <- model.matrix(~ Replicate + Condition,
                        data = SummarizedExperiment::colData(se))
 res <- calculateRelativeFC(se, design, coef = "Conditioncis_output")
 plotMeanDiff(res, pointSize = "large", nTopToLabel = 3)
