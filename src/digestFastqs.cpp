@@ -1263,6 +1263,18 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             }
             std::string wtForward = wildTypeForward[idxForward];
             std::string wtNameForward = wildTypeForwardNames[idxForward];
+            
+            // if the variable region is longer than the (best matching) WT sequence, 
+            // skip the read (consider it to have the wrong length)
+            if (varSeqForward.length() > wtForward.length()) {
+#ifdef _OPENMP
+              #pragma omp atomic
+#endif
+              nReadWrongLength++;
+              chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "noPrimer_readWrongLength");
+              continue;  
+            }
+            
             if (compareToWildtype(varSeqForward, wtForward, varIntQualForward,
                                   mutatedPhredMinForward, nbrMutatedCodonsMaxForward, forbiddenCodonsForward,
                                   wtNameForward, nbrMutatedBasesMaxForward, nMutQualTooLow,
@@ -1322,6 +1334,18 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             }
             std::string wtReverse = wildTypeReverse[idxReverse];
             std::string wtNameReverse = wildTypeReverseNames[idxReverse];
+            
+            // if the variable region is longer than the (best matching) WT sequence, 
+            // skip the read (consider it to have the wrong length)
+            if (varSeqReverse.length() > wtReverse.length()) {
+#ifdef _OPENMP
+              #pragma omp atomic
+#endif
+              nReadWrongLength++;
+              chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "noPrimer_readWrongLength");
+              continue;  
+            }
+            
             if (compareToWildtype(varSeqReverse, wtReverse, varIntQualReverse,
                                   mutatedPhredMinReverse, nbrMutatedCodonsMaxReverse, forbiddenCodonsReverse,
                                   wtNameReverse, nbrMutatedBasesMaxReverse, nMutQualTooLow,
