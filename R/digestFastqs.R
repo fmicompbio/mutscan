@@ -243,351 +243,357 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          filteredReadsFastqReverse = "",
                          maxNReads = -1, verbose = FALSE,
                          nThreads = 1, chunkSize = 100000) {
-  ## pre-flight checks ---------------------------------------------------------
-  ## fastq files exist
-  if (length(fastqForward) < 1 || !all(file.exists(fastqForward)) ||
-      (!is.null(fastqReverse) && (length(fastqReverse) != length(fastqForward) ||
-                                 !all(file.exists(fastqReverse))))) {
-    stop("'fastqForward' and 'fastqReverse' must point to one or several matching existing files");
-  }
-  if (is.null(fastqReverse)) {
-    fastqReverse <- rep("", length(fastqForward))
-  }
-
-  ## merging/rev complementing arguments are ok
-  .assertScalar(x = mergeForwardReverse, type = "logical")
-  .assertScalar(x = revComplForward, type = "logical")
-  .assertScalar(x = revComplReverse, type = "logical")
-  if (any(fastqReverse == "") && mergeForwardReverse) {
-    stop("Both forward and reverse FASTQ files must be given in order to merge ",
-         "forward and reverse reads")
-  }
-
-  ## check numeric inputs
-  .assertVector(x = elementLengthsForward, type = "numeric",
-                rngIncl = c(0, Inf), validValues = -1)
-  .assertVector(x = elementLengthsReverse, type = "numeric",
-                rngIncl = c(0, Inf), validValues = -1)
-  .assertScalar(x = minOverlap, type = "numeric", rngIncl = c(0, Inf))
-  .assertScalar(x = maxOverlap, type = "numeric", rngIncl = c(0, Inf))
-  .assertScalar(x = minMergedLength, type = "numeric", rngIncl = c(0, Inf))
-  .assertScalar(x = maxMergedLength, type = "numeric", rngIncl = c(0, Inf))
-  .assertScalar(x = avePhredMinForward, type = "numeric", rngIncl = c(0, Inf))
-  .assertScalar(x = avePhredMinReverse, type = "numeric", rngIncl = c(0, Inf))
-  .assertScalar(x = variableNMaxForward, type = "numeric", rngIncl = c(0, Inf))
-  .assertScalar(x = variableNMaxReverse, type = "numeric", rngIncl = c(0, Inf))
-  .assertScalar(x = umiNMax, type = "numeric", rngIncl = c(0, Inf))
-  .assertScalar(x = nbrMutatedCodonsMaxForward, type = "numeric",
-                rngIncl = c(0, Inf), validValues = -1)
-  .assertScalar(x = nbrMutatedCodonsMaxReverse, type = "numeric",
-                rngIncl = c(0, Inf), validValues = -1)
-  .assertScalar(x = nbrMutatedBasesMaxForward, type = "numeric",
-                rngIncl = c(0, Inf), validValues = -1)
-  .assertScalar(x = nbrMutatedBasesMaxReverse, type = "numeric",
-                rngIncl = c(0, Inf), validValues = -1)
-  .assertScalar(x = mutatedPhredMinForward, type = "numeric", rngIncl = c(0, Inf))
-  .assertScalar(x = mutatedPhredMinReverse, type = "numeric", rngIncl = c(0, Inf))
-  .assertScalar(x = constantMaxDistForward, type = "numeric",
-                rngIncl = c(0, Inf), validValues = -1)
-  .assertScalar(x = constantMaxDistReverse, type = "numeric",
-                rngIncl = c(0, Inf), validValues = -1)
-  .assertScalar(x = variableCollapseMaxDist, type = "numeric", rngIncl = c(0, Inf))
-  .assertScalar(x = variableCollapseMinReads, type = "numeric", rngIncl = c(0, Inf))
-  .assertScalar(x = variableCollapseMinRatio, type = "numeric", rngIncl = c(0, Inf))
-  .assertScalar(x = umiCollapseMaxDist, type = "numeric", rngIncl = c(0, Inf))
-  .assertScalar(x = maxNReads, type = "numeric", rngIncl = c(0, Inf),
-                validValues = -1)
-  .assertScalar(x = nThreads, type = "numeric", rngExcl = c(0, Inf))
-  .assertScalar(x = chunkSize, type = "numeric", rngExcl = c(0, Inf))
-
-  ## If a wildtype sequence is provided, it must be unambiguous how to identify and name mutants
-  if (any(wildTypeForward != "")) {
-    if ((nbrMutatedCodonsMaxForward == (-1) && nbrMutatedBasesMaxForward == (-1)) ||
-        (nbrMutatedCodonsMaxForward != (-1) && nbrMutatedBasesMaxForward != (-1))) {
-      stop("Exactly one of 'nbrMutatedCodonsMaxForward' and 'nbrMutatedBasesMaxForward' must be -1")
+    ## pre-flight checks ---------------------------------------------------------
+    ## fastq files exist
+    if (length(fastqForward) < 1 || !all(file.exists(fastqForward)) ||
+        (!is.null(fastqReverse) && (length(fastqReverse) != length(fastqForward) ||
+                                    !all(file.exists(fastqReverse))))) {
+        stop("'fastqForward' and 'fastqReverse' must point to one or several matching existing files");
     }
-  }
-  if (any(wildTypeReverse != "")) {
-    if ((nbrMutatedCodonsMaxReverse == (-1) && nbrMutatedBasesMaxReverse == (-1)) ||
-        (nbrMutatedCodonsMaxReverse != (-1) && nbrMutatedBasesMaxReverse != (-1))) {
-      stop("Exactly one of 'nbrMutatedCodonsMaxReverse' and 'nbrMutatedBasesMaxReverse' must be -1")
+    if (is.null(fastqReverse)) {
+        fastqReverse <- rep("", length(fastqForward))
     }
-  }
-
-  ## adapters must be strings, valid DNA characters
-  if (length(adapterForward) != 1 || !is.character(adapterForward) ||
-      !grepl("^[AaCcGgTt]*$", adapterForward) || length(adapterReverse) != 1 ||
-      !is.character(adapterReverse) || !grepl("^[AaCcGgTt]*$", adapterReverse)) {
-    stop("Adapters must be character strings, only containing valid DNA characters")
-  } else {
-    adapterForward <- toupper(adapterForward)
-    adapterReverse <- toupper(adapterReverse)
-  }
-
-  ## Check provided read composition
-  if (!(length(elementsForward) == 1 && is.character(elementsForward))) {
-    stop("'elementsForward' must be a character scalar")
-  }
-  if (!(length(elementsReverse) == 1 && is.character(elementsReverse))) {
-    stop("'elementsReverse' must be a character scalar")
-  }
-
-  if (nchar(elementsForward) == 0) {
-    stop("'elementsForward' must be a non-empty character scalar")
-  }
-  if (any(fastqReverse != "") && nchar(elementsReverse) == 0) {
-    stop("'elementsReverse' must be a non-empty character scalar")
-  }
-
-  if (!all(strsplit(elementsForward, "")[[1]] %in% c("C", "U", "S", "V", "P"))) {
-    stop("'elementsForward' can only contain letters 'CUSVP'")
-  }
-  if (!all(strsplit(elementsReverse, "")[[1]] %in% c("C", "U", "S", "V", "P"))) {
-    stop("'elementsReverse' can only contain letters 'CUSVP'")
-  }
-
-  if (nchar(elementsForward) != length(elementLengthsForward)) {
-    stop("'elementsForward' and 'elementsLengthsForward' must have the same length")
-  }
-  if (nchar(elementsReverse) != length(elementLengthsReverse)) {
-    stop("'elementsReverse' and 'elementsLengthsReverse' must have the same length")
-  }
-
-  ## Max one 'P'
-  PposFwd <- gregexpr(pattern = "P", elementsForward, fixed = TRUE)[[1]]
-  PposRev <- gregexpr(pattern = "P", elementsReverse, fixed = TRUE)[[1]]
-
-  if (length(PposFwd) > 1) {
-    stop("'elementsForward' can contain max one 'P'")
-  }
-  if (length(PposRev) > 1) {
-    stop("'elementsReverse' can contain max one 'P'")
-  }
-
-  ## If no 'P', max one -1 length
-  if (length(PposFwd) == 1 && PposFwd == -1 &&
-      sum(elementLengthsForward == -1) > 1) {
-    stop("Max one element length (forward) can be -1")
-  }
-  if (length(PposRev) == 1 && PposRev == -1 &&
-      sum(elementLengthsReverse == -1) > 1) {
-    stop("Max one element length (reverse) can be -1")
-  }
-
-  ## If a 'P', max one -1 length on each side
-  if (length(PposFwd) == 1 && PposFwd != -1) {
-    if ((PposFwd != 1 && sum(elementLengthsForward[1:(PposFwd - 1)] == -1) > 1) ||
-        (PposFwd != nchar(elementsForward) &&
-         sum(elementLengthsForward[(PposFwd + 1):nchar(elementsForward)] == -1) > 1)) {
-      stop("Max one element length (forward) on each side of the primer can be -1")
+    ## Convert file paths to canonical form, expand ~ and complete relative paths
+    fastqForward <- normalizePath(fastqForward, mustWork = FALSE)
+    fastqReverse <- normalizePath(fastqReverse, mustWork = FALSE)
+    
+    ## merging/rev complementing arguments are ok
+    .assertScalar(x = mergeForwardReverse, type = "logical")
+    .assertScalar(x = revComplForward, type = "logical")
+    .assertScalar(x = revComplReverse, type = "logical")
+    if (any(fastqReverse == "") && mergeForwardReverse) {
+        stop("Both forward and reverse FASTQ files must be given in order to merge ",
+             "forward and reverse reads")
     }
-  }
-  if (length(PposRev) == 1 && PposRev != -1) {
-    if ((PposRev != 1 && sum(elementLengthsReverse[1:(PposRev - 1)] == -1) > 1) ||
-        (PposRev != nchar(elementsReverse) &&
-         sum(elementLengthsReverse[(PposRev + 1):nchar(elementsReverse)] == -1) > 1)) {
-      stop("Max one element length (reverse) on each side of the primer can be -1")
+    
+    ## check numeric inputs
+    .assertVector(x = elementLengthsForward, type = "numeric",
+                  rngIncl = c(0, Inf), validValues = -1)
+    .assertVector(x = elementLengthsReverse, type = "numeric",
+                  rngIncl = c(0, Inf), validValues = -1)
+    .assertScalar(x = minOverlap, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = maxOverlap, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = minMergedLength, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = maxMergedLength, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = avePhredMinForward, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = avePhredMinReverse, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = variableNMaxForward, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = variableNMaxReverse, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = umiNMax, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = nbrMutatedCodonsMaxForward, type = "numeric",
+                  rngIncl = c(0, Inf), validValues = -1)
+    .assertScalar(x = nbrMutatedCodonsMaxReverse, type = "numeric",
+                  rngIncl = c(0, Inf), validValues = -1)
+    .assertScalar(x = nbrMutatedBasesMaxForward, type = "numeric",
+                  rngIncl = c(0, Inf), validValues = -1)
+    .assertScalar(x = nbrMutatedBasesMaxReverse, type = "numeric",
+                  rngIncl = c(0, Inf), validValues = -1)
+    .assertScalar(x = mutatedPhredMinForward, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = mutatedPhredMinReverse, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = constantMaxDistForward, type = "numeric",
+                  rngIncl = c(0, Inf), validValues = -1)
+    .assertScalar(x = constantMaxDistReverse, type = "numeric",
+                  rngIncl = c(0, Inf), validValues = -1)
+    .assertScalar(x = variableCollapseMaxDist, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = variableCollapseMinReads, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = variableCollapseMinRatio, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = umiCollapseMaxDist, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = maxNReads, type = "numeric", rngIncl = c(0, Inf),
+                  validValues = -1)
+    .assertScalar(x = nThreads, type = "numeric", rngExcl = c(0, Inf))
+    .assertScalar(x = chunkSize, type = "numeric", rngExcl = c(0, Inf))
+    
+    ## If a wildtype sequence is provided, it must be unambiguous how to identify and name mutants
+    if (any(wildTypeForward != "")) {
+        if ((nbrMutatedCodonsMaxForward == (-1) && nbrMutatedBasesMaxForward == (-1)) ||
+            (nbrMutatedCodonsMaxForward != (-1) && nbrMutatedBasesMaxForward != (-1))) {
+            stop("Exactly one of 'nbrMutatedCodonsMaxForward' and 'nbrMutatedBasesMaxForward' must be -1")
+        }
     }
-  }
-
-  if (!is.character(primerForward) || length(primerForward) < 1 ||
-      !all(grepl("^[AaCcGgTt]*$", primerForward)) || !is.character(primerReverse) ||
-      length(primerReverse) < 1 || !all(grepl("^[AaCcGgTt]*$", primerReverse))) {
-    stop("Primers must be character vectors, only containing valid DNA characters")
-  } else {
-    primerForward <- vapply(primerForward, toupper, "")
-    primerReverse <- vapply(primerReverse, toupper, "")
-  }
-
-  ## if wild type sequence is a string, make it into a vector
-  if (length(wildTypeForward) == 1 && is.null(names(wildTypeForward))) {
-    wildTypeForward <- c(f = wildTypeForward)
-  }
-  if (length(wildTypeReverse) == 1 && is.null(names(wildTypeReverse))) {
-    wildTypeReverse <- c(r = wildTypeReverse)
-  }
-
-  ## wild type sequences must be given in named vectors
-  if (any(is.null(names(wildTypeForward))) || any(names(wildTypeForward) == "") ||
-      any(is.null(names(wildTypeReverse))) || any(names(wildTypeReverse) == "")) {
-    stop('wild type sequences must be given in named vectors')
-  }
-
-  ## wild type sequences must be strings, valid DNA characters
-  if (!all(sapply(wildTypeForward, is.character)) || !all(sapply(wildTypeForward, length) == 1) ||
-      !all(sapply(wildTypeForward, function(w) grepl("^[AaCcGgTt]*$", w))) ||
-      !all(sapply(wildTypeReverse, is.character)) || !all(sapply(wildTypeReverse, length) == 1) ||
-      !all(sapply(wildTypeReverse, function(w) grepl("^[AaCcGgTt]*$", w)))) {
-    stop("wild type sequences must be character strings, ",
-         "only containing valid DNA characters")
-  } else {
-    wildTypeForward <- toupper(wildTypeForward)
-    wildTypeReverse <- toupper(wildTypeReverse)
-  }
-
-  ## all wild type sequences should be unique
-  if (any(duplicated(wildTypeForward)) ||
-      any(duplicated(wildTypeReverse))) {
-    stop("Duplicated wild type sequences are not allowed")
-  }
-
-  ## cis experiment - should not have wildTypeReverse
-  if (mergeForwardReverse && any(sapply(wildTypeReverse, nchar) > 0)) {
-    warning("Ignoring 'wildTypeReverse' when forward and reverse reads are merged")
-    wildTypeReverse <- c(r = "")
-  }
-
-  ## if both constantForward and constantLengthForward are given, check that
-  ## the lengths inferred from the two are consistent
-  if (!is.character(constantForward) || !is.character(constantReverse) ||
-      length(constantForward) < 1 || length(constantReverse) < 1 ||
-      !all(grepl("^[AaCcGgTt]*$", constantForward)) ||
-      !all(grepl("^[AaCcGgTt]*$", constantReverse))) {
-    stop("constant sequences must be character strings, ",
-         "only containing valid DNA characters.")
-  } else {
-    constantForward <- toupper(constantForward)
-    constantReverse <- toupper(constantReverse)
-  }
-
-  if (!all(vapply(constantForward, nchar, 0L) == nchar(constantForward[1])) ||
-      !all(vapply(constantReverse, nchar, 0L) == nchar(constantReverse[1]))) {
-    stop("All constant sequences must be of the same length")
-  }
-
-  CposFwd <- gregexpr(pattern = "C", elementsForward)[[1]]
-  if (nchar(constantForward[1]) > 0 &&
-      sum(elementLengthsForward[CposFwd]) != nchar(constantForward[1])) {
-    stop("The sum of the constant sequence lengths in elementsForward (",
-         sum(elementLengthsForward[CposFwd]),
-         ") does not correspond to the length of the given 'constantForward' (",
-         nchar(constantForward[1]), ")")
-  }
-  CposRev <- gregexpr(pattern = "C", elementsReverse)[[1]]
-  if (nchar(constantReverse[1]) > 0 &&
-      sum(elementLengthsReverse[CposRev]) != nchar(constantReverse[1])) {
-    stop("The sum of the constant sequence lengths in elementsReverse (",
-         sum(elementLengthsReverse[CposRev]),
-         ") does not correspond to the length of the given 'constantReverse' (",
-         nchar(constantReverse[1]), ")")
-  }
-
-  if (!all(is.character(forbiddenMutatedCodonsForward)) ||
-      !all(grepl("^[ACGTMRWSYKVHDBN]{3}$", toupper(forbiddenMutatedCodonsForward)) |
-           forbiddenMutatedCodonsForward == "") ||
-      !all(is.character(forbiddenMutatedCodonsReverse)) ||
-      !all(grepl("^[ACGTMRWSYKVHDBN]{3}$", toupper(forbiddenMutatedCodonsReverse)) |
-           forbiddenMutatedCodonsReverse == "")) {
-    stop("All elements of 'forbiddenMutatedCodonsForward' and 'forbiddenMutatedCodonsReverse' must be ",
-         "character strings consisting of three valid IUPAC letters.")
-  } else {
-    forbiddenMutatedCodonsForward <- toupper(forbiddenMutatedCodonsForward)
-    forbiddenMutatedCodonsReverse <- toupper(forbiddenMutatedCodonsReverse)
-  }
-
-  if (!is.logical(useTreeWTmatch) || length(useTreeWTmatch) != 1) {
-    stop("'useTreeWTmatch' must be a logical scalar.")
-  }
-
-  if (!is.logical(collapseToWTForward) || length(collapseToWTForward) != 1) {
-    stop("'collapseToWTForward' must be a logical scalar.")
-  }
-  if (!is.logical(collapseToWTReverse) || length(collapseToWTReverse) != 1) {
-    stop("'collapseToWTReverse' must be a logical scalar.")
-  }
-
-  ## mutNameDelimiter must be a single character, and can not appear in any of the WT sequence names
-  if (!is.character(mutNameDelimiter) || length(mutNameDelimiter) != 1 ||
-      nchar(mutNameDelimiter) != 1 || mutNameDelimiter == "_") {
-    stop("'mutNameDelimiter' must be a single-letter character scalar, not equal to '_'")
-  }
-  if (any(grepl(mutNameDelimiter, c(names(wildTypeForward), names(wildTypeReverse)), fixed = TRUE))) {
-    stop("'mutNameDelimiter' can not appear in the name of any of the provided wild type sequences.")
-  }
-
-  if (!is.character(filteredReadsFastqForward) || !is.character(filteredReadsFastqReverse) ||
-      length(filteredReadsFastqForward) != 1 || length(filteredReadsFastqReverse) != 1 ||
-      (filteredReadsFastqForward != "" && !grepl("\\.gz$", filteredReadsFastqForward)) ||
-      (filteredReadsFastqReverse != "" && !grepl("\\.gz$", filteredReadsFastqReverse))) {
-    stop("'filteredReadsFastqForward' and 'filteredReadsFastqReverse' must be character ",
-         "scalars ending with .gz.")
-  }
-
-  if ((any(fastqReverse == "") && filteredReadsFastqReverse != "") ||
-      (all(fastqReverse != "") && filteredReadsFastqForward != "" && filteredReadsFastqReverse == "") ||
-      (all(fastqForward != "") && filteredReadsFastqForward == "" && filteredReadsFastqReverse != "")) {
-    stop("The pairing of the output FASTQ files must be compatible with that of the input files.")
-  }
-
-  .assertScalar(x = verbose, type = "logical")
-
-  ## call digestFastqsCpp ------------------------------------------------------
-  ## Represent the wildtype sequences as pairs of vectors (one with sequences,
-  ## one with names), to make things faster on the C++ side
-  wildTypeForwardNames <- names(wildTypeForward)
-  wildTypeForward <- unname(wildTypeForward)
-  wildTypeReverseNames <- names(wildTypeReverse)
-  wildTypeReverse <- unname(wildTypeReverse)
-
-  res <- digestFastqsCpp(fastqForwardVect = fastqForward,
-                         fastqReverseVect = fastqReverse,
-                         mergeForwardReverse = mergeForwardReverse,
-                         minOverlap = minOverlap,
-                         maxOverlap = maxOverlap,
-                         minMergedLength = minMergedLength,
-                         maxMergedLength = maxMergedLength,
-                         maxFracMismatchOverlap = maxFracMismatchOverlap,
-                         greedyOverlap = greedyOverlap,
-                         revComplForward = revComplForward,
-                         revComplReverse = revComplReverse,
-                         elementsForward = elementsForward,
-                         elementLengthsForward = as.numeric(elementLengthsForward),
-                         elementsReverse = elementsReverse,
-                         elementLengthsReverse = as.numeric(elementLengthsReverse),
-                         adapterForward = adapterForward,
-                         adapterReverse = adapterReverse,
-                         primerForward = primerForward,
-                         primerReverse = primerReverse,
-                         wildTypeForward = wildTypeForward,
-                         wildTypeForwardNames = wildTypeForwardNames,
-                         wildTypeReverse = wildTypeReverse,
-                         wildTypeReverseNames = wildTypeReverseNames,
-                         constantForward = constantForward,
-                         constantReverse = constantReverse,
-                         avePhredMinForward = avePhredMinForward,
-                         avePhredMinReverse = avePhredMinReverse,
-                         variableNMaxForward = variableNMaxForward,
-                         variableNMaxReverse = variableNMaxReverse,
-                         umiNMax = umiNMax,
-                         nbrMutatedCodonsMaxForward = nbrMutatedCodonsMaxForward,
-                         nbrMutatedCodonsMaxReverse = nbrMutatedCodonsMaxReverse,
-                         nbrMutatedBasesMaxForward = nbrMutatedBasesMaxForward,
-                         nbrMutatedBasesMaxReverse = nbrMutatedBasesMaxReverse,
-                         forbiddenMutatedCodonsForward = forbiddenMutatedCodonsForward,
-                         forbiddenMutatedCodonsReverse = forbiddenMutatedCodonsReverse,
-                         useTreeWTmatch = useTreeWTmatch,
-                         collapseToWTForward = collapseToWTForward,
-                         collapseToWTReverse = collapseToWTReverse,
-                         mutatedPhredMinForward = mutatedPhredMinForward,
-                         mutatedPhredMinReverse = mutatedPhredMinReverse,
-                         mutNameDelimiter = mutNameDelimiter,
-                         constantMaxDistForward = constantMaxDistForward,
-                         constantMaxDistReverse = constantMaxDistReverse,
-                         variableCollapseMaxDist = variableCollapseMaxDist,
-                         variableCollapseMinReads = as.integer(ceiling(variableCollapseMinReads)),
-                         variableCollapseMinRatio = variableCollapseMinRatio,
-                         umiCollapseMaxDist = umiCollapseMaxDist,
-                         filteredReadsFastqForward = filteredReadsFastqForward,
-                         filteredReadsFastqReverse = filteredReadsFastqReverse,
-                         maxNReads = maxNReads,
-                         verbose = verbose,
-                         nThreads = as.integer(nThreads),
-                         chunkSize = as.integer(chunkSize))
-
-  ## Add package version and processing date -----------------------------------
-  res$parameters$processingInfo <- paste0(
-    "Processed by mutscan v", utils::packageVersion("mutscan"), " on ",
-    Sys.time()
-  )
-  res
+    if (any(wildTypeReverse != "")) {
+        if ((nbrMutatedCodonsMaxReverse == (-1) && nbrMutatedBasesMaxReverse == (-1)) ||
+            (nbrMutatedCodonsMaxReverse != (-1) && nbrMutatedBasesMaxReverse != (-1))) {
+            stop("Exactly one of 'nbrMutatedCodonsMaxReverse' and 'nbrMutatedBasesMaxReverse' must be -1")
+        }
+    }
+    
+    ## adapters must be strings, valid DNA characters
+    if (length(adapterForward) != 1 || !is.character(adapterForward) ||
+        !grepl("^[AaCcGgTt]*$", adapterForward) || length(adapterReverse) != 1 ||
+        !is.character(adapterReverse) || !grepl("^[AaCcGgTt]*$", adapterReverse)) {
+        stop("Adapters must be character strings, only containing valid DNA characters")
+    } else {
+        adapterForward <- toupper(adapterForward)
+        adapterReverse <- toupper(adapterReverse)
+    }
+    
+    ## Check provided read composition
+    if (!(length(elementsForward) == 1 && is.character(elementsForward))) {
+        stop("'elementsForward' must be a character scalar")
+    }
+    if (!(length(elementsReverse) == 1 && is.character(elementsReverse))) {
+        stop("'elementsReverse' must be a character scalar")
+    }
+    
+    if (nchar(elementsForward) == 0) {
+        stop("'elementsForward' must be a non-empty character scalar")
+    }
+    if (any(fastqReverse != "") && nchar(elementsReverse) == 0) {
+        stop("'elementsReverse' must be a non-empty character scalar")
+    }
+    
+    if (!all(strsplit(elementsForward, "")[[1]] %in% c("C", "U", "S", "V", "P"))) {
+        stop("'elementsForward' can only contain letters 'CUSVP'")
+    }
+    if (!all(strsplit(elementsReverse, "")[[1]] %in% c("C", "U", "S", "V", "P"))) {
+        stop("'elementsReverse' can only contain letters 'CUSVP'")
+    }
+    
+    if (nchar(elementsForward) != length(elementLengthsForward)) {
+        stop("'elementsForward' and 'elementsLengthsForward' must have the same length")
+    }
+    if (nchar(elementsReverse) != length(elementLengthsReverse)) {
+        stop("'elementsReverse' and 'elementsLengthsReverse' must have the same length")
+    }
+    
+    ## Max one 'P'
+    PposFwd <- gregexpr(pattern = "P", elementsForward, fixed = TRUE)[[1]]
+    PposRev <- gregexpr(pattern = "P", elementsReverse, fixed = TRUE)[[1]]
+    
+    if (length(PposFwd) > 1) {
+        stop("'elementsForward' can contain max one 'P'")
+    }
+    if (length(PposRev) > 1) {
+        stop("'elementsReverse' can contain max one 'P'")
+    }
+    
+    ## If no 'P', max one -1 length
+    if (length(PposFwd) == 1 && PposFwd == -1 &&
+        sum(elementLengthsForward == -1) > 1) {
+        stop("Max one element length (forward) can be -1")
+    }
+    if (length(PposRev) == 1 && PposRev == -1 &&
+        sum(elementLengthsReverse == -1) > 1) {
+        stop("Max one element length (reverse) can be -1")
+    }
+    
+    ## If a 'P', max one -1 length on each side
+    if (length(PposFwd) == 1 && PposFwd != -1) {
+        if ((PposFwd != 1 && sum(elementLengthsForward[1:(PposFwd - 1)] == -1) > 1) ||
+            (PposFwd != nchar(elementsForward) &&
+             sum(elementLengthsForward[(PposFwd + 1):nchar(elementsForward)] == -1) > 1)) {
+            stop("Max one element length (forward) on each side of the primer can be -1")
+        }
+    }
+    if (length(PposRev) == 1 && PposRev != -1) {
+        if ((PposRev != 1 && sum(elementLengthsReverse[1:(PposRev - 1)] == -1) > 1) ||
+            (PposRev != nchar(elementsReverse) &&
+             sum(elementLengthsReverse[(PposRev + 1):nchar(elementsReverse)] == -1) > 1)) {
+            stop("Max one element length (reverse) on each side of the primer can be -1")
+        }
+    }
+    
+    if (!is.character(primerForward) || length(primerForward) < 1 ||
+        !all(grepl("^[AaCcGgTt]*$", primerForward)) || !is.character(primerReverse) ||
+        length(primerReverse) < 1 || !all(grepl("^[AaCcGgTt]*$", primerReverse))) {
+        stop("Primers must be character vectors, only containing valid DNA characters")
+    } else {
+        primerForward <- vapply(primerForward, toupper, "")
+        primerReverse <- vapply(primerReverse, toupper, "")
+    }
+    
+    ## if wild type sequence is a string, make it into a vector
+    if (length(wildTypeForward) == 1 && is.null(names(wildTypeForward))) {
+        wildTypeForward <- c(f = wildTypeForward)
+    }
+    if (length(wildTypeReverse) == 1 && is.null(names(wildTypeReverse))) {
+        wildTypeReverse <- c(r = wildTypeReverse)
+    }
+    
+    ## wild type sequences must be given in named vectors
+    if (any(is.null(names(wildTypeForward))) || any(names(wildTypeForward) == "") ||
+        any(is.null(names(wildTypeReverse))) || any(names(wildTypeReverse) == "")) {
+        stop('wild type sequences must be given in named vectors')
+    }
+    
+    ## wild type sequences must be strings, valid DNA characters
+    if (!all(sapply(wildTypeForward, is.character)) || !all(sapply(wildTypeForward, length) == 1) ||
+        !all(sapply(wildTypeForward, function(w) grepl("^[AaCcGgTt]*$", w))) ||
+        !all(sapply(wildTypeReverse, is.character)) || !all(sapply(wildTypeReverse, length) == 1) ||
+        !all(sapply(wildTypeReverse, function(w) grepl("^[AaCcGgTt]*$", w)))) {
+        stop("wild type sequences must be character strings, ",
+             "only containing valid DNA characters")
+    } else {
+        wildTypeForward <- toupper(wildTypeForward)
+        wildTypeReverse <- toupper(wildTypeReverse)
+    }
+    
+    ## all wild type sequences should be unique
+    if (any(duplicated(wildTypeForward)) ||
+        any(duplicated(wildTypeReverse))) {
+        stop("Duplicated wild type sequences are not allowed")
+    }
+    
+    ## cis experiment - should not have wildTypeReverse
+    if (mergeForwardReverse && any(sapply(wildTypeReverse, nchar) > 0)) {
+        warning("Ignoring 'wildTypeReverse' when forward and reverse reads are merged")
+        wildTypeReverse <- c(r = "")
+    }
+    
+    ## if both constantForward and constantLengthForward are given, check that
+    ## the lengths inferred from the two are consistent
+    if (!is.character(constantForward) || !is.character(constantReverse) ||
+        length(constantForward) < 1 || length(constantReverse) < 1 ||
+        !all(grepl("^[AaCcGgTt]*$", constantForward)) ||
+        !all(grepl("^[AaCcGgTt]*$", constantReverse))) {
+        stop("constant sequences must be character strings, ",
+             "only containing valid DNA characters.")
+    } else {
+        constantForward <- toupper(constantForward)
+        constantReverse <- toupper(constantReverse)
+    }
+    
+    if (!all(vapply(constantForward, nchar, 0L) == nchar(constantForward[1])) ||
+        !all(vapply(constantReverse, nchar, 0L) == nchar(constantReverse[1]))) {
+        stop("All constant sequences must be of the same length")
+    }
+    
+    CposFwd <- gregexpr(pattern = "C", elementsForward)[[1]]
+    if (nchar(constantForward[1]) > 0 &&
+        sum(elementLengthsForward[CposFwd]) != nchar(constantForward[1])) {
+        stop("The sum of the constant sequence lengths in elementsForward (",
+             sum(elementLengthsForward[CposFwd]),
+             ") does not correspond to the length of the given 'constantForward' (",
+             nchar(constantForward[1]), ")")
+    }
+    CposRev <- gregexpr(pattern = "C", elementsReverse)[[1]]
+    if (nchar(constantReverse[1]) > 0 &&
+        sum(elementLengthsReverse[CposRev]) != nchar(constantReverse[1])) {
+        stop("The sum of the constant sequence lengths in elementsReverse (",
+             sum(elementLengthsReverse[CposRev]),
+             ") does not correspond to the length of the given 'constantReverse' (",
+             nchar(constantReverse[1]), ")")
+    }
+    
+    if (!all(is.character(forbiddenMutatedCodonsForward)) ||
+        !all(grepl("^[ACGTMRWSYKVHDBN]{3}$", toupper(forbiddenMutatedCodonsForward)) |
+             forbiddenMutatedCodonsForward == "") ||
+        !all(is.character(forbiddenMutatedCodonsReverse)) ||
+        !all(grepl("^[ACGTMRWSYKVHDBN]{3}$", toupper(forbiddenMutatedCodonsReverse)) |
+             forbiddenMutatedCodonsReverse == "")) {
+        stop("All elements of 'forbiddenMutatedCodonsForward' and 'forbiddenMutatedCodonsReverse' must be ",
+             "character strings consisting of three valid IUPAC letters.")
+    } else {
+        forbiddenMutatedCodonsForward <- toupper(forbiddenMutatedCodonsForward)
+        forbiddenMutatedCodonsReverse <- toupper(forbiddenMutatedCodonsReverse)
+    }
+    
+    if (!is.logical(useTreeWTmatch) || length(useTreeWTmatch) != 1) {
+        stop("'useTreeWTmatch' must be a logical scalar.")
+    }
+    
+    if (!is.logical(collapseToWTForward) || length(collapseToWTForward) != 1) {
+        stop("'collapseToWTForward' must be a logical scalar.")
+    }
+    if (!is.logical(collapseToWTReverse) || length(collapseToWTReverse) != 1) {
+        stop("'collapseToWTReverse' must be a logical scalar.")
+    }
+    
+    ## mutNameDelimiter must be a single character, and can not appear in any of the WT sequence names
+    if (!is.character(mutNameDelimiter) || length(mutNameDelimiter) != 1 ||
+        nchar(mutNameDelimiter) != 1 || mutNameDelimiter == "_") {
+        stop("'mutNameDelimiter' must be a single-letter character scalar, not equal to '_'")
+    }
+    if (any(grepl(mutNameDelimiter, c(names(wildTypeForward), names(wildTypeReverse)), fixed = TRUE))) {
+        stop("'mutNameDelimiter' can not appear in the name of any of the provided wild type sequences.")
+    }
+    
+    if (!is.character(filteredReadsFastqForward) || !is.character(filteredReadsFastqReverse) ||
+        length(filteredReadsFastqForward) != 1 || length(filteredReadsFastqReverse) != 1 ||
+        (filteredReadsFastqForward != "" && !grepl("\\.gz$", filteredReadsFastqForward)) ||
+        (filteredReadsFastqReverse != "" && !grepl("\\.gz$", filteredReadsFastqReverse))) {
+        stop("'filteredReadsFastqForward' and 'filteredReadsFastqReverse' must be character ",
+             "scalars ending with .gz.")
+    }
+    ## If path is "", it will still be ""
+    filteredReadsFastqForward <- normalizePath(filteredReadsFastqForward, mustWork = FALSE)
+    filteredReadsFastqReverse <- normalizePath(filteredReadsFastqReverse, mustWork = FALSE)
+    
+    if ((any(fastqReverse == "") && filteredReadsFastqReverse != "") ||
+        (all(fastqReverse != "") && filteredReadsFastqForward != "" && filteredReadsFastqReverse == "") ||
+        (all(fastqForward != "") && filteredReadsFastqForward == "" && filteredReadsFastqReverse != "")) {
+        stop("The pairing of the output FASTQ files must be compatible with that of the input files.")
+    }
+    
+    .assertScalar(x = verbose, type = "logical")
+    
+    ## call digestFastqsCpp ------------------------------------------------------
+    ## Represent the wildtype sequences as pairs of vectors (one with sequences,
+    ## one with names), to make things faster on the C++ side
+    wildTypeForwardNames <- names(wildTypeForward)
+    wildTypeForward <- unname(wildTypeForward)
+    wildTypeReverseNames <- names(wildTypeReverse)
+    wildTypeReverse <- unname(wildTypeReverse)
+    
+    res <- digestFastqsCpp(fastqForwardVect = fastqForward,
+                           fastqReverseVect = fastqReverse,
+                           mergeForwardReverse = mergeForwardReverse,
+                           minOverlap = minOverlap,
+                           maxOverlap = maxOverlap,
+                           minMergedLength = minMergedLength,
+                           maxMergedLength = maxMergedLength,
+                           maxFracMismatchOverlap = maxFracMismatchOverlap,
+                           greedyOverlap = greedyOverlap,
+                           revComplForward = revComplForward,
+                           revComplReverse = revComplReverse,
+                           elementsForward = elementsForward,
+                           elementLengthsForward = as.numeric(elementLengthsForward),
+                           elementsReverse = elementsReverse,
+                           elementLengthsReverse = as.numeric(elementLengthsReverse),
+                           adapterForward = adapterForward,
+                           adapterReverse = adapterReverse,
+                           primerForward = primerForward,
+                           primerReverse = primerReverse,
+                           wildTypeForward = wildTypeForward,
+                           wildTypeForwardNames = wildTypeForwardNames,
+                           wildTypeReverse = wildTypeReverse,
+                           wildTypeReverseNames = wildTypeReverseNames,
+                           constantForward = constantForward,
+                           constantReverse = constantReverse,
+                           avePhredMinForward = avePhredMinForward,
+                           avePhredMinReverse = avePhredMinReverse,
+                           variableNMaxForward = variableNMaxForward,
+                           variableNMaxReverse = variableNMaxReverse,
+                           umiNMax = umiNMax,
+                           nbrMutatedCodonsMaxForward = nbrMutatedCodonsMaxForward,
+                           nbrMutatedCodonsMaxReverse = nbrMutatedCodonsMaxReverse,
+                           nbrMutatedBasesMaxForward = nbrMutatedBasesMaxForward,
+                           nbrMutatedBasesMaxReverse = nbrMutatedBasesMaxReverse,
+                           forbiddenMutatedCodonsForward = forbiddenMutatedCodonsForward,
+                           forbiddenMutatedCodonsReverse = forbiddenMutatedCodonsReverse,
+                           useTreeWTmatch = useTreeWTmatch,
+                           collapseToWTForward = collapseToWTForward,
+                           collapseToWTReverse = collapseToWTReverse,
+                           mutatedPhredMinForward = mutatedPhredMinForward,
+                           mutatedPhredMinReverse = mutatedPhredMinReverse,
+                           mutNameDelimiter = mutNameDelimiter,
+                           constantMaxDistForward = constantMaxDistForward,
+                           constantMaxDistReverse = constantMaxDistReverse,
+                           variableCollapseMaxDist = variableCollapseMaxDist,
+                           variableCollapseMinReads = as.integer(ceiling(variableCollapseMinReads)),
+                           variableCollapseMinRatio = variableCollapseMinRatio,
+                           umiCollapseMaxDist = umiCollapseMaxDist,
+                           filteredReadsFastqForward = filteredReadsFastqForward,
+                           filteredReadsFastqReverse = filteredReadsFastqReverse,
+                           maxNReads = maxNReads,
+                           verbose = verbose,
+                           nThreads = as.integer(nThreads),
+                           chunkSize = as.integer(chunkSize))
+    
+    ## Add package version and processing date -----------------------------------
+    res$parameters$processingInfo <- paste0(
+        "Processed by mutscan v", utils::packageVersion("mutscan"), " on ",
+        Sys.time()
+    )
+    res
 }
