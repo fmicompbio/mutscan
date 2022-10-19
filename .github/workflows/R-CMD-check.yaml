@@ -93,6 +93,10 @@ jobs:
           sessioninfo::session_info(pkgs, include_base = TRUE)
         shell: Rscript {0}
 
+      - name: Check
+        run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error", check_dir = "check")
+        shell: Rscript {0}
+        
       - name: Build, Install, Check
         uses: grimbough/bioc-actions/build-install-check@v1
 
@@ -111,7 +115,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@master
         with:
-          name: ${{ runner.os }}-bioc${{ matrix.config.bioc }}-results
+          name: ${{ runner.os }}-bioc-${{ matrix.config.bioc }}-results
           path: check
 
       - name: Upload installation log
