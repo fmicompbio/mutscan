@@ -33,7 +33,7 @@ Imports:
     stats,
     GGally,
     ggplot2,
-    tidyselect,
+    tidyselect (>= 1.2.0),
     tibble,
     rlang,
     grDevices,

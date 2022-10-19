@@ -58,7 +58,7 @@ plotDistributions <- function(se, selAssay = "counts",
         SummarizedExperiment::assay(se, selAssay, withDimnames = TRUE)
     )) %>%
         tibble::rownames_to_column("feature") %>%
-        tidyr::gather(key = "Name", value = "value", -.data$feature) %>%
+        tidyr::gather(key = "Name", value = "value", -"feature") %>%
         dplyr::group_by(.data$Name) %>%
         dplyr::arrange(dplyr::desc(.data$value)) %>%
         dplyr::mutate(idx = seq_along(.data$value), 
