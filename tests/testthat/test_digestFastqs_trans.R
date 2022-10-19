@@ -815,65 +815,141 @@ test_that("digestFastqs works as expected for experiments with only forward read
   expect_equal(res$filterSummary$f11_nbrForbiddenCodons, 1L)
   expect_equal(res$filterSummary$f12_nbrTooManyMutConstant, 0L)
   expect_equal(res$filterSummary$f13_nbrTooManyBestConstantHits, 0L)
-  expect_equal(res$filterSummary$nbrRetained, 272L)
+    expect_equal(res$filterSummary$nbrRetained, 272L)
+    
+    expect_equal(res$filterSummary * 2, res2$filterSummary)
+    expect_equal(res$summaryTable$nbrReads * 2, res2$summaryTable$nbrReads)
+    expect_equal(res$summaryTable$nbrUmis, res2$summaryTable$nbrUmis)
+    
+    for (nm in setdiff(names(Ldef), c("fastqReverse", "forbiddenMutatedCodonsForward",
+                                      "forbiddenMutatedCodonsReverse", "verbose",
+                                      "elementLengthsReverse"))) {
+        expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
+    }
+    expect_equal(res$parameters[["fastqReverse"]], "", ignore_attr = TRUE)
+    
+    expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
+    expect_equal(res$summaryTable$nbrReads, res$summaryTable$maxNbrReads)
+    expect_equal(sum(res$summaryTable$nbrReads == 2), 29L)
+    
+    ## Check the number of reads with a given number of mismatches
+    expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 0]), 10L)
+    expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 1]), 47L)
+    expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 2]), 123L)
+    expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 3]), 92L)
+    expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 0]), 10L)
+    expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 1]), 262L)
+    expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == 0]), 21L)
+    expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == 1]), 251L)
+    
+    ## Similarly but for the number of unique sequences
+    expect_equal(sum(res$summaryTable$nbrMutBases == 0), 1L)
+    expect_equal(sum(res$summaryTable$nbrMutBases == 1), 43L)
+    expect_equal(sum(res$summaryTable$nbrMutBases == 2), 102L)
+    expect_equal(sum(res$summaryTable$nbrMutBases == 3), 78L)
+    expect_equal(sum(res$summaryTable$nbrMutCodons == 0), 1L)
+    expect_equal(sum(res$summaryTable$nbrMutCodons == 1), 223L)
+    expect_equal(sum(res$summaryTable$nbrMutAAs == 0), 10L)
+    expect_equal(sum(res$summaryTable$nbrMutAAs == 1), 214L)
+    
+    
+    ## Check that mutant naming worked (compare to manual matching)
+    example_seq <- paste0("ACTGATACAACCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTG",
+                          "CAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")
+    expect_equal(res$summaryTable$mutantName[res$summaryTable$sequence == example_seq],
+                 "f.4.ACC")
+    
+    expect_equal(sum(res$errorStatistics$nbrMatchForward + res$errorStatistics$nbrMismatchForward),
+                 nchar(Ldef$constantForward[1]) * res$filterSummary$nbrRetained)
+    expect_equal(sum(res$errorStatistics$nbrMatchReverse + res$errorStatistics$nbrMismatchReverse),
+                 nchar(Ldef$constantReverse[1]) * res$filterSummary$nbrRetained)
+    
+    expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 14], 187L)
+    expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 22], 47L)
+    expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 27], 314L)
+    expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 33], 469L)
+    expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 37], 3868L)
+    
+    expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 14], 6L)
+    expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 27], 4L)
+    expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 37], 1L)
+    
+})
 
-  expect_equal(res$filterSummary * 2, res2$filterSummary)
-  expect_equal(res$summaryTable$nbrReads * 2, res2$summaryTable$nbrReads)
-  expect_equal(res$summaryTable$nbrUmis, res2$summaryTable$nbrUmis)
-
-  for (nm in setdiff(names(Ldef), c("fastqReverse", "forbiddenMutatedCodonsForward",
-                                    "forbiddenMutatedCodonsReverse", "verbose",
-                                    "elementLengthsReverse"))) {
-    expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
-  }
-  expect_equal(res$parameters[["fastqReverse"]], "", ignore_attr = TRUE)
-
-  expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
-  expect_equal(res$summaryTable$nbrReads, res$summaryTable$maxNbrReads)
-  expect_equal(sum(res$summaryTable$nbrReads == 2), 29L)
-
-  ## Check the number of reads with a given number of mismatches
-  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 0]), 10L)
-  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 1]), 47L)
-  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 2]), 123L)
-  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutBases == 3]), 92L)
-  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 0]), 10L)
-  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutCodons == 1]), 262L)
-  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == 0]), 21L)
-  expect_equal(sum(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == 1]), 251L)
-
-  ## Similarly but for the number of unique sequences
-  expect_equal(sum(res$summaryTable$nbrMutBases == 0), 1L)
-  expect_equal(sum(res$summaryTable$nbrMutBases == 1), 43L)
-  expect_equal(sum(res$summaryTable$nbrMutBases == 2), 102L)
-  expect_equal(sum(res$summaryTable$nbrMutBases == 3), 78L)
-  expect_equal(sum(res$summaryTable$nbrMutCodons == 0), 1L)
-  expect_equal(sum(res$summaryTable$nbrMutCodons == 1), 223L)
-  expect_equal(sum(res$summaryTable$nbrMutAAs == 0), 10L)
-  expect_equal(sum(res$summaryTable$nbrMutAAs == 1), 214L)
-
-  
-  ## Check that mutant naming worked (compare to manual matching)
-  example_seq <- paste0("ACTGATACAACCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTG",
-                        "CAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")
-  expect_equal(res$summaryTable$mutantName[res$summaryTable$sequence == example_seq],
-               "f.4.ACC")
-
-  expect_equal(sum(res$errorStatistics$nbrMatchForward + res$errorStatistics$nbrMismatchForward),
-               nchar(Ldef$constantForward[1]) * res$filterSummary$nbrRetained)
-  expect_equal(sum(res$errorStatistics$nbrMatchReverse + res$errorStatistics$nbrMismatchReverse),
-               nchar(Ldef$constantReverse[1]) * res$filterSummary$nbrRetained)
-
-  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 14], 187L)
-  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 22], 47L)
-  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 27], 314L)
-  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 33], 469L)
-  expect_equal(res$errorStatistics$nbrMatchForward[res$errorStatistics$PhredQuality == 37], 3868L)
-
-  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 14], 6L)
-  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 27], 4L)
-  expect_equal(res$errorStatistics$nbrMismatchForward[res$errorStatistics$PhredQuality == 37], 1L)
-
+## ----------------------------------------------------------------------------
+## Only forward read, provide a too short WT sequence
+## ----------------------------------------------------------------------------
+test_that("digestFastqs works as expected when the WT sequence is too short", {
+    fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
+    fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
+    ## default arguments
+    Ldef <- list(
+        fastqForward = fqt1, fastqReverse = NULL,
+        mergeForwardReverse = FALSE,
+        minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE,
+        revComplForward = FALSE, revComplReverse = FALSE,
+        elementsForward = "SUCV", elementsReverse = "",
+        elementLengthsForward = c(1, 10, 18, 96),
+        elementLengthsReverse = numeric(0),
+        adapterForward = "GGAAGAGCACACGTC",
+        adapterReverse = "",
+        primerForward = "",
+        primerReverse = "",
+        wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACT",
+        wildTypeReverse = "",
+        constantForward = "AACCGGAGGAGGGAGCTG",
+        constantReverse = "",
+        avePhredMinForward = 20.0, avePhredMinReverse = 30.0,
+        variableNMaxForward = 0, variableNMaxReverse = 0,
+        umiNMax = 0,
+        nbrMutatedCodonsMaxForward = 1,
+        nbrMutatedCodonsMaxReverse = 1,
+        nbrMutatedBasesMaxForward = -1,
+        nbrMutatedBasesMaxReverse = -1,
+        forbiddenMutatedCodonsForward = "NNA",
+        forbiddenMutatedCodonsReverse = "NNW",
+        useTreeWTmatch = FALSE,
+        mutatedPhredMinForward = 25.0, mutatedPhredMinReverse = 0.0,
+        mutNameDelimiter = ".",
+        constantMaxDistForward = -1,
+        constantMaxDistReverse = -1,
+        variableCollapseMaxDist = 0,
+        variableCollapseMinReads = 0,
+        variableCollapseMinRatio = 0,
+        umiCollapseMaxDist = 0,
+        filteredReadsFastqForward = "",
+        filteredReadsFastqReverse = "",
+        maxNReads = -1, verbose = FALSE,
+        nThreads = 1, chunkSize = 300
+    )
+    
+    res <- do.call(digestFastqs, Ldef)
+    
+    expect_equal(res$filterSummary$nbrTotal, 1000L)
+    expect_equal(res$filterSummary$f1_nbrAdapter, 297L)
+    expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
+    expect_equal(res$filterSummary$f3_nbrReadWrongLength, 284L) ## generated as 1000-297-419 (all var seqs are too long)
+    expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
+    expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 0L)
+    expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 0L)
+    expect_equal(res$filterSummary$f7_nbrTooManyNinUMI, 0L)
+    expect_equal(res$filterSummary$f8_nbrTooManyBestWTHits, 0L)
+    expect_equal(res$filterSummary$f9_nbrMutQualTooLow, 0L)
+    expect_equal(res$filterSummary$f10a_nbrTooManyMutCodons, 419L) ## this value was generated and checked manually
+    expect_equal(res$filterSummary$f10b_nbrTooManyMutBases, 0L)
+    expect_equal(res$filterSummary$f11_nbrForbiddenCodons, 0L)
+    expect_equal(res$filterSummary$f12_nbrTooManyMutConstant, 0L)
+    expect_equal(res$filterSummary$f13_nbrTooManyBestConstantHits, 0L)
+    expect_equal(res$filterSummary$nbrRetained, 0L)
+    
+    expect_equal(nrow(res$summaryTable), 0L)
+    
+    for (nm in setdiff(names(Ldef), c("fastqReverse", "forbiddenMutatedCodonsForward",
+                                      "forbiddenMutatedCodonsReverse", "verbose",
+                                      "elementLengthsReverse"))) {
+        expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
+    }
+    expect_equal(res$parameters[["fastqReverse"]], "", ignore_attr = TRUE)
 })
 
 ## ----------------------------------------------------------------------------
