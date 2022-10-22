@@ -120,6 +120,7 @@ jobs:
           path: check
 
       - name: List files
+        if: failure()
         run: |
             getwd()
             list.files(".", recursive = TRUE, full.names = TRUE)
