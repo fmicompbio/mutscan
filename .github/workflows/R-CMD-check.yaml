@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Check out repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up R and install BiocManager
         uses: grimbough/bioc-actions/setup-bioc@v1
@@ -93,10 +93,6 @@ jobs:
           sessioninfo::session_info(pkgs, include_base = TRUE)
         shell: Rscript {0}
 
-      # - name: Check
-      #   run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error", check_dir = "check")
-      #   shell: Rscript {0}
-        
       - name: Build, Install, Check
         id: build-install-check
         uses: grimbough/bioc-actions/build-install-check@v1
@@ -107,26 +103,6 @@ jobs:
       #     arguments: '--no-check-bioc-views --no-check-bioc-help'
       #     error-on: 'error'
 
-      - name: Show testthat output
-        if: always()
-        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
-        shell: bash
-
-      - name: Upload check results
-        if: failure()
-        uses: actions/upload-artifact@master
-        with:
-          name: ${{ runner.os }}-bioc-${{ matrix.config.bioc }}-results
-          path: check
-
-      - name: List files
-        if: failure()
-        run: |
-            getwd()
-            list.files("..", full.names = TRUE)
-            list.files("../..", full.names = TRUE)
-        shell: Rscript {0}
-        
       - name: Upload install log if the build/install/check step fails
         if: always() && (steps.build-install-check.outcome == 'failure')
         uses: actions/upload-artifact@v3
