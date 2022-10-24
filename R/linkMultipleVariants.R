@@ -154,14 +154,14 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
 
     ## Get count matrix with "raw" (uncorrected) sequences
     countCombined <- outCombined$summaryTable %>%
-        dplyr::select(.data$sequence, .data$nbrReads, .data$varLengths) %>%
+        dplyr::select("sequence", "nbrReads", "varLengths") %>%
         dplyr::mutate(idx = paste0("I", seq_along(.data$sequence)))
 
     ## If applicable, separate into forward and reverse sequences
     if (any(grepl("_", countCombined$sequence))) {
         countCombined <- countCombined %>%
-            tidyr::separate(sequence, into = c("sequenceForward", 
-                                               "sequenceReverse"), 
+            tidyr::separate(.data$sequence, into = c("sequenceForward", 
+                                                     "sequenceReverse"), 
                             sep = "_") %>%
             tidyr::separate(.data$varLengths, into = c("varLengthsForward", 
                                                        "varLengthsReverse"),
@@ -173,8 +173,8 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
                                       length, 0))
     } else {
         countCombined <- countCombined %>%
-            dplyr::rename(sequenceForward = .data$sequence,
-                          varLengthsForward = .data$varLengths) %>%
+            dplyr::rename(sequenceForward = "sequence",
+                          varLengthsForward = "varLengths") %>%
             dplyr::mutate(
                 nCompForward = vapply(strsplit(.data$varLengthsForward, ","), 
                                       length, 0))
@@ -227,8 +227,8 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     ## Conversion tables
     convSeparate <- lapply(outSeparate, function(out) {
         out$summaryTable %>%
-            dplyr::select(.data$mutantName, .data$sequence) %>%
-            tidyr::separate_rows(.data$sequence, sep = ",")
+            dplyr::select("mutantName", "sequence") %>%
+            tidyr::separate_rows("sequence", sep = ",")
     })
 
     ## --------------------------------------------------------------------- ##

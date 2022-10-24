@@ -62,7 +62,7 @@ plotFiltering <- function(se, valueType = "reads", onlyActiveFilters = TRUE,
     ## Extract relevant columns from colData(se)
     ## ----------------------------------------------------------------------- ##
     cd <- as.data.frame(colData(se)) %>%
-        dplyr::select(.data$nbrTotal:.data$nbrRetained) %>%
+        dplyr::select("nbrTotal":"nbrRetained") %>%
         dplyr::select(c("nbrTotal", tidyselect::matches("^f.*_"), "nbrRetained"))
     
     ## Remove inactive filters if desired
@@ -84,7 +84,7 @@ plotFiltering <- function(se, valueType = "reads", onlyActiveFilters = TRUE,
     ## ----------------------------------------------------------------------- ##
     cd <- cd %>% 
         tibble::rownames_to_column("sample") %>%
-        tidyr::gather(key = "step", value = "nbrReads", -.data$sample) %>%
+        tidyr::gather(key = "step", value = "nbrReads", -"sample") %>%
         dplyr::mutate(step = factor(.data$step, levels = colnames(cd)))
     
     ## Check that numbers add up (total - all filters = retained)

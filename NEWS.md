@@ -1,3 +1,8 @@
+# mutscan 0.2.32
+
+* Expand FASTQ file paths automatically
+* Filter out reads where the variable region is longer than the best matching WT sequence
+
 # mutscan 0.2.31
 
 * Add option to include identity line in pairs plots
