@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.31</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.32</span>
       </span>
     </div>
 
@@ -59,14 +59,16 @@
 
       
 
-      </header><script src="mutscan_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Multiplexed assays of variant effect analysis with <code>mutscan</code>
+      <h1 data-toc-skip>Multiplexed assays of variant effect analysis
+with <code>mutscan</code>
 </h1>
-                        <h4 data-toc-skip class="author">Charlotte Soneson and Michael Stadler</h4>
+                        <h4 data-toc-skip class="author">Charlotte
+Soneson and Michael Stadler</h4>
             
-            <h4 data-toc-skip class="date">25 September 2022</h4>
+            <h4 data-toc-skip class="date">28 October 2022</h4>
       
       
       <div class="hidden name"><code>mutscan.Rmd</code></div>
@@ -81,18 +83,35 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p><code>mutscan</code> provides functionality for processing and visualizing Multiplexed Assays of Variant Effect (MAVE) and other similar types of data, starting from single-end or paired-end FASTQ files. A broad range of library designs can be processed, encompassing experiments considering either a single protein or combinations of multiple proteins (e.g., aimed at studying protein-protein interactions).</p>
-<p>The figure below provides a high-level overview of the <code>mutscan</code> functionality, which will be described in more detail in the following sections.</p>
+<p><code>mutscan</code> provides functionality for processing and
+visualizing Multiplexed Assays of Variant Effect (MAVE) and other
+similar types of data, starting from single-end or paired-end FASTQ
+files. A broad range of library designs can be processed, encompassing
+experiments considering either a single protein or combinations of
+multiple proteins (e.g., aimed at studying protein-protein
+interactions).</p>
+<p>The figure below provides a high-level overview of the
+<code>mutscan</code> functionality, which will be described in more
+detail in the following sections.</p>
 <div class="figure" style="text-align: center">
 <img src="mutscan-overview.001.png" alt="Overview of the `mutscan` functionality. The `digestFastqs()` function processes each sequencing library, possibly consisting of multiple (pairs of) FASTQ files, separately, and generates an output object containing, among other things, the count table and a summary of the filtering steps. The `summarizeExperiment()` function takes one or more of these objects and combines them into a `SummarizedExperiment` object, that can then be used for downstream analysis such as plotting and statistical testing." width="100%"><p class="caption">
-Overview of the <code>mutscan</code> functionality. The <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> function processes each sequencing library, possibly consisting of multiple (pairs of) FASTQ files, separately, and generates an output object containing, among other things, the count table and a summary of the filtering steps. The <code><a href="../reference/summarizeExperiment.html">summarizeExperiment()</a></code> function takes one or more of these objects and combines them into a <code>SummarizedExperiment</code> object, that can then be used for downstream analysis such as plotting and statistical testing.
+Overview of the <code>mutscan</code> functionality. The
+<code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> function processes each sequencing library,
+possibly consisting of multiple (pairs of) FASTQ files, separately, and
+generates an output object containing, among other things, the count
+table and a summary of the filtering steps. The
+<code><a href="../reference/summarizeExperiment.html">summarizeExperiment()</a></code> function takes one or more of these
+objects and combines them into a <code>SummarizedExperiment</code>
+object, that can then be used for downstream analysis such as plotting
+and statistical testing.
 </p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="example-data">Example data<a class="anchor" aria-label="anchor" href="#example-data"></a>
 </h2>
-<p>The <code>mutscan</code> package contains several small example FASTQ files representing different types of experiments:</p>
+<p>The <code>mutscan</code> package contains several small example FASTQ
+files representing different types of experiments:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">datadir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">dir</a></span><span class="op">(</span><span class="va">datadir</span><span class="op">)</span></span>
@@ -105,13 +124,29 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span><span class="co">#&gt; [13] "transOutput_1.fastq.gz"              "transOutput_2.fastq.gz"</span></span></code></pre></div>
 <ul>
 <li>
-<code>transInput_{1,2}.fastq.gz</code>, <code>transOutput_{1,2}.fastq.gz</code> - data from TRANS experiment in <span class="citation">[@Diss2018]</span>. The forward and reverse reads correspond to the mutated <em>FOS</em> and <em>JUN</em> sequences, respectively. Each read consists of a UMI sequence, followed by a constant sequence and the variable region.</li>
+<code>transInput_{1,2}.fastq.gz</code>,
+<code>transOutput_{1,2}.fastq.gz</code> - data from TRANS experiment in
+<span class="citation">[@Diss2018]</span>. The forward and reverse reads
+correspond to the mutated <em>FOS</em> and <em>JUN</em> sequences,
+respectively. Each read consists of a UMI sequence, followed by a
+constant sequence and the variable region.</li>
 <li>
-<code>cisInput_{1,2}.fastq.gz</code>, <code>cisOutput_{1,2}.fastq.gz</code> - data from CIS experiment in <span class="citation">[@Diss2018]</span>. The forward and reverse reads both correspond to the mutated <em>FOS</em> sequence. Each read consists of a UMI sequence, followed by a constant sequence and the variable region.</li>
+<code>cisInput_{1,2}.fastq.gz</code>,
+<code>cisOutput_{1,2}.fastq.gz</code> - data from CIS experiment in
+<span class="citation">[@Diss2018]</span>. The forward and reverse reads
+both correspond to the mutated <em>FOS</em> sequence. Each read consists
+of a UMI sequence, followed by a constant sequence and the variable
+region.</li>
 <li>
-<code>GSE102901_cis_se.rds</code> - a <code>SummarizedExperiment</code> object obtained by processing the full CIS data from <span class="citation">[@Diss2018]</span>.</li>
+<code>GSE102901_cis_se.rds</code> - a
+<code>SummarizedExperiment</code> object obtained by processing the full
+CIS data from <span class="citation">[@Diss2018]</span>.</li>
 <li>
-<code>leujunt0_{1,2}.fastq.gz</code> - unpublished data; the forward read corresponds to an unmutated sequence of one of 46 leucine zipper sequences, and the reverse read corresponds to mutated <em>JUN</em> sequences. Each read contains a (frame-shifted) primer sequence, followed by the variable region.</li>
+<code>leujunt0_{1,2}.fastq.gz</code> - unpublished data; the forward
+read corresponds to an unmutated sequence of one of 46 leucine zipper
+sequences, and the reverse read corresponds to mutated <em>JUN</em>
+sequences. Each read contains a (frame-shifted) primer sequence,
+followed by the variable region.</li>
 </ul>
 </div>
 <div class="section level2">
@@ -120,53 +155,115 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <div class="section level3">
 <h3 id="read-composition-specification">Read composition specification<a class="anchor" aria-label="anchor" href="#read-composition-specification"></a>
 </h3>
-<p>The main function for processing the Multiplexed Assays of Variant Effect FASTQ files is <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code>. This function requires the specification of paths to compressed FASTQ file(s) and the composition of the reads in these files. The composition is specified by the user, and is given in the form of a character string indicating the parts constituting the respective read, and an integer vector specifying the lengths of the individual parts. The permitted components are:</p>
+<p>The main function for processing the Multiplexed Assays of Variant
+Effect FASTQ files is <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code>. This function
+requires the specification of paths to compressed FASTQ file(s) and the
+composition of the reads in these files. The composition is specified by
+the user, and is given in the form of a character string indicating the
+parts constituting the respective read, and an integer vector specifying
+the lengths of the individual parts. The permitted components are:</p>
 <ul>
 <li>
 <code>S</code> (skip) - nucleotide(s) to skip</li>
 <li>
 <code>U</code> (UMI) - UMI sequence</li>
 <li>
-<code>C</code> (constant) - constant sequence, can be used e.g. to estimate the sequencing error rate if available</li>
+<code>C</code> (constant) - constant sequence, can be used e.g. to
+estimate the sequencing error rate if available</li>
 <li>
-<code>V</code> (variable) - nucleotides corresponding to the variable region</li>
+<code>V</code> (variable) - nucleotides corresponding to the
+variable region</li>
 <li>
-<code>P</code> (primer) - a primer sequence, which may appear in a nonspecified position in the read but whose position defines the start or end position of other components.</li>
+<code>P</code> (primer) - a primer sequence, which may appear in a
+nonspecified position in the read but whose position defines the start
+or end position of other components.</li>
 </ul>
-<p>A read can have several components of the same type (e.g., skipped nucleotides both in the beginning or the end, or two variable regions separated by a primer). In such cases, <code>mutscan</code> will concatenate all components of the same type in the processing, while recording the lengths of the individual components.</p>
+<p>A read can have several components of the same type (e.g., skipped
+nucleotides both in the beginning or the end, or two variable regions
+separated by a primer). In such cases, <code>mutscan</code> will
+concatenate all components of the same type in the processing, while
+recording the lengths of the individual components.</p>
 <p>As an example, a read with the following composition:</p>
-<p>[1 skipped nt] - [10 nt UMI] - [18 nt constant sequence] - [96 nt variable region]</p>
-<p>would be specified to <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> by an elements string <code>"SUCV"</code>, and an element length vector <code>c(1, 10, 18, 96)</code>.</p>
-<p>The package can also accommodate designs with primer sequences. In this situation, the primer acts as an ‘anchor’, and the read composition before and after the primer is specified. For example, a read with the following composition:</p>
-<p>[unknown sequence] - [10 nt primer] - [variable region, constituting the remainder of the read]</p>
-<p>would be represented by an elements string <code>"SPV"</code>, and an element length vector <code>c(-1, 10, -1)</code>, where the -1 indicates that the corresponding read part consists of the remaining part of the read, not accounted for by any of the other specified parts. In addition, the sequence of the primer must be specified, and any read where the primer is not present will be discarded.</p>
-<p>The forward and reverse reads can have different compositions. The user can also specify whether the variable parts of the forward and/or reverse reads should be reverse complemented before being processed, and whether the variable regions of the forward and reverse reads should be merged into a single consensus sequence.</p>
+<p>[1 skipped nt] - [10 nt UMI] - [18 nt constant sequence] - [96 nt
+variable region]</p>
+<p>would be specified to <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> by an elements
+string <code>"SUCV"</code>, and an element length vector
+<code>c(1, 10, 18, 96)</code>.</p>
+<p>The package can also accommodate designs with primer sequences. In
+this situation, the primer acts as an ‘anchor’, and the read composition
+before and after the primer is specified. For example, a read with the
+following composition:</p>
+<p>[unknown sequence] - [10 nt primer] - [variable region, constituting
+the remainder of the read]</p>
+<p>would be represented by an elements string <code>"SPV"</code>, and an
+element length vector <code>c(-1, 10, -1)</code>, where the -1 indicates
+that the corresponding read part consists of the remaining part of the
+read, not accounted for by any of the other specified parts. In
+addition, the sequence of the primer must be specified, and any read
+where the primer is not present will be discarded.</p>
+<p>The forward and reverse reads can have different compositions. The
+user can also specify whether the variable parts of the forward and/or
+reverse reads should be reverse complemented before being processed, and
+whether the variable regions of the forward and reverse reads should be
+merged into a single consensus sequence.</p>
 </div>
 <div class="section level3">
 <h3 id="filtering">Filtering<a class="anchor" aria-label="anchor" href="#filtering"></a>
 </h3>
-<p>In addition to reading the FASTQ files, the <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> function will perform a series of filtering steps, in the following order:</p>
+<p>In addition to reading the FASTQ files, the
+<code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> function will perform a series of filtering
+steps, in the following order:</p>
 <ul>
-<li>Search for perfect matches to forward/reverse adapter sequences, filter out the read pair if a match is found in either the forward or reverse read.</li>
-<li>Search for perfect matches to forward/reverse primer sequences, filter out the read pair if not both are found.</li>
-<li>Filter out reads whose length is not compatible with the indicated composition.</li>
-<li>If forward and reverse variable regions should be merged, filter out read pairs where no valid overlap could be found.</li>
-<li>Filter out read pair if the average quality in the variable region is below <code>avePhredMin</code> in either the forward or reverse read (or the consensus sequence if they are merged).</li>
-<li>Filter out read pair if the number of Ns in the variable region exceeds <code>variableNMax</code>.</li>
-<li>Filter out read pair if the number of Ns in the combined forward and reverse UMI sequence exceeds <code>umiNMax</code>.</li>
-<li>If wild type (reference) sequences are provided (via <code>wildTypeForward</code> and/or <code>wildTypeReverse</code>), filter out reads if there are multiple best matches among the provided wild type sequences.</li>
-<li>Filter out read pair if any mutated base has a quality below <code>mutatedPhredMin</code>.</li>
-<li>Filter out read pair if the number of mutated codons exceeds <code>nbrMutatedCodonsMax</code> or the number of mutated nucleotides exceeds <code>nbrMutatedBasesMax</code>.</li>
-<li>Filter out read pair if any of the mutated codons match any of the codons encoded by <code>forbiddenMutatedCodons</code>.</li>
-<li>Filter out read pair if there are too many mutations in the constant sequence, or if there are multiple equally close best hits among the provided constant sequences.</li>
+<li>Search for perfect matches to forward/reverse adapter sequences,
+filter out the read pair if a match is found in either the forward or
+reverse read.</li>
+<li>Search for perfect matches to forward/reverse primer sequences,
+filter out the read pair if not both are found.</li>
+<li>Filter out reads whose length is not compatible with the indicated
+composition.</li>
+<li>If forward and reverse variable regions should be merged, filter out
+read pairs where no valid overlap could be found.</li>
+<li>Filter out read pair if the average quality in the variable region
+is below <code>avePhredMin</code> in either the forward or reverse read
+(or the consensus sequence if they are merged).</li>
+<li>Filter out read pair if the number of Ns in the variable region
+exceeds <code>variableNMax</code>.</li>
+<li>Filter out read pair if the number of Ns in the combined forward and
+reverse UMI sequence exceeds <code>umiNMax</code>.</li>
+<li>If wild type (reference) sequences are provided (via
+<code>wildTypeForward</code> and/or <code>wildTypeReverse</code>),
+filter out reads if there are multiple best matches among the provided
+wild type sequences.</li>
+<li>Filter out read pair if any mutated base has a quality below
+<code>mutatedPhredMin</code>.</li>
+<li>Filter out read pair if the number of mutated codons exceeds
+<code>nbrMutatedCodonsMax</code> or the number of mutated nucleotides
+exceeds <code>nbrMutatedBasesMax</code>.</li>
+<li>Filter out read pair if any of the mutated codons match any of the
+codons encoded by <code>forbiddenMutatedCodons</code>.</li>
+<li>Filter out read pair if there are too many mutations in the constant
+sequence, or if there are multiple equally close best hits among the
+provided constant sequences.</li>
 </ul>
-<p>Reads that are filtered out in one step will not be processed further (and thus will not contribute to the count of reads being filtered out for any other reasons).</p>
+<p>Reads that are filtered out in one step will not be processed further
+(and thus will not contribute to the count of reads being filtered out
+for any other reasons).</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="processing-trans-data">Processing TRANS data<a class="anchor" aria-label="anchor" href="#processing-trans-data"></a>
 </h2>
-<p>Here, we illustrate the processing of the provided TRANS experiment example data. We filter out reads with any adapter match, an average phred quality below 20, any Ns in the UMI or variable sequence, more than one mutated codon, or a mutated codon ending with A or T (represented by the <code>NNW</code> value of the <code>forbiddenMutatedCodonsForward</code> and <code>forbiddenMutatedCodonsReverse</code> arguments). In order to identify the number of mutations, we have to provide the wild type sequences of <em>FOS</em> and <em>JUN</em> (forward and reverse reads, respectively). This will additionally name the final mutants according to the positions and sequences of the mutated codons.</p>
+<p>Here, we illustrate the processing of the provided TRANS experiment
+example data. We filter out reads with any adapter match, an average
+phred quality below 20, any Ns in the UMI or variable sequence, more
+than one mutated codon, or a mutated codon ending with A or T
+(represented by the <code>NNW</code> value of the
+<code>forbiddenMutatedCodonsForward</code> and
+<code>forbiddenMutatedCodonsReverse</code> arguments). In order to
+identify the number of mutations, we have to provide the wild type
+sequences of <em>FOS</em> and <em>JUN</em> (forward and reverse reads,
+respectively). This will additionally name the final mutants according
+to the positions and sequences of the mutated codons.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">transInput</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/digestFastqs.html">digestFastqs</a></span><span class="op">(</span></span>
 <span>    fastqForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">datadir</span>, <span class="st">"transInput_1.fastq.gz"</span><span class="op">)</span>,</span>
@@ -198,7 +295,10 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span>    constantMaxDistReverse <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,</span>
 <span>    verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>The <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> function returns a list with four elements. The <code>parameters</code> list records all parameter values used during the processing, as well as the <code>mutscan</code> version and time of processing.</p>
+<p>The <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> function returns a list with four
+elements. The <code>parameters</code> list records all parameter values
+used during the processing, as well as the <code>mutscan</code> version
+and time of processing.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">transInput</span><span class="op">$</span><span class="va">parameters</span></span>
 <span><span class="co">#&gt; $fastqForward</span></span>
@@ -361,8 +461,12 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span><span class="co">#&gt; [1] 100000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $processingInfo</span></span>
-<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.31 on 2022-09-25 11:14:52"</span></span></code></pre></div>
-<p>The <code>filterSummary</code> data.frame contains a summary of the number of reads filtered out in each step. Note that for any given filtering step, only the reads retained by the previous filters are considered. The numbers in the filter column names indicate the order of the filters.</p>
+<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.32 on 2022-10-28 12:19:01"</span></span></code></pre></div>
+<p>The <code>filterSummary</code> data.frame contains a summary of the
+number of reads filtered out in each step. Note that for any given
+filtering step, only the reads retained by the previous filters are
+considered. The numbers in the filter column names indicate the order of
+the filters.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">transInput</span><span class="op">$</span><span class="va">filterSummary</span></span>
 <span><span class="co">#&gt;   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span></span>
@@ -375,7 +479,21 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span><span class="co">#&gt; 1                      392                       0                      8</span></span>
 <span><span class="co">#&gt;   f12_nbrTooManyMutConstant f13_nbrTooManyBestConstantHits nbrRetained</span></span>
 <span><span class="co">#&gt; 1                         0                              0         279</span></span></code></pre></div>
-<p>The <code>summaryTable</code> provides the number of reads and unique UMIs observed for each variable sequence pair. The underscore in the strings in the sequence column indicate the separation between the forward and reverse wild type sequences. In addition, the table contains a column <code>mutantName</code>, which provides a shorthand notation for each mutant. The format of the values in this column is a combination of <code>WTS.xx.NNN</code> (separated by <code>_</code>), where <code>WTS</code> provides the name of the closest matching wild type sequence (if only one, unnamed wild type sequence is provided, the name will be <code>f/r</code> depending on if it corresponds to the forward/reverse read, respectively). The <code>xx</code> part indicates the mutated codon or nucleotide number, and <code>NNN</code> gives the observed sequence for the mutated codon or nucleotide. A sequence without mutations is named <code>WTS.0.WT</code>, where, again, <code>WTS</code> is the name of the matching wild type sequence.</p>
+<p>The <code>summaryTable</code> provides the number of reads and unique
+UMIs observed for each variable sequence pair. The underscore in the
+strings in the sequence column indicate the separation between the
+forward and reverse wild type sequences. In addition, the table contains
+a column <code>mutantName</code>, which provides a shorthand notation
+for each mutant. The format of the values in this column is a
+combination of <code>WTS.xx.NNN</code> (separated by <code>_</code>),
+where <code>WTS</code> provides the name of the closest matching wild
+type sequence (if only one, unnamed wild type sequence is provided, the
+name will be <code>f/r</code> depending on if it corresponds to the
+forward/reverse read, respectively). The <code>xx</code> part indicates
+the mutated codon or nucleotide number, and <code>NNN</code> gives the
+observed sequence for the mutated codon or nucleotide. A sequence
+without mutations is named <code>WTS.0.WT</code>, where, again,
+<code>WTS</code> is the name of the matching wild type sequence.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">transInput</span><span class="op">$</span><span class="va">summaryTable</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            mutantName</span></span>
@@ -413,7 +531,9 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span><span class="co">#&gt; 4 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_IARLEEKVKTLKAQNSELATTANMLREQVAQL</span></span>
 <span><span class="co">#&gt; 5 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_IARLEEKVKTLKAQNSELASTANMLREQVRQL</span></span>
 <span><span class="co">#&gt; 6 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_IARLEEKVKTLKAQNSELASTANMLREQVGQL</span></span></code></pre></div>
-<p>Finally, the <code>errorStatistics</code> data.frame lists the number of matching and mismatching bases in the constant sequences, stratified by the phred quality score (from 0 to 99).</p>
+<p>Finally, the <code>errorStatistics</code> data.frame lists the number
+of matching and mismatching bases in the constant sequences, stratified
+by the phred quality score (from 0 to 99).</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">transInput</span><span class="op">$</span><span class="va">errorStatistics</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">transInput</span><span class="op">$</span><span class="va">errorStatistics</span><span class="op">[</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span> <span class="op">!=</span> <span class="fl">0</span>, <span class="op">]</span></span>
 <span><span class="co">#&gt;    PhredQuality nbrMatchForward nbrMismatchForward nbrMatchReverse</span></span>
@@ -428,7 +548,8 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span><span class="co">#&gt; 28                  3</span></span>
 <span><span class="co">#&gt; 34                  1</span></span>
 <span><span class="co">#&gt; 38                  0</span></span></code></pre></div>
-<p>The <code>errorStatistics</code> output can be used to estimate the sequencing error rate:</p>
+<p>The <code>errorStatistics</code> output can be used to estimate the
+sequencing error rate:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">(</span><span class="va">propErrorsConstantF</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">transInput</span><span class="op">$</span><span class="va">errorStatistics</span><span class="op">$</span><span class="va">nbrMismatchForward</span><span class="op">)</span> <span class="op">/</span></span>
 <span>   <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar</a></span><span class="op">(</span><span class="va">transInput</span><span class="op">$</span><span class="va">parameters</span><span class="op">$</span><span class="va">constantForward</span><span class="op">)</span> <span class="op">*</span> <span class="va">transInput</span><span class="op">$</span><span class="va">filterSummary</span><span class="op">$</span><span class="va">nbrRetained</span><span class="op">)</span><span class="op">)</span></span>
@@ -440,7 +561,19 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <div class="section level2">
 <h2 id="processing-cis-data">Processing CIS data<a class="anchor" aria-label="anchor" href="#processing-cis-data"></a>
 </h2>
-<p>Next, we illustrate the processing of the provided CIS experiment example data. Recall that in this case, both the forward and reverse variable sequence correspond to the same mutated <em>FOS</em> sequence, and before matching to the wild type sequence, the two components need to be merged to generate a single variable sequence (this is specified via the <code>mergeForwardReverse</code> argument). As for the TRANS data, we filter out reads with any adapter match, an average phred quality below 20, any Ns in the UMI or variable sequence, more than one mutated codon, or a mutated codon ending with A or T (represented by the <code>NNW</code> value of the <code>forbiddenMutatedCodonsForward</code> argument). Since the forward and reverse variable sequences are merged into one variable sequence, only one wild type sequence is provided (the <code>wildTypeReverse</code> argument will be ignored if specified).</p>
+<p>Next, we illustrate the processing of the provided CIS experiment
+example data. Recall that in this case, both the forward and reverse
+variable sequence correspond to the same mutated <em>FOS</em> sequence,
+and before matching to the wild type sequence, the two components need
+to be merged to generate a single variable sequence (this is specified
+via the <code>mergeForwardReverse</code> argument). As for the TRANS
+data, we filter out reads with any adapter match, an average phred
+quality below 20, any Ns in the UMI or variable sequence, more than one
+mutated codon, or a mutated codon ending with A or T (represented by the
+<code>NNW</code> value of the <code>forbiddenMutatedCodonsForward</code>
+argument). Since the forward and reverse variable sequences are merged
+into one variable sequence, only one wild type sequence is provided (the
+<code>wildTypeReverse</code> argument will be ignored if specified).</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cisInput</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/digestFastqs.html">digestFastqs</a></span><span class="op">(</span></span>
 <span>    fastqForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">datadir</span>, <span class="st">"cisInput_1.fastq.gz"</span><span class="op">)</span>,</span>
@@ -646,7 +779,7 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span><span class="co">#&gt; [1] 100000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $processingInfo</span></span>
-<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.31 on 2022-09-25 11:14:53"</span></span>
+<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.32 on 2022-10-28 12:19:02"</span></span>
 <span><span class="va">cisInput</span><span class="op">$</span><span class="va">filterSummary</span></span>
 <span><span class="co">#&gt;   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span></span>
 <span><span class="co">#&gt; 1     1000           126              0                     0</span></span>
@@ -673,7 +806,9 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span><span class="co">#&gt; 28                  0</span></span>
 <span><span class="co">#&gt; 34                  1</span></span>
 <span><span class="co">#&gt; 38                 14</span></span></code></pre></div>
-<p>The <code>summaryTable</code> now provides the number of reads and unique UMIs observed for each variable sequence, and all values in the <code>mutNames</code> column will start with <code>FOS</code>.</p>
+<p>The <code>summaryTable</code> now provides the number of reads and
+unique UMIs observed for each variable sequence, and all values in the
+<code>mutNames</code> column will start with <code>FOS</code>.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cisInput</span><span class="op">$</span><span class="va">summaryTable</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   mutantName</span></span>
@@ -708,7 +843,13 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <div class="section level2">
 <h2 id="processing-trans-data-with-primers">Processing TRANS data with primers<a class="anchor" aria-label="anchor" href="#processing-trans-data-with-primers"></a>
 </h2>
-<p>Finally, we illustrate the processing of the provided example data, where the first read corresponds to one of 46 leucine zipper sequences, and the second read is a mutated <em>JUN</em> sequence. We first need to define the possible sequences for the forward read. If multiple wild type sequences are provided like here, <code>mutscan</code> will match each read against all of them and find the most similar one for each read.</p>
+<p>Finally, we illustrate the processing of the provided example data,
+where the first read corresponds to one of 46 leucine zipper sequences,
+and the second read is a mutated <em>JUN</em> sequence. We first need to
+define the possible sequences for the forward read. If multiple wild
+type sequences are provided like here, <code>mutscan</code> will match
+each read against all of them and find the most similar one for each
+read.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">leu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>    ATF2 <span class="op">=</span> <span class="st">"GATCCTGATGAAAAAAGGAGAAAGTTTTTAGAGCGAAATAGAGCAGCAGCTTCAAGATGCCGACAAAAAAGGAAAGTCTGGGTTCAGTCTTTAGAGAAGAAAGCTGAAGACTTGAGTTCATTAAATGGTCAGCTGCAGAGTGAAGTCACCCTGCTGAGAAATGAAGTGGCACAGCTGAAACAGCTTCTTCTGGCT"</span>,</span>
@@ -758,7 +899,13 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span>    NFE2L3 <span class="op">=</span> <span class="st">"GTCTCACTTATCCGTGACATCAGACGAAGAGGGAAAAATAAAGTTGCTGCGCAGAACTGTCGTAAACGCAAATTGGACATAATTTTGAATTTAGAAGATGATGTATGTAACTTGCAAGCAAAGAAGGAAACTCTTAAGAGAGAGCAAGCACAATGTAACAAAGCTATTAACATAATGAAACAGAAACTGCATGAC"</span>,</span>
 <span>    TEF <span class="op">=</span> <span class="st">"CAGAAGGATGAAAAGTACTGGACAAGACGCAAGAAGAACAACGTGGCAGCTAAACGGTCACGGGATGCCCGGCGCCTGAAAGAGAATCAGATCACCATCCGGGCAGCCTTCCTGGAGAAGGAGAACACAGCCCTGCGGACGGAGGTGGCCGAGCTACGCAAGGAGGTGGGCAAGTGCAAGACCATCGTGTCCAAG"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Next we process the data, not allowing any mismatches in the forward read, but 1 mismatching codon in the reverse read. Now, we assume that the variable sequence starts immediately after the provided primers, and hence we don’t specify any UMI/constant sequence lengths. For the forward read, the variable region is taken to be the remainder of the read (after the primer), whereas for the reverse read, we specify the variable sequence length to 96.</p>
+<p>Next we process the data, not allowing any mismatches in the forward
+read, but 1 mismatching codon in the reverse read. Now, we assume that
+the variable sequence starts immediately after the provided primers, and
+hence we don’t specify any UMI/constant sequence lengths. For the
+forward read, the variable region is taken to be the remainder of the
+read (after the primer), whereas for the reverse read, we specify the
+variable sequence length to 96.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">leujunt0</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/digestFastqs.html">digestFastqs</a></span><span class="op">(</span></span>
 <span>    fastqForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">datadir</span>, <span class="st">"leujunt0_1.fastq.gz"</span><span class="op">)</span>,</span>
@@ -1048,7 +1195,7 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span><span class="co">#&gt; [1] 100000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $processingInfo</span></span>
-<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.31 on 2022-09-25 11:14:53"</span></span>
+<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.32 on 2022-10-28 12:19:02"</span></span>
 <span><span class="va">leujunt0</span><span class="op">$</span><span class="va">filterSummary</span></span>
 <span><span class="co">#&gt;   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span></span>
 <span><span class="co">#&gt; 1     1000             0            126                     0</span></span>
@@ -1101,7 +1248,17 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <div class="section level2">
 <h2 id="combining-samples">Combining samples<a class="anchor" aria-label="anchor" href="#combining-samples"></a>
 </h2>
-<p>The <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> function processes each sample (pair of FASTQ files) separately. In order to prepare the data for downstream statistical analysis and plotting, the <code><a href="../reference/summarizeExperiment.html">summarizeExperiment()</a></code> function takes a named list of outputs from <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code>, and a <code>data.frame</code> with sample annotations, and generates a <code>SummarizedExperiment</code> object, with an <code>assay</code> containing either UMI or read counts. To illustrate this, we process also the output sample for the TRANS experiment for which we processed the input sample above, and feed both outputs to <code><a href="../reference/summarizeExperiment.html">summarizeExperiment()</a></code>.</p>
+<p>The <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> function processes each sample (pair
+of FASTQ files) separately. In order to prepare the data for downstream
+statistical analysis and plotting, the
+<code><a href="../reference/summarizeExperiment.html">summarizeExperiment()</a></code> function takes a named list of
+outputs from <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code>, and a <code>data.frame</code>
+with sample annotations, and generates a
+<code>SummarizedExperiment</code> object, with an <code>assay</code>
+containing either UMI or read counts. To illustrate this, we process
+also the output sample for the TRANS experiment for which we processed
+the input sample above, and feed both outputs to
+<code><a href="../reference/summarizeExperiment.html">summarizeExperiment()</a></code>.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">transOutput</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/digestFastqs.html">digestFastqs</a></span><span class="op">(</span></span>
 <span>    fastqForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">datadir</span>, <span class="st">"transOutput_1.fastq.gz"</span><span class="op">)</span>,</span>
@@ -1237,7 +1394,11 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <div class="section level2">
 <h2 id="collapsing-count-matrix-to-amino-acids">Collapsing count matrix to amino acids<a class="anchor" aria-label="anchor" href="#collapsing-count-matrix-to-amino-acids"></a>
 </h2>
-<p>The  object generated by <code><a href="../reference/summarizeExperiment.html">summarizeExperiment()</a></code> contains one row for each observed variant (combination). This can be further collapsed by replacing the mutated codon by the corresponding amino acid, and aggregating the counts corresponding to the same mutated amino acid (combination).</p>
+<p>The object generated by <code><a href="../reference/summarizeExperiment.html">summarizeExperiment()</a></code> contains
+one row for each observed variant (combination). This can be further
+collapsed by replacing the mutated codon by the corresponding amino
+acid, and aggregating the counts corresponding to the same mutated amino
+acid (combination).</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">se_collapsed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/collapseMutantsByAA.html">collapseMutantsByAA</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">se_collapsed</span>, <span class="st">"counts"</span><span class="op">)</span><span class="op">)</span></span>
@@ -1282,10 +1443,17 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <div class="section level2">
 <h2 id="diagnostic-plots">Diagnostic plots<a class="anchor" aria-label="anchor" href="#diagnostic-plots"></a>
 </h2>
-<p><code>mutscan</code> contains functionality for generating a variety of diagnostic plots. Here we illustrate these using the full CIS data set from <span class="citation">[@Diss2018]</span>, which has been processed using <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> as illustrated above, and summarized in a <code>SummarizedExperiment</code> object provided with the package.</p>
+<p><code>mutscan</code> contains functionality for generating a variety
+of diagnostic plots. Here we illustrate these using the full CIS data
+set from <span class="citation">[@Diss2018]</span>, which has been
+processed using <code><a href="../reference/digestFastqs.html">digestFastqs()</a></code> as illustrated above, and
+summarized in a <code>SummarizedExperiment</code> object provided with
+the package.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">datadir</span>, <span class="st">"GSE102901_cis_se.rds"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>First, we can plot a summary of the filtering process, indicating the number of reads that were filtered out by (or retained after) each step of the <code>mutscan</code> filtering.</p>
+<p>First, we can plot a summary of the filtering process, indicating the
+number of reads that were filtered out by (or retained after) each step
+of the <code>mutscan</code> filtering.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotFiltering.html">plotFiltering</a></span><span class="op">(</span><span class="va">se</span>, valueType <span class="op">=</span> <span class="st">"reads"</span>, onlyActiveFilters <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>              plotType <span class="op">=</span> <span class="st">"remaining"</span>, facetBy <span class="op">=</span> <span class="st">"sample"</span>, numberSize <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
@@ -1294,11 +1462,14 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotFiltering.html">plotFiltering</a></span><span class="op">(</span><span class="va">se</span>, valueType <span class="op">=</span> <span class="st">"fractions"</span>, onlyActiveFilters <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>              plotType <span class="op">=</span> <span class="st">"filtered"</span>, facetBy <span class="op">=</span> <span class="st">"step"</span>, numberSize <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mutscan_files/figure-html/unnamed-chunk-17-1.png" width="768"></p>
-<p>We can also generate a pairs plot displaying the correlation among the samples in the data set.</p>
+<p>We can also generate a pairs plot displaying the correlation among
+the samples in the data set.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotPairs.html">plotPairs</a></span><span class="op">(</span><span class="va">se</span>, selAssay <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mutscan_files/figure-html/unnamed-chunk-18-1.png" width="700"></p>
-<p>Additional plot functions can be used to visualize the total count per sample, across all variants, or the distribution of variant counts per sample.</p>
+<p>Additional plot functions can be used to visualize the total count
+per sample, across all variants, or the distribution of variant counts
+per sample.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotTotals.html">plotTotals</a></span><span class="op">(</span><span class="va">se</span>, selAssay <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mutscan_files/figure-html/unnamed-chunk-19-1.png" width="700"></p>
@@ -1313,8 +1484,21 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <div class="section level2">
 <h2 id="calculating-fitness-scores">Calculating fitness scores<a class="anchor" aria-label="anchor" href="#calculating-fitness-scores"></a>
 </h2>
-<p>The function <code><a href="../reference/calculateFitnessScore.html">calculateFitnessScore()</a></code> can be used to calculate fitness scores as described in <span class="citation">[@Diss2018]</span>. The function requires the user to specify a <code>pairingCol</code>, containing the replicate ID for each sample; one or more <code>ODCols</code>, containing the optical density for each sample, and a <code>comparison</code>, which is a character vector of length 3 specifying the comparison to perform, of the form (<code>groupColumn</code>, <code>numerator</code>, <code>denominator</code>). Here, <code>groupColumn</code> is the name of the column in <code>colData(se)</code> that contains the grouping information, and <code>numerator</code> and <code>denominator</code> specify the values of this column representing the two groups to be compared.</p>
-<p>Here, we illustrate the application of <code><a href="../reference/calculateFitnessScore.html">calculateFitnessScore()</a></code> on the SummarizedExperiment object containing all the three CIS replicates from <span class="citation">[@Diss2018]</span>.</p>
+<p>The function <code><a href="../reference/calculateFitnessScore.html">calculateFitnessScore()</a></code> can be used to
+calculate fitness scores as described in <span class="citation">[@Diss2018]</span>. The function requires the user to
+specify a <code>pairingCol</code>, containing the replicate ID for each
+sample; one or more <code>ODCols</code>, containing the optical density
+for each sample, and a <code>comparison</code>, which is a character
+vector of length 3 specifying the comparison to perform, of the form
+(<code>groupColumn</code>, <code>numerator</code>,
+<code>denominator</code>). Here, <code>groupColumn</code> is the name of
+the column in <code>colData(se)</code> that contains the grouping
+information, and <code>numerator</code> and <code>denominator</code>
+specify the values of this column representing the two groups to be
+compared.</p>
+<p>Here, we illustrate the application of
+<code><a href="../reference/calculateFitnessScore.html">calculateFitnessScore()</a></code> on the SummarizedExperiment object
+containing all the three CIS replicates from <span class="citation">[@Diss2018]</span>.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">se_collapsed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/collapseMutantsByAA.html">collapseMutantsByAA</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span>
 <span><span class="va">ppis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calculateFitnessScore.html">calculateFitnessScore</a></span><span class="op">(</span>se <span class="op">=</span> <span class="va">se_collapsed</span>, pairingCol <span class="op">=</span> <span class="st">"Replicate"</span>, </span>
@@ -1347,8 +1531,20 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <div class="section level2">
 <h2 id="scoring-mutations-with-edger-or-limma">Scoring mutations with <code>edgeR</code> or <code>limma</code><a class="anchor" aria-label="anchor" href="#scoring-mutations-with-edger-or-limma"></a>
 </h2>
-<p>As an alternative to the fitness scoring, <code>mutscan</code> can be used to model the observed counts using a generalized linear model (with <code>edgeR</code>) or a general linear model (with <code>limma</code>) and estimate a logFC and a p-value for the enrichment of each variant betwen two conditions (or more generally, in association with any predictor), compared to one or more WT sequences. Note that for this, at least two replicates are required.</p>
-<p>We start by looking at the design matrix, in order to determine which of the coefficients to specify for the testing in <code><a href="../reference/calculateRelativeFC.html">calculateRelativeFC()</a></code>. For more information about how to set up and interpret design matrices in <code>edgeR</code> or <code>limma</code>, see e.g. <a href="https://f1000research.com/articles/9-1444" class="external-link">Law et al (2020)</a>, or <a href="https://f1000research.com/articles/9-512" class="external-link">Soneson et al (2020)</a>.</p>
+<p>As an alternative to the fitness scoring, <code>mutscan</code> can be
+used to model the observed counts using a generalized linear model (with
+<code>edgeR</code>) or a general linear model (with <code>limma</code>)
+and estimate a logFC and a p-value for the enrichment of each variant
+betwen two conditions (or more generally, in association with any
+predictor), compared to one or more WT sequences. Note that for this, at
+least two replicates are required.</p>
+<p>We start by looking at the design matrix, in order to determine which
+of the coefficients to specify for the testing in
+<code><a href="../reference/calculateRelativeFC.html">calculateRelativeFC()</a></code>. For more information about how to
+set up and interpret design matrices in <code>edgeR</code> or
+<code>limma</code>, see e.g. <a href="https://f1000research.com/articles/9-1444" class="external-link">Law et al (2020)</a>,
+or <a href="https://f1000research.com/articles/9-512" class="external-link">Soneson et al
+(2020)</a>.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Replicate</span> <span class="op">+</span> <span class="va">Condition</span>,</span>
 <span>             data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">se_collapsed</span><span class="op">)</span><span class="op">)</span></span>
@@ -1364,7 +1560,9 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span><span class="co">#&gt; attr(,"contrasts")</span></span>
 <span><span class="co">#&gt; attr(,"contrasts")$Condition</span></span>
 <span><span class="co">#&gt; [1] "contr.treatment"</span></span></code></pre></div>
-<p>Next, we apply either <code>edgeR</code> or <code>limma</code> to extract the logFCs of the mutants, compared to the wildtype sequence.</p>
+<p>Next, we apply either <code>edgeR</code> or <code>limma</code> to
+extract the logFCs of the mutants, compared to the wildtype
+sequence.</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## edgeR</span></span>
 <span><span class="va">edger_scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calculateRelativeFC.html">calculateRelativeFC</a></span><span class="op">(</span></span>
@@ -1423,7 +1621,9 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span><span class="co">#&gt; f.0.WT 2.842423e-08 -0.01353281 0.01353286 19.29458 4.653621e-06 0.9999964</span></span>
 <span><span class="co">#&gt;        adj.P.Val         B    se.logFC df.total df.prior</span></span>
 <span><span class="co">#&gt; f.0.WT 0.9999964 -10.83369 0.006107981 10.43551 7.435512</span></span></code></pre></div>
-<p><code>mutscan</code> also contains functions for plotting the results of the statistical testing - in particular, MA (mean-difference) plots and volcano plots can be easily generated.</p>
+<p><code>mutscan</code> also contains functions for plotting the results
+of the statistical testing - in particular, MA (mean-difference) plots
+and volcano plots can be easily generated.</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotMeanDiff.html">plotMeanDiff</a></span><span class="op">(</span><span class="va">edger_scores</span>, pointSize <span class="op">=</span> <span class="st">"large"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mutscan_files/figure-html/unnamed-chunk-24-1.png" width="700"></p>
@@ -1435,9 +1635,14 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <h2 id="faq">FAQ<a class="anchor" aria-label="anchor" href="#faq"></a>
 </h2>
 <div class="section level4">
-<h4 id="can-digestfastqs-process-a-sample-where-the-reads-are-spread-across-multiple-pairs-of-fastq-files">Can <code>digestFastqs</code> process a sample where the reads are spread across multiple (pairs of) FASTQ files?<a class="anchor" aria-label="anchor" href="#can-digestfastqs-process-a-sample-where-the-reads-are-spread-across-multiple-pairs-of-fastq-files"></a>
+<h4 id="can-digestfastqs-process-a-sample-where-the-reads-are-spread-across-multiple-pairs-of-fastq-files">Can <code>digestFastqs</code> process a sample where the reads are
+spread across multiple (pairs of) FASTQ files?<a class="anchor" aria-label="anchor" href="#can-digestfastqs-process-a-sample-where-the-reads-are-spread-across-multiple-pairs-of-fastq-files"></a>
 </h4>
-<p>Yes, you can specify a vector of FASTQ files to <code>fastqForward</code>/<code>fastqReverse</code>. In this case, the reads from all (pairs of) files will be analyzed as if they came from a single FASTQ file. In case of paired-end data, take care to specify the forward and reverse FASTQ files in the same order.</p>
+<p>Yes, you can specify a vector of FASTQ files to
+<code>fastqForward</code>/<code>fastqReverse</code>. In this case, the
+reads from all (pairs of) files will be analyzed as if they came from a
+single FASTQ file. In case of paired-end data, take care to specify the
+forward and reverse FASTQ files in the same order.</p>
 </div>
 </div>
 <div class="section level2">
@@ -1462,7 +1667,7 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span><span class="co">#&gt; [8] base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt;  [1] mutscan_0.2.31              SummarizedExperiment_1.26.1</span></span>
+<span><span class="co">#&gt;  [1] mutscan_0.2.32              SummarizedExperiment_1.26.1</span></span>
 <span><span class="co">#&gt;  [3] Biobase_2.56.0              GenomicRanges_1.48.0       </span></span>
 <span><span class="co">#&gt;  [5] GenomeInfoDb_1.32.4         IRanges_2.30.1             </span></span>
 <span><span class="co">#&gt;  [7] S4Vectors_0.34.0            BiocGenerics_0.42.0        </span></span>
@@ -1472,32 +1677,33 @@ Overview of the <code>mutscan</code> functionality. The <code><a href="../refere
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;  [1] bitops_1.0-7           fs_1.5.2               RColorBrewer_1.1-3    </span></span>
 <span><span class="co">#&gt;  [4] rprojroot_2.0.3        tools_4.2.1            bslib_0.4.0           </span></span>
-<span><span class="co">#&gt;  [7] utf8_1.2.2             R6_2.5.1               DT_0.25               </span></span>
-<span><span class="co">#&gt; [10] colorspace_2.0-3       tidyselect_1.1.2       GGally_2.1.2          </span></span>
-<span><span class="co">#&gt; [13] compiler_4.2.1         textshaping_0.3.6      cli_3.4.1             </span></span>
-<span><span class="co">#&gt; [16] csaw_1.30.1            desc_1.4.2             DelayedArray_0.22.0   </span></span>
-<span><span class="co">#&gt; [19] labeling_0.4.2         bookdown_0.29          sass_0.4.2            </span></span>
-<span><span class="co">#&gt; [22] scales_1.2.1           pkgdown_2.0.6.9000     systemfonts_1.0.4     </span></span>
-<span><span class="co">#&gt; [25] stringr_1.4.1          digest_0.6.29          Rsamtools_2.12.0      </span></span>
-<span><span class="co">#&gt; [28] rmarkdown_2.16         XVector_0.36.0         pkgconfig_2.0.3       </span></span>
-<span><span class="co">#&gt; [31] htmltools_0.5.3        fastmap_1.1.0          limma_3.52.3          </span></span>
-<span><span class="co">#&gt; [34] highr_0.9              htmlwidgets_1.5.4      rlang_1.0.6           </span></span>
-<span><span class="co">#&gt; [37] jquerylib_0.1.4        generics_0.1.3         farver_2.1.1          </span></span>
-<span><span class="co">#&gt; [40] jsonlite_1.8.0         BiocParallel_1.30.3    dplyr_1.0.10          </span></span>
-<span><span class="co">#&gt; [43] RCurl_1.98-1.8         magrittr_2.0.3         GenomeInfoDbData_1.2.8</span></span>
-<span><span class="co">#&gt; [46] Matrix_1.5-1           Rcpp_1.0.9             munsell_0.5.0         </span></span>
-<span><span class="co">#&gt; [49] fansi_1.0.3            lifecycle_1.0.2        stringi_1.7.8         </span></span>
-<span><span class="co">#&gt; [52] yaml_2.3.5             edgeR_3.38.4           zlibbioc_1.42.0       </span></span>
-<span><span class="co">#&gt; [55] plyr_1.8.7             grid_4.2.1             parallel_4.2.1        </span></span>
-<span><span class="co">#&gt; [58] ggrepel_0.9.1          crayon_1.5.1           lattice_0.20-45       </span></span>
-<span><span class="co">#&gt; [61] splines_4.2.1          Biostrings_2.64.1      locfit_1.5-9.6        </span></span>
-<span><span class="co">#&gt; [64] metapod_1.4.0          knitr_1.40             pillar_1.8.1          </span></span>
-<span><span class="co">#&gt; [67] codetools_0.2-18       glue_1.6.2             evaluate_0.16         </span></span>
-<span><span class="co">#&gt; [70] BiocManager_1.30.18    vctrs_0.4.1            gtable_0.3.1          </span></span>
-<span><span class="co">#&gt; [73] grr_0.9.5              purrr_0.3.4            tidyr_1.2.1           </span></span>
-<span><span class="co">#&gt; [76] reshape_0.8.9          cachem_1.0.6           ggplot2_3.3.6         </span></span>
-<span><span class="co">#&gt; [79] xfun_0.33              ragg_1.2.2             tibble_3.1.8          </span></span>
-<span><span class="co">#&gt; [82] Matrix.utils_0.9.8     memoise_2.0.1          ellipsis_0.3.2</span></span></code></pre></div>
+<span><span class="co">#&gt;  [7] utf8_1.2.2             R6_2.5.1               DT_0.26               </span></span>
+<span><span class="co">#&gt; [10] colorspace_2.0-3       withr_2.5.0            tidyselect_1.2.0      </span></span>
+<span><span class="co">#&gt; [13] GGally_2.1.2           compiler_4.2.1         textshaping_0.3.6     </span></span>
+<span><span class="co">#&gt; [16] cli_3.4.1              csaw_1.30.1            desc_1.4.2            </span></span>
+<span><span class="co">#&gt; [19] DelayedArray_0.22.0    labeling_0.4.2         bookdown_0.29         </span></span>
+<span><span class="co">#&gt; [22] sass_0.4.2             scales_1.2.1           pkgdown_2.0.6.9000    </span></span>
+<span><span class="co">#&gt; [25] systemfonts_1.0.4      stringr_1.4.1          digest_0.6.30         </span></span>
+<span><span class="co">#&gt; [28] Rsamtools_2.12.0       rmarkdown_2.17         XVector_0.36.0        </span></span>
+<span><span class="co">#&gt; [31] pkgconfig_2.0.3        htmltools_0.5.3        fastmap_1.1.0         </span></span>
+<span><span class="co">#&gt; [34] limma_3.52.4           highr_0.9              htmlwidgets_1.5.4     </span></span>
+<span><span class="co">#&gt; [37] rlang_1.0.6            farver_2.1.1           jquerylib_0.1.4       </span></span>
+<span><span class="co">#&gt; [40] generics_0.1.3         jsonlite_1.8.3         BiocParallel_1.30.4   </span></span>
+<span><span class="co">#&gt; [43] dplyr_1.0.10           RCurl_1.98-1.9         magrittr_2.0.3        </span></span>
+<span><span class="co">#&gt; [46] GenomeInfoDbData_1.2.8 Matrix_1.5-1           Rcpp_1.0.9            </span></span>
+<span><span class="co">#&gt; [49] munsell_0.5.0          fansi_1.0.3            lifecycle_1.0.3       </span></span>
+<span><span class="co">#&gt; [52] stringi_1.7.8          yaml_2.3.6             edgeR_3.38.4          </span></span>
+<span><span class="co">#&gt; [55] zlibbioc_1.42.0        plyr_1.8.7             grid_4.2.1            </span></span>
+<span><span class="co">#&gt; [58] parallel_4.2.1         ggrepel_0.9.1          crayon_1.5.2          </span></span>
+<span><span class="co">#&gt; [61] lattice_0.20-45        splines_4.2.1          Biostrings_2.64.1     </span></span>
+<span><span class="co">#&gt; [64] locfit_1.5-9.6         metapod_1.4.0          knitr_1.40            </span></span>
+<span><span class="co">#&gt; [67] pillar_1.8.1           codetools_0.2-18       glue_1.6.2            </span></span>
+<span><span class="co">#&gt; [70] evaluate_0.17          BiocManager_1.30.19    vctrs_0.5.0           </span></span>
+<span><span class="co">#&gt; [73] gtable_0.3.1           grr_0.9.5              purrr_0.3.5           </span></span>
+<span><span class="co">#&gt; [76] tidyr_1.2.1            reshape_0.8.9          cachem_1.0.6          </span></span>
+<span><span class="co">#&gt; [79] ggplot2_3.3.6          xfun_0.34              ragg_1.2.4            </span></span>
+<span><span class="co">#&gt; [82] tibble_3.1.8           Matrix.utils_0.9.8     memoise_2.0.1         </span></span>
+<span><span class="co">#&gt; [85] ellipsis_0.3.2</span></span></code></pre></div>
 </div>
   </div>
 
