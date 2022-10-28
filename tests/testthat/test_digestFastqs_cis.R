@@ -70,10 +70,14 @@ test_that("digestFastqs works as expected for cis experiments", {
   expect_equal(res$filterSummary$f13_nbrTooManyBestConstantHits, 0L)
   expect_equal(res$filterSummary$nbrRetained, 167)
 
-  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
+  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose", "fastqForward", "fastqReverse"))) {
     expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
   }
-
+  for (nm in c("fastqForward", "fastqReverse")) {
+    expect_equal(res$parameters[[nm]], normalizePath(Ldef[[nm]], mustWork = FALSE), 
+                 ignore_attr = TRUE)
+  }
+  
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
   expect_equal(sum(res$summaryTable$nbrReads == 2), 11L)
   expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
@@ -219,8 +223,12 @@ test_that("digestFastqs works as expected when specifying max nbr of mutated bas
                                    "mutantNameAA", "mutationTypes",
                                    "sequenceAA"))
 
-  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
+  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose", "fastqForward", "fastqReverse"))) {
     expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
+  }
+  for (nm in c("fastqForward", "fastqReverse")) {
+    expect_equal(res$parameters[[nm]], normalizePath(Ldef[[nm]], mustWork = FALSE), 
+                 ignore_attr = TRUE)
   }
 
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
