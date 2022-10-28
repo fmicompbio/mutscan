@@ -1050,10 +1050,13 @@ test_that("writing filtered reads to file works", {
   expect_equal(res$filterSummary$f13_nbrTooManyBestConstantHits, 0L)
   expect_equal(res$filterSummary$nbrRetained, 279L)
 
-  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose", "fastqForward", "fastqReverse"))) {
+  for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose", "fastqForward", "fastqReverse",
+                                    "filteredReadsFastqForward", 
+                                    "filteredReadsFastqReverse"))) {
     expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
   }
-  for (nm in c("fastqForward", "fastqReverse")) {
+  for (nm in c("fastqForward", "fastqReverse", "filteredReadsFastqForward",
+               "filteredReadsFastqReverse")) {
     expect_equal(res$parameters[[nm]], normalizePath(Ldef[[nm]], mustWork = FALSE), 
                  ignore_attr = TRUE)
   }
