@@ -306,10 +306,14 @@ test_that("digestFastqs works as expected for trans experiments, filter based on
   expect_equal(res$filterSummary$f13_nbrTooManyBestConstantHits, 0L)
   expect_equal(res$filterSummary$nbrRetained, 275L)
 
-  for (nm in setdiff(names(L), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
+  for (nm in setdiff(names(L), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose", "fastqForward", "fastqReverse"))) {
     expect_equal(res$parameters[[nm]], L[[nm]], ignore_attr = TRUE)
   }
-
+  for (nm in c("fastqForward", "fastqReverse")) {
+    expect_equal(res$parameters[[nm]], normalizePath(L[[nm]], mustWork = FALSE), 
+                 ignore_attr = TRUE)
+  }
+  
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
   expect_equal(res$summaryTable$nbrReads, res$summaryTable$maxNbrReads)
   expect_true(all(res$summaryTable$nbrReads == res$summaryTable$nbrUmis))
@@ -365,9 +369,14 @@ test_that("digestFastqs works as expected for trans experiments, filter based on
   expect_equal(res$filterSummary$f13_nbrTooManyBestConstantHits, 0L)
   expect_equal(res$filterSummary$nbrRetained, 253L)
 
-  for (nm in setdiff(names(L), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
+  for (nm in setdiff(names(L), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose", "fastqForward", "fastqReverse"))) {
     expect_equal(res$parameters[[nm]], L[[nm]], ignore_attr = TRUE)
   }
+  for (nm in c("fastqForward", "fastqReverse")) {
+    expect_equal(res$parameters[[nm]], normalizePath(L[[nm]], mustWork = FALSE), 
+                 ignore_attr = TRUE)
+  }
+  
 
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
   expect_equal(res$summaryTable$nbrReads, res$summaryTable$maxNbrReads)
@@ -406,9 +415,15 @@ test_that("digestFastqs works as expected for trans experiments, filter based on
   expect_equal(res$filterSummary$f13_nbrTooManyBestConstantHits, 0L)
   expect_equal(res$filterSummary$nbrRetained, 251L)
 
-  for (nm in setdiff(names(L), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose"))) {
+  for (nm in setdiff(names(L), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose", "fastqForward", "fastqReverse"))) {
     expect_equal(res$parameters[[nm]], L[[nm]], ignore_attr = TRUE)
   }
+  for (nm in c("fastqForward", "fastqReverse")) {
+    expect_equal(res$parameters[[nm]], normalizePath(L[[nm]], mustWork = FALSE), 
+                 ignore_attr = TRUE)
+  }
+  
+  
 
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
   expect_equal(res$summaryTable$nbrReads, res$summaryTable$maxNbrReads)
