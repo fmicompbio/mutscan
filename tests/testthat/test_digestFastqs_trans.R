@@ -1057,7 +1057,8 @@ test_that("writing filtered reads to file works", {
   }
   for (nm in c("fastqForward", "fastqReverse", "filteredReadsFastqForward",
                "filteredReadsFastqReverse")) {
-    expect_equal(res$parameters[[nm]], normalizePath(Ldef[[nm]], mustWork = FALSE), 
+    expect_equal(normalizePath(res$parameters[[nm]], mustWork = FALSE), 
+                 normalizePath(Ldef[[nm]], mustWork = FALSE), 
                  ignore_attr = TRUE)
   }
   
