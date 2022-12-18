@@ -147,6 +147,8 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     }))
     countMat <- methods::new("dgTMatrix", i = tmp$i - 1L, j = tmp$j - 1L,
                              x = tmp$x, Dim = c(nrow(allSequences), length(allSamples)))
+    ## Convert to dgCMatrix for easier processing downstream
+    countMat <- methods::as(countMat, "CsparseMatrix")
 
     ## --------------------------------------------------------------------------
     ## Create the colData

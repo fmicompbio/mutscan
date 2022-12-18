@@ -1,3 +1,7 @@
+# mutscan 0.2.33
+
+* Replace Matrix.utils::aggregate.Matrix (removed from CRAN) by DelayedArray::rowsum
+
 # mutscan 0.2.32
 
 * Expand FASTQ file paths automatically

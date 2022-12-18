@@ -1,6 +1,6 @@
 Package: mutscan
 Title: Preprocessing and Analysis of Deep Mutational Scanning Data
-Version: 0.2.32
+Version: 0.2.33
 Authors@R: 
     c(person(given = "Charlotte",
              family = "Soneson",
@@ -27,7 +27,6 @@ Imports:
     edgeR,
     dplyr,
     Matrix,
-    Matrix.utils,
     limma,
     tidyr,
     stats,
@@ -44,7 +43,8 @@ Imports:
     ggrepel,
     IRanges,
     zlibbioc,
-    utils
+    utils,
+    DelayedArray
 Suggests: 
     testthat (>= 3.0.0),
     BiocStyle,
@@ -54,7 +54,7 @@ Suggests:
 SystemRequirements: GNU make
 License: MIT + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 LinkingTo: 
     Rcpp

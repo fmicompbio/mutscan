@@ -13,7 +13,7 @@
 #'
 #' @export
 #'
-#' @importFrom Matrix.utils aggregate.Matrix
+#' @importFrom DelayedArray rowsum
 #' @importFrom S4Vectors metadata
 #' @importFrom SummarizedExperiment assays rowData SummarizedExperiment colData
 #' @importFrom dplyr across group_by summarize
@@ -25,11 +25,18 @@ collapseMutantsByAA <- function(se, nameCol = "mutantNameAA") {
                   validValues = colnames(SummarizedExperiment::rowData(se)))
     
     ## Collapse assays
+    ## Matrix.utils has been removed from CRAN
+    # aList <- lapply(SummarizedExperiment::assays(se), function(a) {
+    #     Matrix.utils::aggregate.Matrix(
+    #         x = a,
+    #         groupings = factor(SummarizedExperiment::rowData(se)[[nameCol]]),
+    #         fun = "colSums")
+    # })
     aList <- lapply(SummarizedExperiment::assays(se), function(a) {
-        Matrix.utils::aggregate.Matrix(
+        DelayedArray::rowsum(
             x = a,
-            groupings = factor(SummarizedExperiment::rowData(se)[[nameCol]]),
-            fun = "colSums")
+            group = factor(SummarizedExperiment::rowData(se)[[nameCol]])
+        )
     })
     
     ## Collapse rowData - simple columns
