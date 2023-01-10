@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.32</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.33</span>
       </span>
     </div>
 
@@ -68,7 +68,7 @@ with <code>mutscan</code>
                         <h4 data-toc-skip class="author">Charlotte
 Soneson and Michael Stadler</h4>
             
-            <h4 data-toc-skip class="date">29 October 2022</h4>
+            <h4 data-toc-skip class="date">10 January 2023</h4>
       
       
       <div class="hidden name"><code>mutscan.Rmd</code></div>
@@ -461,7 +461,7 @@ and time of processing.</p>
 <span><span class="co">#&gt; [1] 100000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $processingInfo</span></span>
-<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.32 on 2022-10-29 17:30:55"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.33 on 2023-01-10 07:57:02"</span></span></code></pre></div>
 <p>The <code>filterSummary</code> data.frame contains a summary of the
 number of reads filtered out in each step. Note that for any given
 filtering step, only the reads retained by the previous filters are
@@ -779,7 +779,7 @@ into one variable sequence, only one wild type sequence is provided (the
 <span><span class="co">#&gt; [1] 100000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $processingInfo</span></span>
-<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.32 on 2022-10-29 17:30:56"</span></span>
+<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.33 on 2023-01-10 07:57:02"</span></span>
 <span><span class="va">cisInput</span><span class="op">$</span><span class="va">filterSummary</span></span>
 <span><span class="co">#&gt;   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span></span>
 <span><span class="co">#&gt; 1     1000           126              0                     0</span></span>
@@ -1195,7 +1195,7 @@ variable sequence length to 96.</p>
 <span><span class="co">#&gt; [1] 100000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $processingInfo</span></span>
-<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.32 on 2022-10-29 17:30:56"</span></span>
+<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.33 on 2023-01-10 07:57:03"</span></span>
 <span><span class="va">leujunt0</span><span class="op">$</span><span class="va">filterSummary</span></span>
 <span><span class="co">#&gt;   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span></span>
 <span><span class="co">#&gt; 1     1000             0            126                     0</span></span>
@@ -1307,7 +1307,7 @@ the input sample above, and feed both outputs to
 <span><span class="co">## for samples and variants in the `colData` and `rowData`, </span></span>
 <span><span class="co">## respectively.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">se</span>, <span class="st">"counts"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 6 x 2 sparse Matrix of class "dgTMatrix"</span></span>
+<span><span class="co">#&gt; 6 x 2 sparse Matrix of class "dgCMatrix"</span></span>
 <span><span class="co">#&gt;                     sample1 sample2</span></span>
 <span><span class="co">#&gt; FOS.0.WT_JUN.0.WT         .       1</span></span>
 <span><span class="co">#&gt; FOS.0.WT_JUN.13.CCC       1       .</span></span>
@@ -1402,14 +1402,13 @@ acid (combination).</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">se_collapsed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/collapseMutantsByAA.html">collapseMutantsByAA</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">se_collapsed</span>, <span class="st">"counts"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 6 x 2 sparse Matrix of class "dgCMatrix"</span></span>
 <span><span class="co">#&gt;                   sample1 sample2</span></span>
 <span><span class="co">#&gt; FOS.0.WT_JUN.0.WT       1       3</span></span>
-<span><span class="co">#&gt; FOS.0.WT_JUN.10.S       .       1</span></span>
-<span><span class="co">#&gt; FOS.0.WT_JUN.12.L       .       1</span></span>
-<span><span class="co">#&gt; FOS.0.WT_JUN.13.K       1       .</span></span>
-<span><span class="co">#&gt; FOS.0.WT_JUN.13.L       1       .</span></span>
-<span><span class="co">#&gt; FOS.0.WT_JUN.13.P       1       .</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.10.S       0       1</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.12.L       0       1</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.13.K       1       0</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.13.L       1       0</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.13.P       1       0</span></span>
 <span><span class="fu">Matrix</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">se_collapsed</span>, <span class="st">"counts"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; sample1 sample2 </span></span>
 <span><span class="co">#&gt;     279     285</span></span>
@@ -1651,7 +1650,7 @@ forward and reverse FASTQ files in the same order.</p>
 <p>This vignette was compiled on the following system:</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; R version 4.2.1 (2022-06-23)</span></span>
+<span><span class="co">#&gt; R version 4.2.2 (2022-10-31)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-apple-darwin17.0 (64-bit)</span></span>
 <span><span class="co">#&gt; Running under: macOS Big Sur ... 10.16</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1667,43 +1666,42 @@ forward and reverse FASTQ files in the same order.</p>
 <span><span class="co">#&gt; [8] base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt;  [1] mutscan_0.2.32              SummarizedExperiment_1.26.1</span></span>
-<span><span class="co">#&gt;  [3] Biobase_2.56.0              GenomicRanges_1.48.0       </span></span>
-<span><span class="co">#&gt;  [5] GenomeInfoDb_1.32.4         IRanges_2.30.1             </span></span>
-<span><span class="co">#&gt;  [7] S4Vectors_0.34.0            BiocGenerics_0.42.0        </span></span>
-<span><span class="co">#&gt;  [9] MatrixGenerics_1.8.1        matrixStats_0.62.0         </span></span>
-<span><span class="co">#&gt; [11] BiocStyle_2.24.0           </span></span>
+<span><span class="co">#&gt;  [1] mutscan_0.2.33              SummarizedExperiment_1.28.0</span></span>
+<span><span class="co">#&gt;  [3] Biobase_2.58.0              GenomicRanges_1.50.2       </span></span>
+<span><span class="co">#&gt;  [5] GenomeInfoDb_1.34.6         IRanges_2.32.0             </span></span>
+<span><span class="co">#&gt;  [7] S4Vectors_0.36.1            BiocGenerics_0.44.0        </span></span>
+<span><span class="co">#&gt;  [9] MatrixGenerics_1.10.0       matrixStats_0.63.0         </span></span>
+<span><span class="co">#&gt; [11] BiocStyle_2.26.0           </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;  [1] bitops_1.0-7           fs_1.5.2               RColorBrewer_1.1-3    </span></span>
-<span><span class="co">#&gt;  [4] rprojroot_2.0.3        tools_4.2.1            bslib_0.4.0           </span></span>
+<span><span class="co">#&gt;  [4] rprojroot_2.0.3        tools_4.2.2            bslib_0.4.2           </span></span>
 <span><span class="co">#&gt;  [7] utf8_1.2.2             R6_2.5.1               DT_0.26               </span></span>
 <span><span class="co">#&gt; [10] colorspace_2.0-3       withr_2.5.0            tidyselect_1.2.0      </span></span>
-<span><span class="co">#&gt; [13] GGally_2.1.2           compiler_4.2.1         textshaping_0.3.6     </span></span>
-<span><span class="co">#&gt; [16] cli_3.4.1              csaw_1.30.1            desc_1.4.2            </span></span>
-<span><span class="co">#&gt; [19] DelayedArray_0.22.0    labeling_0.4.2         bookdown_0.29         </span></span>
-<span><span class="co">#&gt; [22] sass_0.4.2             scales_1.2.1           pkgdown_2.0.6.9000    </span></span>
-<span><span class="co">#&gt; [25] systemfonts_1.0.4      stringr_1.4.1          digest_0.6.30         </span></span>
-<span><span class="co">#&gt; [28] Rsamtools_2.12.0       rmarkdown_2.17         XVector_0.36.0        </span></span>
-<span><span class="co">#&gt; [31] pkgconfig_2.0.3        htmltools_0.5.3        fastmap_1.1.0         </span></span>
-<span><span class="co">#&gt; [34] limma_3.52.4           highr_0.9              htmlwidgets_1.5.4     </span></span>
-<span><span class="co">#&gt; [37] rlang_1.0.6            farver_2.1.1           jquerylib_0.1.4       </span></span>
-<span><span class="co">#&gt; [40] generics_0.1.3         jsonlite_1.8.3         BiocParallel_1.30.4   </span></span>
+<span><span class="co">#&gt; [13] GGally_2.1.2           compiler_4.2.2         textshaping_0.3.6     </span></span>
+<span><span class="co">#&gt; [16] cli_3.6.0              csaw_1.32.0            desc_1.4.2            </span></span>
+<span><span class="co">#&gt; [19] DelayedArray_0.24.0    labeling_0.4.2         bookdown_0.31         </span></span>
+<span><span class="co">#&gt; [22] sass_0.4.4             scales_1.2.1           pkgdown_2.0.7.9000    </span></span>
+<span><span class="co">#&gt; [25] systemfonts_1.0.4      stringr_1.5.0          digest_0.6.31         </span></span>
+<span><span class="co">#&gt; [28] Rsamtools_2.14.0       rmarkdown_2.19         XVector_0.38.0        </span></span>
+<span><span class="co">#&gt; [31] pkgconfig_2.0.3        htmltools_0.5.4        fastmap_1.1.0         </span></span>
+<span><span class="co">#&gt; [34] limma_3.54.0           highr_0.10             htmlwidgets_1.6.1     </span></span>
+<span><span class="co">#&gt; [37] rlang_1.0.6            jquerylib_0.1.4        generics_0.1.3        </span></span>
+<span><span class="co">#&gt; [40] farver_2.1.1           jsonlite_1.8.4         BiocParallel_1.32.5   </span></span>
 <span><span class="co">#&gt; [43] dplyr_1.0.10           RCurl_1.98-1.9         magrittr_2.0.3        </span></span>
-<span><span class="co">#&gt; [46] GenomeInfoDbData_1.2.8 Matrix_1.5-1           Rcpp_1.0.9            </span></span>
+<span><span class="co">#&gt; [46] GenomeInfoDbData_1.2.9 Matrix_1.5-3           Rcpp_1.0.9            </span></span>
 <span><span class="co">#&gt; [49] munsell_0.5.0          fansi_1.0.3            lifecycle_1.0.3       </span></span>
-<span><span class="co">#&gt; [52] stringi_1.7.8          yaml_2.3.6             edgeR_3.38.4          </span></span>
-<span><span class="co">#&gt; [55] zlibbioc_1.42.0        plyr_1.8.7             grid_4.2.1            </span></span>
-<span><span class="co">#&gt; [58] parallel_4.2.1         ggrepel_0.9.1          crayon_1.5.2          </span></span>
-<span><span class="co">#&gt; [61] lattice_0.20-45        splines_4.2.1          Biostrings_2.64.1     </span></span>
-<span><span class="co">#&gt; [64] locfit_1.5-9.6         metapod_1.4.0          knitr_1.40            </span></span>
+<span><span class="co">#&gt; [52] stringi_1.7.8          yaml_2.3.6             edgeR_3.40.1          </span></span>
+<span><span class="co">#&gt; [55] zlibbioc_1.44.0        plyr_1.8.8             grid_4.2.2            </span></span>
+<span><span class="co">#&gt; [58] parallel_4.2.2         ggrepel_0.9.2          crayon_1.5.2          </span></span>
+<span><span class="co">#&gt; [61] lattice_0.20-45        splines_4.2.2          Biostrings_2.66.0     </span></span>
+<span><span class="co">#&gt; [64] locfit_1.5-9.7         metapod_1.6.0          knitr_1.41            </span></span>
 <span><span class="co">#&gt; [67] pillar_1.8.1           codetools_0.2-18       glue_1.6.2            </span></span>
-<span><span class="co">#&gt; [70] evaluate_0.17          BiocManager_1.30.19    vctrs_0.5.0           </span></span>
-<span><span class="co">#&gt; [73] gtable_0.3.1           grr_0.9.5              purrr_0.3.5           </span></span>
-<span><span class="co">#&gt; [76] tidyr_1.2.1            reshape_0.8.9          cachem_1.0.6          </span></span>
-<span><span class="co">#&gt; [79] ggplot2_3.3.6          xfun_0.34              ragg_1.2.4            </span></span>
-<span><span class="co">#&gt; [82] tibble_3.1.8           Matrix.utils_0.9.8     memoise_2.0.1         </span></span>
-<span><span class="co">#&gt; [85] ellipsis_0.3.2</span></span></code></pre></div>
+<span><span class="co">#&gt; [70] evaluate_0.19          BiocManager_1.30.19    vctrs_0.5.1           </span></span>
+<span><span class="co">#&gt; [73] gtable_0.3.1           purrr_1.0.0            tidyr_1.2.1           </span></span>
+<span><span class="co">#&gt; [76] reshape_0.8.9          cachem_1.0.6           ggplot2_3.4.0         </span></span>
+<span><span class="co">#&gt; [79] xfun_0.36              ragg_1.2.4             tibble_3.1.8          </span></span>
+<span><span class="co">#&gt; [82] memoise_2.0.1          ellipsis_0.3.2</span></span></code></pre></div>
 </div>
   </div>
 
@@ -1724,7 +1722,7 @@ forward and reverse FASTQ files in the same order.</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.9000.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.9000.</p>
 </div>
 
       </footer>
