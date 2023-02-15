@@ -32,7 +32,7 @@
 #' head(rownames(sec))
 #' ## The mutantName column contains the individual codon variants that were 
 #' ## collapsed
-#' head(rowData(sec))
+#' head(SummarizedExperiment::rowData(sec))
 #' 
 collapseMutantsByAA <- function(se, nameCol = "mutantNameAA") {
     .assertVector(x = se, type = "SummarizedExperiment")

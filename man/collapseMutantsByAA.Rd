@@ -34,7 +34,7 @@ dim(sec)
 head(rownames(sec))
 ## The mutantName column contains the individual codon variants that were 
 ## collapsed
-head(rowData(sec))
+head(SummarizedExperiment::rowData(sec))
 
 }
 \author{
