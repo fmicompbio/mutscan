@@ -19,6 +19,21 @@
 #' @importFrom dplyr across group_by summarize
 #' @importFrom stats setNames
 #'
+#' @examples 
+#' se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds",
+#'                           package = "mutscan"))[1:200, ]
+#' ## The rows of this object correspond to individual codon variants
+#' dim(se)
+#' head(rownames(se))
+#' ## Collapse by amino acid
+#' sec <- collapseMutantsByAA(se)
+#' ## The rows of the collapsed object correspond to amino acid variants
+#' dim(sec)
+#' head(rownames(sec))
+#' ## The mutantName column contains the individual codon variants that were 
+#' ## collapsed
+#' head(rowData(sec))
+#' 
 collapseMutantsByAA <- function(se, nameCol = "mutantNameAA") {
     .assertVector(x = se, type = "SummarizedExperiment")
     .assertScalar(x = nameCol, type = "character",
