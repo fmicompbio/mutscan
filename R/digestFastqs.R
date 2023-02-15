@@ -18,165 +18,175 @@
 #'  \item If requested, collapse forward and reverse variable regions by
 #'  retaining, for each position, the base with the highest reported base
 #'  quality.
-#'  \item Filter out read pair if the average quality in the variable region is
-#'  below \code{avePhredMinForward}/\code{avePhredMinReverse}, in either the
-#'  forward or reverse read (or the merged read).
-#'  \item Filter out read pair if the number of Ns in the variable region
+#'  \item Filter out the read (pair) if the average quality in the variable 
+#'  region is below \code{avePhredMinForward}/\code{avePhredMinReverse}, in 
+#'  either the forward or reverse read (or the merged read).
+#'  \item Filter out the read (pair) if the number of Ns in the variable region
 #'  exceeds \code{variableNMaxForward}/\code{variableNMaxReverse}.
-#'  \item Filter out read pair if the number of Ns in the combined forward and
-#'  reverse UMI sequence exceeds \code{umiNMax}
+#'  \item Filter out the read (pair) if the number of Ns in the combined forward 
+#'  and reverse UMI sequence exceeds \code{umiNMax}
 #'  \item If one or more wild type sequences (for the variable region) are
 #'  provided, find the mismatches between the (forward/reverse) variable region
 #'  and the provided wild type sequence (if more than one wild type sequence is
 #'  provided, first find the one that is closest to the read).
-#'  \item Filter out read pair if any mutated base has a quality below
+#'  \item Filter out the read (pair) if any mutated base has a quality below
 #'  \code{mutatedPhredMinForward}/\code{mutatedPhredMinReverse}.
-#'  \item Filter out read pair if the number of mutated codons exceeds
+#'  \item Filter out the read (pair) if the number of mutated codons exceeds
 #'  \code{nbrMutatedCodonsMaxForward}/\code{nbrMutatedCodonsMaxReverse}.
-#'  \item Filter out read pair if any of the mutated codons match any of the
-#'  codons encoded by
+#'  \item Filter out the read (pair) if any of the mutated codons match any of 
+#'  the codons encoded by
 #'  \code{forbiddenMutatedCodonsForward}/\code{forbiddenMutatedCodonsReverse}.
-#'  \item Assign a 'mutation name' to the read. This name is a combination of
-#'  parts of the form XX{.}YY{.}NNN, where XX is the name of the most similar
-#'  reference sequence, YY is the mutated codon number, and NNN is the mutated
-#'  codon. {.} is a delimiter, specified via \code{mutNameDelimiter}. If no
-#'  wildtype sequences are provided, the read sequence will be used as the
-#'  'mutation name'.
+#'  \item Assign a 'mutation name' to the read (pair). This name is a 
+#'  combination of parts of the form XX{.}YY{.}NNN, where XX is the name of the 
+#'  most similar reference sequence, YY is the mutated codon number, and NNN is 
+#'  the mutated codon. {.} is a delimiter, specified via 
+#'  \code{mutNameDelimiter}. If no wildtype sequences are provided, the
+#'  variable sequence will be used as the mutation name'.
 #'}
 #'
 #' Based on the retained reads following this filtering process, count the
 #' number of reads, and the number of unique UMIs, for each variable sequence
 #' (or pair of variable sequences).
 #'
-#' @param fastqForward,fastqReverse character vector, paths to gzipped FASTQ files
-#'   corresponding to forward and reverse reads, respectively. If more than one
-#'   forward/reverse sequence file is given, they need to be provided in the
-#'   same order. Note that if multiple fastq files are provided, they are all
-#'   assumed to correspond to the same sample, and will effectively be concatenated.
-#' @param mergeForwardReverse logical(1), whether to fuse the forward and
-#'   reverse variable sequences.
-#' @param minOverlap,maxOverlap numeric(1), the minimal and maximal allowed
-#'   overlap between the forward and reverse reads when merging. Only used if
-#'   \code{mergeForwardReverse} is \code{TRUE}. If set to 0, only overlaps
-#'   covering the full length of the shortest of the two reads will be
-#'   considered.
-#' @param minMergedLength,maxMergedLength numeric(1), the minimal and maximal
-#'   allowed total length of the merged product (if \code{mergeForwardReverse} is
-#'   \code{TRUE}). If set to 0, any length is allowed.
-#' @param maxFracMismatchOverlap numeric(1), maximal mismatch rate in the
-#'   overlap. Only used if \code{mergeForwardReverse} is \code{TRUE}.
-#' @param greedyOverlap logical(1). If \code{TRUE}, the first overlap satisfying
-#'   \code{minOverlap}, \code{maxOverlap}, \code{minMergedLength},
-#'   \code{maxMergedLength} and \code{maxFracMismatchOverlap} will
-#'   be retained. If \code{FALSE}, all valid overlaps will be scored and the one
-#'   with the highest score (largest number of matches) will be retained.
-#' @param revComplForward,revComplReverse logical(1), whether to reverse
-#'   complement the forward/reverse variable and constant sequences, respectively.
-#' @param elementsForward,elementsReverse Character strings representing the
-#'   composition of the forward and reverse reads, respectively. The strings should
-#'   consist only of the letters S (skip), C (constant), U (umi), P (primer),
-#'   V (variable), and cover the full extent of the read. Most combinations
-#'   are allowed (and a given letter can appear multiple times), but there
-#'   can be at most one occurrence of P. If a given letter is included
-#'   multiple times, the corresponding sequences will be concatenated in the output.
+#' @param fastqForward,fastqReverse Character vectors, paths to gzipped FASTQ 
+#'     files corresponding to forward and reverse reads, respectively. If more 
+#'     than one forward/reverse sequence file is given, they need to be 
+#'     provided in the same order. Note that if multiple fastq files are 
+#'     provided, they are all assumed to correspond to the same sample, and 
+#'     will effectively be concatenated.
+#' @param mergeForwardReverse Logical scalar, whether to fuse the forward and
+#'     reverse variable sequences.
+#' @param minOverlap,maxOverlap Numeric scalar, the minimal and maximal allowed
+#'     overlap between the forward and reverse reads when merging. Only used if
+#'     \code{mergeForwardReverse} is \code{TRUE}. If set to 0, only overlaps
+#'     covering the full length of the shortest of the two reads will be
+#'     considered.
+#' @param minMergedLength,maxMergedLength Numeric scalar, the minimal and 
+#'     maximal allowed total length of the merged product (if 
+#'     \code{mergeForwardReverse} is \code{TRUE}). If set to 0, any length is 
+#'     allowed.
+#' @param maxFracMismatchOverlap Numeric scalar, maximal mismatch rate in the
+#'     overlap. Only used if \code{mergeForwardReverse} is \code{TRUE}.
+#' @param greedyOverlap Logical scalar. If \code{TRUE}, the first overlap 
+#'     satisfying \code{minOverlap}, \code{maxOverlap}, \code{minMergedLength},
+#'     \code{maxMergedLength} and \code{maxFracMismatchOverlap} will
+#'     be retained. If \code{FALSE}, all valid overlaps will be scored and the 
+#'     one with the highest score (largest number of matches) will be retained.
+#' @param revComplForward,revComplReverse Logical scalar, whether to reverse
+#'     complement the forward/reverse variable and constant sequences, 
+#'     respectively.
+#' @param elementsForward,elementsReverse Character scalars representing the
+#'     composition of the forward and reverse reads, respectively. The strings 
+#'     should consist only of the letters S (skip), C (constant), U (umi), 
+#'     P (primer), V (variable), and cover the full extent of the read. Most 
+#'     combinations are allowed (and a given letter can appear multiple times), 
+#'     but there can be at most one occurrence of P. If a given letter is 
+#'     included multiple times, the corresponding sequences will be 
+#'     concatenated in the output.
 #' @param elementLengthsForward,elementLengthsReverse Numeric vectors containing
-#'   the lengths of each read component from \code{elementsForward}/\code{elementsReverse},
-#'   respectively. If the length of one element is set to -1, it will be inferred
-#'   from the other lengths (as the remainder of the read). At most one number
-#'   (or one number on each side of the primer P) can be set to -1. The indicated
-#'   length of the primer is not used (instead it's inferred from the provided primer
-#'   sequence) and can also be set to -1.
-#' @param adapterForward,adapterReverse character(1), the adapter sequence for
-#'   forward/reverse reads, respectively. If a forward/reverse read contains the
-#'   corresponding adapter sequence, the sequence pair will be filtered out.
-#'   If set to \code{NULL}, no adapter filtering is performed. The number of
-#'   filtered read pairs are reported in the return value.
+#'     the lengths of each read component from 
+#'     \code{elementsForward}/\code{elementsReverse}, respectively. If the 
+#'     length of one element is set to -1, it will be inferred from the other 
+#'     lengths (as the remainder of the read). At most one number (or one 
+#'     number on each side of the primer P) can be set to -1. The indicated
+#'     length of the primer is not used (instead it's inferred from the 
+#'     provided primer sequence) and can also be set to -1.
+#' @param adapterForward,adapterReverse Character scalars, the adapter sequence 
+#'     for forward/reverse reads, respectively. If a forward/reverse read 
+#'     contains the corresponding adapter sequence, the sequence pair will be 
+#'     filtered out. If set to \code{NULL}, no adapter filtering is performed. 
+#'     The number of filtered read pairs are reported in the return value.
 #' @param primerForward,primerReverse Character vectors, representing the primer
-#'   sequence(s) for forward/reverse reads, respectively. Only read pairs that
-#'   contain perfect matches to both the forward and reverse primers (if given)
-#'   will be retained. Multiple primers can be specified - they will be
-#'   considered in order and the first match will be used.
-#' @param wildTypeForward,wildTypeReverse character(1) or named character
-#'   vector, the wild type sequence for the forward and reverse variable region.
-#'   If given as a single string, the reference sequence will be named 'f' (for
-#'   forward) or 'r' (for reverse).
-#' @param constantForward,constantReverse character(1) or character vector,
-#'   the expected constant forward and reverse sequences. If a vector, all
-#'   elements must have the same length.
-#' @param avePhredMinForward,avePhredMinReverse numeric(1) Minimum average Phred
-#'   score in the variable region for a read to be retained. If L contains both
-#'   forward and reverse variable regions, the minimum average Phred score has
-#'   to be achieved in both for a read pair to be retained.
-#' @param variableNMaxForward,variableNMaxReverse numeric(1) Maximum number of
-#'   Ns allowed in the variable region for a read to be retained.
-#' @param umiNMax numeric(1) Maximum number of Ns allowed in the UMI for a read
-#'   to be retained.
-#' @param nbrMutatedCodonsMaxForward,nbrMutatedCodonsMaxReverse numeric(1)
-#'   Maximum number of mutated codons that are allowed. Note that for the
-#'   forward and reverse sequence, respectively, exactly one of
-#'   \code{nbrMutatedCodonsMax} and \code{nbrMutatedBasesMax} must be -1,
-#'   and the other must be a non-negative number. The one that is not -1
-#'   will be used to filter and name the identified mutants.
-#' @param nbrMutatedBasesMaxForward,nbrMutatedBasesMaxReverse numeric(1)
-#'   Maximum number of mutated bases that are allowed. Note that for the
-#'   forward and reverse sequence, respectively, exactly one of
-#'   \code{nbrMutatedCodonsMax} and \code{nbrMutatedBasesMax} must be -1,
-#'   and the other must be a non-negative number. The one that is not -1
-#'   will be used to filter and name the identified mutants.
-#' @param forbiddenMutatedCodonsForward,forbiddenMutatedCodonsReverse character
-#'   vector of codons (can contain ambiguous IUPAC characters, see
-#'   \code{\link[Biostrings]{IUPAC_CODE_MAP}}). If a read pair contains a
-#'   mutated codon matching this pattern, it will be filtered out.
-#' @param useTreeWTmatch logical(1). Should a tree-based matching
-#'   to wild type sequences be used if possible? If the number of allowed
-#'   mismatches is small, and the number of wild type sequences is large,
-#'   this is typically faster.
+#'     sequence(s) for forward/reverse reads, respectively. Only read pairs that
+#'     contain perfect matches to both the forward and reverse primers (if 
+#'     given) will be retained. Multiple primers can be specified - they will be
+#'     considered in order and the first match will be used.
+#' @param wildTypeForward,wildTypeReverse Character scalars or named character
+#'     vectors, the wild type sequence for the forward and reverse variable 
+#'     region. If given as a single string, the reference sequence will be 
+#'     named 'f' (for forward) or 'r' (for reverse).
+#' @param constantForward,constantReverse Character vectors giving,
+#'     the expected constant forward and reverse sequences. If more than one 
+#'     sequence is provided, they must all have the same length.
+#' @param avePhredMinForward,avePhredMinReverse Numeric scalar, the minimum 
+#'     average Phred score in the variable region for a read to be retained. 
+#'     If a read pair contains both forward and reverse variable regions, the 
+#'     minimum average Phred score has to be achieved in both for a read pair 
+#'     to be retained.
+#' @param variableNMaxForward,variableNMaxReverse Numeric scalar, the maximum 
+#'     number of Ns allowed in the variable region for a read to be retained.
+#' @param umiNMax Numeric scalar, the maximum number of Ns allowed in the UMI 
+#'     for a read to be retained.
+#' @param nbrMutatedCodonsMaxForward,nbrMutatedCodonsMaxReverse Numeric
+#'     scalar, the maximum number of mutated codons that are allowed. Note that 
+#'     for the forward and reverse sequence, respectively, exactly one of
+#'     \code{nbrMutatedCodonsMax} and \code{nbrMutatedBasesMax} must be -1,
+#'     and the other must be a non-negative number. The one that is not -1
+#'     will be used to filter and name the identified mutants.
+#' @param nbrMutatedBasesMaxForward,nbrMutatedBasesMaxReverse Numeric scalar,
+#'     the maximum number of mutated bases that are allowed. Note that for the
+#'     forward and reverse sequence, respectively, exactly one of
+#'     \code{nbrMutatedCodonsMax} and \code{nbrMutatedBasesMax} must be -1,
+#'     and the other must be a non-negative number. The one that is not -1
+#'     will be used to filter and name the identified mutants.
+#' @param forbiddenMutatedCodonsForward,forbiddenMutatedCodonsReverse Character
+#'     vector of codons (can contain ambiguous IUPAC characters, see
+#'     \code{\link[Biostrings]{IUPAC_CODE_MAP}}). If a read pair contains a
+#'     mutated codon matching this pattern, it will be filtered out.
+#' @param useTreeWTmatch Logical scalar. Should a tree-based matching
+#'     to wild type sequences be used if possible? If the number of allowed
+#'     mismatches is small, and the number of wild type sequences is large,
+#'     this is typically faster.
 #' @param collapseToWTForward,collapseToWTReverse Logical scalar, indicating
-#'   whether to just represent the observed variable sequence by the
-#'   closest wildtype sequence rather than retaining the information about
-#'   the mutations.
-#' @param mutatedPhredMinForward,mutatedPhredMinReverse numeric(1) Minimum Phred
-#'   score of a mutated base for the read to be retained. If any mutated base
-#'   has a Phred score lower than \code{mutatedPhredMin}, the read will be
-#'   discarded.
-#' @param mutNameDelimiter character(1) Delimiter used in the naming of mutants.
-#'   Generally, mutants will be named as XX{.}YY{.}NNN, where XX is the closest
-#'   provided reference sequence, YY is the mutated codon number, and NNN is the
-#'   mutated codon. Here, {.} is the provided \code{mutNameDelimiter}. The
-#'   delimiter must be a single character (not "_"), and can not appear in any
-#'   of the provided reference sequence names.
-#' @param constantMaxDistForward,constantMaxDistReverse numeric(1) maximum
-#'   allowed Hamming distance between the extracted and expected constant sequence.
-#'   If multiple constant sequences are provided, the most similar one is used.
-#'   Reads with a larger distance to the expected constant sequence are
-#'   discarded. If set to -1, no filtering is done.
-#' @param variableCollapseMaxDist,umiCollapseMaxDist A \code{numeric} scalar
-#'   defining the tolerances for collapsing similar variable (forward + reverse,
-#'   if any) or UMI sequences. If the value is in [0, 1), it defines the maximal
-#'   Hamming distance in terms of a fraction of sequence length:
-#'   (\code{round(variableCollapseMaxDist * nchar(variableSeq))}).
-#'   A value greater or equal to 1 is rounded and directly used as the maximum
-#'   allowed Hamming distance. Note that variable sequences can only be
-#'   collapsed if they are all of the same length and no wild type sequences
-#'   (\code{wildTypeForward} or \code{wildTypeReverse}) have been given.
-#' @param variableCollapseMinReads A \code{numeric} scalar. Indicates the minimum
-#'   number of reads for the read to be considered for collapsing with similar
-#'   sequences.
-#' @param variableCollapseMinRatio A \code{numeric} scalar. During collapsing of
-#'   similar variable sequences, a low-frequency sequence will be collapsed with
-#'   a higher-frequency sequence only if the ratio between the high-frequency
-#'   and the low-frequency sequences is at least this high. The default value
-#'   of 0 indicates that no such check is performed.
-#' @param filteredReadsFastqForward,filteredReadsFastqReverse character(1), the
-#'   name of a (pair of) FASTQ file(s) where filtered-out reads will be written.
-#'   The name(s) should end in .gz (the output will always be compressed). If
-#'   empty, filtered reads will not be written to a file.
-#' @param maxNReads integer(1) Maximal number of reads to process. If set to -1,
-#'   all reads will be processed.
-#' @param verbose logical(1), whether to print out progress messages.
-#' @param nThreads numeric(1), number of threads to use for parallel processing.
-#' @param chunkSize numeric(1), number of read (pairs) to keep in memory for
-#'   parallel processing. Reduce from the default value if you run out of memory.
+#'     whether to just represent the observed variable sequence by the
+#'     closest wildtype sequence rather than retaining the information about
+#'     the mutations.
+#' @param mutatedPhredMinForward,mutatedPhredMinReverse Numeric scalar, the 
+#'     minimum Phred score of a mutated base for the read to be retained. If 
+#'     any mutated base has a Phred score lower than \code{mutatedPhredMin}, 
+#'     the read (pair) will be discarded.
+#' @param mutNameDelimiter Character scalar, the delimiter used in the naming 
+#'     of mutants. Generally, mutants will be named as XX{.}YY{.}NNN, where XX 
+#'     is the closest provided reference sequence, YY is the mutated base or 
+#'     codon number (depending on whether \code{nbrMutatedBases*} or 
+#'     \code{nbrMutatedCodons*} is specified), and NNN is the
+#'     mutated base or codon. Here, {.} is the provided \code{mutNameDelimiter}. 
+#'     The delimiter must be a single character (not "_"), and can not appear 
+#'     in any of the provided reference sequence names.
+#' @param constantMaxDistForward,constantMaxDistReverse Numeric scalars, the 
+#'     maximum allowed Hamming distance between the extracted and expected 
+#'     constant sequence. If multiple constant sequences are provided, the most 
+#'     similar one is used. Reads with a larger distance to the expected 
+#'     constant sequence are discarded. If set to -1, no filtering is done.
+#' @param variableCollapseMaxDist,umiCollapseMaxDist Numeric scalar defining 
+#'     the tolerances for collapsing similar variable (forward + reverse,
+#'     if any) or UMI sequences. If the value is in [0, 1), it defines the 
+#'     maximal Hamming distance in terms of a fraction of sequence length:
+#'     (\code{round(variableCollapseMaxDist * nchar(variableSeq))}).
+#'     A value greater or equal to 1 is rounded and directly used as the maximum
+#'     allowed Hamming distance. Note that variable sequences can only be
+#'     collapsed if they are all of the same length and no wild type sequences
+#'     (\code{wildTypeForward} or \code{wildTypeReverse}) have been given.
+#' @param variableCollapseMinReads Numeric scalar, indicating the minimum
+#'     number of reads for the read to be considered for collapsing with similar
+#'     sequences.
+#' @param variableCollapseMinRatio Numeric scalar. During collapsing of
+#'     similar variable sequences, a low-frequency sequence will be collapsed 
+#'     with a higher-frequency sequence only if the ratio between the 
+#'     high-frequency and the low-frequency sequence counts is at least this 
+#'     high. The default value of 0 indicates that no such check is performed.
+#' @param filteredReadsFastqForward,filteredReadsFastqReverse Character 
+#'     scalars, the names of a (pair of) FASTQ file(s) where filtered-out reads 
+#'     will be written. The name(s) should end in .gz (the output will always 
+#'     be compressed). If empty, filtered reads will not be written to a file.
+#' @param maxNReads Integer scalar, the maximum number of reads to process. 
+#'     If set to -1, all reads in the FASTQ file(s) will be processed.
+#' @param verbose Logical scalar, whether to print out progress messages.
+#' @param nThreads Numeric scalar, the number of threads to use for parallel 
+#'     processing.
+#' @param chunkSize Numeric scalar, the number of read (pairs) to keep in 
+#'     memory for parallel processing. Reduce from the default value if you 
+#'     run out of memory.
 #'
 #' @return A list with four entries:
 #' \describe{
@@ -202,7 +212,116 @@
 #' the processing. Also contains the version of the package and the time of
 #' processing.}
 #' }
-#'
+#' 
+#' @examples
+#' ## See the vignette for complete worked-out examples for different types of 
+#' ## data sets
+#' 
+#' ## ----------------------------------------------------------------------- ## 
+#' ## Process a single-end data set, assume that the full read represents  
+#' ## the variable region
+#' out <- digestFastqs(
+#'     fastqForward = system.file("extdata", "cisInput_1.fastq.gz", 
+#'                                package = "mutscan"), 
+#'     elementsForward = "V", elementLengthsForward = -1
+#' )
+#' ## Table with read counts and mutant information
+#' head(out$summaryTable)
+#' ## Filter summary
+#' out$filterSummary
+#' 
+#' ## ----------------------------------------------------------------------- ## 
+#' ## Process a single-end data set, specify the read as a combination of 
+#' ## UMI, constant region and variable region (skip the first base)
+#' out <- digestFastqs(
+#'     fastqForward = system.file("extdata", "cisInput_1.fastq.gz", 
+#'                                package = "mutscan"), 
+#'     elementsForward = "SUCV", elementLengthsForward = c(1, 10, 18, 96), 
+#'     constantForward = "AACCGGAGGAGGGAGCTG"
+#' )
+#' ## Table with read counts and mutant information
+#' head(out$summaryTable)
+#' ## Filter summary
+#' out$filterSummary
+#' ## Error statistics
+#' out$errorStatistics
+#' 
+#' ## ----------------------------------------------------------------------- ## 
+#' ## Process a single-end data set, specify the read as a combination of 
+#' ## UMI, constant region and variable region, provide the wild type 
+#' ## sequence to compare the variable region to and limit the number of 
+#' ## allowed mutated codons to 1
+#' out <- digestFastqs(
+#'     fastqForward = system.file("extdata", "cisInput_1.fastq.gz", 
+#'                                package = "mutscan"), 
+#'     elementsForward = "SUCV", elementLengthsForward = c(1, 10, 18, 96), 
+#'     constantForward = "AACCGGAGGAGGGAGCTG", 
+#'     wildTypeForward = c(FOS = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"),
+#'     nbrMutatedCodonsMaxForward = 1
+#' )
+#' ## Table with read counts and mutant information
+#' head(out$summaryTable)
+#' ## Filter summary
+#' out$filterSummary
+#' ## Error statistics
+#' out$errorStatistics
+#' 
+#' ## ----------------------------------------------------------------------- ## 
+#' ## Process a paired-end data set where both the forward and reverse reads 
+#' ## contain the same variable region and thus should be merged to generate 
+#' ## the final variable sequence, specify the reads as a combination of 
+#' ## UMI, constant region and variable region, provide the wild type 
+#' ## sequence to compare the variable region to and limit the number of 
+#' ## allowed mutated codons to 1
+#' out <- digestFastqs(
+#'     fastqForward = system.file("extdata", "cisInput_1.fastq.gz", 
+#'                                package = "mutscan"),
+#'     fastqReverse = system.file("extdata", "cisInput_2.fastq.gz",
+#'                                package = "mutscan"), 
+#'     mergeForwardReverse = TRUE, revComplForward = FALSE, revComplReverse = TRUE, 
+#'     elementsForward = "SUCV", elementLengthsForward = c(1, 10, 18, 96),
+#'     elementsReverse = "SUCVS", elementLengthsReverse = c(1, 7, 17, 96, -1),
+#'     constantForward = "AACCGGAGGAGGGAGCTG", 
+#'     constantReverse = "GAGTTCATCCTGGCAGC",
+#'     wildTypeForward = c(FOS = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"),
+#'     nbrMutatedCodonsMaxForward = 1
+#' )
+#' ## Table with read counts and mutant information
+#' head(out$summaryTable)
+#' ## Filter summary
+#' out$filterSummary
+#' ## Error statistics
+#' out$errorStatistics
+#' 
+#' ## ----------------------------------------------------------------------- ## 
+#' ## Process a paired-end data set where the forward and reverse reads 
+#' ## contain variable regions corresponding to different proteins, and thus 
+#' ## should not be merged, specify the reads as a combination of 
+#' ## UMI, constant region and variable region, provide the wild type 
+#' ## sequence to compare the variable region to and limit the number of 
+#' ## allowed mutated codons to 1
+#' out <- digestFastqs(
+#'     fastqForward = system.file("extdata", "transInput_1.fastq.gz", 
+#'                                package = "mutscan"),
+#'     fastqReverse = system.file("extdata", "transInput_2.fastq.gz",
+#'                                package = "mutscan"), 
+#'     mergeForwardReverse = FALSE,  
+#'     elementsForward = "SUCV", elementLengthsForward = c(1, 10, 18, 96),
+#'     elementsReverse = "SUCV", elementLengthsReverse = c(1, 8, 20, 96),
+#'     constantForward = "AACCGGAGGAGGGAGCTG", 
+#'     constantReverse = "GAAAAAGGAAGCTGGAGAGA",
+#'     wildTypeForward = c(FOS = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"),
+#'     wildTypeReverse = c(JUN = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT"), 
+#'     nbrMutatedCodonsMaxForward = 1,
+#'     nbrMutatedCodonsMaxReverse = 1
+#' )
+#' ## Table with read counts and mutant information
+#' head(out$summaryTable)
+#' ## Filter summary
+#' out$filterSummary
+#' ## Error statistics
+#' out$errorStatistics
+#' 
 #' @export
 #' @import zlibbioc
 digestFastqs <- function(fastqForward, fastqReverse = NULL,
