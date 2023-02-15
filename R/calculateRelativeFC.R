@@ -29,6 +29,9 @@
 #'
 #' @export
 #'
+#' @return A \code{data.frame} with output from the statistical testing 
+#' framework (edgeR or limma). 
+#' 
 #' @importFrom edgeR DGEList scaleOffset estimateDisp glmQLFit glmQLFTest
 #'     topTags predFC topTags calcNormFactors effectiveLibSizes
 #' @importFrom SummarizedExperiment colData assay assayNames

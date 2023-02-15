@@ -46,6 +46,10 @@ should be used to calculate size factors. Should be either \code{"TMM"} or
 \code{"csaw"} when \code{WTrows} is \code{NULL}, and \code{"geomean"} or
 \code{"sum"} when \code{WTrows} is provided.}
 }
+\value{
+A \code{data.frame} with output from the statistical testing 
+framework (edgeR or limma).
+}
 \description{
 Calculate logFCs and associated p-values for a given comparison, using
 either limma or the Negative Binomial quasi-likelihood framework of edgeR.

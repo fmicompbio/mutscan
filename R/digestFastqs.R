@@ -498,14 +498,14 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     
     ## If a 'P', max one -1 length on each side
     if (length(PposFwd) == 1 && PposFwd != -1) {
-        if ((PposFwd != 1 && sum(elementLengthsForward[1:(PposFwd - 1)] == -1) > 1) ||
+        if ((PposFwd != 1 && sum(elementLengthsForward[seq_len(PposFwd - 1)] == -1) > 1) ||
             (PposFwd != nchar(elementsForward) &&
              sum(elementLengthsForward[(PposFwd + 1):nchar(elementsForward)] == -1) > 1)) {
             stop("Max one element length (forward) on each side of the primer can be -1")
         }
     }
     if (length(PposRev) == 1 && PposRev != -1) {
-        if ((PposRev != 1 && sum(elementLengthsReverse[1:(PposRev - 1)] == -1) > 1) ||
+        if ((PposRev != 1 && sum(elementLengthsReverse[seq_len(PposRev - 1)] == -1) > 1) ||
             (PposRev != nchar(elementsReverse) &&
              sum(elementLengthsReverse[(PposRev + 1):nchar(elementsReverse)] == -1) > 1)) {
             stop("Max one element length (reverse) on each side of the primer can be -1")
@@ -536,10 +536,12 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     }
     
     ## wild type sequences must be strings, valid DNA characters
-    if (!all(sapply(wildTypeForward, is.character)) || !all(sapply(wildTypeForward, length) == 1) ||
-        !all(sapply(wildTypeForward, function(w) grepl("^[AaCcGgTt]*$", w))) ||
-        !all(sapply(wildTypeReverse, is.character)) || !all(sapply(wildTypeReverse, length) == 1) ||
-        !all(sapply(wildTypeReverse, function(w) grepl("^[AaCcGgTt]*$", w)))) {
+    if (!all(vapply(wildTypeForward, is.character, FALSE)) || 
+        !all(vapply(wildTypeForward, length, 0) == 1) ||
+        !all(vapply(wildTypeForward, function(w) grepl("^[AaCcGgTt]*$", w), FALSE)) ||
+        !all(vapply(wildTypeReverse, is.character, FALSE)) || 
+        !all(vapply(wildTypeReverse, length, 0) == 1) ||
+        !all(vapply(wildTypeReverse, function(w) grepl("^[AaCcGgTt]*$", w), FALSE))) {
         stop("wild type sequences must be character strings, ",
              "only containing valid DNA characters")
     } else {
@@ -554,7 +556,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     }
     
     ## cis experiment - should not have wildTypeReverse
-    if (mergeForwardReverse && any(sapply(wildTypeReverse, nchar) > 0)) {
+    if (mergeForwardReverse && any(vapply(wildTypeReverse, nchar, 1) > 0)) {
         warning("Ignoring 'wildTypeReverse' when forward and reverse reads are merged")
         wildTypeReverse <- c(r = "")
     }
