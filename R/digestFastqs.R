@@ -248,9 +248,9 @@
 #' 
 #' ## ----------------------------------------------------------------------- ## 
 #' ## Process a single-end data set, specify the read as a combination of 
-#' ## UMI, constant region and variable region, provide the wild type 
-#' ## sequence to compare the variable region to and limit the number of 
-#' ## allowed mutated codons to 1
+#' ## UMI, constant region and variable region (skip the first base), provide 
+#' ## the wild type sequence to compare the variable region to and limit the 
+#' ## number of allowed mutated codons to 1
 #' out <- digestFastqs(
 #'     fastqForward = system.file("extdata", "cisInput_1.fastq.gz", 
 #'                                package = "mutscan"), 
@@ -270,9 +270,9 @@
 #' ## Process a paired-end data set where both the forward and reverse reads 
 #' ## contain the same variable region and thus should be merged to generate 
 #' ## the final variable sequence, specify the reads as a combination of 
-#' ## UMI, constant region and variable region, provide the wild type 
-#' ## sequence to compare the variable region to and limit the number of 
-#' ## allowed mutated codons to 1
+#' ## UMI, constant region and variable region (skip the first and/or last
+#' ## base), provide the wild type sequence to compare the variable region to 
+#' ## and limit the number of allowed mutated codons to 1
 #' out <- digestFastqs(
 #'     fastqForward = system.file("extdata", "cisInput_1.fastq.gz", 
 #'                                package = "mutscan"),
@@ -297,9 +297,9 @@
 #' ## Process a paired-end data set where the forward and reverse reads 
 #' ## contain variable regions corresponding to different proteins, and thus 
 #' ## should not be merged, specify the reads as a combination of 
-#' ## UMI, constant region and variable region, provide the wild type 
-#' ## sequence to compare the variable region to and limit the number of 
-#' ## allowed mutated codons to 1
+#' ## UMI, constant region and variable region (skip the first base), provide 
+#' ## the wild type sequence to compare the variable region to and limit the 
+#' ## number of allowed mutated codons to 1
 #' out <- digestFastqs(
 #'     fastqForward = system.file("extdata", "transInput_1.fastq.gz", 
 #'                                package = "mutscan"),
