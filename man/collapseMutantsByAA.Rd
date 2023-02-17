@@ -21,6 +21,22 @@ A \code{\link[SummarizedExperiment]{SummarizedExperiment}} where
 \description{
 Collapse counts by mutated amino acid
 }
+\examples{
+se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds",
+                          package = "mutscan"))[1:200, ]
+## The rows of this object correspond to individual codon variants
+dim(se)
+head(rownames(se))
+## Collapse by amino acid
+sec <- collapseMutantsByAA(se)
+## The rows of the collapsed object correspond to amino acid variants
+dim(sec)
+head(rownames(sec))
+## The mutantName column contains the individual codon variants that were 
+## collapsed
+head(SummarizedExperiment::rowData(sec))
+
+}
 \author{
 Charlotte Soneson, Michael Stadler
 }

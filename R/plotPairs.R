@@ -12,43 +12,48 @@
 #' @return A \code{ggplot} object.
 #'
 #' @param se A SummarizedExperiment object, e.g. the output of
-#'   \code{summarizeExperiment}
+#'     \code{summarizeExperiment}
 #' @param selAssay Character scalar, the assay to use as the basis for the
-#'   pairs plot.
+#'     pairs plot.
 #' @param doLog Logical scalar, whether or not to log-transform the values
-#'   before plotting.
+#'     before plotting.
 #' @param pseudocount Numeric scalar, the pseudocount to add to the values
-#'   before log-transforming (if \code{doLog} is \code{TRUE}).
+#'     before log-transforming (if \code{doLog} is \code{TRUE}).
 #' @param corMethod Either "pearson" or "spearman", the type of correlation
-#'   to calculate.
+#'     to calculate.
 #' @param histBreaks Numeric scalar, the number of breaks in the histograms
-#'   to put in the diagonal panels.
+#'     to put in the diagonal panels.
 #' @param pointsType Either "points" or "smoothscatter", determining the
-#'   type of plots that will be made.
+#'     type of plots that will be made.
 #' @param corSizeMult,corSizeAdd Numeric scalars determining how the
-#'   absolute correlation value is transformed into a font size. The
-#'   transformation is corSizeMult * abs(corr) + corSizeAdd.
+#'     absolute correlation value is transformed into a font size. The
+#'     transformation is corSizeMult * abs(corr) + corSizeAdd.
 #' @param pointSize,pointAlpha Numeric scalars determining the size and
-#'   opacity of points in the plot.
+#'     opacity of points in the plot.
 #' @param colorByCorrelation Logical scalar, indicating whether the correlation
-#'   panels should be colored according to the correlation value.
+#'     panels should be colored according to the correlation value.
 #' @param corrColorRange Numeric vector of length 2, providing the lower and 
-#'   upper limits of the color scale when coloring by correlation. Both 
-#'   values should be positive; the same range is used for negative 
-#'   correlations. If \code{NULL} (the default), the range is inferred from 
-#'   the data.
+#'     upper limits of the color scale when coloring by correlation. Both 
+#'     values should be positive; the same range is used for negative 
+#'     correlations. If \code{NULL} (the default), the range is inferred from 
+#'     the data.
 #' @param addIdentityLine Logical scalar, indicating whether the identity line 
-#'   should be added (only used if \code{pointsType = "points"}).
+#'     should be added (only used if \code{pointsType = "points"}).
 #'
 #' @importFrom GGally eval_data_col ggpairs wrap
 #' @importFrom ggplot2 ggplot annotate theme_void ylim stat_density2d
-#'   scale_fill_continuous geom_point theme_bw theme element_blank aes
-#'   geom_histogram scale_x_continuous scale_y_continuous geom_abline
+#'     scale_fill_continuous geom_point theme_bw theme element_blank aes
+#'     geom_histogram scale_x_continuous scale_y_continuous geom_abline
 #' @importFrom stats cor
 #' @importFrom SummarizedExperiment assayNames assay
 #' @importFrom grDevices hcl.colors rgb colorRamp
 #' @importFrom rlang .data
 #'
+#' @examples
+#' se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+#'                           package = "mutscan"))[1:200, ]
+#' plotPairs(se)
+#' 
 plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
                       corMethod = "pearson", histBreaks = 40,
                       pointsType = "points", corSizeMult = 5,
@@ -97,7 +102,7 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
         yData <- GGally::eval_data_col(data, mapping$y)
 
         ## Calculate correlation
-        mainCor = stats::cor(xData, yData, method = corMethod)
+        mainCor <- stats::cor(xData, yData, method = corMethod)
         transfCor <- (abs(mainCor) - min(corRange))/(max(corRange) - min(corRange))
         ## Protect against numerical imprecision leading to values outside
         ## the allowed range

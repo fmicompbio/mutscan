@@ -38,6 +38,36 @@ Combine multiple sequence lists (as returned by \code{\link{digestFastqs}}
 into a \code{\link[SummarizedExperiment]{SummarizedExperiment}}, with
 observed variable sequences (sequence pairs) in rows and samples in columns.
 }
+\examples{
+## Input sample
+inp <- digestFastqs(
+    fastqForward = system.file("extdata", "cisInput_1.fastq.gz", 
+                               package = "mutscan"), 
+    elementsForward = "SUCV", elementLengthsForward = c(1, 10, 18, 96), 
+    constantForward = "AACCGGAGGAGGGAGCTG", 
+    wildTypeForward = c(FOS = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"),
+    nbrMutatedCodonsMaxForward = 1
+)
+## Output sample
+outp <- digestFastqs(
+    fastqForward = system.file("extdata", "cisOutput_1.fastq.gz", 
+                               package = "mutscan"), 
+    elementsForward = "SUCV", elementLengthsForward = c(1, 10, 18, 96), 
+    constantForward = "AACCGGAGGAGGGAGCTG", 
+    wildTypeForward = c(FOS = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"),
+    nbrMutatedCodonsMaxForward = 1
+)
+## Combine
+se <- summarizeExperiment(
+    x = list(r1inp = inp, r1outp = outp), 
+    coldata = data.frame(Name = c("r1inp", "r1outp"), 
+                         Condition = c("input", "output"), 
+                         Replicate = c("rep1", "rep1")),
+    countType = "umis"
+)
+se
+
+}
 \author{
 Michael Stadler, Charlotte Soneson
 }

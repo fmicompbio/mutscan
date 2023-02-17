@@ -46,6 +46,21 @@ A numeric vector with fitness scores.
 Using sequence counts before and after selection, calculate fitness scores 
 as described by Diss and Lehner (2018).
 }
+\examples{
+se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+                          package = "mutscan"))
+## Check that the wildtype sequence is present in the data
+stopifnot("f.0.WT" \%in\% rownames(se))
+## Calculate PPI scores as defined in Diss & Lehner (2018)
+ppis <- calculateFitnessScore(
+    se = se, pairingCol = "Replicate", 
+    ODCols = c("OD1", "OD2"),
+    comparison = c("Condition", "cis_output", "cis_input"),
+    WTrows = "f.0.WT")
+## Matrix with PPI scores for each replicate
+head(ppis)
+
+}
 \references{
 "The genetic landscape of a physical interaction."
     Diss G and Lehner B. Elife. 2018;7:e32472. doi: 10.7554/eLife.32472.

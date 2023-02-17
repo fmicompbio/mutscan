@@ -71,7 +71,7 @@ plotFiltering <- function(se, valueType = "reads", onlyActiveFilters = TRUE,
     }
     
     ## Check that filtering columns are in the right order
-    nbrs <- gsub("^f", "", sapply(strsplit(colnames(cd), "_"), .subset, 1))
+    nbrs <- gsub("^f", "", vapply(strsplit(colnames(cd), "_"), .subset, FUN.VALUE = "", 1))
     nbrs <- nbrs[-c(1, length(nbrs))]
     nbrs <- gsub("a$|b$", "", nbrs)
     stopifnot(all(diff(as.numeric(nbrs)) >= 0))
@@ -104,10 +104,10 @@ plotFiltering <- function(se, valueType = "reads", onlyActiveFilters = TRUE,
         dplyr::mutate(fracReads = signif(.data$nbrReads / 
                                              .data$nbrReads[.data$step == "nbrTotal"],
                                         digits = 3)) %>%
-        dplyr::mutate(cumulsum = sapply(seq_along(.data$step), function(i) {
+        dplyr::mutate(cumulsum = vapply(seq_along(.data$step), function(i) {
             sum(.data$nbrReads[as.numeric(.data$step) <= as.numeric(.data$step[i]) & 
                                    .data$step != "nbrTotal"])
-        })) %>%
+        }, NA_real_)) %>%
         dplyr::mutate(nbrRemaining = .data$nbrReads[.data$step == "nbrTotal"] - 
                           .data$cumulsum) %>%
         dplyr::mutate(fracRemaining = signif(.data$nbrRemaining /

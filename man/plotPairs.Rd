@@ -71,6 +71,12 @@ panels display the scatter plots, the upper-triangular ones print out
 the (Pearson or Spearman) correlations, and the diagonal panels show
 histograms of the respective columns.
 }
+\examples{
+se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds", 
+                          package = "mutscan"))[1:200, ]
+plotPairs(se)
+
+}
 \author{
 Charlotte Soneson
 }

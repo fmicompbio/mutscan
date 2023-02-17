@@ -29,6 +29,9 @@
 #'
 #' @export
 #'
+#' @return A \code{data.frame} with output from the statistical testing 
+#' framework (edgeR or limma). 
+#' 
 #' @importFrom edgeR DGEList scaleOffset estimateDisp glmQLFit glmQLFTest
 #'     topTags predFC topTags calcNormFactors effectiveLibSizes
 #' @importFrom SummarizedExperiment colData assay assayNames
@@ -40,7 +43,26 @@
 #'                           package = "mutscan"))[1:200, ]
 #' design <- stats::model.matrix(~ Replicate + Condition,
 #'                               data = SummarizedExperiment::colData(se))
-#' res <- calculateRelativeFC(se, design, coef = "Conditioncis_output")
+#'                               
+#' ## Calculate "absolute" log-fold changes with edgeR
+#' res <- calculateRelativeFC(se, design, coef = "Conditioncis_output", 
+#'                            method = "edgeR")
+#' head(res)
+#' ## Calculate log-fold changes relative to the WT sequence with edgeR
+#' stopifnot("f.0.WT" %in% rownames(se))
+#' res <- calculateRelativeFC(se, design, coef = "Conditioncis_output", 
+#'                            method = "edgeR", WTrows = "f.0.WT")
+#' head(res)
+#' 
+#' ## Calculate "absolute" log-fold changes with limma
+#' res <- calculateRelativeFC(se, design, coef = "Conditioncis_output", 
+#'                            method = "limma")
+#' head(res)
+#' ## Calculate log-fold changes relative to the WT sequence with limma
+#' stopifnot("f.0.WT" %in% rownames(se))
+#' res <- calculateRelativeFC(se, design, coef = "Conditioncis_output", 
+#'                            method = "limma", WTrows = "f.0.WT")
+#' head(res)
 #'
 calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
                                 WTrows = NULL, selAssay = "counts",

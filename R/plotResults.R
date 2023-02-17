@@ -123,7 +123,7 @@
 
 .getColName <- function(res, validValues, aspect) {
     .assertVector(x = res, type = "data.frame")
-    colName = grep(paste(paste0("^", validValues, "$"), collapse = "|"),
+    colName <- grep(paste(paste0("^", validValues, "$"), collapse = "|"),
                    colnames(res), value = TRUE)
     if (length(colName) == 0) {
         stop("No suitable column found for ", aspect, ", one of the ",
