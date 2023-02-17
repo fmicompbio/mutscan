@@ -21,7 +21,7 @@ following the primer will be considered the variable sequence."><!-- mathjax -->
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.33</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.34</span>
       </span>
     </div>
 
@@ -117,20 +117,21 @@ following the primer will be considered the variable sequence.</p>
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>fastqForward, fastqReverse</dt>
-<dd><p>character vector, paths to gzipped FASTQ files
-corresponding to forward and reverse reads, respectively. If more than one
-forward/reverse sequence file is given, they need to be provided in the
-same order. Note that if multiple fastq files are provided, they are all
-assumed to correspond to the same sample, and will effectively be concatenated.</p></dd>
+<dd><p>Character vectors, paths to gzipped FASTQ 
+files corresponding to forward and reverse reads, respectively. If more 
+than one forward/reverse sequence file is given, they need to be 
+provided in the same order. Note that if multiple fastq files are 
+provided, they are all assumed to correspond to the same sample, and 
+will effectively be concatenated.</p></dd>
 
 
 <dt>mergeForwardReverse</dt>
-<dd><p>logical(1), whether to fuse the forward and
+<dd><p>Logical scalar, whether to fuse the forward and
 reverse variable sequences.</p></dd>
 
 
 <dt>minOverlap, maxOverlap</dt>
-<dd><p>numeric(1), the minimal and maximal allowed
+<dd><p>Numeric scalar, the minimal and maximal allowed
 overlap between the forward and reverse reads when merging. Only used if
 <code>mergeForwardReverse</code> is <code>TRUE</code>. If set to 0, only overlaps
 covering the full length of the shortest of the two reads will be
@@ -138,107 +139,112 @@ considered.</p></dd>
 
 
 <dt>minMergedLength, maxMergedLength</dt>
-<dd><p>numeric(1), the minimal and maximal
-allowed total length of the merged product (if <code>mergeForwardReverse</code> is
-<code>TRUE</code>). If set to 0, any length is allowed.</p></dd>
+<dd><p>Numeric scalar, the minimal and 
+maximal allowed total length of the merged product (if 
+<code>mergeForwardReverse</code> is <code>TRUE</code>). If set to 0, any length is 
+allowed.</p></dd>
 
 
 <dt>maxFracMismatchOverlap</dt>
-<dd><p>numeric(1), maximal mismatch rate in the
+<dd><p>Numeric scalar, maximal mismatch rate in the
 overlap. Only used if <code>mergeForwardReverse</code> is <code>TRUE</code>.</p></dd>
 
 
 <dt>greedyOverlap</dt>
-<dd><p>logical(1). If <code>TRUE</code>, the first overlap satisfying
-<code>minOverlap</code>, <code>maxOverlap</code>, <code>minMergedLength</code>,
+<dd><p>Logical scalar. If <code>TRUE</code>, the first overlap 
+satisfying <code>minOverlap</code>, <code>maxOverlap</code>, <code>minMergedLength</code>,
 <code>maxMergedLength</code> and <code>maxFracMismatchOverlap</code> will
-be retained. If <code>FALSE</code>, all valid overlaps will be scored and the one
-with the highest score (largest number of matches) will be retained.</p></dd>
+be retained. If <code>FALSE</code>, all valid overlaps will be scored and the 
+one with the highest score (largest number of matches) will be retained.</p></dd>
 
 
 <dt>revComplForward, revComplReverse</dt>
-<dd><p>logical(1), whether to reverse
-complement the forward/reverse variable and constant sequences, respectively.</p></dd>
+<dd><p>Logical scalar, whether to reverse
+complement the forward/reverse variable and constant sequences, 
+respectively.</p></dd>
 
 
 <dt>adapterForward, adapterReverse</dt>
-<dd><p>character(1), the adapter sequence for
-forward/reverse reads, respectively. If a forward/reverse read contains the
-corresponding adapter sequence, the sequence pair will be filtered out.
-If set to <code>NULL</code>, no adapter filtering is performed. The number of
-filtered read pairs are reported in the return value.</p></dd>
+<dd><p>Character scalars, the adapter sequence 
+for forward/reverse reads, respectively. If a forward/reverse read 
+contains the corresponding adapter sequence, the sequence pair will be 
+filtered out. If set to <code>NULL</code>, no adapter filtering is performed. 
+The number of filtered read pairs are reported in the return value.</p></dd>
 
 
 <dt>elementsForward, elementsReverse</dt>
-<dd><p>Character strings representing the
-composition of the forward and reverse reads, respectively. The strings should
-consist only of the letters S (skip), C (constant), U (umi), P (primer),
-V (variable), and cover the full extent of the read. Most combinations
-are allowed (and a given letter can appear multiple times), but there
-can be at most one occurrence of P. If a given letter is included
-multiple times, the corresponding sequences will be concatenated in the output.</p></dd>
+<dd><p>Character scalars representing the
+composition of the forward and reverse reads, respectively. The strings 
+should consist only of the letters S (skip), C (constant), U (umi), 
+P (primer), V (variable), and cover the full extent of the read. Most 
+combinations are allowed (and a given letter can appear multiple times), 
+but there can be at most one occurrence of P. If a given letter is 
+included multiple times, the corresponding sequences will be 
+concatenated in the output.</p></dd>
 
 
 <dt>elementLengthsForward, elementLengthsReverse</dt>
 <dd><p>Numeric vectors containing
-the lengths of each read component from <code>elementsForward</code>/<code>elementsReverse</code>,
-respectively. If the length of one element is set to -1, it will be inferred
-from the other lengths (as the remainder of the read). At most one number
-(or one number on each side of the primer P) can be set to -1. The indicated
-length of the primer is not used (instead it's inferred from the provided primer
-sequence) and can also be set to -1.</p></dd>
+the lengths of each read component from 
+<code>elementsForward</code>/<code>elementsReverse</code>, respectively. If the 
+length of one element is set to -1, it will be inferred from the other 
+lengths (as the remainder of the read). At most one number (or one 
+number on each side of the primer P) can be set to -1. The indicated
+length of the primer is not used (instead it's inferred from the 
+provided primer sequence) and can also be set to -1.</p></dd>
 
 
 <dt>primerForward, primerReverse</dt>
 <dd><p>Character vectors, representing the primer
 sequence(s) for forward/reverse reads, respectively. Only read pairs that
-contain perfect matches to both the forward and reverse primers (if given)
-will be retained. Multiple primers can be specified - they will be
+contain perfect matches to both the forward and reverse primers (if 
+given) will be retained. Multiple primers can be specified - they will be
 considered in order and the first match will be used.</p></dd>
 
 
 <dt>wildTypeForward, wildTypeReverse</dt>
-<dd><p>character(1) or named character
-vector, the wild type sequence for the forward and reverse variable region.
-If given as a single string, the reference sequence will be named 'f' (for
-forward) or 'r' (for reverse).</p></dd>
+<dd><p>Character scalars or named character
+vectors, the wild type sequence for the forward and reverse variable 
+region. If given as a single string, the reference sequence will be 
+named 'f' (for forward) or 'r' (for reverse).</p></dd>
 
 
 <dt>constantForward, constantReverse</dt>
-<dd><p>character(1) or character vector,
-the expected constant forward and reverse sequences. If a vector, all
-elements must have the same length.</p></dd>
+<dd><p>Character vectors giving,
+the expected constant forward and reverse sequences. If more than one 
+sequence is provided, they must all have the same length.</p></dd>
 
 
 <dt>avePhredMinForward, avePhredMinReverse</dt>
-<dd><p>numeric(1) Minimum average Phred
-score in the variable region for a read to be retained. If L contains both
-forward and reverse variable regions, the minimum average Phred score has
-to be achieved in both for a read pair to be retained.</p></dd>
-
-
-<dt>variableNMaxForward, variableNMaxReverse</dt>
-<dd><p>numeric(1) Maximum number of
-Ns allowed in the variable region for a read to be retained.</p></dd>
-
-
-<dt>umiNMax</dt>
-<dd><p>numeric(1) Maximum number of Ns allowed in the UMI for a read
+<dd><p>Numeric scalar, the minimum 
+average Phred score in the variable region for a read to be retained. 
+If a read pair contains both forward and reverse variable regions, the 
+minimum average Phred score has to be achieved in both for a read pair 
 to be retained.</p></dd>
 
 
+<dt>variableNMaxForward, variableNMaxReverse</dt>
+<dd><p>Numeric scalar, the maximum 
+number of Ns allowed in the variable region for a read to be retained.</p></dd>
+
+
+<dt>umiNMax</dt>
+<dd><p>Numeric scalar, the maximum number of Ns allowed in the UMI 
+for a read to be retained.</p></dd>
+
+
 <dt>nbrMutatedCodonsMaxForward, nbrMutatedCodonsMaxReverse</dt>
-<dd><p>numeric(1)
-Maximum number of mutated codons that are allowed. Note that for the
-forward and reverse sequence, respectively, exactly one of
+<dd><p>Numeric
+scalar, the maximum number of mutated codons that are allowed. Note that 
+for the forward and reverse sequence, respectively, exactly one of
 <code>nbrMutatedCodonsMax</code> and <code>nbrMutatedBasesMax</code> must be -1,
 and the other must be a non-negative number. The one that is not -1
 will be used to filter and name the identified mutants.</p></dd>
 
 
 <dt>nbrMutatedBasesMaxForward, nbrMutatedBasesMaxReverse</dt>
-<dd><p>numeric(1)
-Maximum number of mutated bases that are allowed. Note that for the
+<dd><p>Numeric scalar,
+the maximum number of mutated bases that are allowed. Note that for the
 forward and reverse sequence, respectively, exactly one of
 <code>nbrMutatedCodonsMax</code> and <code>nbrMutatedBasesMax</code> must be -1,
 and the other must be a non-negative number. The one that is not -1
@@ -246,14 +252,14 @@ will be used to filter and name the identified mutants.</p></dd>
 
 
 <dt>forbiddenMutatedCodonsForward, forbiddenMutatedCodonsReverse</dt>
-<dd><p>character
+<dd><p>Character
 vector of codons (can contain ambiguous IUPAC characters, see
 <code><a href="https://rdrr.io/pkg/Biostrings/man/IUPAC_CODE_MAP.html" class="external-link">IUPAC_CODE_MAP</a></code>). If a read pair contains a
 mutated codon matching this pattern, it will be filtered out.</p></dd>
 
 
 <dt>useTreeWTmatch</dt>
-<dd><p>logical(1). Should a tree-based matching
+<dd><p>Logical scalar. Should a tree-based matching
 to wild type sequences be used if possible? If the number of allowed
 mismatches is small, and the number of wild type sequences is large,
 this is typically faster.</p></dd>
@@ -267,34 +273,36 @@ the mutations.</p></dd>
 
 
 <dt>mutatedPhredMinForward, mutatedPhredMinReverse</dt>
-<dd><p>numeric(1) Minimum Phred
-score of a mutated base for the read to be retained. If any mutated base
-has a Phred score lower than <code>mutatedPhredMin</code>, the read will be
-discarded.</p></dd>
+<dd><p>Numeric scalar, the 
+minimum Phred score of a mutated base for the read to be retained. If 
+any mutated base has a Phred score lower than <code>mutatedPhredMin</code>, 
+the read (pair) will be discarded.</p></dd>
 
 
 <dt>mutNameDelimiter</dt>
-<dd><p>character(1) Delimiter used in the naming of mutants.
-Generally, mutants will be named as XX.YY.NNN, where XX is the closest
-provided reference sequence, YY is the mutated codon number, and NNN is the
-mutated codon. Here, . is the provided <code>mutNameDelimiter</code>. The
-delimiter must be a single character (not "_"), and can not appear in any
-of the provided reference sequence names.</p></dd>
+<dd><p>Character scalar, the delimiter used in the naming 
+of mutants. Generally, mutants will be named as XX.YY.NNN, where XX 
+is the closest provided reference sequence, YY is the mutated base or 
+codon number (depending on whether <code>nbrMutatedBases*</code> or 
+<code>nbrMutatedCodons*</code> is specified), and NNN is the
+mutated base or codon. Here, . is the provided <code>mutNameDelimiter</code>. 
+The delimiter must be a single character (not "_"), and can not appear 
+in any of the provided reference sequence names.</p></dd>
 
 
 <dt>constantMaxDistForward, constantMaxDistReverse</dt>
-<dd><p>numeric(1) maximum
-allowed Hamming distance between the extracted and expected constant sequence.
-If multiple constant sequences are provided, the most similar one is used.
-Reads with a larger distance to the expected constant sequence are
-discarded. If set to -1, no filtering is done.</p></dd>
+<dd><p>Numeric scalars, the 
+maximum allowed Hamming distance between the extracted and expected 
+constant sequence. If multiple constant sequences are provided, the most 
+similar one is used. Reads with a larger distance to the expected 
+constant sequence are discarded. If set to -1, no filtering is done.</p></dd>
 
 
 <dt>variableCollapseMaxDist, umiCollapseMaxDist</dt>
-<dd><p>A <code>numeric</code> scalar
-defining the tolerances for collapsing similar variable (forward + reverse,
-if any) or UMI sequences. If the value is in [0, 1), it defines the maximal
-Hamming distance in terms of a fraction of sequence length:
+<dd><p>Numeric scalar defining 
+the tolerances for collapsing similar variable (forward + reverse,
+if any) or UMI sequences. If the value is in [0, 1), it defines the 
+maximal Hamming distance in terms of a fraction of sequence length:
 (<code>round(variableCollapseMaxDist * nchar(variableSeq))</code>).
 A value greater or equal to 1 is rounded and directly used as the maximum
 allowed Hamming distance. Note that variable sequences can only be
@@ -303,42 +311,44 @@ collapsed if they are all of the same length and no wild type sequences
 
 
 <dt>variableCollapseMinReads</dt>
-<dd><p>A <code>numeric</code> scalar. Indicates the minimum
+<dd><p>Numeric scalar, indicating the minimum
 number of reads for the read to be considered for collapsing with similar
 sequences.</p></dd>
 
 
 <dt>variableCollapseMinRatio</dt>
-<dd><p>A <code>numeric</code> scalar. During collapsing of
-similar variable sequences, a low-frequency sequence will be collapsed with
-a higher-frequency sequence only if the ratio between the high-frequency
-and the low-frequency sequences is at least this high. The default value
-of 0 indicates that no such check is performed.</p></dd>
+<dd><p>Numeric scalar. During collapsing of
+similar variable sequences, a low-frequency sequence will be collapsed 
+with a higher-frequency sequence only if the ratio between the 
+high-frequency and the low-frequency sequence counts is at least this 
+high. The default value of 0 indicates that no such check is performed.</p></dd>
 
 
 <dt>filteredReadsFastqForward, filteredReadsFastqReverse</dt>
-<dd><p>character(1), the
-name of a (pair of) FASTQ file(s) where filtered-out reads will be written.
-The name(s) should end in .gz (the output will always be compressed). If
-empty, filtered reads will not be written to a file.</p></dd>
+<dd><p>Character 
+scalars, the names of a (pair of) FASTQ file(s) where filtered-out reads 
+will be written. The name(s) should end in .gz (the output will always 
+be compressed). If empty, filtered reads will not be written to a file.</p></dd>
 
 
 <dt>maxNReads</dt>
-<dd><p>integer(1) Maximal number of reads to process. If set to -1,
-all reads will be processed.</p></dd>
+<dd><p>Integer scalar, the maximum number of reads to process. 
+If set to -1, all reads in the FASTQ file(s) will be processed.</p></dd>
 
 
 <dt>verbose</dt>
-<dd><p>logical(1), whether to print out progress messages.</p></dd>
+<dd><p>Logical scalar, whether to print out progress messages.</p></dd>
 
 
 <dt>nThreads</dt>
-<dd><p>numeric(1), number of threads to use for parallel processing.</p></dd>
+<dd><p>Numeric scalar, the number of threads to use for parallel 
+processing.</p></dd>
 
 
 <dt>chunkSize</dt>
-<dd><p>numeric(1), number of read (pairs) to keep in memory for
-parallel processing. Reduce from the default value if you run out of memory.</p></dd>
+<dd><p>Numeric scalar, the number of read (pairs) to keep in 
+memory for parallel processing. Reduce from the default value if you 
+run out of memory.</p></dd>
 
 </dl></div>
     <div id="value">
@@ -388,35 +398,1166 @@ processing.</p></dd>
 <li><p>If requested, collapse forward and reverse variable regions by
  retaining, for each position, the base with the highest reported base
  quality.</p></li>
-<li><p>Filter out read pair if the average quality in the variable region is
- below <code>avePhredMinForward</code>/<code>avePhredMinReverse</code>, in either the
- forward or reverse read (or the merged read).</p></li>
-<li><p>Filter out read pair if the number of Ns in the variable region
+<li><p>Filter out the read (pair) if the average quality in the variable 
+ region is below <code>avePhredMinForward</code>/<code>avePhredMinReverse</code>, in 
+ either the forward or reverse read (or the merged read).</p></li>
+<li><p>Filter out the read (pair) if the number of Ns in the variable region
  exceeds <code>variableNMaxForward</code>/<code>variableNMaxReverse</code>.</p></li>
-<li><p>Filter out read pair if the number of Ns in the combined forward and
- reverse UMI sequence exceeds <code>umiNMax</code></p></li>
+<li><p>Filter out the read (pair) if the number of Ns in the combined forward 
+ and reverse UMI sequence exceeds <code>umiNMax</code></p></li>
 <li><p>If one or more wild type sequences (for the variable region) are
  provided, find the mismatches between the (forward/reverse) variable region
  and the provided wild type sequence (if more than one wild type sequence is
  provided, first find the one that is closest to the read).</p></li>
-<li><p>Filter out read pair if any mutated base has a quality below
+<li><p>Filter out the read (pair) if any mutated base has a quality below
  <code>mutatedPhredMinForward</code>/<code>mutatedPhredMinReverse</code>.</p></li>
-<li><p>Filter out read pair if the number of mutated codons exceeds
+<li><p>Filter out the read (pair) if the number of mutated codons exceeds
  <code>nbrMutatedCodonsMaxForward</code>/<code>nbrMutatedCodonsMaxReverse</code>.</p></li>
-<li><p>Filter out read pair if any of the mutated codons match any of the
- codons encoded by
+<li><p>Filter out the read (pair) if any of the mutated codons match any of 
+ the codons encoded by
  <code>forbiddenMutatedCodonsForward</code>/<code>forbiddenMutatedCodonsReverse</code>.</p></li>
-<li><p>Assign a 'mutation name' to the read. This name is a combination of
- parts of the form XX.YY.NNN, where XX is the name of the most similar
- reference sequence, YY is the mutated codon number, and NNN is the mutated
- codon. . is a delimiter, specified via <code>mutNameDelimiter</code>. If no
- wildtype sequences are provided, the read sequence will be used as the
- 'mutation name'.</p></li>
+<li><p>Assign a 'mutation name' to the read (pair). This name is a 
+ combination of parts of the form XX.YY.NNN, where XX is the name of the 
+ most similar reference sequence, YY is the mutated codon number, and NNN is 
+ the mutated codon. . is a delimiter, specified via 
+ <code>mutNameDelimiter</code>. If no wildtype sequences are provided, the
+ variable sequence will be used as the mutation name'.</p></li>
 </ol><p>Based on the retained reads following this filtering process, count the
 number of reads, and the number of unique UMIs, for each variable sequence
 (or pair of variable sequences).</p>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## See the vignette for complete worked-out examples for different types of </span></span></span>
+<span class="r-in"><span><span class="co">## data sets</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## ----------------------------------------------------------------------- ## </span></span></span>
+<span class="r-in"><span><span class="co">## Process a single-end data set, assume that the full read represents  </span></span></span>
+<span class="r-in"><span><span class="co">## the variable region</span></span></span>
+<span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">digestFastqs</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    fastqForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"cisInput_1.fastq.gz"</span>, </span></span>
+<span class="r-in"><span>                               package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>    elementsForward <span class="op">=</span> <span class="st">"V"</span>, elementLengthsForward <span class="op">=</span> <span class="op">-</span><span class="fl">1</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## Table with read counts and mutant information</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">summaryTable</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                      mutantName</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 AAAACTACCGGAACCGGAGGAGGGAGCTGACTGATACACTCCAAGCGTAGACAGACCAACTAGAAGTTGAGAAGTCTGCTCTGCAGACCGAGATTGCAAACCTGCAGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 AAACACATGTCAACCGGAGGAGGGAGCTGAATGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 AAACCCGCGACAACCGGAGGAGGGAGCTGACTGATACACTGCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAAGCTGCTAAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 AAACCTTGGTGAACCGGAGGAGGGAGCTGACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 AAACTAGCACCAACCGGAGGAGGGAGCTGACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 AAATTCGCGTCAACCGGAGGAGGGAGCTGACTGATACACTCCAAGAGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                        sequence</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 AAAACTACCGGAACCGGAGGAGGGAGCTGACTGATACACTCCAAGCGTAGACAGACCAACTAGAAGTTGAGAAGTCTGCTCTGCAGACCGAGATTGCAAACCTGCAGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 AAACACATGTCAACCGGAGGAGGGAGCTGAATGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 AAACCCGCGACAACCGGAGGAGGGAGCTGACTGATACACTGCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAAGCTGCTAAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 AAACCTTGGTGAACCGGAGGAGGGAGCTGACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 AAACTAGCACCAACCGGAGGAGGGAGCTGACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 AAATTCGCGTCAACCGGAGGAGGGAGCTGACTGATACACTCCAAGAGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   nbrReads maxNbrReads nbrUmis nbrMutBases nbrMutCodons nbrMutAAs varLengths</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1        1           1       0           0            0         0        125</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2        1           1       0           0            0         0        125</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3        1           1       0           0            0         0        125</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        1           1       0           0            0         0        125</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5        1           1       0           0            0         0        125</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6        1           1       0           0            0         0        125</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                mutantNameAA mutationTypes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 KTTGTGGGS*LIHSKRRQTN*KLRSLLCRPRLQTCRRRRKN              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 KHMSTGGGS*MIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 KPATTGGGS*LIHCKRRQTN*KMRSLLCRPRLPSC*RRRKN              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 KPW*TGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 KLAPTGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 KFASTGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                  sequenceAA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 KTTGTGGGS*LIHSKRRQTN*KLRSLLCRPRLQTCRRRRKN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 KHMSTGGGS*MIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 KPATTGGGS*LIHCKRRQTN*KMRSLLCRPRLPSC*RRRKN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 KPW*TGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 KLAPTGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 KFASTGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN</span>
+<span class="r-in"><span><span class="co">## Filter summary</span></span></span>
+<span class="r-in"><span><span class="va">out</span><span class="op">$</span><span class="va">filterSummary</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     1000             0              0                     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f4_nbrNoValidOverlap f5_nbrAvgVarQualTooLow f6_nbrTooManyNinVar</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                    0                      1                 593</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f7_nbrTooManyNinUMI f8_nbrTooManyBestWTHits f9_nbrMutQualTooLow</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                   0                       0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f10a_nbrTooManyMutCodons f10b_nbrTooManyMutBases f11_nbrForbiddenCodons</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                        0                       0                      0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f12_nbrTooManyMutConstant f13_nbrTooManyBestConstantHits nbrRetained</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                         0                              0         406</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## ----------------------------------------------------------------------- ## </span></span></span>
+<span class="r-in"><span><span class="co">## Process a single-end data set, specify the read as a combination of </span></span></span>
+<span class="r-in"><span><span class="co">## UMI, constant region and variable region (skip the first base)</span></span></span>
+<span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">digestFastqs</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    fastqForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"cisInput_1.fastq.gz"</span>, </span></span>
+<span class="r-in"><span>                               package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>    elementsForward <span class="op">=</span> <span class="st">"SUCV"</span>, elementLengthsForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">18</span>, <span class="fl">96</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>    constantForward <span class="op">=</span> <span class="st">"AACCGGAGGAGGGAGCTG"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## Table with read counts and mutant information</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">summaryTable</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                         mutantName</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 AAATATAACGTTGACGATGTAGCTTTAGGTGTCTGTAAAACAGGTGCCGAAGAAGCTGGAGTAACAGAAGTGAGAACCAGCTTATCAGAAAAAAAG</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 AAGAGCACACGTCTGAACTCCAGTCACATCACGATCTCGTATGCCGTCTTCTGCTTGAAAAAAAAAAAAATAAACAAAGTACTTTCTATTTTCTAT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 AAGAGCACACGTCTGAACTCCAGTCACATCACGATCTCGTATGCCGTCTTCTGCTTGAAAAAAAAAAAATAATACTATTTTTTTTGTTTATTTCCA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 AATGATACACTCCAAACGGAGACAGACCAACTAGAATATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCGGAAAGAGGAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 AATGATACACTCCAAGCGGAGACAGAACAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 AATGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                           sequence</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 AAATATAACGTTGACGATGTAGCTTTAGGTGTCTGTAAAACAGGTGCCGAAGAAGCTGGAGTAACAGAAGTGAGAACCAGCTTATCAGAAAAAAAG</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 AAGAGCACACGTCTGAACTCCAGTCACATCACGATCTCGTATGCCGTCTTCTGCTTGAAAAAAAAAAAAATAAACAAAGTACTTTCTATTTTCTAT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 AAGAGCACACGTCTGAACTCCAGTCACATCACGATCTCGTATGCCGTCTTCTGCTTGAAAAAAAAAAAATAATACTATTTTTTTTGTTTATTTCCA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 AATGATACACTCCAAACGGAGACAGACCAACTAGAATATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCGGAAAGAGGAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 AATGATACACTCCAAGCGGAGACAGAACAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 AATGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   nbrReads maxNbrReads nbrUmis nbrMutBases nbrMutCodons nbrMutAAs varLengths</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1        1           1       1           0            0         0         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2        1           1       1           0            0         0         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3        1           1       1           0            0         0         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        1           1       1           0            0         0         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5        1           1       1           0            0         0         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6        2           2       2           0            0         0         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                       mutantNameAA mutationTypes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 KYNVDDVALGVCKTGAEEAGVTEVRTSLSEKK              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 KSTRLNSSHITISYAVFCLKKKKINKVLSIFY              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 KSTRLNSSHITISYAVFCLKKKK*YYFFCLFP              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 NDTLQTETDQLEYEKSALQTEIANLRKEEEKL              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 NDTLQAETEQLEDEKSALQTEIANLLKEKEKL              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 NDTLQAETDQLEDEKSALQTEIANLLKEKEKL              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                         sequenceAA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 KYNVDDVALGVCKTGAEEAGVTEVRTSLSEKK</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 KSTRLNSSHITISYAVFCLKKKKINKVLSIFY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 KSTRLNSSHITISYAVFCLKKKK*YYFFCLFP</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 NDTLQTETDQLEYEKSALQTEIANLRKEEEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 NDTLQAETEQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 NDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-in"><span><span class="co">## Filter summary</span></span></span>
+<span class="r-in"><span><span class="va">out</span><span class="op">$</span><span class="va">filterSummary</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     1000             0              0                     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f4_nbrNoValidOverlap f5_nbrAvgVarQualTooLow f6_nbrTooManyNinVar</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                    0                      3                 591</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f7_nbrTooManyNinUMI f8_nbrTooManyBestWTHits f9_nbrMutQualTooLow</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                   0                       0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f10a_nbrTooManyMutCodons f10b_nbrTooManyMutBases f11_nbrForbiddenCodons</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                        0                       0                      0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f12_nbrTooManyMutConstant f13_nbrTooManyBestConstantHits nbrRetained</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                         0                              0         406</span>
+<span class="r-in"><span><span class="co">## Error statistics</span></span></span>
+<span class="r-in"><span><span class="va">out</span><span class="op">$</span><span class="va">errorStatistics</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     PhredQuality nbrMatchForward nbrMismatchForward nbrMatchReverse</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1              0               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2              1               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3              2               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4              3               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5              4               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6              5               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7              6               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8              7               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9              8               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10             9               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11            10               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12            11               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13            12               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14            13               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15            14             121                 66               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16            15               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17            16               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18            17               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19            18               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20            19               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21            20               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22            21               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23            22              30                  1               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24            23               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25            24               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26            25               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27            26               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28            27             208                 56               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29            28               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30            29               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31            30               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32            31               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33            32               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 34            33             393                 96               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 35            34               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36            35               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 37            36               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 38            37            5929                408               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 39            38               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40            39               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 41            40               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42            41               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 43            42               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 44            43               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 45            44               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 46            45               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 47            46               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 48            47               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 49            48               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 50            49               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 51            50               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 52            51               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 53            52               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 54            53               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 55            54               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 56            55               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 57            56               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 58            57               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 59            58               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 60            59               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 61            60               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 62            61               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 63            62               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 64            63               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 65            64               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 66            65               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 67            66               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 68            67               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 69            68               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 70            69               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 71            70               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 72            71               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 73            72               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 74            73               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 75            74               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 76            75               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 77            76               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 78            77               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 79            78               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 80            79               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 81            80               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 82            81               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 83            82               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 84            83               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 85            84               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 86            85               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 87            86               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 88            87               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 89            88               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 90            89               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 91            90               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 92            91               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 93            92               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 94            93               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 95            94               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 96            95               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 97            96               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 98            97               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 99            98               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 100           99               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     nbrMismatchReverse</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 34                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 35                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 37                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 38                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 39                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 41                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 43                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 44                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 45                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 46                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 47                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 48                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 49                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 50                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 51                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 52                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 53                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 54                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 55                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 56                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 57                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 58                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 59                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 60                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 61                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 62                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 63                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 64                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 65                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 66                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 67                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 68                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 69                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 70                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 71                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 72                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 73                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 74                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 75                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 76                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 77                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 78                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 79                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 80                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 81                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 82                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 83                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 84                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 85                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 86                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 87                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 88                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 89                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 90                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 91                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 92                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 93                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 94                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 95                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 96                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 97                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 98                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 99                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 100                  0</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## ----------------------------------------------------------------------- ## </span></span></span>
+<span class="r-in"><span><span class="co">## Process a single-end data set, specify the read as a combination of </span></span></span>
+<span class="r-in"><span><span class="co">## UMI, constant region and variable region (skip the first base), provide </span></span></span>
+<span class="r-in"><span><span class="co">## the wild type sequence to compare the variable region to and limit the </span></span></span>
+<span class="r-in"><span><span class="co">## number of allowed mutated codons to 1</span></span></span>
+<span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">digestFastqs</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    fastqForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"cisInput_1.fastq.gz"</span>, </span></span>
+<span class="r-in"><span>                               package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>    elementsForward <span class="op">=</span> <span class="st">"SUCV"</span>, elementLengthsForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">18</span>, <span class="fl">96</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>    constantForward <span class="op">=</span> <span class="st">"AACCGGAGGAGGGAGCTG"</span>, </span></span>
+<span class="r-in"><span>    wildTypeForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>FOS <span class="op">=</span> <span class="st">"ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    nbrMutatedCodonsMaxForward <span class="op">=</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## Table with read counts and mutant information</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">summaryTable</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   mutantName</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   FOS.0.WT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  FOS.1.AAT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  FOS.1.ACC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  FOS.1.ACG</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  FOS.1.CCT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 FOS.10.CAT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                           sequence</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 AATGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 ACCGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 ACGGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 CCTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 ACTGATACACTCCAAGCGGAGACAGACCATCTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   nbrReads maxNbrReads nbrUmis nbrMutBases nbrMutCodons nbrMutAAs varLengths</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       30          30      30           0            0         0         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2        2           2       2           1            1         1         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3        1           1       1           1            1         0         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        1           1       1           1            1         0         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5        1           1       1           1            1         1         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6        1           1       1           1            1         1         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   mutantNameAA mutationTypes                       sequenceAA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     FOS.0.WT               TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      FOS.1.N nonsynonymous NDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     FOS.0.WT        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4     FOS.0.WT        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5      FOS.1.P nonsynonymous PDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6     FOS.10.H nonsynonymous TDTLQAETDHLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-in"><span><span class="co">## Filter summary</span></span></span>
+<span class="r-in"><span><span class="va">out</span><span class="op">$</span><span class="va">filterSummary</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     1000             0              0                     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f4_nbrNoValidOverlap f5_nbrAvgVarQualTooLow f6_nbrTooManyNinVar</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                    0                      3                 591</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f7_nbrTooManyNinUMI f8_nbrTooManyBestWTHits f9_nbrMutQualTooLow</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                   0                       0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f10a_nbrTooManyMutCodons f10b_nbrTooManyMutBases f11_nbrForbiddenCodons</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                      297                       0                      0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f12_nbrTooManyMutConstant f13_nbrTooManyBestConstantHits nbrRetained</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                         0                              0         109</span>
+<span class="r-in"><span><span class="co">## Error statistics</span></span></span>
+<span class="r-in"><span><span class="va">out</span><span class="op">$</span><span class="va">errorStatistics</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     PhredQuality nbrMatchForward nbrMismatchForward nbrMatchReverse</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1              0               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2              1               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3              2               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4              3               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5              4               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6              5               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7              6               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8              7               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9              8               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10             9               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11            10               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12            11               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13            12               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14            13               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15            14              17                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16            15               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17            16               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18            17               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19            18               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20            19               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21            20               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22            21               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23            22               5                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24            23               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25            24               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26            25               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27            26               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28            27              31                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29            28               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30            29               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31            30               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32            31               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33            32               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 34            33              88                  1               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 35            34               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36            35               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 37            36               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 38            37            1819                  1               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 39            38               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40            39               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 41            40               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42            41               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 43            42               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 44            43               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 45            44               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 46            45               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 47            46               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 48            47               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 49            48               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 50            49               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 51            50               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 52            51               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 53            52               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 54            53               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 55            54               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 56            55               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 57            56               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 58            57               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 59            58               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 60            59               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 61            60               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 62            61               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 63            62               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 64            63               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 65            64               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 66            65               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 67            66               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 68            67               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 69            68               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 70            69               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 71            70               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 72            71               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 73            72               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 74            73               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 75            74               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 76            75               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 77            76               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 78            77               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 79            78               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 80            79               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 81            80               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 82            81               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 83            82               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 84            83               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 85            84               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 86            85               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 87            86               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 88            87               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 89            88               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 90            89               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 91            90               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 92            91               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 93            92               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 94            93               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 95            94               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 96            95               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 97            96               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 98            97               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 99            98               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 100           99               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     nbrMismatchReverse</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 34                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 35                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 37                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 38                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 39                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 41                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 43                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 44                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 45                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 46                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 47                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 48                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 49                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 50                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 51                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 52                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 53                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 54                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 55                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 56                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 57                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 58                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 59                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 60                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 61                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 62                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 63                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 64                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 65                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 66                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 67                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 68                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 69                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 70                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 71                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 72                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 73                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 74                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 75                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 76                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 77                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 78                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 79                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 80                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 81                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 82                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 83                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 84                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 85                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 86                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 87                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 88                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 89                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 90                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 91                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 92                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 93                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 94                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 95                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 96                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 97                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 98                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 99                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 100                  0</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## ----------------------------------------------------------------------- ## </span></span></span>
+<span class="r-in"><span><span class="co">## Process a paired-end data set where both the forward and reverse reads </span></span></span>
+<span class="r-in"><span><span class="co">## contain the same variable region and thus should be merged to generate </span></span></span>
+<span class="r-in"><span><span class="co">## the final variable sequence, specify the reads as a combination of </span></span></span>
+<span class="r-in"><span><span class="co">## UMI, constant region and variable region (skip the first and/or last</span></span></span>
+<span class="r-in"><span><span class="co">## base), provide the wild type sequence to compare the variable region to </span></span></span>
+<span class="r-in"><span><span class="co">## and limit the number of allowed mutated codons to 1</span></span></span>
+<span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">digestFastqs</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    fastqForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"cisInput_1.fastq.gz"</span>, </span></span>
+<span class="r-in"><span>                               package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    fastqReverse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"cisInput_2.fastq.gz"</span>,</span></span>
+<span class="r-in"><span>                               package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>    mergeForwardReverse <span class="op">=</span> <span class="cn">TRUE</span>, revComplForward <span class="op">=</span> <span class="cn">FALSE</span>, revComplReverse <span class="op">=</span> <span class="cn">TRUE</span>, </span></span>
+<span class="r-in"><span>    elementsForward <span class="op">=</span> <span class="st">"SUCV"</span>, elementLengthsForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">18</span>, <span class="fl">96</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    elementsReverse <span class="op">=</span> <span class="st">"SUCVS"</span>, elementLengthsReverse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">7</span>, <span class="fl">17</span>, <span class="fl">96</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    constantForward <span class="op">=</span> <span class="st">"AACCGGAGGAGGGAGCTG"</span>, </span></span>
+<span class="r-in"><span>    constantReverse <span class="op">=</span> <span class="st">"GAGTTCATCCTGGCAGC"</span>,</span></span>
+<span class="r-in"><span>    wildTypeForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>FOS <span class="op">=</span> <span class="st">"ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    nbrMutatedCodonsMaxForward <span class="op">=</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## Table with read counts and mutant information</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">summaryTable</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   mutantName</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   FOS.0.WT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  FOS.1.AAT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  FOS.1.ACC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  FOS.1.ACG</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  FOS.1.CCT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  FOS.1.CGT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                           sequence</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 AATGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 ACCGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 ACGGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 CCTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 CGTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   nbrReads maxNbrReads nbrUmis nbrMutBases nbrMutCodons nbrMutAAs varLengths</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       77          77      77           0            0         0         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2        2           2       2           1            1         1         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3        2           2       2           1            1         0         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        1           1       1           1            1         0         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5        1           1       1           1            1         1         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6        1           1       1           2            1         1         96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   mutantNameAA mutationTypes                       sequenceAA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     FOS.0.WT               TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      FOS.1.N nonsynonymous NDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     FOS.0.WT        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4     FOS.0.WT        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5      FOS.1.P nonsynonymous PDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6      FOS.1.R nonsynonymous RDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-in"><span><span class="co">## Filter summary</span></span></span>
+<span class="r-in"><span><span class="va">out</span><span class="op">$</span><span class="va">filterSummary</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     1000             0              0                     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f4_nbrNoValidOverlap f5_nbrAvgVarQualTooLow f6_nbrTooManyNinVar</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                    0                      0                  52</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f7_nbrTooManyNinUMI f8_nbrTooManyBestWTHits f9_nbrMutQualTooLow</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                   0                       0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f10a_nbrTooManyMutCodons f10b_nbrTooManyMutBases f11_nbrForbiddenCodons</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                      699                       0                      0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f12_nbrTooManyMutConstant f13_nbrTooManyBestConstantHits nbrRetained</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                         0                              0         249</span>
+<span class="r-in"><span><span class="co">## Error statistics</span></span></span>
+<span class="r-in"><span><span class="va">out</span><span class="op">$</span><span class="va">errorStatistics</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     PhredQuality nbrMatchForward nbrMismatchForward nbrMatchReverse</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1              0               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2              1               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3              2               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4              3               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5              4               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6              5               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7              6               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8              7               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9              8               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10             9               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11            10               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12            11               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13            12               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14            13               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15            14              69                  2              53</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16            15               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17            16               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18            17               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19            18               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20            19               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21            20               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22            21               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23            22              23                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24            23               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25            24               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26            25               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27            26               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28            27             115                  1              74</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29            28               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30            29               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31            30               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32            31               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33            32               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 34            33             252                  1             143</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 35            34               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36            35               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 37            36               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 38            37            4017                  2            3930</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 39            38               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40            39               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 41            40               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42            41               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 43            42               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 44            43               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 45            44               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 46            45               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 47            46               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 48            47               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 49            48               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 50            49               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 51            50               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 52            51               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 53            52               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 54            53               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 55            54               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 56            55               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 57            56               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 58            57               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 59            58               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 60            59               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 61            60               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 62            61               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 63            62               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 64            63               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 65            64               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 66            65               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 67            66               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 68            67               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 69            68               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 70            69               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 71            70               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 72            71               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 73            72               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 74            73               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 75            74               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 76            75               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 77            76               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 78            77               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 79            78               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 80            79               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 81            80               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 82            81               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 83            82               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 84            83               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 85            84               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 86            85               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 87            86               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 88            87               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 89            88               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 90            89               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 91            90               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 92            91               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 93            92               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 94            93               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 95            94               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 96            95               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 97            96               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 98            97               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 99            98               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 100           99               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     nbrMismatchReverse</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                    6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15                   9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 34                   3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 35                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 37                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 38                  15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 39                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 41                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 43                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 44                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 45                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 46                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 47                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 48                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 49                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 50                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 51                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 52                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 53                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 54                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 55                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 56                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 57                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 58                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 59                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 60                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 61                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 62                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 63                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 64                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 65                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 66                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 67                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 68                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 69                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 70                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 71                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 72                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 73                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 74                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 75                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 76                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 77                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 78                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 79                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 80                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 81                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 82                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 83                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 84                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 85                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 86                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 87                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 88                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 89                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 90                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 91                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 92                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 93                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 94                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 95                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 96                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 97                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 98                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 99                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 100                  0</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## ----------------------------------------------------------------------- ## </span></span></span>
+<span class="r-in"><span><span class="co">## Process a paired-end data set where the forward and reverse reads </span></span></span>
+<span class="r-in"><span><span class="co">## contain variable regions corresponding to different proteins, and thus </span></span></span>
+<span class="r-in"><span><span class="co">## should not be merged, specify the reads as a combination of </span></span></span>
+<span class="r-in"><span><span class="co">## UMI, constant region and variable region (skip the first base), provide </span></span></span>
+<span class="r-in"><span><span class="co">## the wild type sequence to compare the variable region to and limit the </span></span></span>
+<span class="r-in"><span><span class="co">## number of allowed mutated codons to 1</span></span></span>
+<span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">digestFastqs</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    fastqForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"transInput_1.fastq.gz"</span>, </span></span>
+<span class="r-in"><span>                               package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    fastqReverse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"transInput_2.fastq.gz"</span>,</span></span>
+<span class="r-in"><span>                               package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>    mergeForwardReverse <span class="op">=</span> <span class="cn">FALSE</span>,  </span></span>
+<span class="r-in"><span>    elementsForward <span class="op">=</span> <span class="st">"SUCV"</span>, elementLengthsForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">18</span>, <span class="fl">96</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    elementsReverse <span class="op">=</span> <span class="st">"SUCV"</span>, elementLengthsReverse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">8</span>, <span class="fl">20</span>, <span class="fl">96</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    constantForward <span class="op">=</span> <span class="st">"AACCGGAGGAGGGAGCTG"</span>, </span></span>
+<span class="r-in"><span>    constantReverse <span class="op">=</span> <span class="st">"GAAAAAGGAAGCTGGAGAGA"</span>,</span></span>
+<span class="r-in"><span>    wildTypeForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>FOS <span class="op">=</span> <span class="st">"ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    wildTypeReverse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>JUN <span class="op">=</span> <span class="st">"ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT"</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>    nbrMutatedCodonsMaxForward <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>    nbrMutatedCodonsMaxReverse <span class="op">=</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## Table with read counts and mutant information</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">summaryTable</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            mutantName</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 FOS.0.WT_JUN.13.CCC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 FOS.0.WT_JUN.13.CTC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  FOS.0.WT_JUN.2.TCC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 FOS.0.WT_JUN.20.ACC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 FOS.0.WT_JUN.30.AGG</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 FOS.0.WT_JUN.30.GGG</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                                                                                            sequence</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA_ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAACCCCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA_ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAACTCCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA_ATCTCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA_ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGACCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA_ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGAGGCAGCTT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA_ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGGGCAGCTT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   nbrReads maxNbrReads nbrUmis nbrMutBases nbrMutCodons nbrMutAAs varLengths</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1        1           1       1           2            1         1      96_96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2        1           1       1           3            1         1      96_96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3        1           1       1           1            1         1      96_96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        1           1       1           1            1         1      96_96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5        1           1       1           3            1         1      96_96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6        1           1       1           2            1         1      96_96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        mutantNameAA mutationTypes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 FOS.0.WT_JUN.13.P nonsynonymous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 FOS.0.WT_JUN.13.L nonsynonymous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  FOS.0.WT_JUN.2.S nonsynonymous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 FOS.0.WT_JUN.20.T nonsynonymous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 FOS.0.WT_JUN.30.R nonsynonymous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 FOS.0.WT_JUN.30.G nonsynonymous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                          sequenceAA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_IARLEEKVKTLKPQNSELASTANMLREQVAQL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_IARLEEKVKTLKLQNSELASTANMLREQVAQL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_ISRLEEKVKTLKAQNSELASTANMLREQVAQL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_IARLEEKVKTLKAQNSELATTANMLREQVAQL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_IARLEEKVKTLKAQNSELASTANMLREQVRQL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_IARLEEKVKTLKAQNSELASTANMLREQVGQL</span>
+<span class="r-in"><span><span class="co">## Filter summary</span></span></span>
+<span class="r-in"><span><span class="va">out</span><span class="op">$</span><span class="va">filterSummary</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     1000             0              0                     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f4_nbrNoValidOverlap f5_nbrAvgVarQualTooLow f6_nbrTooManyNinVar</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                    0                     17                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f7_nbrTooManyNinUMI f8_nbrTooManyBestWTHits f9_nbrMutQualTooLow</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                   0                       0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f10a_nbrTooManyMutCodons f10b_nbrTooManyMutBases f11_nbrForbiddenCodons</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                      698                       0                      0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   f12_nbrTooManyMutConstant f13_nbrTooManyBestConstantHits nbrRetained</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                         0                              0         285</span>
+<span class="r-in"><span><span class="co">## Error statistics</span></span></span>
+<span class="r-in"><span><span class="va">out</span><span class="op">$</span><span class="va">errorStatistics</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     PhredQuality nbrMatchForward nbrMismatchForward nbrMatchReverse</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1              0               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2              1               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3              2               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4              3               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5              4               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6              5               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7              6               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8              7               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9              8               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10             9               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11            10               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12            11               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13            12               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14            13               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15            14             160                 11             206</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16            15               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17            16               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18            17               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19            18               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20            19               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21            20               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22            21               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23            22              53                  0              14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24            23               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25            24               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26            25               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27            26               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28            27             307                  4             486</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29            28               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30            29               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31            30               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32            31               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33            32               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 34            33             486                  0             468</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 35            34               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36            35               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 37            36               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 38            37            4108                  1            4505</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 39            38               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40            39               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 41            40               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42            41               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 43            42               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 44            43               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 45            44               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 46            45               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 47            46               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 48            47               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 49            48               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 50            49               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 51            50               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 52            51               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 53            52               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 54            53               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 55            54               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 56            55               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 57            56               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 58            57               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 59            58               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 60            59               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 61            60               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 62            61               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 63            62               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 64            63               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 65            64               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 66            65               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 67            66               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 68            67               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 69            68               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 70            69               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 71            70               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 72            71               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 73            72               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 74            73               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 75            74               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 76            75               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 77            76               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 78            77               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 79            78               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 80            79               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 81            80               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 82            81               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 83            82               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 84            83               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 85            84               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 86            85               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 87            86               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 88            87               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 89            88               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 90            89               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 91            90               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 92            91               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 93            92               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 94            93               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 95            94               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 96            95               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 97            96               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 98            97               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 99            98               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 100           99               0                  0               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     nbrMismatchReverse</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9                    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15                  17</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28                   3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 34                   1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 35                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 37                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 38                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 39                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 41                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 43                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 44                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 45                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 46                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 47                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 48                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 49                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 50                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 51                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 52                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 53                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 54                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 55                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 56                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 57                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 58                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 59                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 60                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 61                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 62                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 63                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 64                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 65                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 66                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 67                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 68                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 69                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 70                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 71                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 72                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 73                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 74                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 75                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 76                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 77                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 78                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 79                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 80                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 81                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 82                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 83                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 84                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 85                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 86                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 87                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 88                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 89                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 90                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 91                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 92                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 93                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 94                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 95                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 96                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 97                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 98                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 99                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 100                  0</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>

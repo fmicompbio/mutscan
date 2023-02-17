@@ -18,7 +18,7 @@ as described by Diss and Lehner (2018)."><!-- mathjax --><script src="https://cd
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.33</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.34</span>
       </span>
     </div>
 
@@ -117,6 +117,37 @@ If NULL, no division by WT scores will be done.</p></dd>
     <p>Michael Stadler and Charlotte Soneson</p>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE102901_cis_se.rds"</span>, </span></span>
+<span class="r-in"><span>                          package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## Check that the wildtype sequence is present in the data</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="st">"f.0.WT"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## Calculate PPI scores as defined in Diss &amp; Lehner (2018)</span></span></span>
+<span class="r-in"><span><span class="va">ppis</span> <span class="op">&lt;-</span> <span class="fu">calculateFitnessScore</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    se <span class="op">=</span> <span class="va">se</span>, pairingCol <span class="op">=</span> <span class="st">"Replicate"</span>, </span></span>
+<span class="r-in"><span>    ODCols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"OD1"</span>, <span class="st">"OD2"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    comparison <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Condition"</span>, <span class="st">"cis_output"</span>, <span class="st">"cis_input"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    WTrows <span class="op">=</span> <span class="st">"f.0.WT"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## Matrix with PPI scores for each replicate</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ppis</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         cis_output_vs_cis_input_repl1 cis_output_vs_cis_input_repl2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT                      1.0000000                     1.0000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC                     0.9763609                     0.9173416</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG                     0.8887226                     0.8775120</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC                     1.0105154                     1.0096229</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACG                     0.9881472                     0.9905645</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AGC                     0.8233725                     0.8718729</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         cis_output_vs_cis_input_repl3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT                      1.0000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC                     0.8861805</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG                     0.9407093</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC                     1.0188111</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACG                     0.9884163</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AGC                     0.9669444</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
