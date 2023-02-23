@@ -1,3 +1,11 @@
+# mutscan 0.2.35
+
+* Add alternative names for variants (including HGVS identifiers)
+
+# mutscan 0.2.34
+
+* Expand examples in function documentation
+
 # mutscan 0.2.33
 
 * Replace Matrix.utils::aggregate.Matrix (removed from CRAN) by DelayedArray::rowsum
