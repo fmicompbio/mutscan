@@ -33,7 +33,7 @@
 #' framework (edgeR or limma). 
 #' 
 #' @importFrom edgeR DGEList scaleOffset estimateDisp glmQLFit glmQLFTest
-#'     topTags predFC topTags calcNormFactors effectiveLibSizes
+#'     topTags predFC topTags calcNormFactors getNormLibSizes
 #' @importFrom SummarizedExperiment colData assay assayNames
 #' @importFrom limma voom eBayes topTable lmFit contrasts.fit
 #' @importFrom csaw normOffsets
@@ -171,7 +171,7 @@ calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
             vm <- limma::voom(dge, design = design, lib.size = exp(dge$offset))
         } else {
             vm <- limma::voom(dge, design = design,
-                              lib.size = edgeR::effectiveLibSizes(dge))
+                              lib.size = edgeR::getNormLibSizes(dge))
         }
         fit <- limma::lmFit(vm, design = design)
         if (!is.null(contrast)) {
