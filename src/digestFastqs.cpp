@@ -117,6 +117,33 @@ std::map<char,std::vector<char>> initializeIUPAC() {
   return IUPAC;
 }
 
+// initialize one- to three-letter amino acid conversion table
+std::map<char,std::string> initializeThreeAA() {
+    std::map<char,std::string> threeAA;
+    threeAA['A'] = std::string("Ala");
+    threeAA['R'] = std::string("Arg");
+    threeAA['N'] = std::string("Asn");
+    threeAA['D'] = std::string("Asp");
+    threeAA['C'] = std::string("Cys");
+    threeAA['Q'] = std::string("Gln");
+    threeAA['E'] = std::string("Glu");
+    threeAA['G'] = std::string("Gly");
+    threeAA['H'] = std::string("His");
+    threeAA['I'] = std::string("Ile");
+    threeAA['L'] = std::string("Leu");
+    threeAA['K'] = std::string("Lys");
+    threeAA['M'] = std::string("Met");
+    threeAA['F'] = std::string("Phe");
+    threeAA['P'] = std::string("Pro");
+    threeAA['S'] = std::string("Ser");
+    threeAA['T'] = std::string("Thr");
+    threeAA['W'] = std::string("Trp");
+    threeAA['Y'] = std::string("Tyr");
+    threeAA['V'] = std::string("Val");
+    threeAA['*'] = std::string("*");
+    return threeAA;
+}
+
 // split string by delimiter (code from https://www.fluentcpp.com/2017/04/21/how-to-split-a-string-in-c/)
 std::vector<std::string> split(const std::string& s, char delimiter) {
   std::vector<std::string> tokens;
@@ -199,19 +226,40 @@ std::string translateString(std::string& s) {
 
 // compare read to wildtype sequence,
 // identify mutated bases/codons, filter, update counters
-// and add to the name
+// and add to the name (mutantName* may be empty if no mutations are found,
+// except mutantName*HGVS will be set to the nearest wildtype name := `codonPrefix`)
 // returns true if the read needs to be filtered out
 // (and a counter has been incremented)
+// TODO:
+// - instead of conditionally creating mutantName,
+//   build mutantNameBase and mutantNameCodon in parallel and
+//   conditionally set to mutantName base at the end
+// - at the end, take mutantNameBase and mutantNameAA and
+//   create mutantNameBaseHGVS and mutantNameAAHGVS from it (helper function
+//   that takes name and wt/mutant sequences as input):
+//   * always using `codonPrefix` as the reference sequence name
+//   * if it contains no ':c', add it for mutantNameBaseHGVS
+//   * replace ':c' by ':p' for mutantNameAAHGVS (or add if there is no ':c')
+//   * use `threeAA` for mapping one- to three-letter aa
+//   * follow future standard: encode base substitutions individually, combine
+//     all that are spaced less than 2nt appart into a delins
+//   * make sure all names (including *HGVS) always end with a final '_'
+//     (except non-HGVS names if there are no mutations)
+// - fix tests
+// - add tests for *HGVS
 bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
                        const std::vector<int> varIntQual, const double mutatedPhredMin,
                        const int nbrMutatedCodonsMax, const std::set<std::string> &forbiddenCodons,
                        const std::string codonPrefix, const int nbrMutatedBasesMax,
                        int &nMutQualTooLow, int &nTooManyMutCodons, int &nForbiddenCodons,
                        int &nTooManyMutBases, std::string &mutantName, 
-                       std::string &mutantNameAA, int &nMutBases,
+                       std::string &mutantNameBase, std::string &mutantNameCodon,
+                       std::string &mutantNameBaseHGVS, std::string &mutantNameAA,
+                       std::string &mutantNameAAHGVS, int &nMutBases,
                        int &nMutCodons, int &nMutAAs, std::set<std::string> &mutationTypes, 
                        const std::string mutNameDelimiter,
-                       const bool collapseToWT) {
+                       const bool collapseToWT,
+                       const std::map<char, std::string> &threeAA) {
   // exactly one of nbrMutatedCodonsMax or nbrMutatedBasesMax should be -1 (checked in the R code).
   // the one that is not -1 will be used for filtering and naming the mutant
 
@@ -388,7 +436,11 @@ struct mutantInfo {
   std::set<int> nMutAAs;
   std::set<std::string> mutationTypes;
   std::set<std::string> sequence; // set of sequences for that mutant
+  std::set<std::string> mutantNameBase;
+  std::set<std::string> mutantNameCodon;
+  std::set<std::string> mutantNameBaseHGVS;
   std::set<std::string> mutantNameAA;
+  std::set<std::string> mutantNameAAHGVS;
   std::set<std::string> sequenceAA;
   std::string varLengths;         // lengths of individual variable segments (e.g. "10,20" or "10,20_20,10")
 };
@@ -651,7 +703,8 @@ bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQu
 
   // find overlap (score := number of overlap bases - number of mismatches in overlap)
   size_t o, i, j;
-  int bestScore = -1, bestO = -1, score, cumpos = 0, matchedlen = 0;
+  size_t cumpos = 0, bestO = 0, matchedlen = 0;
+  int bestScore = -1, score;
   double fracmm;
 
   for (o = maxOverlap; o >= minOverlap; o--) {
@@ -682,7 +735,7 @@ bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQu
       cumpos += varLengthsForward[i];
       if (cumpos > lenF - bestO) { // break within overlap
         if (cumpos < lenF &&
-            cumpos - (lenF - bestO) - matchedlen != varLengthsReverse[i - o]) {
+            (int)(cumpos - (lenF - bestO) - matchedlen) != varLengthsReverse[i - o]) {
           return true; // no valid overlap possible
         } else if (cumpos < lenF) {
           matchedlen += varLengthsReverse[i - o];
@@ -927,6 +980,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
 
   // Biostrings::IUPAC_CODE_MAP
   std::map<char,std::vector<char>> IUPAC = initializeIUPAC();
+  std::map<char, std::string> threeAA = initializeThreeAA();
 
   // --------------------------------------------------------------------------
   // declare variables
@@ -1083,7 +1137,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           std::string varSeqForward = "", varSeqReverse = "", varQualForward = "";
           std::string varQualReverse = "", umiSeq = "", constSeqForward = "";
           std::string constSeqReverse = "", constQualForward = "", constQualReverse = "";
-          std::string mutantName = "", mutantNameAA = "";
+          std::string mutantName = "", mutantNameBase = "", mutantNameCodon = "",
+              mutantNameBaseHGVS = "", mutantNameAA = "", mutantNameAAHGVS = "";
           std::vector<int> varLengthsForward, varLengthsReverse;
           std::string varLengthsForwardStr = "", varLengthsReverseStr = "";
           int nMutBases = 0, nMutCodons = 0, nMutAAs = 0;
@@ -1279,15 +1334,21 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                                   mutatedPhredMinForward, nbrMutatedCodonsMaxForward, forbiddenCodonsForward,
                                   wtNameForward, nbrMutatedBasesMaxForward, nMutQualTooLow,
                                   nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, 
-                                  mutantName, mutantNameAA, nMutBases, nMutCodons, 
-                                  nMutAAs, mutationTypes, mutNameDelimiter, collapseToWTForward)) {
+                                  mutantName, mutantNameBase, mutantNameCodon,
+                                  mutantNameBaseHGVS, mutantNameAA, mutantNameAAHGVS,
+                                  nMutBases, nMutCodons, 
+                                  nMutAAs, mutationTypes, mutNameDelimiter, collapseToWTForward,
+                                  threeAA)) {
               // read is to be filtered out
               chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
               continue;
             }
           } else if (varSeqForward.length() > 0) { // variable seq, but no reference -> add variable seq to mutantName
             mutantName += (varSeqForward + std::string("_"));
+            mutantNameBase += (varSeqForward + std::string("_"));
+            mutantNameCodon += (varSeqForward + std::string("_"));
             mutantNameAA += (translateString(varSeqForward) + std::string("_"));
+            // don't set mutantNameBaseHGVS, mutantNameAAHGVS if there is no wt
           }
           // convert varLengthsForward to string
           if (varLengthsForward.size() > 0) {
@@ -1350,15 +1411,21 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                                   mutatedPhredMinReverse, nbrMutatedCodonsMaxReverse, forbiddenCodonsReverse,
                                   wtNameReverse, nbrMutatedBasesMaxReverse, nMutQualTooLow,
                                   nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, 
-                                  mutantName, mutantNameAA, nMutBases, nMutCodons, 
-                                  nMutAAs, mutationTypes, mutNameDelimiter, collapseToWTReverse)) {
+                                  mutantName, mutantNameBase, mutantNameCodon,
+                                  mutantNameBaseHGVS, mutantNameAA, mutantNameAAHGVS,
+                                  nMutBases, nMutCodons, 
+                                  nMutAAs, mutationTypes, mutNameDelimiter, collapseToWTReverse,
+                                  threeAA)) {
               // read is to be filtered out
               chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "mutQualTooLow_tooManyMutCodons_forbiddenCodons");
               continue;
             }
           } else if (!noReverse && varSeqReverse.length() > 0) { // variable seq, but no reference -> add variable seq to mutantName
             mutantName += (varSeqReverse + std::string("_"));
+            mutantNameBase += (varSeqReverse + std::string("_"));
+            mutantNameCodon += (varSeqReverse + std::string("_"));
             mutantNameAA += (translateString(varSeqReverse) + std::string("_"));
+            // don't set mutantNameBaseHGVS, mutantNameAAHGVS if there is no wt
           }
           // convert varLengthsReverse to string
           if (varLengthsReverse.size() > 0) {
@@ -1483,12 +1550,20 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           // ... create final mutant name
           if (mutantName.length() > 0) { // we have a least one mutation, or sequence-based name
             mutantName.pop_back(); // remove '_' at the end
+            mutantNameBase.pop_back(); // remove '_' at the end
+            mutantNameCodon.pop_back(); // remove '_' at the end
           } else {
             // will we ever go in here?
             if (wildTypeForward[0].compare("") != 0 ||
                 (!noReverse && wildTypeReverse[0].compare("") != 0)) {
               mutantName = "WT";
+              mutantNameBase = "WT";
+              mutantNameCodon = "WT";
             }
+          }
+          if (mutantNameBaseHGVS.length() > 0) { // we have a (closest) wiltype name
+            mutantNameBaseHGVS.pop_back(); // remove '_' at the end
+            mutantNameAAHGVS.pop_back(); // remove '_' at the end
           }
           if (mutantNameAA.length() > 0) { // we have a least one mutation, or sequence-based name
             mutantNameAA.pop_back(); // remove '_' at the end
@@ -1499,7 +1574,6 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
               mutantNameAA = "WT";
             }
           }
-          
           if (!noReverse) { // "trans" experiment
             varSeqForward += (std::string("_") + varSeqReverse);
             varLengthsForwardStr += (std::string("_") + varLengthsReverseStr);
@@ -1521,7 +1595,11 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             (*mutantSummaryParIt).second.nMutCodons.insert(nMutCodons);
             (*mutantSummaryParIt).second.nMutAAs.insert(nMutAAs);
             (*mutantSummaryParIt).second.mutationTypes.insert(mutationTypes.begin(), mutationTypes.end());
+            (*mutantSummaryParIt).second.mutantNameBase.insert(mutantNameBase);
+            (*mutantSummaryParIt).second.mutantNameCodon.insert(mutantNameCodon);
+            (*mutantSummaryParIt).second.mutantNameBaseHGVS.insert(mutantNameBaseHGVS);
             (*mutantSummaryParIt).second.mutantNameAA.insert(mutantNameAA);
+            (*mutantSummaryParIt).second.mutantNameAAHGVS.insert(mutantNameAAHGVS);
             (*mutantSummaryParIt).second.sequenceAA.insert(translateString(varSeqForward));
           } else {
             // ... ... create mutantInfo instance for this mutant and add it to mutantSummary
@@ -1537,7 +1615,11 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             newMutant.sequence.insert(varSeqForward);
             newMutant.varLengths = varLengthsForwardStr;
             newMutant.mutationTypes.insert(mutationTypes.begin(), mutationTypes.end());
+            newMutant.mutantNameBase.insert(mutantNameBase);
+            newMutant.mutantNameCodon.insert(mutantNameCodon);
+            newMutant.mutantNameBaseHGVS.insert(mutantNameBaseHGVS);
             newMutant.mutantNameAA.insert(mutantNameAA);
+            newMutant.mutantNameAAHGVS.insert(mutantNameAAHGVS);
             newMutant.sequenceAA.insert(translateString(varSeqForward));
             mutantSummary.insert(std::pair<std::string,mutantInfo>(mutantName, newMutant));
           }
@@ -1715,9 +1797,21 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             (*collapsedMutantSummaryIt).second.mutationTypes.insert(
                 (*mutantSummaryIt).second.mutationTypes.begin(),
                 (*mutantSummaryIt).second.mutationTypes.end());
+            (*collapsedMutantSummaryIt).second.mutantNameBase.insert(
+                (*mutantSummaryIt).second.mutantNameBase.begin(),
+                (*mutantSummaryIt).second.mutantNameBase.end());
+            (*collapsedMutantSummaryIt).second.mutantNameCodon.insert(
+                (*mutantSummaryIt).second.mutantNameCodon.begin(),
+                (*mutantSummaryIt).second.mutantNameCodon.end());
+            (*collapsedMutantSummaryIt).second.mutantNameBaseHGVS.insert(
+                (*mutantSummaryIt).second.mutantNameBaseHGVS.begin(),
+                (*mutantSummaryIt).second.mutantNameBaseHGVS.end());
             (*collapsedMutantSummaryIt).second.mutantNameAA.insert(
                 (*mutantSummaryIt).second.mutantNameAA.begin(),
                 (*mutantSummaryIt).second.mutantNameAA.end());
+            (*collapsedMutantSummaryIt).second.mutantNameAAHGVS.insert(
+                (*mutantSummaryIt).second.mutantNameAAHGVS.begin(),
+                (*mutantSummaryIt).second.mutantNameAAHGVS.end());
             (*collapsedMutantSummaryIt).second.sequenceAA.insert(
                 (*mutantSummaryIt).second.sequenceAA.begin(),
                 (*mutantSummaryIt).second.sequenceAA.end());
@@ -1791,7 +1885,9 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   std::vector<int> dfReads(dfLen, 0), dfUmis(dfLen, 0), dfMaxReads(dfLen, 0);
   std::vector<std::string> dfMutBases(dfLen, ""), dfMutCodons(dfLen, ""); 
   std::vector<std::string> dfMutAAs(dfLen, ""), dfVarLengths(dfLen, "");
-  std::vector<std::string> dfMutantNameAA(dfLen, ""), dfSeqAA(dfLen, "");
+  std::vector<std::string> dfMutantNameBase(dfLen, ""), dfMutantNameCodon(dfLen, "");
+  std::vector<std::string> dfMutantNameBaseHGVS(dfLen, ""), dfMutantNameAA(dfLen, "");
+  std::vector<std::string> dfMutantNameAAHGVS(dfLen, ""), dfSeqAA(dfLen, "");
   std::vector<std::string> dfMutationTypes(dfLen, "");
   int j = 0;
   for (mutantSummaryIt = mutantSummary.begin(); mutantSummaryIt != mutantSummary.end(); mutantSummaryIt++) {
@@ -1806,15 +1902,59 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
       collapsedSequence.pop_back(); // remove final ","
     }
     
+    // mutantNameBase
+    std::vector<std::string> mutantNameBaseVector((*mutantSummaryIt).second.mutantNameBase.begin(),
+                                                  (*mutantSummaryIt).second.mutantNameBase.end());
+    std::string collapsedMutantNameBase = "";
+    for (size_t i = 0; i < mutantNameBaseVector.size(); i++) {
+        collapsedMutantNameBase += mutantNameBaseVector[i] + ",";
+    }
+    if (!collapsedMutantNameBase.empty()) {
+        collapsedMutantNameBase.pop_back(); // remove final ","
+    }
+    
+    // mutantNameCodon
+    std::vector<std::string> mutantNameCodonVector((*mutantSummaryIt).second.mutantNameCodon.begin(),
+                                                   (*mutantSummaryIt).second.mutantNameCodon.end());
+    std::string collapsedMutantNameCodon = "";
+    for (size_t i = 0; i < mutantNameCodonVector.size(); i++) {
+        collapsedMutantNameCodon += mutantNameCodonVector[i] + ",";
+    }
+    if (!collapsedMutantNameCodon.empty()) {
+        collapsedMutantNameCodon.pop_back(); // remove final ","
+    }
+    
+    // mutantNameBaseHGVS
+    std::vector<std::string> mutantNameBaseHGVSVector((*mutantSummaryIt).second.mutantNameBaseHGVS.begin(),
+                                                      (*mutantSummaryIt).second.mutantNameBaseHGVS.end());
+    std::string collapsedMutantNameBaseHGVS = "";
+    for (size_t i = 0; i < mutantNameBaseHGVSVector.size(); i++) {
+        collapsedMutantNameBaseHGVS += mutantNameBaseHGVSVector[i] + ",";
+    }
+    if (!collapsedMutantNameBaseHGVS.empty()) {
+        collapsedMutantNameBaseHGVS.pop_back(); // remove final ","
+    }
+    
     // mutantNameAA
     std::vector<std::string> mutantNameAAVector((*mutantSummaryIt).second.mutantNameAA.begin(),
                                                 (*mutantSummaryIt).second.mutantNameAA.end());
     std::string collapsedMutantNameAA = "";
     for (size_t i = 0; i < mutantNameAAVector.size(); i++) {
-      collapsedMutantNameAA += mutantNameAAVector[i] + ",";
+        collapsedMutantNameAA += mutantNameAAVector[i] + ",";
     }
     if (!collapsedMutantNameAA.empty()) {
-      collapsedMutantNameAA.pop_back(); // remove final ","
+        collapsedMutantNameAA.pop_back(); // remove final ","
+    }
+    
+    // mutantNameAAHGVS
+    std::vector<std::string> mutantNameAAHGVSVector((*mutantSummaryIt).second.mutantNameAAHGVS.begin(),
+                                                    (*mutantSummaryIt).second.mutantNameAAHGVS.end());
+    std::string collapsedMutantNameAAHGVS = "";
+    for (size_t i = 0; i < mutantNameAAHGVSVector.size(); i++) {
+      collapsedMutantNameAAHGVS += mutantNameAAHGVSVector[i] + ",";
+    }
+    if (!collapsedMutantNameAAHGVS.empty()) {
+      collapsedMutantNameAAHGVS.pop_back(); // remove final ","
     }
     
     // mutationTypes
@@ -1880,7 +2020,11 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     dfMutBases[j] = collapsedNMutBases;
     dfMutCodons[j] = collapsedNMutCodons;
     dfMutAAs[j] = collapsedNMutAAs;
+    dfMutantNameBase[j] = collapsedMutantNameBase;
+    dfMutantNameCodon[j] = collapsedMutantNameCodon;
+    dfMutantNameBaseHGVS[j] = collapsedMutantNameBaseHGVS;
     dfMutantNameAA[j] = collapsedMutantNameAA;
+    dfMutantNameAAHGVS[j] = collapsedMutantNameAAHGVS;
     dfMutationTypes[j] = collapsedMutationTypes;
     dfSeqAA[j] = collapsedSequenceAA;
     dfVarLengths[j] = (*mutantSummaryIt).second.varLengths;
@@ -1920,7 +2064,11 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                                    Named("nbrMutCodons") = dfMutCodons,
                                    Named("nbrMutAAs") = dfMutAAs,
                                    Named("varLengths") = dfVarLengths,
+                                   Named("mutantNameBase") = dfMutantNameBase,
+                                   Named("mutantNameCodon") = dfMutantNameCodon,
+                                   Named("mutantNameBaseHGVS") = dfMutantNameBaseHGVS,
                                    Named("mutantNameAA") = dfMutantNameAA,
+                                   Named("mutantNameAAHGVS") = dfMutantNameAAHGVS,
                                    Named("mutationTypes") = dfMutationTypes,
                                    Named("sequenceAA") = dfSeqAA,
                                    Named("stringsAsFactors") = false);
