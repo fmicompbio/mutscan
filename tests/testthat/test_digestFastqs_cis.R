@@ -110,6 +110,14 @@ test_that("digestFastqs works as expected for cis experiments", {
                "f.4.CGC")
   expect_equal(res$summaryTable$mutantNameAA[res$summaryTable$sequence == example_seq],
                "f.4.R")
+  expect_equal(res$summaryTable$mutantNameBase[res$summaryTable$sequence == example_seq],
+               "f.11.G")
+  expect_equal(res$summaryTable$mutantNameCodon[res$summaryTable$sequence == example_seq],
+               "f.4.CGC")
+  expect_equal(res$summaryTable$mutantNameBaseHGVS[res$summaryTable$sequence == example_seq],
+               "f:c.11T>G")
+  expect_equal(res$summaryTable$mutantNameAAHGVS[res$summaryTable$sequence == example_seq],
+               "f:p.(Leu4Arg)")
   
   expect_equal(res$summaryTable$sequenceAA, 
                as.character(Biostrings::translate(
@@ -220,7 +228,9 @@ test_that("digestFastqs works as expected when specifying max nbr of mutated bas
   expect_named(res$summaryTable, c("mutantName", "sequence","nbrReads",
                                    "maxNbrReads", "nbrUmis", "nbrMutBases",
                                    "nbrMutCodons", "nbrMutAAs", "varLengths",
-                                   "mutantNameAA", "mutationTypes",
+                                   "mutantNameBase", "mutantNameCodon",
+                                   "mutantNameBaseHGVS", "mutantNameAA",
+                                   "mutantNameAAHGVS", "mutationTypes",
                                    "sequenceAA"))
 
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose", "fastqForward", "fastqReverse"))) {
@@ -266,7 +276,15 @@ test_that("digestFastqs works as expected when specifying max nbr of mutated bas
                "f.11.G")
   expect_equal(res$summaryTable$mutantNameAA[res$summaryTable$sequence == example_seq], 
                "f.4.R")
-
+  expect_equal(res$summaryTable$mutantNameBase[res$summaryTable$sequence == example_seq],
+               "f.11.G")
+  expect_equal(res$summaryTable$mutantNameCodon[res$summaryTable$sequence == example_seq],
+               "f.4.CGC")
+  expect_equal(res$summaryTable$mutantNameBaseHGVS[res$summaryTable$sequence == example_seq],
+               "f:c.11T>G")
+  expect_equal(res$summaryTable$mutantNameAAHGVS[res$summaryTable$sequence == example_seq],
+               "f:p.(Leu4Arg)")
+  
   expect_equal(sum(res$errorStatistics$nbrMatchForward + res$errorStatistics$nbrMismatchForward),
                nchar(Ldef$constantForward[1]) * res$filterSummary$nbrRetained)
   expect_equal(sum(res$errorStatistics$nbrMatchReverse + res$errorStatistics$nbrMismatchReverse),

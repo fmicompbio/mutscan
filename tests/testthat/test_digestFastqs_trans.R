@@ -81,6 +81,14 @@ test_that("digestFastqs works as expected for trans experiments", {
   expect_equal(sum(res$summaryTable$nbrReads == 2), 2L)
   expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
                sort(c("f.13.GAG_r.0.WT", "f.26.TAG_r.8.AGG")))
+  expect_equal(sort(res$summaryTable$mutantNameCodon[res$summaryTable$nbrReads == 2]),
+               sort(c("f.13.GAG_r.0.WT", "f.26.TAG_r.8.AGG")))
+  expect_equal(sort(res$summaryTable$mutantNameBase[res$summaryTable$nbrReads == 2]),
+               sort(c("f.39.G_r.0.WT", "f.76.T_f.77.A_r.22.A_r.23.G")))
+  expect_equal(sort(res$summaryTable$mutantNameBaseHGVS[res$summaryTable$nbrReads == 2]),
+               sort(c("f:c.39T>G_r:c", "f:c.76_77delinsTA_r:c.22_23delinsAG")))
+  expect_equal(sort(res$summaryTable$mutantNameAAHGVS[res$summaryTable$nbrReads == 2]),
+               sort(c("f:p.(Asp13Glu)_r:p", "f:p.(Leu26*)_r:p.(Val8Arg)")))
   expect_true(all(res$summaryTable$nbrReads == res$summaryTable$nbrUmis))
 
   ## Check the number of reads with a given number of mismatches
@@ -121,6 +129,14 @@ test_that("digestFastqs works as expected for trans experiments", {
                "f.4.ACC_r.9.GGC")
   expect_equal(res$summaryTable$mutantNameAA[res$summaryTable$sequence == example_seq],
                "f.4.T_r.9.G")
+  expect_equal(res$summaryTable$mutantNameCodon[res$summaryTable$sequence == example_seq],
+               "f.4.ACC_r.9.GGC")
+  expect_equal(res$summaryTable$mutantNameBase[res$summaryTable$sequence == example_seq],
+               "f.10.A_f.11.C_r.25.G_r.26.G_r.27.C")
+  expect_equal(res$summaryTable$mutantNameBaseHGVS[res$summaryTable$sequence == example_seq],
+               "f:c.10_11delinsAC_r:c.25_27delinsGGC")
+  expect_equal(res$summaryTable$mutantNameAAHGVS[res$summaryTable$sequence == example_seq],
+               "f:p.(Leu4Thr)_r:p.(Lys9Gly)")
   
   expect_equal(sum(grepl("WT", res$summaryTable$mutantNameAA) & res$summaryTable$nbrMutBases > 0), 37L)
   expect_true(all(grepl("silent", res$summaryTable$mutationTypes[grepl("WT", res$summaryTable$mutantNameAA) & grepl("f\\.[1-9]", res$summaryTable$mutantName) & grepl("r\\.[1-9]", res$summaryTable$mutantName)])))
@@ -600,6 +616,16 @@ test_that("digestFastqs works as expected for trans experiments, when variable s
   expect_equal(sum(res$summaryTable$nbrReads == 2), 2L)
   expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
                sort(c("f.13.GAG_r.0.WT", "f.26.TAG_r.8.AGG")))
+  expect_equal(sort(res$summaryTable$mutantNameCodon[res$summaryTable$nbrReads == 2]),
+               sort(c("f.13.GAG_r.0.WT", "f.26.TAG_r.8.AGG")))
+  expect_equal(sort(res$summaryTable$mutantNameBase[res$summaryTable$nbrReads == 2]),
+               sort(c("f.39.G_r.0.WT", "f.76.T_f.77.A_r.22.A_r.23.G")))
+  expect_equal(sort(res$summaryTable$mutantNameBaseHGVS[res$summaryTable$nbrReads == 2]),
+               sort(c("f:c.39T>G_r:c", "f:c.76_77delinsTA_r:c.22_23delinsAG")))
+  expect_equal(sort(res$summaryTable$mutantNameAAHGVS[res$summaryTable$nbrReads == 2]),
+               sort(c("f:p.(Asp13Glu)_r:p", "f:p.(Leu26*)_r:p.(Val8Arg)")))
+  expect_true(all(res$summaryTable$nbrReads == res$summaryTable$nbrUmis))
+  
   expect_true(all(res$summaryTable$nbrReads == res$summaryTable$nbrUmis))
 
   ## Check that mutant naming worked (compare to manual matching)
@@ -609,6 +635,16 @@ test_that("digestFastqs works as expected for trans experiments, when variable s
                         "CAACATGCTCAGGGAACAGGTGGCACAGCTT")
   expect_equal(res$summaryTable$mutantName[res$summaryTable$sequence == example_seq],
                "f.4.ACC_r.9.GGC")
+  expect_equal(res$summaryTable$mutantNameAA[res$summaryTable$sequence == example_seq],
+               "f.4.T_r.9.G")
+  expect_equal(res$summaryTable$mutantNameCodon[res$summaryTable$sequence == example_seq],
+               "f.4.ACC_r.9.GGC")
+  expect_equal(res$summaryTable$mutantNameBase[res$summaryTable$sequence == example_seq],
+               "f.10.A_f.11.C_r.25.G_r.26.G_r.27.C")
+  expect_equal(res$summaryTable$mutantNameBaseHGVS[res$summaryTable$sequence == example_seq],
+               "f:c.10_11delinsAC_r:c.25_27delinsGGC")
+  expect_equal(res$summaryTable$mutantNameAAHGVS[res$summaryTable$sequence == example_seq],
+               "f:p.(Leu4Thr)_r:p.(Lys9Gly)")
 
   expect_equal(sum(res$errorStatistics$nbrMatchForward + res$errorStatistics$nbrMismatchForward),
                nchar(Ldef$constantForward[1]) * res$filterSummary$nbrRetained)
@@ -721,6 +757,14 @@ test_that("digestFastqs works as expected for trans experiments when multiple re
   expect_equal(sum(res$summaryTable$nbrReads == 2), 1L)
   expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
                sort(c("forward=26=TAG_reverse1=8=AGG")))
+  expect_equal(sort(res$summaryTable$mutantNameCodon[res$summaryTable$nbrReads == 2]),
+               sort(c("forward=26=TAG_reverse1=8=AGG")))
+  expect_equal(sort(res$summaryTable$mutantNameBase[res$summaryTable$nbrReads == 2]),
+               sort(c("forward=76=T_forward=77=A_reverse1=22=A_reverse1=23=G")))
+  expect_equal(sort(res$summaryTable$mutantNameBaseHGVS[res$summaryTable$nbrReads == 2]),
+               sort(c("forward:c.76_77delinsTA_reverse1:c.22_23delinsAG")))
+  expect_equal(sort(res$summaryTable$mutantNameAAHGVS[res$summaryTable$nbrReads == 2]),
+               sort(c("forward:p.(Leu26*)_reverse1:p.(Val8Arg)")))
   expect_true(all(res$summaryTable$nbrReads == res$summaryTable$nbrUmis))
 
   ## Check that mutant naming worked (compare to manual matching)
@@ -730,6 +774,16 @@ test_that("digestFastqs works as expected for trans experiments when multiple re
                         "CAACATGCTCAGGGAACAGGTGGCACAGCTT")
   expect_equal(res$summaryTable$mutantName[res$summaryTable$sequence == example_seq],
                "forward=4=ACC_reverse1=9=GGC")
+  expect_equal(res$summaryTable$mutantNameAA[res$summaryTable$sequence == example_seq],
+               "forward=4=T_reverse1=9=G")
+  expect_equal(res$summaryTable$mutantNameCodon[res$summaryTable$sequence == example_seq],
+               "forward=4=ACC_reverse1=9=GGC")
+  expect_equal(res$summaryTable$mutantNameBase[res$summaryTable$sequence == example_seq],
+               "forward=10=A_forward=11=C_reverse1=25=G_reverse1=26=G_reverse1=27=C")
+  expect_equal(res$summaryTable$mutantNameBaseHGVS[res$summaryTable$sequence == example_seq],
+               "forward:c.10_11delinsAC_reverse1:c.25_27delinsGGC")
+  expect_equal(res$summaryTable$mutantNameAAHGVS[res$summaryTable$sequence == example_seq],
+               "forward:p.(Leu4Thr)_reverse1:p.(Lys9Gly)")
 
   expect_equal(sum(res$errorStatistics$nbrMatchForward + res$errorStatistics$nbrMismatchForward),
                nchar(Ldef$constantForward[1]) * res$filterSummary$nbrRetained)
@@ -1216,6 +1270,10 @@ test_that("digestFastqs works as expected for trans experiments, if collapsing t
   expect_equal(res$summaryTable$nbrReads[res$summaryTable$nbrMutAAs == "0,1,2"], 279L)
   expect_equal(res$summaryTable$mutationTypes, "nonsynonymous,silent,stop")
   expect_equal(res$summaryTable$mutantNameAA, "f_r")
+  expect_equal(res$summaryTable$mutantNameBase, "f_r")
+  expect_equal(res$summaryTable$mutantNameCodon, "f_r")
+  expect_equal(res$summaryTable$mutantNameBaseHGVS, "f:c_r:c")
+  expect_equal(res$summaryTable$mutantNameAAHGVS, "f:p_r:p")
   
   ## check that variable segment lengths are reported correctly
   expect_equal(res$summaryTable$varLengths, "80,16_16,80")
