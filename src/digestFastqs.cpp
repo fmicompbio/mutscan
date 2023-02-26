@@ -165,7 +165,7 @@ bool compareCodonPositions(std::string a, std::string b, const char mutNameDelim
 
 // translate sequence
 // [[Rcpp::export]]
-std::string translateString(std::string& s) {
+std::string translateString(const std::string& s) {
   const char* tr = "KQE*TPASRRG*ILVLNHDYTPASSRGCILVFKQE*TPASRRGWMLVLNHDYTPASSRGCILVF";
   std::string aa = "";
   size_t i = 0, j = 0;
@@ -223,7 +223,127 @@ std::string translateString(std::string& s) {
   return aa;
 }
 
+// check if string ends with another string
+// see https://stackoverflow.com/questions/874134/find-out-if-string-ends-with-another-string-in-c
+bool hasEnding (std::string const &fullString, std::string const &ending) {
+    if (fullString.length() >= ending.length()) {
+        return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
+    } else {
+        return false;
+    }
+}
 
+// Helper function to create the ID for a single mutation group (delins or 
+// single mutation)
+std::string makeSingleBaseHGVSid(int posMin, int posMax, const std::string wtSeq, 
+                                 const std::string varSeq) {
+    std::string id = "";
+    if (posMax > posMin) {
+        // delins
+        id += std::to_string(posMin) + "_" + std::to_string(posMax) + 
+            "delins" + 
+            varSeq.substr((size_t)(posMin - 1), (size_t)(posMax - posMin + 1)) + ";";
+    } else {
+        // single base mutation
+        id += std::to_string(posMin) + wtSeq[posMin - 1] + 
+            ">" + varSeq[posMin - 1] + ";";
+    }
+    return id;
+}
+
+// [[Rcpp::export]]
+std::string makeBaseHGVS(const std::vector<std::string> mutationsSorted, 
+                         const std::string mutNameDelimiter, 
+                         const std::string wtSeq, const std::string varSeq) {
+  int prevPosMin = -5, prevPosMax = -5; // something far enough from the first mutation position to not cause a delins
+  bool moreThanOne = false;
+  int pos;
+  std::string mutId = "";
+    
+  if (mutationsSorted.size() == 0) {
+    // no mutations - return only _ (all variants should end with this character,
+    // as it will be stripped off later)
+    return std::string("_");
+  } else {
+    for (size_t i = 0; i < mutationsSorted.size(); i++) {
+      // get the mutated position
+      pos = std::stoi(split(mutationsSorted[i], *(mutNameDelimiter.c_str()))[1]);
+      if (pos - prevPosMax > 2) {
+        // need to start a new mutation group
+        // first finish the previous one and add to mutId
+        if (prevPosMin > 0) {
+          // an actual mutation (the initialization value was negative)
+          if (mutId != "") {
+            // not the first mutation we add
+            moreThanOne = true;
+          }
+          mutId += makeSingleBaseHGVSid(prevPosMin, prevPosMax, wtSeq, varSeq);
+        }
+        prevPosMin = pos;
+        prevPosMax = pos;
+      } else {
+        prevPosMax = pos;
+      }
+    }
+    // process last mutation
+    if (mutId != "") {
+      // not the first mutation we add
+      moreThanOne = true;
+    }
+    mutId += makeSingleBaseHGVSid(prevPosMin, prevPosMax, wtSeq, varSeq);
+    mutId.pop_back(); // remove final ;
+    if (moreThanOne) {
+      mutId = "[" + mutId + "]_";
+    } else {
+      mutId += "_";
+    }
+  }
+  return mutId;
+}
+
+std::string makeAAHGVS(const std::vector<std::string> mutationsSorted, 
+                       const std::string mutNameDelimiter, 
+                       const std::string wtSeq, 
+                       std::map<char, std::string> &threeAA) {
+  int pos;
+  std::string mutAA;
+  char wtAA;
+  std::string mutId = "";
+    
+  if (mutationsSorted.size() == 0) {
+    // no mutations - return only _ (all variants should end with this character,
+    // as it will be stripped off later)
+    return std::string("_");
+  } else {
+    if (mutationsSorted.size() > 1) {
+      mutId += "[";
+    }
+    for (size_t i = 0; i < mutationsSorted.size(); i++) {
+      // get the mutated position and the mutated amino acid
+      pos = std::stoi(split(mutationsSorted[i], *(mutNameDelimiter.c_str()))[1]);
+      mutAA = split(mutationsSorted[i], *(mutNameDelimiter.c_str()))[2];
+      // get the corresponding wt amino acid
+      wtAA = wtSeq[pos - 1];
+      // assemble mutation identifier
+      mutId += "(" + threeAA[wtAA] + std::to_string(pos) + threeAA[*(mutAA.c_str())] + ");";
+    }
+    mutId.pop_back(); // remove final ;
+    if (mutationsSorted.size() > 1) {
+      mutId += "]";
+    }
+    mutId += "_";
+    return mutId;
+  }
+}
+
+// [[Rcpp::export]]
+std::string test_makeAAHGVS(const std::vector<std::string> mutationsSorted, 
+                            const std::string mutNameDelimiter, 
+                            const std::string wtSeq) {
+    std::map<char,std::string> threeAA = initializeThreeAA();
+    return makeAAHGVS(mutationsSorted, mutNameDelimiter, wtSeq, threeAA);
+} 
+    
 // compare read to wildtype sequence,
 // identify mutated bases/codons, filter, update counters
 // and add to the name (mutantName* may be empty if no mutations are found,
@@ -259,17 +379,27 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
                        int &nMutCodons, int &nMutAAs, std::set<std::string> &mutationTypes, 
                        const std::string mutNameDelimiter,
                        const bool collapseToWT,
-                       const std::map<char, std::string> &threeAA) {
+                       std::map<char, std::string> &threeAA) {
   // exactly one of nbrMutatedCodonsMax or nbrMutatedBasesMax should be -1 (checked in the R code).
   // the one that is not -1 will be used for filtering and naming the mutant
 
-  std::set<std::string> mutatedCodons;
-  std::set<std::string> mutatedBases;
-  std::set<std::string> mutatedAAs;
+  std::set<std::string> mutatedBases, mutatedCodons, mutatedAAs;
   std::set<std::string>::iterator mutatedCodonIt;
   bool hasLowQualMutation, hasForbidden;
   std::string varCodon, wtCodon, varAA, wtAA;
 
+  // create prefixes for HGVS identifiers
+  // if codonPrefix doesn't end with :c, add it -> basePrefixHGVS
+  // replace :c by :p in basePrefixHGVS -> aaPrefixHGVS
+  std::string basePrefixHGVS = codonPrefix, aaPrefixHGVS = codonPrefix;
+  if (!hasEnding(codonPrefix, ":c")) {
+      basePrefixHGVS = basePrefixHGVS + ":c";
+      aaPrefixHGVS = aaPrefixHGVS + ":p";
+  } else {
+      aaPrefixHGVS.pop_back();
+      aaPrefixHGVS = aaPrefixHGVS + "p";
+  }
+  
   // filter if there are too many mutated codons
   // mutatedCodons.clear();
   hasLowQualMutation = false;
@@ -367,35 +497,61 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
   nMutCodons += (int)mutatedCodons.size();
   nMutAAs += (int)mutatedAAs.size();
 
-
   // create name for mutant
   if (collapseToWT) {
+    mutantNameBase += codonPrefix + "_";
+    mutantNameCodon += codonPrefix + "_";
     mutantName += codonPrefix + "_";
     mutantNameAA += codonPrefix + "_";
+    mutantNameBaseHGVS += basePrefixHGVS + "_";
+    mutantNameAAHGVS += aaPrefixHGVS + "_";
   } else {
-    std::vector<std::string> mutatedCodonsOrBasesSorted, mutatedAAsSorted;
-    if (nbrMutatedCodonsMax != (-1)) {
-      mutatedCodonsOrBasesSorted.assign(mutatedCodons.begin(), mutatedCodons.end());
-    } else {
-      mutatedCodonsOrBasesSorted.assign(mutatedBases.begin(), mutatedBases.end());
-    }
-    std::sort(mutatedCodonsOrBasesSorted.begin(), mutatedCodonsOrBasesSorted.end(),
+    std::vector<std::string> mutatedBasesSorted, mutatedCodonsSorted, mutatedAAsSorted;
+    
+    mutatedBasesSorted.assign(mutatedBases.begin(), mutatedBases.end());
+    std::sort(mutatedBasesSorted.begin(), mutatedBasesSorted.end(),
               std::bind(compareCodonPositions, _1, _2, *(mutNameDelimiter.c_str())));
+    
+    mutatedCodonsSorted.assign(mutatedCodons.begin(), mutatedCodons.end());
+    std::sort(mutatedCodonsSorted.begin(), mutatedCodonsSorted.end(),
+              std::bind(compareCodonPositions, _1, _2, *(mutNameDelimiter.c_str())));
+    
     mutatedAAsSorted.assign(mutatedAAs.begin(), mutatedAAs.end());
     std::sort(mutatedAAsSorted.begin(), mutatedAAsSorted.end(),
               std::bind(compareCodonPositions, _1, _2, *(mutNameDelimiter.c_str())));
-    for (size_t i = 0; i < mutatedCodonsOrBasesSorted.size(); i++) {
-      mutantName += mutatedCodonsOrBasesSorted[i];
+    
+    for (size_t i = 0; i < mutatedBasesSorted.size(); i++) {
+      mutantNameBase += mutatedBasesSorted[i];
+      if (nbrMutatedCodonsMax == (-1)) {
+        mutantName += mutatedBasesSorted[i];
+      }
+    }
+    for (size_t i = 0; i < mutatedCodonsSorted.size(); i++) {
+      mutantNameCodon += mutatedCodonsSorted[i];
+      if (nbrMutatedCodonsMax != (-1)) {
+        mutantName += mutatedCodonsSorted[i];
+      }
     }
     for (size_t i = 0; i < mutatedAAsSorted.size(); i++) {
       mutantNameAA += mutatedAAsSorted[i];
     }
     // if no mutant codons, name as <codonPrefix>.0.WT
-    if (mutatedCodonsOrBasesSorted.size() == 0) {
+    if (mutatedBasesSorted.size() == 0) {
+      mutantNameBase += codonPrefix + mutNameDelimiter + "0" + mutNameDelimiter + "WT_";
+      mutantNameCodon += codonPrefix + mutNameDelimiter + "0" + mutNameDelimiter + "WT_";
       mutantName += codonPrefix + mutNameDelimiter + "0" + mutNameDelimiter + "WT_";
+      mutantNameBaseHGVS += basePrefixHGVS + "_";
+    } else {
+      mutantNameBaseHGVS += basePrefixHGVS + "." + 
+          makeBaseHGVS(mutatedBasesSorted, mutNameDelimiter, wtSeq, varSeq);
     }
     if (mutatedAAsSorted.size() == 0) {
       mutantNameAA += codonPrefix + mutNameDelimiter + "0" + mutNameDelimiter + "WT_";
+      mutantNameAAHGVS += aaPrefixHGVS + "_";
+    } else {
+      mutantNameAAHGVS += aaPrefixHGVS + "." + 
+          makeAAHGVS(mutatedAAsSorted, mutNameDelimiter, 
+                     translateString(wtSeq), threeAA);
     }
   }
 
@@ -980,7 +1136,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
 
   // Biostrings::IUPAC_CODE_MAP
   std::map<char,std::vector<char>> IUPAC = initializeIUPAC();
-  std::map<char, std::string> threeAA = initializeThreeAA();
+  std::map<char,std::string> threeAA = initializeThreeAA();
 
   // --------------------------------------------------------------------------
   // declare variables
@@ -1561,7 +1717,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
               mutantNameCodon = "WT";
             }
           }
-          if (mutantNameBaseHGVS.length() > 0) { // we have a (closest) wiltype name
+          if (mutantNameBaseHGVS.length() > 0) { // we have a (closest) wildtype name
             mutantNameBaseHGVS.pop_back(); // remove '_' at the end
             mutantNameAAHGVS.pop_back(); // remove '_' at the end
           }

@@ -37,13 +37,40 @@ BEGIN_RCPP
 END_RCPP
 }
 // translateString
-std::string translateString(std::string& s);
+std::string translateString(const std::string& s);
 RcppExport SEXP _mutscan_translateString(SEXP sSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string& >::type s(sSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type s(sSEXP);
     rcpp_result_gen = Rcpp::wrap(translateString(s));
+    return rcpp_result_gen;
+END_RCPP
+}
+// makeBaseHGVS
+std::string makeBaseHGVS(const std::vector<std::string> mutationsSorted, const std::string mutNameDelimiter, const std::string wtSeq, const std::string varSeq);
+RcppExport SEXP _mutscan_makeBaseHGVS(SEXP mutationsSortedSEXP, SEXP mutNameDelimiterSEXP, SEXP wtSeqSEXP, SEXP varSeqSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const std::vector<std::string> >::type mutationsSorted(mutationsSortedSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type mutNameDelimiter(mutNameDelimiterSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type wtSeq(wtSeqSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type varSeq(varSeqSEXP);
+    rcpp_result_gen = Rcpp::wrap(makeBaseHGVS(mutationsSorted, mutNameDelimiter, wtSeq, varSeq));
+    return rcpp_result_gen;
+END_RCPP
+}
+// test_makeAAHGVS
+std::string test_makeAAHGVS(const std::vector<std::string> mutationsSorted, const std::string mutNameDelimiter, const std::string wtSeq);
+RcppExport SEXP _mutscan_test_makeAAHGVS(SEXP mutationsSortedSEXP, SEXP mutNameDelimiterSEXP, SEXP wtSeqSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const std::vector<std::string> >::type mutationsSorted(mutationsSortedSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type mutNameDelimiter(mutNameDelimiterSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type wtSeq(wtSeqSEXP);
+    rcpp_result_gen = Rcpp::wrap(test_makeAAHGVS(mutationsSorted, mutNameDelimiter, wtSeq));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -243,6 +270,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mutscan_calcNearestStringDist", (DL_FUNC) &_mutscan_calcNearestStringDist, 3},
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 3},
     {"_mutscan_translateString", (DL_FUNC) &_mutscan_translateString, 1},
+    {"_mutscan_makeBaseHGVS", (DL_FUNC) &_mutscan_makeBaseHGVS, 4},
+    {"_mutscan_test_makeAAHGVS", (DL_FUNC) &_mutscan_test_makeAAHGVS, 3},
     {"_mutscan_test_decomposeRead", (DL_FUNC) &_mutscan_test_decomposeRead, 13},
     {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 12},
     {"_mutscan_findClosestRefSeq", (DL_FUNC) &_mutscan_findClosestRefSeq, 4},
