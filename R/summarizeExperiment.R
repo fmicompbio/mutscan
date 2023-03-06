@@ -148,8 +148,12 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
     ## Also here, each column can contain multiple values separated with ,
     ## (e.g. if variable sequences were collapsed to WT in digestFastqs)
     ## ------------------------------------------------------------------------
-    for (v in c("nbrMutBases", "nbrMutCodons", "nbrMutAAs",
-                "sequenceAA", "mutantNameAA", "mutationTypes", "varLengths")) {
+    for (v in intersect(c("nbrMutBases", "nbrMutCodons", "nbrMutAAs", 
+                          "mutantNameBase", "mutantNameBaseHGVS",
+                          "mutantNameCodon", "mutantNameAA", "mutantNameAAHGVS",
+                          "sequenceAA", "mutationTypes",
+                          "varLengths"),
+                        colnames(tmpdf))) {
         tmp <- mergeValues(tmpdf$mutantName, tmpdf[[v]]) %>%
             stats::setNames(c("mutantName", v))
         allSequences[[v]] <- tmp[[v]][match(allSequences$mutantName,

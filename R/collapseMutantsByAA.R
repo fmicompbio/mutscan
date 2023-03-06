@@ -58,8 +58,13 @@ collapseMutantsByAA <- function(se, nameCol = "mutantNameAA") {
     rd <- mergeValues(SummarizedExperiment::rowData(se)[[nameCol]],
                       SummarizedExperiment::rowData(se)$sequence) %>%
         stats::setNames(c(nameCol, "sequence"))
-    for (v in c("mutantName", "sequenceAA", "mutationTypes",
-                "nbrMutBases", "nbrMutCodons", "nbrMutAAs")) {
+    for (v in setdiff(
+        intersect(c("mutantName", "mutantNameBase", "mutantNameBaseHGVS",
+                    "mutantNameCodon", "mutantNameAA", "mutantNameAAHGVS",
+                    "sequenceAA", "mutationTypes",
+                    "nbrMutBases", "nbrMutCodons", "nbrMutAAs"),
+                  colnames(SummarizedExperiment::rowData(se))),
+        nameCol)) {
         tmp <- mergeValues(SummarizedExperiment::rowData(se)[[nameCol]],
                            SummarizedExperiment::rowData(se)[[v]])
         rd[[v]] <- tmp$valueColl[match(rd[[nameCol]], tmp$mutantNameColl)]
