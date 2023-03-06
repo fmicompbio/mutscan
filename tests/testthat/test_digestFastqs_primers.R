@@ -122,6 +122,28 @@ test_that("digestFastqs works as expected for primer experiments", {
                sort(c("BACH2.0.WT_r.6.CCC", "BATF2.0.WT_r.21.TGG", "BATF2.0.WT_r.7.GGG", "CEBPB.0.WT_r.12.CTC",
                       "CEBPD.0.WT_r.13.CCC", "CEBPD.0.WT_r.23.GAG", "CREB3L3.0.WT_r.22.GGG",
                       "FOSL1.0.WT_r.22.CCC", "FOSL2.0.WT_r.13.GGG", "JUNB.0.WT_r.0.WT", "XBP1.0.WT_r.0.WT")))
+  expect_equal(sort(res$summaryTable$mutantNameCodon[res$summaryTable$nbrReads == 2]),
+               sort(c("BACH2.0.WT_r.6.CCC", "BATF2.0.WT_r.21.TGG", "BATF2.0.WT_r.7.GGG", "CEBPB.0.WT_r.12.CTC",
+                      "CEBPD.0.WT_r.13.CCC", "CEBPD.0.WT_r.23.GAG", "CREB3L3.0.WT_r.22.GGG",
+                      "FOSL1.0.WT_r.22.CCC", "FOSL2.0.WT_r.13.GGG", "JUNB.0.WT_r.0.WT", "XBP1.0.WT_r.0.WT")))
+  expect_equal(sort(res$summaryTable$mutantNameBase[res$summaryTable$nbrReads == 2]),
+               sort(c("BACH2.0.WT_r.16.C_r.17.C_r.18.C", "BATF2.0.WT_r.61.T_r.62.G", 
+                      "BATF2.0.WT_r.19.G_r.20.G_r.21.G", "CEBPB.0.WT_r.34.C_r.35.T_r.36.C",
+                      "CEBPD.0.WT_r.37.C_r.39.C", "CEBPD.0.WT_r.67.G_r.69.G", 
+                      "CREB3L3.0.WT_r.65.G_r.66.G", "FOSL1.0.WT_r.64.C", 
+                      "FOSL2.0.WT_r.38.G_r.39.G", "JUNB.0.WT_r.0.WT", "XBP1.0.WT_r.0.WT")))
+  expect_equal(sort(res$summaryTable$mutantNameBaseHGVS[res$summaryTable$nbrReads == 2]),
+               sort(c("BACH2:c_r:c.16_18delinsCCC", "BATF2:c_r:c.61_62delinsTG", 
+                      "BATF2:c_r:c.19_21delinsGGG", "CEBPB:c_r:c.34_36delinsCTC",
+                      "CEBPD:c_r:c.37_39delinsCCC", "CEBPD:c_r:c.67_69delinsGAG", 
+                      "CREB3L3:c_r:c.65_66delinsGG", "FOSL1:c_r:c.64G>C", 
+                      "FOSL2:c_r:c.38_39delinsGG", "JUNB:c_r:c", "XBP1:c_r:c")))
+  expect_equal(sort(res$summaryTable$mutantNameAAHGVS[res$summaryTable$nbrReads == 2]),
+               sort(c("BACH2:p_r:p.(Glu6Pro)", "BATF2:p_r:p.(Thr21Trp)", 
+                      "BATF2:p_r:p.(Lys7Gly)", "CEBPB:p_r:p.(Lys12Leu)",
+                      "CEBPD:p_r:p.(Ala13Pro)", "CEBPD:p_r:p.(Asn23Glu)",
+                      "CREB3L3:p_r:p.(Ala22Gly)", "FOSL1:p_r:p.(Ala22Pro)", 
+                      "FOSL2:p_r:p.(Ala13Gly)", "JUNB:p_r:p", "XBP1:p_r:p")))
   expect_equal(res$summaryTable$nbrUmis, rep(0L, nrow(res$summaryTable))) ## no UMIs in this experiment
   
   ## Test that we get the same results with useTreeWTmatch = TRUE

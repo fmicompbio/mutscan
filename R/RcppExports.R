@@ -32,6 +32,14 @@ translateString <- function(s) {
     .Call(`_mutscan_translateString`, s)
 }
 
+makeBaseHGVS <- function(mutationsSorted, mutNameDelimiter, wtSeq, varSeq) {
+    .Call(`_mutscan_makeBaseHGVS`, mutationsSorted, mutNameDelimiter, wtSeq, varSeq)
+}
+
+test_makeAAHGVS <- function(mutationsSorted, mutNameDelimiter, wtSeq) {
+    .Call(`_mutscan_test_makeAAHGVS`, mutationsSorted, mutNameDelimiter, wtSeq)
+}
+
 test_decomposeRead <- function(sseq, squal, elements, elementLengths, primerSeqs, umiSeq, varSeq, varQual, varLengths, constSeq, constQual, nNoPrimer, nReadWrongLength) {
     .Call(`_mutscan_test_decomposeRead`, sseq, squal, elements, elementLengths, primerSeqs, umiSeq, varSeq, varQual, varLengths, constSeq, constQual, nNoPrimer, nReadWrongLength)
 }

@@ -237,10 +237,18 @@ A list with four entries:
 \item{summaryTable}{A \code{data.frame} that contains, for each observed
 mutation combination, the corresponding variable region sequences (or pair of
 sequences), the number of observed such sequences, and the number of unique
-UMIs observed for the sequence. It also has a column named 'maxNbrReads',
-which contains the number of reads for the most frequent observed sequence
+UMIs observed for the sequence. It also has additional columns: 'maxNbrReads'
+contains the number of reads for the most frequent observed sequence
 represented by the feature (only relevant if similar variable regions are
-collapsed).}
+collapsed). 'nbrMutBases', 'nbrMutCodons' and 'nbrMutAAs' give the number of
+mutated bases, codons or amino acids in each variant. Alternative variant
+names based on base, codon or amino acid sequence are provided in columns
+'mutantNameBase', 'mutantNameCodon', 'mutantNameAA'. In addition,
+'mutantNameBaseHGVS' and 'mutantNameAAHGVS' give base- and amino acid-based
+names following the HGVS nomenclature (https://varnomen.hgvs.org/). Please
+note that the provided reference sequence names are used for the HGVS
+sequence identifiers. It is up to the user to use appropriately named 
+reference sequences in order to obtain valid HGVS variant names.}
 \item{filterSummary}{A \code{data.frame} that contains the number of input
 reads, the number of reads filtered out in the processing, and the number of
 retained reads. The filters are named according to the convention

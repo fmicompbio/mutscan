@@ -470,3 +470,25 @@ test_that("mergeReadPairsPartial works", {
   expect_false(res3k$return)
   expect_equal(res3k$mergedLengths, c(5L, 13L))
 })
+
+## ----------------------------------------------------------------------------
+## makeBaseHGVS/makeAAHGVS
+## ----------------------------------------------------------------------------
+test_that("makeBaseHGVS works", {
+    expect_equal(makeBaseHGVS(c("FOS.1.A", "FOS.2.T"), ".", "TAG", "ATG"), "1_2delinsAT_")
+    expect_equal(makeBaseHGVS(c("f.1.A", "r.4.A"), ".", "TAGT", "AAGA"), "[1T>A;4T>A]_")
+    expect_equal(makeBaseHGVS(c("f.1.A", "r.4.A", "f.6.C"), ".", "TAGTGTAGTCCGT", "AAGAGCAGTCCGT"),
+                 "[1T>A;4_6delinsAGC]_")
+    expect_equal(makeBaseHGVS(c("r.4.A"), ".", "TAGTGTAGTCCGT", "TAGAGTAGTCCGT"), "4T>A_")
+})
+
+test_that("makeAAHGVS works", {
+    expect_equal(test_makeAAHGVS("FOS.1.H", ".", "TDTLQAETDQLEDEKSALQTEIANLLKEKEKL"),
+                 "(Thr1His)_")
+    expect_equal(test_makeAAHGVS(c("f.1.L", "r.4.M"), ".", "TDTLQAETDQLEDEKSALQTEIANLLKEKEKL"),
+                 "[(Thr1Leu);(Leu4Met)]_")
+    expect_equal(test_makeAAHGVS(c("f.1.L", "f.2.M"), ".", "TDTLQAETDQLEDEKSALQTEIANLLKEKEKL"),
+                 "[(Thr1Leu);(Asp2Met)]_")
+    expect_equal(test_makeAAHGVS(c("f.1.L", "f.2.M", "f.7.M"), ".", "TDTLQAETDQLEDEKSALQTEIANLLKEKEKL"),
+                 "[(Thr1Leu);(Asp2Met);(Glu7Met)]_")
+})
