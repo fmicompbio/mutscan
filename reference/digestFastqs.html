@@ -21,7 +21,7 @@ following the primer will be considered the variable sequence."><!-- mathjax -->
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.34</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.35</span>
       </span>
     </div>
 
@@ -359,10 +359,18 @@ run out of memory.</p></dd>
 <dd><p>A <code>data.frame</code> that contains, for each observed
 mutation combination, the corresponding variable region sequences (or pair of
 sequences), the number of observed such sequences, and the number of unique
-UMIs observed for the sequence. It also has a column named 'maxNbrReads',
-which contains the number of reads for the most frequent observed sequence
+UMIs observed for the sequence. It also has additional columns: 'maxNbrReads'
+contains the number of reads for the most frequent observed sequence
 represented by the feature (only relevant if similar variable regions are
-collapsed).</p></dd>
+collapsed). 'nbrMutBases', 'nbrMutCodons' and 'nbrMutAAs' give the number of
+mutated bases, codons or amino acids in each variant. Alternative variant
+names based on base, codon or amino acid sequence are provided in columns
+'mutantNameBase', 'mutantNameCodon', 'mutantNameAA'. In addition,
+'mutantNameBaseHGVS' and 'mutantNameAAHGVS' give base- and amino acid-based
+names following the HGVS nomenclature (https://varnomen.hgvs.org/). Please
+note that the provided reference sequence names are used for the HGVS
+sequence identifiers. It is up to the user to use appropriately named 
+reference sequences in order to obtain valid HGVS variant names.</p></dd>
 
 <dt>filterSummary</dt>
 <dd><p>A <code>data.frame</code> that contains the number of input
@@ -463,20 +471,34 @@ number of reads, and the number of unique UMIs, for each variable sequence
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4        1           1       0           0            0         0        125</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5        1           1       0           0            0         0        125</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6        1           1       0           0            0         0        125</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                mutantNameAA mutationTypes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 KTTGTGGGS*LIHSKRRQTN*KLRSLLCRPRLQTCRRRRKN              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 KHMSTGGGS*MIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 KPATTGGGS*LIHCKRRQTN*KMRSLLCRPRLPSC*RRRKN              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 KPW*TGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 KLAPTGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 KFASTGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                  sequenceAA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 KTTGTGGGS*LIHSKRRQTN*KLRSLLCRPRLQTCRRRRKN</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 KHMSTGGGS*MIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 KPATTGGGS*LIHCKRRQTN*KMRSLLCRPRLPSC*RRRKN</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 KPW*TGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 KLAPTGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 KFASTGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                  mutantNameBase</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 AAAACTACCGGAACCGGAGGAGGGAGCTGACTGATACACTCCAAGCGTAGACAGACCAACTAGAAGTTGAGAAGTCTGCTCTGCAGACCGAGATTGCAAACCTGCAGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 AAACACATGTCAACCGGAGGAGGGAGCTGAATGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 AAACCCGCGACAACCGGAGGAGGGAGCTGACTGATACACTGCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAAGCTGCTAAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 AAACCTTGGTGAACCGGAGGAGGGAGCTGACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 AAACTAGCACCAACCGGAGGAGGGAGCTGACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 AAATTCGCGTCAACCGGAGGAGGGAGCTGACTGATACACTCCAAGAGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                 mutantNameCodon</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 AAAACTACCGGAACCGGAGGAGGGAGCTGACTGATACACTCCAAGCGTAGACAGACCAACTAGAAGTTGAGAAGTCTGCTCTGCAGACCGAGATTGCAAACCTGCAGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 AAACACATGTCAACCGGAGGAGGGAGCTGAATGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 AAACCCGCGACAACCGGAGGAGGGAGCTGACTGATACACTGCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAAGCTGCTAAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 AAACCTTGGTGAACCGGAGGAGGGAGCTGACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 AAACTAGCACCAACCGGAGGAGGGAGCTGACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 AAATTCGCGTCAACCGGAGGAGGGAGCTGACTGATACACTCCAAGAGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   mutantNameBaseHGVS                              mutantNameAA mutantNameAAHGVS</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                    KTTGTGGGS*LIHSKRRQTN*KLRSLLCRPRLQTCRRRRKN                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                    KHMSTGGGS*MIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                    KPATTGGGS*LIHCKRRQTN*KMRSLLCRPRLPSC*RRRKN                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                    KPW*TGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                    KLAPTGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                    KFASTGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   mutationTypes                                sequenceAA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1               KTTGTGGGS*LIHSKRRQTN*KLRSLLCRPRLQTCRRRRKN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2               KHMSTGGGS*MIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3               KPATTGGGS*LIHCKRRQTN*KMRSLLCRPRLPSC*RRRKN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4               KPW*TGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5               KLAPTGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6               KFASTGGGS*LIHSKRRQTN*KMRSLLCRPRLPTC*RRRKN</span>
 <span class="r-in"><span><span class="co">## Filter summary</span></span></span>
 <span class="r-in"><span><span class="va">out</span><span class="op">$</span><span class="va">filterSummary</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span>
@@ -522,20 +544,34 @@ number of reads, and the number of unique UMIs, for each variable sequence
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4        1           1       1           0            0         0         96</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5        1           1       1           0            0         0         96</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6        2           2       2           0            0         0         96</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                       mutantNameAA mutationTypes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 KYNVDDVALGVCKTGAEEAGVTEVRTSLSEKK              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 KSTRLNSSHITISYAVFCLKKKKINKVLSIFY              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 KSTRLNSSHITISYAVFCLKKKK*YYFFCLFP              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 NDTLQTETDQLEYEKSALQTEIANLRKEEEKL              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 NDTLQAETEQLEDEKSALQTEIANLLKEKEKL              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 NDTLQAETDQLEDEKSALQTEIANLLKEKEKL              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                         sequenceAA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 KYNVDDVALGVCKTGAEEAGVTEVRTSLSEKK</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 KSTRLNSSHITISYAVFCLKKKKINKVLSIFY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 KSTRLNSSHITISYAVFCLKKKK*YYFFCLFP</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 NDTLQTETDQLEYEKSALQTEIANLRKEEEKL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 NDTLQAETEQLEDEKSALQTEIANLLKEKEKL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 NDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                     mutantNameBase</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 AAATATAACGTTGACGATGTAGCTTTAGGTGTCTGTAAAACAGGTGCCGAAGAAGCTGGAGTAACAGAAGTGAGAACCAGCTTATCAGAAAAAAAG</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 AAGAGCACACGTCTGAACTCCAGTCACATCACGATCTCGTATGCCGTCTTCTGCTTGAAAAAAAAAAAAATAAACAAAGTACTTTCTATTTTCTAT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 AAGAGCACACGTCTGAACTCCAGTCACATCACGATCTCGTATGCCGTCTTCTGCTTGAAAAAAAAAAAATAATACTATTTTTTTTGTTTATTTCCA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 AATGATACACTCCAAACGGAGACAGACCAACTAGAATATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCGGAAAGAGGAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 AATGATACACTCCAAGCGGAGACAGAACAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 AATGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                    mutantNameCodon</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 AAATATAACGTTGACGATGTAGCTTTAGGTGTCTGTAAAACAGGTGCCGAAGAAGCTGGAGTAACAGAAGTGAGAACCAGCTTATCAGAAAAAAAG</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 AAGAGCACACGTCTGAACTCCAGTCACATCACGATCTCGTATGCCGTCTTCTGCTTGAAAAAAAAAAAAATAAACAAAGTACTTTCTATTTTCTAT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 AAGAGCACACGTCTGAACTCCAGTCACATCACGATCTCGTATGCCGTCTTCTGCTTGAAAAAAAAAAAATAATACTATTTTTTTTGTTTATTTCCA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 AATGATACACTCCAAACGGAGACAGACCAACTAGAATATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCGGAAAGAGGAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 AATGATACACTCCAAGCGGAGACAGAACAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 AATGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   mutantNameBaseHGVS                     mutantNameAA mutantNameAAHGVS</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                    KYNVDDVALGVCKTGAEEAGVTEVRTSLSEKK                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                    KSTRLNSSHITISYAVFCLKKKKINKVLSIFY                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                    KSTRLNSSHITISYAVFCLKKKK*YYFFCLFP                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                    NDTLQTETDQLEYEKSALQTEIANLRKEEEKL                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                    NDTLQAETEQLEDEKSALQTEIANLLKEKEKL                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                    NDTLQAETDQLEDEKSALQTEIANLLKEKEKL                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   mutationTypes                       sequenceAA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1               KYNVDDVALGVCKTGAEEAGVTEVRTSLSEKK</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2               KSTRLNSSHITISYAVFCLKKKKINKVLSIFY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3               KSTRLNSSHITISYAVFCLKKKK*YYFFCLFP</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4               NDTLQTETDQLEYEKSALQTEIANLRKEEEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5               NDTLQAETEQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6               NDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
 <span class="r-in"><span><span class="co">## Filter summary</span></span></span>
 <span class="r-in"><span><span class="va">out</span><span class="op">$</span><span class="va">filterSummary</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span>
@@ -789,13 +825,20 @@ number of reads, and the number of unique UMIs, for each variable sequence
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4        1           1       1           1            1         0         96</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5        1           1       1           1            1         1         96</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6        1           1       1           1            1         1         96</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   mutantNameAA mutationTypes                       sequenceAA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     FOS.0.WT               TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      FOS.1.N nonsynonymous NDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3     FOS.0.WT        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4     FOS.0.WT        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5      FOS.1.P nonsynonymous PDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6     FOS.10.H nonsynonymous TDTLQAETDHLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   mutantNameBase mutantNameCodon mutantNameBaseHGVS mutantNameAA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       FOS.0.WT        FOS.0.WT              FOS:c     FOS.0.WT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2        FOS.2.A       FOS.1.AAT         FOS:c.2C&gt;A      FOS.1.N</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3        FOS.3.C       FOS.1.ACC         FOS:c.3T&gt;C     FOS.0.WT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        FOS.3.G       FOS.1.ACG         FOS:c.3T&gt;G     FOS.0.WT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5        FOS.1.C       FOS.1.CCT         FOS:c.1A&gt;C      FOS.1.P</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6       FOS.30.T      FOS.10.CAT        FOS:c.30A&gt;T     FOS.10.H</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   mutantNameAAHGVS mutationTypes                       sequenceAA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1            FOS:p               TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  FOS:p.(Thr1Asn) nonsynonymous NDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3            FOS:p        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4            FOS:p        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  FOS:p.(Thr1Pro) nonsynonymous PDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 FOS:p.(Gln10His) nonsynonymous TDTLQAETDHLEDEKSALQTEIANLLKEKEKL</span>
 <span class="r-in"><span><span class="co">## Filter summary</span></span></span>
 <span class="r-in"><span><span class="va">out</span><span class="op">$</span><span class="va">filterSummary</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span>
@@ -1056,13 +1099,20 @@ number of reads, and the number of unique UMIs, for each variable sequence
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4        1           1       1           1            1         0         96</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5        1           1       1           1            1         1         96</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6        1           1       1           2            1         1         96</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   mutantNameAA mutationTypes                       sequenceAA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     FOS.0.WT               TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      FOS.1.N nonsynonymous NDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3     FOS.0.WT        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4     FOS.0.WT        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5      FOS.1.P nonsynonymous PDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6      FOS.1.R nonsynonymous RDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    mutantNameBase mutantNameCodon mutantNameBaseHGVS mutantNameAA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1        FOS.0.WT        FOS.0.WT              FOS:c     FOS.0.WT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2         FOS.2.A       FOS.1.AAT         FOS:c.2C&gt;A      FOS.1.N</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3         FOS.3.C       FOS.1.ACC         FOS:c.3T&gt;C     FOS.0.WT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4         FOS.3.G       FOS.1.ACG         FOS:c.3T&gt;G     FOS.0.WT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5         FOS.1.C       FOS.1.CCT         FOS:c.1A&gt;C      FOS.1.P</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 FOS.1.C_FOS.2.G       FOS.1.CGT  FOS:c.1_2delinsCG      FOS.1.R</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   mutantNameAAHGVS mutationTypes                       sequenceAA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1            FOS:p               TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  FOS:p.(Thr1Asn) nonsynonymous NDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3            FOS:p        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4            FOS:p        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  FOS:p.(Thr1Pro) nonsynonymous PDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  FOS:p.(Thr1Arg) nonsynonymous RDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span>
 <span class="r-in"><span><span class="co">## Filter summary</span></span></span>
 <span class="r-in"><span><span class="va">out</span><span class="op">$</span><span class="va">filterSummary</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span>
@@ -1325,13 +1375,27 @@ number of reads, and the number of unique UMIs, for each variable sequence
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4        1           1       1           1            1         1      96_96</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5        1           1       1           3            1         1      96_96</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6        1           1       1           2            1         1      96_96</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        mutantNameAA mutationTypes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 FOS.0.WT_JUN.13.P nonsynonymous</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 FOS.0.WT_JUN.13.L nonsynonymous</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  FOS.0.WT_JUN.2.S nonsynonymous</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 FOS.0.WT_JUN.20.T nonsynonymous</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 FOS.0.WT_JUN.30.R nonsynonymous</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 FOS.0.WT_JUN.30.G nonsynonymous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                        mutantNameBase     mutantNameCodon</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1          FOS.0.WT_JUN.37.C_JUN.39.C FOS.0.WT_JUN.13.CCC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 FOS.0.WT_JUN.37.C_JUN.38.T_JUN.39.C FOS.0.WT_JUN.13.CTC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                    FOS.0.WT_JUN.4.T  FOS.0.WT_JUN.2.TCC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                   FOS.0.WT_JUN.58.A FOS.0.WT_JUN.20.ACC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 FOS.0.WT_JUN.88.A_JUN.89.G_JUN.90.G FOS.0.WT_JUN.30.AGG</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6          FOS.0.WT_JUN.89.G_JUN.90.G FOS.0.WT_JUN.30.GGG</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           mutantNameBaseHGVS      mutantNameAA       mutantNameAAHGVS</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 FOS:c_JUN:c.37_39delinsCCC FOS.0.WT_JUN.13.P FOS:p_JUN:p.(Ala13Pro)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 FOS:c_JUN:c.37_39delinsCTC FOS.0.WT_JUN.13.L FOS:p_JUN:p.(Ala13Leu)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3           FOS:c_JUN:c.4G&gt;T  FOS.0.WT_JUN.2.S  FOS:p_JUN:p.(Ala2Ser)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4          FOS:c_JUN:c.58T&gt;A FOS.0.WT_JUN.20.T FOS:p_JUN:p.(Ser20Thr)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 FOS:c_JUN:c.88_90delinsAGG FOS.0.WT_JUN.30.R FOS:p_JUN:p.(Ala30Arg)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  FOS:c_JUN:c.89_90delinsGG FOS.0.WT_JUN.30.G FOS:p_JUN:p.(Ala30Gly)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   mutationTypes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 nonsynonymous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 nonsynonymous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 nonsynonymous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 nonsynonymous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 nonsynonymous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 nonsynonymous</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                          sequenceAA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_IARLEEKVKTLKPQNSELASTANMLREQVAQL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_IARLEEKVKTLKLQNSELASTANMLREQVAQL</span>

@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.34</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.35</span>
       </span>
     </div>
 
@@ -68,7 +68,7 @@ with <code>mutscan</code>
                         <h4 data-toc-skip class="author">Charlotte
 Soneson and Michael Stadler</h4>
             
-            <h4 data-toc-skip class="date">17 February 2023</h4>
+            <h4 data-toc-skip class="date">6 March 2023</h4>
       
       
       <div class="hidden name"><code>mutscan.Rmd</code></div>
@@ -461,7 +461,7 @@ and time of processing.</p>
 <span><span class="co">#&gt; [1] 100000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $processingInfo</span></span>
-<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.34 on 2023-02-17 20:49:47"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.35 on 2023-03-06 15:22:43"</span></span></code></pre></div>
 <p>The <code>filterSummary</code> data.frame contains a summary of the
 number of reads filtered out in each step. Note that for any given
 filtering step, only the reads retained by the previous filters are
@@ -517,13 +517,27 @@ without mutations is named <code>WTS.0.WT</code>, where, again,
 <span><span class="co">#&gt; 4        1           1       1           1            1         1      96_96</span></span>
 <span><span class="co">#&gt; 5        1           1       1           3            1         1      96_96</span></span>
 <span><span class="co">#&gt; 6        1           1       1           2            1         1      96_96</span></span>
-<span><span class="co">#&gt;        mutantNameAA mutationTypes</span></span>
-<span><span class="co">#&gt; 1 FOS.0.WT_JUN.13.P nonsynonymous</span></span>
-<span><span class="co">#&gt; 2 FOS.0.WT_JUN.13.L nonsynonymous</span></span>
-<span><span class="co">#&gt; 3  FOS.0.WT_JUN.2.S nonsynonymous</span></span>
-<span><span class="co">#&gt; 4 FOS.0.WT_JUN.20.T nonsynonymous</span></span>
-<span><span class="co">#&gt; 5 FOS.0.WT_JUN.30.R nonsynonymous</span></span>
-<span><span class="co">#&gt; 6 FOS.0.WT_JUN.30.G nonsynonymous</span></span>
+<span><span class="co">#&gt;                        mutantNameBase     mutantNameCodon</span></span>
+<span><span class="co">#&gt; 1          FOS.0.WT_JUN.37.C_JUN.39.C FOS.0.WT_JUN.13.CCC</span></span>
+<span><span class="co">#&gt; 2 FOS.0.WT_JUN.37.C_JUN.38.T_JUN.39.C FOS.0.WT_JUN.13.CTC</span></span>
+<span><span class="co">#&gt; 3                    FOS.0.WT_JUN.4.T  FOS.0.WT_JUN.2.TCC</span></span>
+<span><span class="co">#&gt; 4                   FOS.0.WT_JUN.58.A FOS.0.WT_JUN.20.ACC</span></span>
+<span><span class="co">#&gt; 5 FOS.0.WT_JUN.88.A_JUN.89.G_JUN.90.G FOS.0.WT_JUN.30.AGG</span></span>
+<span><span class="co">#&gt; 6          FOS.0.WT_JUN.89.G_JUN.90.G FOS.0.WT_JUN.30.GGG</span></span>
+<span><span class="co">#&gt;           mutantNameBaseHGVS      mutantNameAA       mutantNameAAHGVS</span></span>
+<span><span class="co">#&gt; 1 FOS:c_JUN:c.37_39delinsCCC FOS.0.WT_JUN.13.P FOS:p_JUN:p.(Ala13Pro)</span></span>
+<span><span class="co">#&gt; 2 FOS:c_JUN:c.37_39delinsCTC FOS.0.WT_JUN.13.L FOS:p_JUN:p.(Ala13Leu)</span></span>
+<span><span class="co">#&gt; 3           FOS:c_JUN:c.4G&gt;T  FOS.0.WT_JUN.2.S  FOS:p_JUN:p.(Ala2Ser)</span></span>
+<span><span class="co">#&gt; 4          FOS:c_JUN:c.58T&gt;A FOS.0.WT_JUN.20.T FOS:p_JUN:p.(Ser20Thr)</span></span>
+<span><span class="co">#&gt; 5 FOS:c_JUN:c.88_90delinsAGG FOS.0.WT_JUN.30.R FOS:p_JUN:p.(Ala30Arg)</span></span>
+<span><span class="co">#&gt; 6  FOS:c_JUN:c.89_90delinsGG FOS.0.WT_JUN.30.G FOS:p_JUN:p.(Ala30Gly)</span></span>
+<span><span class="co">#&gt;   mutationTypes</span></span>
+<span><span class="co">#&gt; 1 nonsynonymous</span></span>
+<span><span class="co">#&gt; 2 nonsynonymous</span></span>
+<span><span class="co">#&gt; 3 nonsynonymous</span></span>
+<span><span class="co">#&gt; 4 nonsynonymous</span></span>
+<span><span class="co">#&gt; 5 nonsynonymous</span></span>
+<span><span class="co">#&gt; 6 nonsynonymous</span></span>
 <span><span class="co">#&gt;                                                          sequenceAA</span></span>
 <span><span class="co">#&gt; 1 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_IARLEEKVKTLKPQNSELASTANMLREQVAQL</span></span>
 <span><span class="co">#&gt; 2 TDTLQAETDQLEDEKSALQTEIANLLKEKEKL_IARLEEKVKTLKLQNSELASTANMLREQVAQL</span></span>
@@ -779,7 +793,7 @@ into one variable sequence, only one wild type sequence is provided (the
 <span><span class="co">#&gt; [1] 100000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $processingInfo</span></span>
-<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.34 on 2023-02-17 20:49:48"</span></span>
+<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.35 on 2023-03-06 15:22:43"</span></span>
 <span><span class="va">cisInput</span><span class="op">$</span><span class="va">filterSummary</span></span>
 <span><span class="co">#&gt;   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span></span>
 <span><span class="co">#&gt; 1     1000           126              0                     0</span></span>
@@ -832,13 +846,20 @@ unique UMIs observed for each variable sequence, and all values in the
 <span><span class="co">#&gt; 4        1           1       1           1            1         0         96</span></span>
 <span><span class="co">#&gt; 5        1           1       1           1            1         0         96</span></span>
 <span><span class="co">#&gt; 6        1           1       1           1            1         1         96</span></span>
-<span><span class="co">#&gt;   mutantNameAA mutationTypes                       sequenceAA</span></span>
-<span><span class="co">#&gt; 1     FOS.0.WT               TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span></span>
-<span><span class="co">#&gt; 2     FOS.0.WT        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span></span>
-<span><span class="co">#&gt; 3     FOS.0.WT        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span></span>
-<span><span class="co">#&gt; 4     FOS.0.WT        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span></span>
-<span><span class="co">#&gt; 5     FOS.0.WT        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span></span>
-<span><span class="co">#&gt; 6     FOS.13.E nonsynonymous TDTLQAETDQLEEEKSALQTEIANLLKEKEKL</span></span></code></pre></div>
+<span><span class="co">#&gt;   mutantNameBase mutantNameCodon mutantNameBaseHGVS mutantNameAA</span></span>
+<span><span class="co">#&gt; 1       FOS.0.WT        FOS.0.WT              FOS:c     FOS.0.WT</span></span>
+<span><span class="co">#&gt; 2        FOS.3.C       FOS.1.ACC         FOS:c.3T&gt;C     FOS.0.WT</span></span>
+<span><span class="co">#&gt; 3        FOS.3.G       FOS.1.ACG         FOS:c.3T&gt;G     FOS.0.WT</span></span>
+<span><span class="co">#&gt; 4       FOS.33.G      FOS.11.CTG        FOS:c.33A&gt;G     FOS.0.WT</span></span>
+<span><span class="co">#&gt; 5       FOS.39.C      FOS.13.GAC        FOS:c.39T&gt;C     FOS.0.WT</span></span>
+<span><span class="co">#&gt; 6       FOS.39.G      FOS.13.GAG        FOS:c.39T&gt;G     FOS.13.E</span></span>
+<span><span class="co">#&gt;   mutantNameAAHGVS mutationTypes                       sequenceAA</span></span>
+<span><span class="co">#&gt; 1            FOS:p               TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span></span>
+<span><span class="co">#&gt; 2            FOS:p        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span></span>
+<span><span class="co">#&gt; 3            FOS:p        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span></span>
+<span><span class="co">#&gt; 4            FOS:p        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span></span>
+<span><span class="co">#&gt; 5            FOS:p        silent TDTLQAETDQLEDEKSALQTEIANLLKEKEKL</span></span>
+<span><span class="co">#&gt; 6 FOS:p.(Asp13Glu) nonsynonymous TDTLQAETDQLEEEKSALQTEIANLLKEKEKL</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="processing-trans-data-with-primers">Processing TRANS data with primers<a class="anchor" aria-label="anchor" href="#processing-trans-data-with-primers"></a>
@@ -1195,7 +1216,7 @@ variable sequence length to 96.</p>
 <span><span class="co">#&gt; [1] 100000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $processingInfo</span></span>
-<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.34 on 2023-02-17 20:49:48"</span></span>
+<span><span class="co">#&gt; [1] "Processed by mutscan v0.2.35 on 2023-03-06 15:22:44"</span></span>
 <span><span class="va">leujunt0</span><span class="op">$</span><span class="va">filterSummary</span></span>
 <span><span class="co">#&gt;   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span></span>
 <span><span class="co">#&gt; 1     1000             0            126                     0</span></span>
@@ -1230,13 +1251,20 @@ variable sequence length to 96.</p>
 <span><span class="co">#&gt; 4        1           1       0           1            1         1     104_96</span></span>
 <span><span class="co">#&gt; 5        1           1       0           2            1         1     105_96</span></span>
 <span><span class="co">#&gt; 6        1           1       0           1            1         0     105_96</span></span>
-<span><span class="co">#&gt;         mutantNameAA mutationTypes</span></span>
-<span><span class="co">#&gt; 1 ATF2.0.WT_JUN.13.P nonsynonymous</span></span>
-<span><span class="co">#&gt; 2 ATF2.0.WT_JUN.20.W nonsynonymous</span></span>
-<span><span class="co">#&gt; 3 ATF2.0.WT_JUN.32.R nonsynonymous</span></span>
-<span><span class="co">#&gt; 4  ATF2.0.WT_JUN.4.M nonsynonymous</span></span>
-<span><span class="co">#&gt; 5  ATF2.0.WT_JUN.5.M nonsynonymous</span></span>
-<span><span class="co">#&gt; 6 ATF2.0.WT_JUN.0.WT        silent</span></span>
+<span><span class="co">#&gt;                mutantNameBase      mutantNameCodon          mutantNameBaseHGVS</span></span>
+<span><span class="co">#&gt; 1 ATF2.0.WT_JUN.37.C_JUN.39.C ATF2.0.WT_JUN.13.CCC ATF2:c_JUN:c.37_39delinsCCC</span></span>
+<span><span class="co">#&gt; 2 ATF2.0.WT_JUN.59.G_JUN.60.G ATF2.0.WT_JUN.20.TGG  ATF2:c_JUN:c.59_60delinsGG</span></span>
+<span><span class="co">#&gt; 3 ATF2.0.WT_JUN.95.G_JUN.96.G ATF2.0.WT_JUN.32.CGG  ATF2:c_JUN:c.95_96delinsGG</span></span>
+<span><span class="co">#&gt; 4          ATF2.0.WT_JUN.10.A  ATF2.0.WT_JUN.4.ATG          ATF2:c_JUN:c.10C&gt;A</span></span>
+<span><span class="co">#&gt; 5 ATF2.0.WT_JUN.13.A_JUN.14.T  ATF2.0.WT_JUN.5.ATG  ATF2:c_JUN:c.13_14delinsAT</span></span>
+<span><span class="co">#&gt; 6          ATF2.0.WT_JUN.18.G  ATF2.0.WT_JUN.6.GAG          ATF2:c_JUN:c.18A&gt;G</span></span>
+<span><span class="co">#&gt;         mutantNameAA        mutantNameAAHGVS mutationTypes</span></span>
+<span><span class="co">#&gt; 1 ATF2.0.WT_JUN.13.P ATF2:p_JUN:p.(Ala13Pro) nonsynonymous</span></span>
+<span><span class="co">#&gt; 2 ATF2.0.WT_JUN.20.W ATF2:p_JUN:p.(Ser20Trp) nonsynonymous</span></span>
+<span><span class="co">#&gt; 3 ATF2.0.WT_JUN.32.R ATF2:p_JUN:p.(Leu32Arg) nonsynonymous</span></span>
+<span><span class="co">#&gt; 4  ATF2.0.WT_JUN.4.M  ATF2:p_JUN:p.(Leu4Met) nonsynonymous</span></span>
+<span><span class="co">#&gt; 5  ATF2.0.WT_JUN.5.M  ATF2:p_JUN:p.(Glu5Met) nonsynonymous</span></span>
+<span><span class="co">#&gt; 6 ATF2.0.WT_JUN.0.WT            ATF2:p_JUN:p        silent</span></span>
 <span><span class="co">#&gt;                                                             sequenceAA</span></span>
 <span><span class="co">#&gt; 1 DPDEKRRKFLERNRAAASRCRQKRKVWVQSLEKKA_IARLEEKVKTLKPQNSELASTANMLREQVAQL</span></span>
 <span><span class="co">#&gt; 2  DPDEKRRKFLERNRAAASRCRQKRKVWVQSLEKK_VARLEEKVKTLKAQNSELAWTANMLREQVAQL</span></span>
@@ -1319,7 +1347,7 @@ the input sample above, and feed both outputs to
 <span><span class="co">#&gt; sample1 sample2 </span></span>
 <span><span class="co">#&gt;     279     285</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">rowData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; DataFrame with 6 rows and 15 columns</span></span>
+<span><span class="co">#&gt; DataFrame with 6 rows and 19 columns</span></span>
 <span><span class="co">#&gt;                              mutantName               sequence nbrMutBases</span></span>
 <span><span class="co">#&gt;                             &lt;character&gt;            &lt;character&gt; &lt;character&gt;</span></span>
 <span><span class="co">#&gt; FOS.0.WT_JUN.0.WT     FOS.0.WT_JUN.0.WT ACTGATACACTCCAAGCGGA..           0</span></span>
@@ -1344,14 +1372,30 @@ the input sample above, and feed both outputs to
 <span><span class="co">#&gt; FOS.0.WT_JUN.13.GCG               1           0            0            0</span></span>
 <span><span class="co">#&gt; FOS.0.WT_JUN.2.TCC                1           1            1            1</span></span>
 <span><span class="co">#&gt; FOS.0.WT_JUN.20.ACC               1           1            1            1</span></span>
-<span><span class="co">#&gt;                                 sequenceAA      mutantNameAA mutationTypes</span></span>
-<span><span class="co">#&gt;                                &lt;character&gt;       &lt;character&gt;   &lt;character&gt;</span></span>
-<span><span class="co">#&gt; FOS.0.WT_JUN.0.WT   TDTLQAETDQLEDEKSALQT.. FOS.0.WT_JUN.0.WT              </span></span>
-<span><span class="co">#&gt; FOS.0.WT_JUN.13.CCC TDTLQAETDQLEDEKSALQT.. FOS.0.WT_JUN.13.P nonsynonymous</span></span>
-<span><span class="co">#&gt; FOS.0.WT_JUN.13.CTC TDTLQAETDQLEDEKSALQT.. FOS.0.WT_JUN.13.L nonsynonymous</span></span>
-<span><span class="co">#&gt; FOS.0.WT_JUN.13.GCG TDTLQAETDQLEDEKSALQT.. FOS.0.WT_JUN.0.WT        silent</span></span>
-<span><span class="co">#&gt; FOS.0.WT_JUN.2.TCC  TDTLQAETDQLEDEKSALQT..  FOS.0.WT_JUN.2.S nonsynonymous</span></span>
-<span><span class="co">#&gt; FOS.0.WT_JUN.20.ACC TDTLQAETDQLEDEKSALQT.. FOS.0.WT_JUN.20.T nonsynonymous</span></span>
+<span><span class="co">#&gt;                             mutantNameBase     mutantNameBaseHGVS</span></span>
+<span><span class="co">#&gt;                                &lt;character&gt;            &lt;character&gt;</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.0.WT        FOS.0.WT_JUN.0.WT            FOS:c_JUN:c</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.13.CCC FOS.0.WT_JUN.37.C_JU.. FOS:c_JUN:c.37_39del..</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.13.CTC FOS.0.WT_JUN.37.C_JU.. FOS:c_JUN:c.37_39del..</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.13.GCG      FOS.0.WT_JUN.39.G      FOS:c_JUN:c.39T&gt;G</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.2.TCC        FOS.0.WT_JUN.4.T       FOS:c_JUN:c.4G&gt;T</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.20.ACC      FOS.0.WT_JUN.58.A      FOS:c_JUN:c.58T&gt;A</span></span>
+<span><span class="co">#&gt;                         mutantNameCodon      mutantNameAA</span></span>
+<span><span class="co">#&gt;                             &lt;character&gt;       &lt;character&gt;</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.0.WT     FOS.0.WT_JUN.0.WT FOS.0.WT_JUN.0.WT</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.13.CCC FOS.0.WT_JUN.13.CCC FOS.0.WT_JUN.13.P</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.13.CTC FOS.0.WT_JUN.13.CTC FOS.0.WT_JUN.13.L</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.13.GCG FOS.0.WT_JUN.13.GCG FOS.0.WT_JUN.0.WT</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.2.TCC   FOS.0.WT_JUN.2.TCC  FOS.0.WT_JUN.2.S</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.20.ACC FOS.0.WT_JUN.20.ACC FOS.0.WT_JUN.20.T</span></span>
+<span><span class="co">#&gt;                           mutantNameAAHGVS             sequenceAA mutationTypes</span></span>
+<span><span class="co">#&gt;                                &lt;character&gt;            &lt;character&gt;   &lt;character&gt;</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.0.WT              FOS:p_JUN:p TDTLQAETDQLEDEKSALQT..              </span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.13.CCC FOS:p_JUN:p.(Ala13Pro) TDTLQAETDQLEDEKSALQT.. nonsynonymous</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.13.CTC FOS:p_JUN:p.(Ala13Leu) TDTLQAETDQLEDEKSALQT.. nonsynonymous</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.13.GCG            FOS:p_JUN:p TDTLQAETDQLEDEKSALQT..        silent</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.2.TCC   FOS:p_JUN:p.(Ala2Ser) TDTLQAETDQLEDEKSALQT.. nonsynonymous</span></span>
+<span><span class="co">#&gt; FOS.0.WT_JUN.20.ACC FOS:p_JUN:p.(Ser20Thr) TDTLQAETDQLEDEKSALQT.. nonsynonymous</span></span>
 <span><span class="co">#&gt;                      varLengths</span></span>
 <span><span class="co">#&gt;                     &lt;character&gt;</span></span>
 <span><span class="co">#&gt; FOS.0.WT_JUN.0.WT         96_96</span></span>
@@ -1666,10 +1710,10 @@ forward and reverse FASTQ files in the same order.</p>
 <span><span class="co">#&gt; [8] base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt;  [1] mutscan_0.2.34              SummarizedExperiment_1.28.0</span></span>
+<span><span class="co">#&gt;  [1] mutscan_0.2.35              SummarizedExperiment_1.28.0</span></span>
 <span><span class="co">#&gt;  [3] Biobase_2.58.0              GenomicRanges_1.50.2       </span></span>
 <span><span class="co">#&gt;  [5] GenomeInfoDb_1.34.9         IRanges_2.32.0             </span></span>
-<span><span class="co">#&gt;  [7] S4Vectors_0.36.1            BiocGenerics_0.44.0        </span></span>
+<span><span class="co">#&gt;  [7] S4Vectors_0.36.2            BiocGenerics_0.44.0        </span></span>
 <span><span class="co">#&gt;  [9] MatrixGenerics_1.10.0       matrixStats_0.63.0         </span></span>
 <span><span class="co">#&gt; [11] BiocStyle_2.26.0           </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1685,7 +1729,7 @@ forward and reverse FASTQ files in the same order.</p>
 <span><span class="co">#&gt; [25] systemfonts_1.0.4      stringr_1.5.0          digest_0.6.31         </span></span>
 <span><span class="co">#&gt; [28] Rsamtools_2.14.0       rmarkdown_2.20         XVector_0.38.0        </span></span>
 <span><span class="co">#&gt; [31] pkgconfig_2.0.3        htmltools_0.5.4        fastmap_1.1.0         </span></span>
-<span><span class="co">#&gt; [34] limma_3.54.1           highr_0.10             htmlwidgets_1.6.1     </span></span>
+<span><span class="co">#&gt; [34] limma_3.54.2           highr_0.10             htmlwidgets_1.6.1     </span></span>
 <span><span class="co">#&gt; [37] rlang_1.0.6            jquerylib_0.1.4        generics_0.1.3        </span></span>
 <span><span class="co">#&gt; [40] farver_2.1.1           jsonlite_1.8.4         BiocParallel_1.32.5   </span></span>
 <span><span class="co">#&gt; [43] dplyr_1.1.0            RCurl_1.98-1.10        magrittr_2.0.3        </span></span>
