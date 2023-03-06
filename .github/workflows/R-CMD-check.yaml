@@ -19,7 +19,7 @@ jobs:
         config:
         - { os: macOS-latest, bioc: 'release', curlConfigPath: '/usr/bin/'}
         - { os: windows-latest, bioc: 'release'}
-        - { os: ubuntu-latest, image: "bioconductor/bioconductor_docker:RELEASE_3_15", cran: "https://demo.rstudiopm.com/all/__linux__/xenial/latest"}
+        - { os: ubuntu-latest, image: "bioconductor/bioconductor_docker:RELEASE_3_16", cran: "https://demo.rstudiopm.com/all/__linux__/xenial/latest"}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
