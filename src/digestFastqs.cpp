@@ -13,7 +13,7 @@
 // [[Rcpp::plugins(openmp)]]
 #endif
 
-#define BUFFER_SIZE 65536 // maximum length of a single read + 2
+// #define BUFFER_SIZE 65536 // maximum length of a single read + 2
 
 // define constants that are used below
 #define NO_SIMILAR_REF    -1 // no similar enough wildtype sequence was found
@@ -47,7 +47,7 @@ bool reached_end_of_file(gzFile file, char *ret) {
   // Check if we have read until a newline character. Otherwise, the read is 
   // too long -> break
   if (std::string(ret).back() != '\n') {
-    stop("Encountered a read exceeding the maximal allowed length (%i)", BUFFER_SIZE - 2);
+    stop("Encountered a read exceeding the maximal allowed length");
   }
   return false;
 }
@@ -58,7 +58,7 @@ bool reached_end_of_file(gzFile file, char *ret) {
 // - true (reached end of file, I am done)
 // - false (not yet reached end of file, not done yet)
 // - nothing (encountered an error, fall back to R from reached_end_of_file())
-bool get_next_seq(gzFile file, char *seq, char *qual) {
+bool get_next_seq(gzFile file, char *seq, char *qual, size_t BUFFER_SIZE) {
   // sequence identifier
   if (reached_end_of_file(file, gzgets(file, seq, BUFFER_SIZE))) {
     return true;
@@ -1124,7 +1124,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                      std::string filteredReadsFastqForward = "",
                      std::string filteredReadsFastqReverse = "",
                      int maxNReads = -1, bool verbose = false,
-                     int nThreads = 1, int chunkSize = 100000) {
+                     int nThreads = 1, int chunkSize = 100000,
+                     size_t maxReadLength = 1024) {
 
   // See https://github.com/Rdatatable/data.table/issues/3300#issuecomment-457017735 for
   // a discussion on limiting the number of threads available to OpenMP
@@ -1146,7 +1147,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   // --------------------------------------------------------------------------
   // declare variables
   // --------------------------------------------------------------------------
-  FastqBuffer *chunkBuffer = new FastqBuffer((size_t)chunkSize, fastqReverseVect[0].compare("") != 0);
+  size_t BUFFER_SIZE = maxReadLength + 2;
+  FastqBuffer *chunkBuffer = new FastqBuffer((size_t)chunkSize, BUFFER_SIZE, fastqReverseVect[0].compare("") != 0);
 
   int nTot = 0, nAdapter = 0, nNoPrimer = 0, nReadWrongLength = 0, nTooManyMutConstant = 0;
   int nNoValidOverlap = 0, nAvgVarQualTooLow = 0, nTooManyNinVar = 0, nTooManyNinUMI = 0;
@@ -1267,11 +1269,13 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     while (done == false) {
       done = get_next_seq(file1,
                           chunkBuffer->seq1 + iChunk * BUFFER_SIZE,
-                          chunkBuffer->qual1 + iChunk * BUFFER_SIZE);
+                          chunkBuffer->qual1 + iChunk * BUFFER_SIZE,
+                          BUFFER_SIZE);
       if (fastqReverse.compare("") != 0) {
         done = (done || get_next_seq(file2,
                                      chunkBuffer->seq2 + iChunk * BUFFER_SIZE,
-                                     chunkBuffer->qual2 + iChunk * BUFFER_SIZE));
+                                     chunkBuffer->qual2 + iChunk * BUFFER_SIZE,
+                                     BUFFER_SIZE));
       }
       if (done == false) {
         iChunk++;
@@ -2292,6 +2296,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   param.push_back(maxNReads, "maxNReads");
   param.push_back(nThreads, "nThreads");
   param.push_back(chunkSize, "chunkSize");
+  param.push_back(maxReadLength, "maxReadLength");
   List L = List::create(Named("parameters") = param,
                         Named("filterSummary") = filt,
                         Named("summaryTable") = df,

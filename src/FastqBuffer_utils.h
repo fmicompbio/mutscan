@@ -7,6 +7,7 @@ using namespace Rcpp;
 class FastqBuffer {
 private:
   size_t nentries; // number of fastq entries allocated (BUFFER_SIZE-1 max length)
+  size_t BUFFER_SIZE; // buffer size
   bool paired;  // paired read entries?
   char *buffer; // single block of memory
   //  each entry e has 2-times (4-times for paired=true) BUFFER_SIZE bytes available
@@ -17,8 +18,9 @@ public:
   char *seq1, *qual1, *seq2, *qual2;
   
   // constructor
-  FastqBuffer(size_t n, bool p = true) {
+  FastqBuffer(size_t n, size_t b, bool p = true) {
     nentries = n;
+    BUFFER_SIZE = b;
     paired = p;
     buffer = new char[nentries * BUFFER_SIZE * (paired ? 4 : 2)];
     seq1 = buffer;
@@ -36,6 +38,7 @@ public:
   FastqBuffer(const FastqBuffer& fqb) {
     paired = fqb.paired;
     nentries = fqb.nentries;
+    BUFFER_SIZE = fqb.BUFFER_SIZE;
     buffer = new char[nentries * BUFFER_SIZE * (paired ? 4 : 2)];
     strncpy(buffer, fqb.buffer, nentries * BUFFER_SIZE * (paired ? 4 : 2));
     seq1 = buffer;

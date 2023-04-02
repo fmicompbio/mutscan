@@ -56,7 +56,8 @@ digestFastqs(
   maxNReads = -1,
   verbose = FALSE,
   nThreads = 1,
-  chunkSize = 1e+05
+  chunkSize = 1e+05,
+  maxReadLength = 1024
 )
 }
 \arguments{
@@ -230,6 +231,10 @@ processing.}
 \item{chunkSize}{Numeric scalar, the number of read (pairs) to keep in 
 memory for parallel processing. Reduce from the default value if you 
 run out of memory.}
+
+\item{maxReadLength}{Numeric scalar, the maximum allowed read length. Longer 
+read lengths lead to higher memory allocation, and may require 
+the \code{chunkSize} to be decreased.}
 }
 \value{
 A list with four entries:
