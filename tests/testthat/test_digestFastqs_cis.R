@@ -39,7 +39,8 @@ test_that("digestFastqs works as expected for cis experiments", {
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1000
+    nThreads = 1, chunkSize = 1000, 
+    maxReadLength = 1024
   )
 
   res <- do.call(digestFastqs, Ldef)
@@ -203,7 +204,8 @@ test_that("digestFastqs works as expected when specifying max nbr of mutated bas
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1000
+    nThreads = 1, chunkSize = 1000, 
+    maxReadLength = 125
   )
 
   res <- do.call(digestFastqs, Ldef)
@@ -355,7 +357,8 @@ test_that("digestFastqs gives the same results regardless of how WT matching is 
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1000
+    nThreads = 1, chunkSize = 1000, 
+    maxReadLength = 1024
   )
 
   res1 <- do.call(digestFastqs, Ldef)

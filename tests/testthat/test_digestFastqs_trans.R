@@ -39,7 +39,8 @@ test_that("digestFastqs works as expected for trans experiments", {
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1000
+    nThreads = 1, chunkSize = 1000, 
+    maxReadLength = 1024
   )
 
   res <- do.call(digestFastqs, Ldef)
@@ -214,7 +215,8 @@ test_that("digestFastqs works as expected for trans experiments, filter based on
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1000
+    nThreads = 1, chunkSize = 1000, 
+    maxReadLength = 1024
   )
 
   res <- do.call(digestFastqs, Ldef)
@@ -514,7 +516,8 @@ test_that("digestFastqs works as expected for trans experiments - no UMI specifi
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 500
+    nThreads = 1, chunkSize = 500, 
+    maxReadLength = 1024
   )
 
   res <- do.call(digestFastqs, Ldef)
@@ -580,7 +583,8 @@ test_that("digestFastqs works as expected for trans experiments, when variable s
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 700
+    nThreads = 1, chunkSize = 700, 
+    maxReadLength = 125
   )
 
   res <- do.call(digestFastqs, Ldef)
@@ -719,7 +723,8 @@ test_that("digestFastqs works as expected for trans experiments when multiple re
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = TRUE,
-    nThreads = 1, chunkSize = 1000
+    nThreads = 1, chunkSize = 1000, 
+    maxReadLength = 1024
   )
 
   expect_output(res <- do.call(digestFastqs, Ldef))
@@ -881,7 +886,8 @@ test_that("digestFastqs works as expected for experiments with only forward read
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 300
+    nThreads = 1, chunkSize = 300, 
+    maxReadLength = 1024
   )
 
   res <- do.call(digestFastqs, Ldef)
@@ -1013,7 +1019,8 @@ test_that("digestFastqs works as expected when the WT sequence is too short", {
         filteredReadsFastqForward = "",
         filteredReadsFastqReverse = "",
         maxNReads = -1, verbose = FALSE,
-        nThreads = 1, chunkSize = 300
+        nThreads = 1, chunkSize = 300, 
+        maxReadLength = 1024
     )
     
     res <- do.call(digestFastqs, Ldef)
@@ -1097,7 +1104,8 @@ test_that("writing filtered reads to file works", {
     filteredReadsFastqForward = outfile1,
     filteredReadsFastqReverse = outfile2,
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1000
+    nThreads = 1, chunkSize = 1000, 
+    maxReadLength = 1024
   )
 
   res <- do.call(digestFastqs, Ldef)
@@ -1228,7 +1236,8 @@ test_that("digestFastqs works as expected for trans experiments, if collapsing t
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1000
+    nThreads = 1, chunkSize = 1000, 
+    maxReadLength = 1024
   )
   
   res <- do.call(digestFastqs, Ldef)

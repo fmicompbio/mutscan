@@ -86,7 +86,8 @@ test_that("digestFastqs works as expected for primer experiments", {
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1000
+    nThreads = 1, chunkSize = 1000, 
+    maxReadLength = 1024
   )
   
   res <- do.call(digestFastqs, Ldef)

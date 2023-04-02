@@ -39,7 +39,8 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1000
+    nThreads = 1, chunkSize = 1000, 
+    maxReadLength = 1024
   )
 
   res <- do.call(digestFastqs, Ldef)
@@ -121,7 +122,8 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1000
+    nThreads = 1, chunkSize = 1000, 
+    maxReadLength = 125
   )
 
   res <- do.call(digestFastqs, Ldef)
@@ -197,7 +199,8 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1000
+    nThreads = 1, chunkSize = 1000, 
+    maxReadLength = 1024
   )
 
   res <- do.call(digestFastqs, Ldef)
@@ -274,7 +277,8 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 500
+    nThreads = 1, chunkSize = 500, 
+    maxReadLength = 1024
   )
 
   res <- do.call(digestFastqs, Ldef)
@@ -367,7 +371,8 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1000
+    nThreads = 1, chunkSize = 1000, 
+    maxReadLength = 1024
   )
 
   res <- do.call(digestFastqs, Ldef)
@@ -454,7 +459,8 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1000
+    nThreads = 1, chunkSize = 1000, 
+    maxReadLength = 1024
   )
   
   res <- do.call(digestFastqs, Ldef)

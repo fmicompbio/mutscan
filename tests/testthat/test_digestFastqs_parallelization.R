@@ -41,7 +41,8 @@ test_that("parallel processing works (cis)", {
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1
+    nThreads = 1, chunkSize = 1, 
+    maxReadLength = 1024
   )
   
   res <- do.call(digestFastqs, Ldef)
@@ -175,7 +176,8 @@ test_that("parallel processing works (trans)", {
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1
+    nThreads = 1, chunkSize = 1, 
+    maxReadLength = 1024
   )
   
   res <- do.call(digestFastqs, Ldef)
