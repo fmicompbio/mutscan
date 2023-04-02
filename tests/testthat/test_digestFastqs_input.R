@@ -264,6 +264,18 @@ test_that("digestFastqs fails with incorrect arguments", {
     expect_error(do.call(digestFastqs, L))
     L <- Ldef; L[[v]] <- c(TRUE, FALSE)
     expect_error(do.call(digestFastqs, L))
-    
   }
+  
+  ## Too long read
+  expect_error(digestFastqs(
+      fastqForward = system.file("extdata", "read_length_65535.fastq.gz",
+                                 package = "mutscan"),
+      elementsForward = "V", elementLengthsForward = -1),
+      "Encountered a read exceeding the maximal allowed length")
+  ## Works with 1nt shorter read
+  out <- digestFastqs(
+      fastqForward = system.file("extdata", "read_length_65534.fastq.gz",
+                                 package = "mutscan"),
+      elementsForward = "V", elementLengthsForward = -1)
+  expect_type(out, "list")
 })

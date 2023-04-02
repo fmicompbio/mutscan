@@ -13,7 +13,7 @@
 // [[Rcpp::plugins(openmp)]]
 #endif
 
-#define BUFFER_SIZE 2048 // maximum length of a single read + 1
+#define BUFFER_SIZE 65536 // maximum length of a single read + 2
 
 // define constants that are used below
 #define NO_SIMILAR_REF    -1 // no similar enough wildtype sequence was found
@@ -43,6 +43,11 @@ bool reached_end_of_file(gzFile file, char *ret) {
         stop(error_string);
       }
     }
+  }
+  // Check if we have read until a newline character. Otherwise, the read is 
+  // too long -> break
+  if (std::string(ret).back() != '\n') {
+    stop("Encountered a read exceeding the maximal allowed length (%i)", BUFFER_SIZE - 2);
   }
   return false;
 }
