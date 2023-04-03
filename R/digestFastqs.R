@@ -187,6 +187,9 @@
 #' @param chunkSize Numeric scalar, the number of read (pairs) to keep in 
 #'     memory for parallel processing. Reduce from the default value if you 
 #'     run out of memory.
+#' @param maxReadLength Numeric scalar, the maximum allowed read length. Longer 
+#'     read lengths lead to higher memory allocation, and may require 
+#'     the \code{chunkSize} to be decreased. 
 #'
 #' @return A list with four entries:
 #' \describe{
@@ -369,7 +372,8 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          filteredReadsFastqForward = "",
                          filteredReadsFastqReverse = "",
                          maxNReads = -1, verbose = FALSE,
-                         nThreads = 1, chunkSize = 100000) {
+                         nThreads = 1, chunkSize = 100000,
+                         maxReadLength = 1024) {
     ## pre-flight checks ---------------------------------------------------------
     ## fastq files exist
     if (length(fastqForward) < 1 || !all(file.exists(fastqForward)) ||
@@ -429,6 +433,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                   validValues = -1)
     .assertScalar(x = nThreads, type = "numeric", rngExcl = c(0, Inf))
     .assertScalar(x = chunkSize, type = "numeric", rngExcl = c(0, Inf))
+    .assertScalar(x = maxReadLength, type = "numeric", rngExcl = c(0, Inf))
     
     ## If a wildtype sequence is provided, it must be unambiguous how to identify and name mutants
     if (any(wildTypeForward != "")) {
@@ -717,7 +722,8 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                            maxNReads = maxNReads,
                            verbose = verbose,
                            nThreads = as.integer(nThreads),
-                           chunkSize = as.integer(chunkSize))
+                           chunkSize = as.integer(chunkSize),
+                           maxReadLength = maxReadLength)
     
     ## Add package version and processing date -----------------------------------
     res$parameters$processingInfo <- paste0(

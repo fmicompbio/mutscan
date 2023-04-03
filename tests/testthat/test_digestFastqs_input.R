@@ -44,7 +44,8 @@ test_that("digestFastqs fails with incorrect arguments", {
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1000
+    nThreads = 1, chunkSize = 1000, 
+    maxReadLength = 1024
   )
   
   ## Incorrect specification of merging/rev complementing arguments
@@ -90,7 +91,7 @@ test_that("digestFastqs fails with incorrect arguments", {
                 "variableCollapseMaxDist", "umiCollapseMaxDist", "variableCollapseMinReads",
                 "variableCollapseMinRatio",
                 "constantMaxDistForward", "constantMaxDistReverse", "maxNReads",
-                "nThreads", "chunkSize")) {
+                "nThreads", "chunkSize", "maxReadLength")) {
     L <- Ldef; L[[var]] <- "str"
     expect_error(do.call(digestFastqs, L))
     L <- Ldef; L[[var]] <- c(1, 2)
@@ -102,11 +103,11 @@ test_that("digestFastqs fails with incorrect arguments", {
     if (!(var %in% c("nbrMutatedCodonsMaxForward", "nbrMutatedCodonsMaxReverse", 
                      "nbrMutatedBasesMaxForward", "nbrMutatedBasesMaxReverse",
                      "constantMaxDistForward", "constantMaxDistReverse",
-                     "maxNReads"))) {
+                     "maxNReads", "maxReadLength"))) {
       L <- Ldef; L[[var]] <- -1
       expect_error(do.call(digestFastqs, L))
     }
-    if (var %in% c("nThreads", "chunkSize")) {
+    if (var %in% c("nThreads", "chunkSize", "maxReadLength")) {
       L <- Ldef; L[[var]] <- 0
       expect_error(do.call(digestFastqs, L))
     }
@@ -264,6 +265,27 @@ test_that("digestFastqs fails with incorrect arguments", {
     expect_error(do.call(digestFastqs, L))
     L <- Ldef; L[[v]] <- c(TRUE, FALSE)
     expect_error(do.call(digestFastqs, L))
-    
   }
+  
+  ## Too long read
+  expect_error(digestFastqs(
+      fastqForward = system.file("extdata", "cisInput_1.fastq.gz",
+                                 package = "mutscan"),
+      elementsForward = "V", elementLengthsForward = -1, 
+      maxReadLength = 100),
+      "Encountered a read exceeding the maximal allowed length")
+  ## Check border cases
+  expect_error(digestFastqs(
+      fastqForward = system.file("extdata", "cisInput_1.fastq.gz",
+                                 package = "mutscan"),
+      elementsForward = "V", elementLengthsForward = -1, 
+      maxReadLength = 124),
+      "Encountered a read exceeding the maximal allowed length")
+  ## Works if the maxReadLength is specified accordingly
+  out <- digestFastqs(
+      fastqForward = system.file("extdata", "cisInput_1.fastq.gz",
+                                 package = "mutscan"),
+      elementsForward = "V", elementLengthsForward = -1, 
+      maxReadLength = 125)
+  expect_type(out, "list")
 })

@@ -1,3 +1,8 @@
+# mutscan 0.2.36
+
+* Check that reads don't exceed the maximal allowed length
+* Add parameter to specify maximal read length
+
 # mutscan 0.2.35
 
 * Add alternative names for variants (including HGVS identifiers)
