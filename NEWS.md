@@ -1,7 +1,7 @@
 # mutscan 0.2.36
 
 * Check that reads don't exceed the maximal allowed length
-* Allow read lengths up to 65534 nt
+* Add parameter to specify maximal read length
 
 # mutscan 0.2.35
 
