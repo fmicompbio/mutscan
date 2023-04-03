@@ -21,7 +21,7 @@ following the primer will be considered the variable sequence."><!-- mathjax -->
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.35</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.36</span>
       </span>
     </div>
 
@@ -110,7 +110,8 @@ following the primer will be considered the variable sequence.</p>
 <span>  maxNReads <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  nThreads <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  chunkSize <span class="op">=</span> <span class="fl">1e+05</span></span>
+<span>  chunkSize <span class="op">=</span> <span class="fl">1e+05</span>,</span>
+<span>  maxReadLength <span class="op">=</span> <span class="fl">1024</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -349,6 +350,12 @@ processing.</p></dd>
 <dd><p>Numeric scalar, the number of read (pairs) to keep in 
 memory for parallel processing. Reduce from the default value if you 
 run out of memory.</p></dd>
+
+
+<dt>maxReadLength</dt>
+<dd><p>Numeric scalar, the maximum allowed read length. Longer 
+read lengths lead to higher memory allocation, and may require 
+the <code>chunkSize</code> to be decreased.</p></dd>
 
 </dl></div>
     <div id="value">
