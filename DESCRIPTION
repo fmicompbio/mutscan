@@ -27,7 +27,7 @@ Imports:
     methods,
     SummarizedExperiment,
     Rcpp,
-    edgeR,
+    edgeR (>= 3.42.0),
     dplyr,
     Matrix,
     limma,
