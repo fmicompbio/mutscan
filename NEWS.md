@@ -1,3 +1,8 @@
+# mutscan 0.2.37
+
+* accommodate changes in edgeR version 3.42 (Bioconductor 3.17)
+* mutscan manuscript published and available at https://doi.org/10.1186/s13059-023-02967-0
+
 # mutscan 0.2.36
 
 * Check that reads don't exceed the maximal allowed length

@@ -1,0 +1,19 @@
+bibentry(
+    bibtype = "Article",
+    title = "mutscan—a flexible R package for efficient end-to-end analysis of multiplexed assays of variant effect data",
+    author = c(
+        person("Charlotte", "Soneson"),
+        person("Alexandra M.", "Bendel"),
+        person("Guillaume", "Diss"),
+        person("Michael B.", "Stadler")),
+    publisher = "Springer Nature",
+	journal = "Genome Biology",
+    year = "2023",
+    month = "Jun",
+    volume = "24",
+    pages = "132",
+    doi = "10.1186/s13059-023-02967-0",
+	issn = "1474-760X",
+	url = "https://doi.org/10.1186/s13059-023-02967-0",
+	abstract = "Multiplexed assays of variant effect (MAVE) experimentally measure the effect of large numbers of sequence variants by selective enrichment of sequences with desirable properties followed by quantification by sequencing. mutscan is an R package for flexible analysis of such experiments, covering the entire workflow from raw reads up to statistical analysis and visualization. The core components are implemented in C++ for efficiency. Various experimental designs are supported, including single or paired reads with optional unique molecular identifiers. To find variants with changed relative abundance, mutscan employs established statistical models provided in the edgeR and limma packages. mutscan is available from https://github.com/fmicompbio/mutscan.",
+)
