@@ -1,7 +1,7 @@
 pandoc: 2.19.2
 pkgdown: 2.0.7.9000
-pkgdown_sha: 172b54113e2f2709d460fe2d09c7e6449c618e27
+pkgdown_sha: 39083f38bbb2de2e1126529392bddf3e6e262ab4
 articles:
   mutscan: mutscan.html
-last_built: 2023-05-08T09:18Z
+last_built: 2023-06-02T07:16Z
 
