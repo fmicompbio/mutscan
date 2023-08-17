@@ -2531,157 +2531,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   }
 
   // return results
-  size_t dfLen = mutantSummary.size();
-  std::vector<std::string> dfSeq(dfLen, ""), dfName(dfLen, "");
-  std::vector<int> dfReads(dfLen, 0), dfUmis(dfLen, 0), dfMaxReads(dfLen, 0);
-  std::vector<std::string> dfMutBases(dfLen, ""), dfMutCodons(dfLen, ""); 
-  std::vector<std::string> dfMutAAs(dfLen, ""), dfVarLengths(dfLen, "");
-  std::vector<std::string> dfMutantNameBase(dfLen, ""), dfMutantNameCodon(dfLen, "");
-  std::vector<std::string> dfMutantNameBaseHGVS(dfLen, ""), dfMutantNameAA(dfLen, "");
-  std::vector<std::string> dfMutantNameAAHGVS(dfLen, ""), dfSeqAA(dfLen, "");
-  std::vector<std::string> dfMutationTypes(dfLen, "");
-  int j = 0;
-  for (mutantSummaryIt = mutantSummary.begin(); mutantSummaryIt != mutantSummary.end(); mutantSummaryIt++) {
-    // collapse all sequences associated with the mutant
-    std::vector<std::string> sequenceVector((*mutantSummaryIt).second.sequence.begin(),
-                                            (*mutantSummaryIt).second.sequence.end());
-    std::string collapsedSequence = "";
-    for (size_t i = 0; i < sequenceVector.size(); i++) {
-      collapsedSequence += sequenceVector[i] + ",";
-    }
-    if (!collapsedSequence.empty()) {
-      collapsedSequence.pop_back(); // remove final ","
-    }
-    
-    // mutantNameBase
-    std::vector<std::string> mutantNameBaseVector((*mutantSummaryIt).second.mutantNameBase.begin(),
-                                                  (*mutantSummaryIt).second.mutantNameBase.end());
-    std::string collapsedMutantNameBase = "";
-    for (size_t i = 0; i < mutantNameBaseVector.size(); i++) {
-        collapsedMutantNameBase += mutantNameBaseVector[i] + ",";
-    }
-    if (!collapsedMutantNameBase.empty()) {
-        collapsedMutantNameBase.pop_back(); // remove final ","
-    }
-    
-    // mutantNameCodon
-    std::vector<std::string> mutantNameCodonVector((*mutantSummaryIt).second.mutantNameCodon.begin(),
-                                                   (*mutantSummaryIt).second.mutantNameCodon.end());
-    std::string collapsedMutantNameCodon = "";
-    for (size_t i = 0; i < mutantNameCodonVector.size(); i++) {
-        collapsedMutantNameCodon += mutantNameCodonVector[i] + ",";
-    }
-    if (!collapsedMutantNameCodon.empty()) {
-        collapsedMutantNameCodon.pop_back(); // remove final ","
-    }
-    
-    // mutantNameBaseHGVS
-    std::vector<std::string> mutantNameBaseHGVSVector((*mutantSummaryIt).second.mutantNameBaseHGVS.begin(),
-                                                      (*mutantSummaryIt).second.mutantNameBaseHGVS.end());
-    std::string collapsedMutantNameBaseHGVS = "";
-    for (size_t i = 0; i < mutantNameBaseHGVSVector.size(); i++) {
-        collapsedMutantNameBaseHGVS += mutantNameBaseHGVSVector[i] + ",";
-    }
-    if (!collapsedMutantNameBaseHGVS.empty()) {
-        collapsedMutantNameBaseHGVS.pop_back(); // remove final ","
-    }
-    
-    // mutantNameAA
-    std::vector<std::string> mutantNameAAVector((*mutantSummaryIt).second.mutantNameAA.begin(),
-                                                (*mutantSummaryIt).second.mutantNameAA.end());
-    std::string collapsedMutantNameAA = "";
-    for (size_t i = 0; i < mutantNameAAVector.size(); i++) {
-        collapsedMutantNameAA += mutantNameAAVector[i] + ",";
-    }
-    if (!collapsedMutantNameAA.empty()) {
-        collapsedMutantNameAA.pop_back(); // remove final ","
-    }
-    
-    // mutantNameAAHGVS
-    std::vector<std::string> mutantNameAAHGVSVector((*mutantSummaryIt).second.mutantNameAAHGVS.begin(),
-                                                    (*mutantSummaryIt).second.mutantNameAAHGVS.end());
-    std::string collapsedMutantNameAAHGVS = "";
-    for (size_t i = 0; i < mutantNameAAHGVSVector.size(); i++) {
-      collapsedMutantNameAAHGVS += mutantNameAAHGVSVector[i] + ",";
-    }
-    if (!collapsedMutantNameAAHGVS.empty()) {
-      collapsedMutantNameAAHGVS.pop_back(); // remove final ","
-    }
-    
-    // mutationTypes
-    std::vector<std::string> mutationTypesVector((*mutantSummaryIt).second.mutationTypes.begin(),
-                                                 (*mutantSummaryIt).second.mutationTypes.end());
-    std::string collapsedMutationTypes = "";
-    for (size_t i = 0; i < mutationTypesVector.size(); i++) {
-      collapsedMutationTypes += mutationTypesVector[i] + ",";
-    }
-    if (!collapsedMutationTypes.empty()) {
-      collapsedMutationTypes.pop_back(); // remove final ","
-    }
-    
-    // collapse all aa sequences associated with the mutant
-    std::vector<std::string> sequenceAAVector((*mutantSummaryIt).second.sequenceAA.begin(),
-                                              (*mutantSummaryIt).second.sequenceAA.end());
-    std::string collapsedSequenceAA = "";
-    for (size_t i = 0; i < sequenceAAVector.size(); i++) {
-      collapsedSequenceAA += sequenceAAVector[i] + ",";
-    }
-    if (!collapsedSequenceAA.empty()) {
-      collapsedSequenceAA.pop_back(); // remove final ","
-    }
-    
-    // collapse all observed nMutBases/nMutCodons
-    std::vector<int> nMutBasesVector((*mutantSummaryIt).second.nMutBases.begin(),
-                                     (*mutantSummaryIt).second.nMutBases.end());
-    std::string collapsedNMutBases = "";
-    for (size_t i = 0; i < nMutBasesVector.size(); i++) {
-      collapsedNMutBases += (std::to_string(nMutBasesVector[i]) + ",");
-    }
-    if (!collapsedNMutBases.empty()) {
-      collapsedNMutBases.pop_back();
-    }
-    
-    // codons
-    std::vector<int> nMutCodonsVector((*mutantSummaryIt).second.nMutCodons.begin(),
-                                      (*mutantSummaryIt).second.nMutCodons.end());
-    std::string collapsedNMutCodons = "";
-    for (size_t i = 0; i < nMutCodonsVector.size(); i++) {
-      collapsedNMutCodons += std::to_string(nMutCodonsVector[i]) + ",";
-    }
-    if (!collapsedNMutCodons.empty()) {
-      collapsedNMutCodons.pop_back();
-    }
-    
-    // AAs
-    std::vector<int> nMutAAsVector((*mutantSummaryIt).second.nMutAAs.begin(),
-                                   (*mutantSummaryIt).second.nMutAAs.end());
-    std::string collapsedNMutAAs = "";
-    for (size_t i = 0; i < nMutAAsVector.size(); i++) {
-      collapsedNMutAAs += std::to_string(nMutAAsVector[i]) + ",";
-    }
-    if (!collapsedNMutAAs.empty()) {
-      collapsedNMutAAs.pop_back();
-    }
-    
-    dfName[j] = (*mutantSummaryIt).first;
-    dfSeq[j] = collapsedSequence;
-    dfReads[j] = (*mutantSummaryIt).second.nReads;
-    dfMaxReads[j] = (*mutantSummaryIt).second.maxNReads;
-    dfUmis[j] = (*mutantSummaryIt).second.umi.size();
-    dfMutBases[j] = collapsedNMutBases;
-    dfMutCodons[j] = collapsedNMutCodons;
-    dfMutAAs[j] = collapsedNMutAAs;
-    dfMutantNameBase[j] = collapsedMutantNameBase;
-    dfMutantNameCodon[j] = collapsedMutantNameCodon;
-    dfMutantNameBaseHGVS[j] = collapsedMutantNameBaseHGVS;
-    dfMutantNameAA[j] = collapsedMutantNameAA;
-    dfMutantNameAAHGVS[j] = collapsedMutantNameAAHGVS;
-    dfMutationTypes[j] = collapsedMutationTypes;
-    dfSeqAA[j] = collapsedSequenceAA;
-    dfVarLengths[j] = (*mutantSummaryIt).second.varLengths;
-    j++;
-  }
-  
+  // ... parameters
   // put back wildtype sequences and names in Rcpp::StringVector
   Rcpp::StringVector wildTypeForwardRcpp(wildTypeForward.size());
   wildTypeForwardRcpp = wildTypeForward;
@@ -2689,45 +2539,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   Rcpp::StringVector wildTypeReverseRcpp(wildTypeReverse.size());
   wildTypeReverseRcpp = wildTypeReverse;
   wildTypeReverseRcpp.attr("names") = wildTypeReverseNames;
-
-  DataFrame filt = DataFrame::create(Named("nbrTotal") = nTot,
-                                     Named("f1_nbrAdapter") = nAdapter,
-                                     Named("f2_nbrNoPrimer") = nNoPrimer,
-                                     Named("f3_nbrReadWrongLength") = nReadWrongLength,
-                                     Named("f4_nbrNoValidOverlap") = nNoValidOverlap,
-                                     Named("f5_nbrAvgVarQualTooLow") = nAvgVarQualTooLow,
-                                     Named("f6_nbrTooManyNinVar") = nTooManyNinVar,
-                                     Named("f7_nbrTooManyNinUMI") = nTooManyNinUMI,
-                                     Named("f8_nbrTooManyBestWTHits") = nTooManyBestWTHits,
-                                     Named("f9_nbrMutQualTooLow") = nMutQualTooLow,
-                                     Named("f10a_nbrTooManyMutCodons") = nTooManyMutCodons,
-                                     Named("f10b_nbrTooManyMutBases") = nTooManyMutBases,
-                                     Named("f11_nbrForbiddenCodons") = nForbiddenCodons,
-                                     Named("f12_nbrTooManyMutConstant") = nTooManyMutConstant,
-                                     Named("f13_nbrTooManyBestConstantHits") = nTooManyBestConstantHits,
-                                     Named("nbrRetained") = nRetain);
-  DataFrame df = DataFrame::create(Named("mutantName") = dfName,
-                                   Named("sequence") = dfSeq,
-                                   Named("nbrReads") = dfReads,
-                                   Named("maxNbrReads") = dfMaxReads,
-                                   Named("nbrUmis") = dfUmis,
-                                   Named("nbrMutBases") = dfMutBases,
-                                   Named("nbrMutCodons") = dfMutCodons,
-                                   Named("nbrMutAAs") = dfMutAAs,
-                                   Named("varLengths") = dfVarLengths,
-                                   Named("mutantNameBase") = dfMutantNameBase,
-                                   Named("mutantNameCodon") = dfMutantNameCodon,
-                                   Named("mutantNameBaseHGVS") = dfMutantNameBaseHGVS,
-                                   Named("mutantNameAA") = dfMutantNameAA,
-                                   Named("mutantNameAAHGVS") = dfMutantNameAAHGVS,
-                                   Named("mutationTypes") = dfMutationTypes,
-                                   Named("sequenceAA") = dfSeqAA,
-                                   Named("stringsAsFactors") = false);
-  DataFrame err = DataFrame::create(Named("PhredQuality") = seq_len(100) - 1,
-                                    Named("nbrMatchForward") = nPhredCorrectForward,
-                                    Named("nbrMismatchForward") = nPhredMismatchForward,
-                                    Named("nbrMatchReverse") = nPhredCorrectReverse,
-                                    Named("nbrMismatchReverse") = nPhredMismatchReverse);
+  
   std::vector<std::string> forbiddenCodonsUsedForward(forbiddenCodonsForward.begin(), forbiddenCodonsForward.end());
   std::vector<std::string> forbiddenCodonsUsedReverse(forbiddenCodonsReverse.begin(), forbiddenCodonsReverse.end());
   List param;
@@ -2783,6 +2595,36 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   param.push_back(nThreads, "nThreads");
   param.push_back(chunkSize, "chunkSize");
   param.push_back(maxReadLength, "maxReadLength");
+
+  // ... error statistics
+  DataFrame err = DataFrame::create(Named("PhredQuality") = seq_len(100) - 1,
+                                    Named("nbrMatchForward") = nPhredCorrectForward,
+                                    Named("nbrMismatchForward") = nPhredMismatchForward,
+                                    Named("nbrMatchReverse") = nPhredCorrectReverse,
+                                    Named("nbrMismatchReverse") = nPhredMismatchReverse);
+  
+  // ... filter statistics
+  DataFrame filt = DataFrame::create(Named("nbrTotal") = nTot,
+                                     Named("f1_nbrAdapter") = nAdapter,
+                                     Named("f2_nbrNoPrimer") = nNoPrimer,
+                                     Named("f3_nbrReadWrongLength") = nReadWrongLength,
+                                     Named("f4_nbrNoValidOverlap") = nNoValidOverlap,
+                                     Named("f5_nbrAvgVarQualTooLow") = nAvgVarQualTooLow,
+                                     Named("f6_nbrTooManyNinVar") = nTooManyNinVar,
+                                     Named("f7_nbrTooManyNinUMI") = nTooManyNinUMI,
+                                     Named("f8_nbrTooManyBestWTHits") = nTooManyBestWTHits,
+                                     Named("f9_nbrMutQualTooLow") = nMutQualTooLow,
+                                     Named("f10a_nbrTooManyMutCodons") = nTooManyMutCodons,
+                                     Named("f10b_nbrTooManyMutBases") = nTooManyMutBases,
+                                     Named("f11_nbrForbiddenCodons") = nForbiddenCodons,
+                                     Named("f12_nbrTooManyMutConstant") = nTooManyMutConstant,
+                                     Named("f13_nbrTooManyBestConstantHits") = nTooManyBestConstantHits,
+                                     Named("nbrRetained") = nRetain);
+  
+  // ... main data frame
+  DataFrame df = mutantSummaryToDataFrame(mutantSummary);
+  
+  // ... pack into list
   List L = List::create(Named("parameters") = param,
                         Named("filterSummary") = filt,
                         Named("summaryTable") = df,
