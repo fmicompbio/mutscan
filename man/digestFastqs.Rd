@@ -47,9 +47,6 @@ digestFastqs(
   mutNameDelimiter = ".",
   constantMaxDistForward = -1,
   constantMaxDistReverse = -1,
-  variableCollapseMaxDist = 0,
-  variableCollapseMinReads = 0,
-  variableCollapseMinRatio = 0,
   umiCollapseMaxDist = 0,
   filteredReadsFastqForward = "",
   filteredReadsFastqReverse = "",
@@ -195,25 +192,13 @@ constant sequence. If multiple constant sequences are provided, the most
 similar one is used. Reads with a larger distance to the expected 
 constant sequence are discarded. If set to -1, no filtering is done.}
 
-\item{variableCollapseMaxDist, umiCollapseMaxDist}{Numeric scalar defining 
-the tolerances for collapsing similar variable (forward + reverse,
-if any) or UMI sequences. If the value is in [0, 1), it defines the 
-maximal Hamming distance in terms of a fraction of sequence length:
-(\code{round(variableCollapseMaxDist * nchar(variableSeq))}).
+\item{umiCollapseMaxDist}{Numeric scalar defining 
+the tolerances for collapsing similar UMI sequences. If the value is 
+in [0, 1), it defines the maximal Hamming distance in terms of a 
+fraction of sequence length:
+(\code{round(umiCollapseMaxDist * nchar(umiSeq))}).
 A value greater or equal to 1 is rounded and directly used as the maximum
-allowed Hamming distance. Note that variable sequences can only be
-collapsed if they are all of the same length and no wild type sequences
-(\code{wildTypeForward} or \code{wildTypeReverse}) have been given.}
-
-\item{variableCollapseMinReads}{Numeric scalar, indicating the minimum
-number of reads for the read to be considered for collapsing with similar
-sequences.}
-
-\item{variableCollapseMinRatio}{Numeric scalar. During collapsing of
-similar variable sequences, a low-frequency sequence will be collapsed 
-with a higher-frequency sequence only if the ratio between the 
-high-frequency and the low-frequency sequence counts is at least this 
-high. The default value of 0 indicates that no such check is performed.}
+allowed Hamming distance.}
 
 \item{filteredReadsFastqForward, filteredReadsFastqReverse}{Character 
 scalars, the names of a (pair of) FASTQ file(s) where filtered-out reads 

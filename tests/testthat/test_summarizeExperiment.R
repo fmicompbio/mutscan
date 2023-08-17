@@ -29,9 +29,6 @@ Ldef <- list(
     mutNameDelimiter = ".",
     constantMaxDistForward = -1,
     constantMaxDistReverse = -1,
-    variableCollapseMaxDist = 0,
-    variableCollapseMinReads = 0,
-    variableCollapseMinRatio = 0,
     umiCollapseMaxDist = 0,
     maxNReads = -1, verbose = FALSE
 )

@@ -1429,9 +1429,6 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                      std::string mutNameDelimiter = ".",
                      int constantMaxDistForward = -1,
                      int constantMaxDistReverse = -1,
-                     double variableCollapseMaxDist = 0.0,
-                     int variableCollapseMinReads = 0,
-                     double variableCollapseMinRatio = 0.0,
                      double umiCollapseMaxDist = 0.0,
                      std::string filteredReadsFastqForward = "",
                      std::string filteredReadsFastqReverse = "",
@@ -2245,9 +2242,6 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   param.push_back(mutNameDelimiter, "mutNameDelimiter");
   param.push_back(constantMaxDistForward, "constantMaxDistForward");
   param.push_back(constantMaxDistReverse, "constantMaxDistReverse");
-  param.push_back(variableCollapseMaxDist, "variableCollapseMaxDist");
-  param.push_back(variableCollapseMinReads, "variableCollapseMinReads");
-  param.push_back(variableCollapseMinRatio, "variableCollapseMinRatio");
   param.push_back(umiCollapseMaxDist, "umiCollapseMaxDist");
   param.push_back(filteredReadsFastqForward, "filteredReadsFastqForward");
   param.push_back(filteredReadsFastqReverse, "filteredReadsFastqReverse");
