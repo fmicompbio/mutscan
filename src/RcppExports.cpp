@@ -147,19 +147,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// collapseDataFrame
-DataFrame collapseDataFrame(DataFrame df, double variableCollapseMaxDist, int variableCollapseMinReads, double variableCollapseMinRatio, double umiCollapseMaxDist, bool verbose);
-RcppExport SEXP _mutscan_collapseDataFrame(SEXP dfSEXP, SEXP variableCollapseMaxDistSEXP, SEXP variableCollapseMinReadsSEXP, SEXP variableCollapseMinRatioSEXP, SEXP umiCollapseMaxDistSEXP, SEXP verboseSEXP) {
+// groupSimilarSequences
+Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs, std::vector<double> scores, double variableCollapseMaxDist, int variableCollapseMinReads, double variableCollapseMinRatio, bool verbose);
+RcppExport SEXP _mutscan_groupSimilarSequences(SEXP seqsSEXP, SEXP scoresSEXP, SEXP variableCollapseMaxDistSEXP, SEXP variableCollapseMinReadsSEXP, SEXP variableCollapseMinRatioSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< DataFrame >::type df(dfSEXP);
+    Rcpp::traits::input_parameter< std::vector<std::string> >::type seqs(seqsSEXP);
+    Rcpp::traits::input_parameter< std::vector<double> >::type scores(scoresSEXP);
     Rcpp::traits::input_parameter< double >::type variableCollapseMaxDist(variableCollapseMaxDistSEXP);
     Rcpp::traits::input_parameter< int >::type variableCollapseMinReads(variableCollapseMinReadsSEXP);
     Rcpp::traits::input_parameter< double >::type variableCollapseMinRatio(variableCollapseMinRatioSEXP);
-    Rcpp::traits::input_parameter< double >::type umiCollapseMaxDist(umiCollapseMaxDistSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(collapseDataFrame(df, variableCollapseMaxDist, variableCollapseMinReads, variableCollapseMinRatio, umiCollapseMaxDist, verbose));
+    rcpp_result_gen = Rcpp::wrap(groupSimilarSequences(seqs, scores, variableCollapseMaxDist, variableCollapseMinReads, variableCollapseMinRatio, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -293,7 +293,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 12},
     {"_mutscan_findClosestRefSeq", (DL_FUNC) &_mutscan_findClosestRefSeq, 4},
     {"_mutscan_findClosestRefSeqEarlyStop", (DL_FUNC) &_mutscan_findClosestRefSeqEarlyStop, 4},
-    {"_mutscan_collapseDataFrame", (DL_FUNC) &_mutscan_collapseDataFrame, 6},
+    {"_mutscan_groupSimilarSequences", (DL_FUNC) &_mutscan_groupSimilarSequences, 6},
     {"_mutscan_digestFastqsCpp", (DL_FUNC) &_mutscan_digestFastqsCpp, 55},
     {"_mutscan_mergeValues", (DL_FUNC) &_mutscan_mergeValues, 3},
     {"_mutscan_levenshtein_distance", (DL_FUNC) &_mutscan_levenshtein_distance, 3},

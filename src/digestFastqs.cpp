@@ -1256,50 +1256,57 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
 }
 
 // Collapse similar sequences
-// HERE!
-std::map<std::string, mutantInfo> collapseMutantSummary(std::map<std::string, mutantInfo> mutantSummary, 
-                                                        double variableCollapseMaxDist, 
-                                                        int variableCollapseMinReads,
-                                                        double variableCollapseMinRatio,
-                                                        double umiCollapseMaxDist,
-                                                        bool verbose) {
-    std::map<std::string, mutantInfo>::iterator mutantSummaryIt, mutantSummarySimIt;
-
-    // get sequence length
-    mutantSummaryIt = mutantSummary.begin();
-    size_t seqlen = (*mutantSummaryIt).first.length();
+//   `seqs`: unique valid nucleotide sequences (or pairs of sequences  concatenated with "_") of equal lengths
+//   `scores`: scores corresponding to `seqs`
+// [[Rcpp::export]]
+Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs,
+                                      std::vector<double> scores, 
+                                      double variableCollapseMaxDist, 
+                                      int variableCollapseMinReads,
+                                      double variableCollapseMinRatio,
+                                      bool verbose) {
     
+    // combine seqs and scores
+    std::map<std::string, double> seqsScores;
+    std::map<std::string, double>::iterator seqsScoresIt, seqsScoresSimIt;
+    for (size_t i = 0; i < seqs.size(); i++) {
+        seqsScores.insert(std::pair<std::string, double>(seqs[i], scores[i]));
+    }
+    
+    // get sequence length
+    size_t seqlen = seqs[0].length();
+
     // calculate Hamming distance tolerance
     int tol;
     if (variableCollapseMaxDist >= 1.0) {
         tol = (int)variableCollapseMaxDist;
     } else {
         tol = (int)(variableCollapseMaxDist *
-            ((*mutantSummaryIt).first.find("_") != std::string::npos ? seqlen-1 : seqlen));
+            (seqs[0].find("_") != std::string::npos ? seqlen-1 : seqlen));
     }
     
     if (verbose) {
         Rcout << "start collapsing variable sequences (tolerance: " << tol << ")...";
     }
     
-    // sort mutantSummary decreasingly by read count
+    // sort seqsScores decreasingly by scores
     // ... create an empty intermediate vector
-    std::vector<std::pair<std::string,mutantInfo>> vec;
-    std::vector<std::pair<std::string,mutantInfo>>::iterator vecIt;
-    // copy key-value pairs from mutantSummary to vec
-    std::copy(mutantSummary.begin(), mutantSummary.end(),
-              std::back_inserter<std::vector<std::pair<std::string,mutantInfo>>>(vec));
-    // ... sort vec by decreasing order of pair.second.nReads
+    std::vector<std::pair<std::string, double>> vec;
+    std::vector<std::pair<std::string, double>>::iterator vecIt;
+    // copy key-value pairs from seqsScores to vec
+    std::copy(seqsScores.begin(), seqsScores.end(),
+              std::back_inserter<std::vector<std::pair<std::string, double>>>(vec));
+    // ... sort vec by decreasing order of pair.second
     //     (if second values are equal, order by the pair's first value)
     std::sort(vec.begin(), vec.end(),
-              [](const std::pair<std::string,mutantInfo>& l,
-                 const std::pair<std::string,mutantInfo>& r) {
-                  if (l.second.nReads != r.second.nReads)
-                      return l.second.nReads > r.second.nReads;
+              [](const std::pair<std::string, double>& l,
+                 const std::pair<std::string, double>& r) {
+                  if (l.second != r.second)
+                      return l.second > r.second;
                   return l.first < r.first;
               });
     
-    // store sequences (from names) in BK tree
+    // store sequences in BK tree
     BKtree tree;
     for (vecIt = vec.begin(); vecIt != vec.end(); vecIt++) {
         if ((*vecIt).first.length() != seqlen) {
@@ -1312,169 +1319,74 @@ std::map<std::string, mutantInfo> collapseMutantSummary(std::map<std::string, mu
     }
     vec.clear(); // remove temporary vector
     
-    if (tree.size > 0) {
-        std::string querySeq, collapsedName;
-        std::vector<std::string> simSeqs;
-        std::map<std::string, std::string> single2collapsed;
-        
-        // start querying in the order of tree.items (ordered decreasingly by nReads)
-        size_t start_size = (double)tree.size;
-        while (tree.size > 0) {
-            querySeq = tree.first();
-            // check in mutantSummary if nReads for querySeq is < variableCollapseMinReads
-            mutantSummaryIt = mutantSummary.find(querySeq);
-            if (variableCollapseMinReads > 0 &&
-                mutantSummaryIt != mutantSummary.end() &&
-                (*mutantSummaryIt).second.nReads < variableCollapseMinReads) {
-                // in that case, nReads < variableCollapseMinReads for all other
-                // sequences in the tree as well
-                // if so, extract all remaining sequences in the tree and
-                // add them to single2collapsed, each mapping to itself
-                std::vector<std::string> rest = tree.get_all();
-                for (size_t i = 0; i < rest.size(); i++) {
-                    single2collapsed[rest[i]] = rest[i];
-                }
-                tree.remove_all();
-                // after that, tree.size = 0 so the loop will stop
-            } else {
-                simSeqs = tree.search(querySeq, tol);
-                for (size_t i = 0; i < simSeqs.size(); i++) {
-                    // check that the read count for querySeq is high enough compared to that of simSeqs[i]
-                    // if not, don't collapse simSeqs[i] with querySeq
-                    // must check explicitly if simSeqs[i] = querySeq, since the ratio in
-                    // that case will always be 1, and the function will loop indefinitely
-                    // if the querySeq is not removed
-                    if (((mutantSummarySimIt = mutantSummary.find(simSeqs[i])) != mutantSummary.end() &&
-                        (*mutantSummaryIt).second.nReads >= variableCollapseMinRatio * (*mutantSummarySimIt).second.nReads) ||
-                        querySeq == simSeqs[i]) {
-                        single2collapsed[simSeqs[i]] = querySeq;
-                        tree.remove(simSeqs[i]);
-                    }
-                }
-                
-                // check for user interruption and print progress
-                if ((start_size - tree.size) % 2000 == 0) { // every 2,000 queries (every ~1-2s)
-                    Rcpp::checkUserInterrupt(); // ... check for user interrupt
-                    // ... and give an update
-                    if (verbose && (start_size - tree.size) % 2000 == 0) {
-                        Rcout << "    " << std::setprecision(4) <<
-                            (100.0 * ((double)(start_size - tree.size) / (double)start_size)) <<
-                                "% done" << std::endl;
-                    }
-                }
-            }
-        }
-        
-        // group into sets of similar sequences
-        std::map<std::string, mutantInfo> collapsedMutantSummary;
-        std::map<std::string, mutantInfo>::iterator collapsedMutantSummaryIt;
-        for (mutantSummaryIt = mutantSummary.begin(); mutantSummaryIt != mutantSummary.end(); mutantSummaryIt++) {
-            collapsedName = single2collapsed[(*mutantSummaryIt).first];
-            if ((collapsedMutantSummaryIt = collapsedMutantSummary.find(collapsedName)) != collapsedMutantSummary.end()) {
-                // ... fuse with existing mutantInfo
-                (*collapsedMutantSummaryIt).second.nReads += (*mutantSummaryIt).second.nReads;
-                (*collapsedMutantSummaryIt).second.maxNReads = std::max(
-                    (*collapsedMutantSummaryIt).second.maxNReads,
-                    (*mutantSummaryIt).second.nReads);
-                (*collapsedMutantSummaryIt).second.umi.insert(
-                        (*mutantSummaryIt).second.umi.begin(),
-                        (*mutantSummaryIt).second.umi.end());
-                (*collapsedMutantSummaryIt).second.sequence.insert(
-                        (*mutantSummaryIt).second.sequence.begin(),
-                        (*mutantSummaryIt).second.sequence.end());
-                (*collapsedMutantSummaryIt).second.nMutBases.insert(
-                        (*mutantSummaryIt).second.nMutBases.begin(),
-                        (*mutantSummaryIt).second.nMutBases.end());
-                (*collapsedMutantSummaryIt).second.nMutCodons.insert(
-                        (*mutantSummaryIt).second.nMutCodons.begin(),
-                        (*mutantSummaryIt).second.nMutCodons.end());
-                (*collapsedMutantSummaryIt).second.nMutAAs.insert(
-                        (*mutantSummaryIt).second.nMutAAs.begin(),
-                        (*mutantSummaryIt).second.nMutAAs.end());
-                (*collapsedMutantSummaryIt).second.mutationTypes.insert(
-                        (*mutantSummaryIt).second.mutationTypes.begin(),
-                        (*mutantSummaryIt).second.mutationTypes.end());
-                (*collapsedMutantSummaryIt).second.mutantNameBase.insert(
-                        (*mutantSummaryIt).second.mutantNameBase.begin(),
-                        (*mutantSummaryIt).second.mutantNameBase.end());
-                (*collapsedMutantSummaryIt).second.mutantNameCodon.insert(
-                        (*mutantSummaryIt).second.mutantNameCodon.begin(),
-                        (*mutantSummaryIt).second.mutantNameCodon.end());
-                (*collapsedMutantSummaryIt).second.mutantNameBaseHGVS.insert(
-                        (*mutantSummaryIt).second.mutantNameBaseHGVS.begin(),
-                        (*mutantSummaryIt).second.mutantNameBaseHGVS.end());
-                (*collapsedMutantSummaryIt).second.mutantNameAA.insert(
-                        (*mutantSummaryIt).second.mutantNameAA.begin(),
-                        (*mutantSummaryIt).second.mutantNameAA.end());
-                (*collapsedMutantSummaryIt).second.mutantNameAAHGVS.insert(
-                        (*mutantSummaryIt).second.mutantNameAAHGVS.begin(),
-                        (*mutantSummaryIt).second.mutantNameAAHGVS.end());
-                (*collapsedMutantSummaryIt).second.sequenceAA.insert(
-                        (*mutantSummaryIt).second.sequenceAA.begin(),
-                        (*mutantSummaryIt).second.sequenceAA.end());
-            } else {
-                // ... insert first mutantInfo
-                collapsedMutantSummary.insert(std::pair<std::string,mutantInfo>(collapsedName, (*mutantSummaryIt).second));
-            }
-        }
-        if (verbose) {
-            Rcout << "done (reduced from " << mutantSummary.size() << " to " << collapsedMutantSummary.size() << ")" << std::endl;
-        }
-        mutantSummary = collapsedMutantSummary;
-    }
+    std::string querySeq, representativeSeq;
+    std::vector<std::string> simSeqs;
+    std::map<std::string, std::string> single2representative;
     
-    // collapse similar UMI sequences in each variable sequence mutantSummary
-    if (umiCollapseMaxDist > 0.0) {
-        // calculate Hamming distance tolerance
-        int tol;
-        if (umiCollapseMaxDist >= 1.0) {
-            tol = (int)umiCollapseMaxDist;
+    // start querying in the order of tree.items (ordered decreasingly by scores)
+    size_t start_size = (double)tree.size;
+    while (tree.size > 0) {
+        querySeq = tree.first();
+        // check in seqsScores if score for querySeq is < variableCollapseMinReads
+        seqsScoresIt = seqsScores.find(querySeq);
+        if (variableCollapseMinReads > 0 &&
+            seqsScoresIt != seqsScores.end() &&
+            (*seqsScoresIt).second < variableCollapseMinReads) {
+            // in that case, score < variableCollapseMinReads for all other
+            // sequences in the tree as well
+            // if so, extract all remaining sequences in the tree and
+            // add them to single2representative, each mapping to itself
+            std::vector<std::string> rest = tree.get_all();
+            for (size_t i = 0; i < rest.size(); i++) {
+                single2representative[rest[i]] = rest[i];
+            }
+            tree.remove_all();
+            // after that, tree.size = 0 so the loop will stop
         } else {
-            tol = (int)(umiCollapseMaxDist * (*(*mutantSummary.begin()).second.umi.begin()).length());
-        }
-        
-        if (verbose) {
-            Rcout << "start collapsing UMIs (tolerance: " << tol << ")...";
-        }
-        
-        // store sequences (from names) in BK tree
-        BKtree tree;
-        std::set<std::string>::iterator umiIt;
-        int mutCounter = 0;
-        for (mutantSummaryIt = mutantSummary.begin(); mutantSummaryIt != mutantSummary.end(); mutantSummaryIt++) {
-            if ((*mutantSummaryIt).second.umi.size() == 1) {
-                continue;
-            } else {
-                tree.remove_all();
-                for (umiIt = (*mutantSummaryIt).second.umi.begin(); umiIt != (*mutantSummaryIt).second.umi.end(); umiIt++) {
-                    tree.insert((*umiIt));
+            simSeqs = tree.search(querySeq, tol);
+            for (size_t i = 0; i < simSeqs.size(); i++) {
+                // check that the score for querySeq is high enough compared to that of simSeqs[i]
+                // if not, don't collapse simSeqs[i] with querySeq
+                // must check explicitly if simSeqs[i] == querySeq, since the ratio in
+                // that case will always be 1, and the function will loop indefinitely
+                // if the querySeq is not removed
+                if (((seqsScoresSimIt = seqsScores.find(simSeqs[i])) != seqsScores.end() &&
+                    (*seqsScoresIt).second >= variableCollapseMinRatio * (*seqsScoresSimIt).second) ||
+                    querySeq == simSeqs[i]) {
+                    single2representative[simSeqs[i]] = querySeq;
+                    tree.remove(simSeqs[i]);
                 }
-                
-                std::vector<std::string> simSeqs;
-                std::set<std::string> collapsedUmis;
-                while (tree.size > 0) {
-                    simSeqs = tree.search(tree.first(), tol);
-                    collapsedUmis.insert(tree.first());
-                    for (size_t i = 0; i < simSeqs.size(); i++) {
-                        tree.remove(simSeqs[i]);
-                    }
-                }
-                
-                (*mutantSummaryIt).second.umi = collapsedUmis;
             }
-            mutCounter++;
+            
             // check for user interruption and print progress
-            if (mutCounter % 200 == 0) { // every 200 queries
+            if ((start_size - tree.size) % 2000 == 0) { // every 2,000 queries (every ~1-2s)
                 Rcpp::checkUserInterrupt(); // ... check for user interrupt
+                // ... and give an update
+                if (verbose && (start_size - tree.size) % 2000 == 0) {
+                    Rcout << "    " << std::setprecision(4) <<
+                        (100.0 * ((double)(start_size - tree.size) / (double)start_size)) <<
+                            "% done" << std::endl;
+                }
             }
-        }
-        
-        if (verbose) {
-            Rcout << "done" << std::endl;
         }
     }
     
-    return mutantSummary;
+    // return grouping results as a DataFrame
+    std::vector<std::string> repseqs(seqs.size());
+    std::unordered_set<std::string> uniqueRepseqs;
+    for (size_t i = 0; i < seqs.size(); i++) {
+        repseqs[i] = single2representative[seqs[i]];
+        uniqueRepseqs.insert(repseqs[i]);
+    }
+    Rcpp::DataFrame df = DataFrame::create(Named("sequence") = seqs,
+                                           Named("representative") = repseqs);
+
+    if (verbose) {
+        Rcout << "done (reduced from " << seqs.size() << " to " << uniqueRepseqs.size() << ")" << std::endl;
+    }
+    uniqueRepseqs.clear();
+
+    return df;
 }
 
 
