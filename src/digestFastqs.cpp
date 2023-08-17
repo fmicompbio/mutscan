@@ -1477,24 +1477,6 @@ std::map<std::string, mutantInfo> collapseMutantSummary(std::map<std::string, mu
     return mutantSummary;
 }
 
-// [[Rcpp::export]]
-DataFrame collapseDataFrame(DataFrame df, double variableCollapseMaxDist, 
-                            int variableCollapseMinReads,
-                            double variableCollapseMinRatio,
-                            double umiCollapseMaxDist, bool verbose = false) {
-    std::map<std::string, mutantInfo> mutantSummary, mutantSummaryCollapsed;
-    DataFrame dfout;
-    
-    mutantSummary = DataFrameToMutantSummary(df);
-    mutantSummaryCollapsed = collapseMutantSummary(mutantSummary, variableCollapseMaxDist, 
-                                                   variableCollapseMinReads, 
-                                                   variableCollapseMinRatio, 
-                                                   umiCollapseMaxDist, 
-                                                   verbose);
-    dfout = mutantSummaryToDataFrame(mutantSummaryCollapsed);
-    return dfout;
-}
-
 
 
 // [[Rcpp::export]]
