@@ -56,8 +56,8 @@ findClosestRefSeqEarlyStop <- function(varSeq, wtSeq, upperBoundMismatch, sim) {
     .Call(`_mutscan_findClosestRefSeqEarlyStop`, varSeq, wtSeq, upperBoundMismatch, sim)
 }
 
-groupSimilarSequences <- function(seqs, scores, variableCollapseMaxDist, variableCollapseMinReads, variableCollapseMinRatio, verbose) {
-    .Call(`_mutscan_groupSimilarSequences`, seqs, scores, variableCollapseMaxDist, variableCollapseMinReads, variableCollapseMinRatio, verbose)
+groupSimilarSequences <- function(seqs, scores, collapseMaxDist, collapseMinScore, collapseMinRatio, verbose) {
+    .Call(`_mutscan_groupSimilarSequences`, seqs, scores, collapseMaxDist, collapseMinScore, collapseMinRatio, verbose)
 }
 
 digestFastqsCpp <- function(fastqForwardVect, fastqReverseVect, mergeForwardReverse, minOverlap, maxOverlap, minMergedLength, maxMergedLength, maxFracMismatchOverlap, greedyOverlap, revComplForward, revComplReverse, elementsForward, elementLengthsForward, elementsReverse, elementLengthsReverse, adapterForward, adapterReverse, primerForward, primerReverse, wildTypeForward, wildTypeForwardNames, wildTypeReverse, wildTypeReverseNames, constantForward, constantReverse, avePhredMinForward = 20.0, avePhredMinReverse = 20.0, variableNMaxForward = 0L, variableNMaxReverse = 0L, umiNMax = 0L, nbrMutatedCodonsMaxForward = 1L, nbrMutatedCodonsMaxReverse = 1L, nbrMutatedBasesMaxForward = -1L, nbrMutatedBasesMaxReverse = -1L, forbiddenMutatedCodonsForward = "NNW", forbiddenMutatedCodonsReverse = "NNW", useTreeWTmatch = FALSE, collapseToWTForward = FALSE, collapseToWTReverse = FALSE, mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0, mutNameDelimiter = ".", constantMaxDistForward = -1L, constantMaxDistReverse = -1L, umiCollapseMaxDist = 0.0, filteredReadsFastqForward = "", filteredReadsFastqReverse = "", maxNReads = -1L, verbose = FALSE, nThreads = 1L, chunkSize = 100000L, maxReadLength = 1024L) {

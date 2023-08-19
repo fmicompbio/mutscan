@@ -1261,9 +1261,9 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
 // [[Rcpp::export]]
 Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs,
                                       std::vector<double> scores, 
-                                      double variableCollapseMaxDist, 
-                                      int variableCollapseMinReads,
-                                      double variableCollapseMinRatio,
+                                      double collapseMaxDist, 
+                                      double collapseMinScore,
+                                      double collapseMinRatio,
                                       bool verbose) {
     
     // combine seqs and scores
@@ -1277,11 +1277,11 @@ Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs,
     size_t seqlen = seqs[0].length();
 
     // calculate Hamming distance tolerance
-    int tol;
-    if (variableCollapseMaxDist >= 1.0) {
-        tol = (int)variableCollapseMaxDist;
+    double tol;
+    if (collapseMaxDist >= 1.0) {
+        tol = collapseMaxDist;
     } else {
-        tol = (int)(variableCollapseMaxDist *
+        tol = (collapseMaxDist *
             (seqs[0].find("_") != std::string::npos ? seqlen-1 : seqlen));
     }
     
@@ -1329,10 +1329,10 @@ Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs,
         querySeq = tree.first();
         // check in seqsScores if score for querySeq is < variableCollapseMinReads
         seqsScoresIt = seqsScores.find(querySeq);
-        if (variableCollapseMinReads > 0 &&
+        if (collapseMinScore > 0 &&
             seqsScoresIt != seqsScores.end() &&
-            (*seqsScoresIt).second < variableCollapseMinReads) {
-            // in that case, score < variableCollapseMinReads for all other
+            (*seqsScoresIt).second < collapseMinScore) {
+            // in that case, score < collapseMinScore for all other
             // sequences in the tree as well
             // if so, extract all remaining sequences in the tree and
             // add them to single2representative, each mapping to itself
@@ -1351,7 +1351,7 @@ Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs,
                 // that case will always be 1, and the function will loop indefinitely
                 // if the querySeq is not removed
                 if (((seqsScoresSimIt = seqsScores.find(simSeqs[i])) != seqsScores.end() &&
-                    (*seqsScoresIt).second >= variableCollapseMinRatio * (*seqsScoresSimIt).second) ||
+                    (*seqsScoresIt).second >= collapseMinRatio * (*seqsScoresSimIt).second) ||
                     querySeq == simSeqs[i]) {
                     single2representative[simSeqs[i]] = querySeq;
                     tree.remove(simSeqs[i]);

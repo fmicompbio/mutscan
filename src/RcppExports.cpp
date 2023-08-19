@@ -148,18 +148,18 @@ BEGIN_RCPP
 END_RCPP
 }
 // groupSimilarSequences
-Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs, std::vector<double> scores, double variableCollapseMaxDist, int variableCollapseMinReads, double variableCollapseMinRatio, bool verbose);
-RcppExport SEXP _mutscan_groupSimilarSequences(SEXP seqsSEXP, SEXP scoresSEXP, SEXP variableCollapseMaxDistSEXP, SEXP variableCollapseMinReadsSEXP, SEXP variableCollapseMinRatioSEXP, SEXP verboseSEXP) {
+Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs, std::vector<double> scores, double collapseMaxDist, double collapseMinScore, double collapseMinRatio, bool verbose);
+RcppExport SEXP _mutscan_groupSimilarSequences(SEXP seqsSEXP, SEXP scoresSEXP, SEXP collapseMaxDistSEXP, SEXP collapseMinScoreSEXP, SEXP collapseMinRatioSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::vector<std::string> >::type seqs(seqsSEXP);
     Rcpp::traits::input_parameter< std::vector<double> >::type scores(scoresSEXP);
-    Rcpp::traits::input_parameter< double >::type variableCollapseMaxDist(variableCollapseMaxDistSEXP);
-    Rcpp::traits::input_parameter< int >::type variableCollapseMinReads(variableCollapseMinReadsSEXP);
-    Rcpp::traits::input_parameter< double >::type variableCollapseMinRatio(variableCollapseMinRatioSEXP);
+    Rcpp::traits::input_parameter< double >::type collapseMaxDist(collapseMaxDistSEXP);
+    Rcpp::traits::input_parameter< double >::type collapseMinScore(collapseMinScoreSEXP);
+    Rcpp::traits::input_parameter< double >::type collapseMinRatio(collapseMinRatioSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(groupSimilarSequences(seqs, scores, variableCollapseMaxDist, variableCollapseMinReads, variableCollapseMinRatio, verbose));
+    rcpp_result_gen = Rcpp::wrap(groupSimilarSequences(seqs, scores, collapseMaxDist, collapseMinScore, collapseMinRatio, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
