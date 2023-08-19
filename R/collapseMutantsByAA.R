@@ -108,6 +108,9 @@ collapseMutantsBySimilarity <- function(se, assayName, scoreMethod = "rowSum",
         collapseMinRatio = collapseMinRatio,
         verbose = verbose
     )
+    matchTable$representative <- rownames(se)[
+        match(matchTable$representative, 
+              SummarizedExperiment::rowData(se)[, sequenceCol])]
 
     ## Add grouping variable
     SummarizedExperiment::rowData(se)$collapseCol <- 
