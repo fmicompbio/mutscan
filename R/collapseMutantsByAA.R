@@ -181,7 +181,7 @@ collapseMutants <- function(se, nameCol) {
         intersect(c("mutantName", "mutantNameBase", "mutantNameBaseHGVS",
                     "mutantNameCodon", "mutantNameAA", "mutantNameAAHGVS",
                     "sequenceAA", "mutationTypes",
-                    "nbrMutBases", "nbrMutCodons", "nbrMutAAs"),
+                    "nbrMutBases", "nbrMutCodons", "nbrMutAAs", "varLengths"),
                   colnames(SummarizedExperiment::rowData(se))),
         nameCol)) {
         tmp <- mergeValues(SummarizedExperiment::rowData(se)[[nameCol]],
