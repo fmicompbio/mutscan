@@ -1,3 +1,33 @@
+## groupSimilarSequences
+seqs <- c("AACGTAGCA", "ACCGTAGCA", "AACGGAGCA", "ATCGGAGCA", "TGAGGCATA")
+scores <- c(5, 1, 3, 1, 8)
+gr <- groupSimilarSequences(seqs = seqs, scores = scores, collapseMaxDist = 1, 
+                            collapseMinScore = 0, collapseMinRatio = 0, verbose = FALSE)
+expect_equal(gr$sequence, seqs)
+expect_equal(gr$representative, seqs[c(1, 1, 1, 4, 5)])
+
+gr <- groupSimilarSequences(seqs = seqs, scores = scores, collapseMaxDist = 0, 
+                            collapseMinScore = 0, collapseMinRatio = 0, verbose = FALSE)
+expect_equal(gr$sequence, seqs)
+expect_equal(gr$representative, seqs[c(1, 2, 3, 4, 5)])
+
+gr <- groupSimilarSequences(seqs = seqs, scores = scores, collapseMaxDist = 1, 
+                            collapseMinScore = 0, collapseMinRatio = 2, verbose = FALSE)
+expect_equal(gr$sequence, seqs)
+expect_equal(gr$representative, seqs[c(1, 1, 3, 3, 5)])
+
+gr <- groupSimilarSequences(seqs = seqs, scores = scores, collapseMaxDist = 1, 
+                            collapseMinScore = 4, collapseMinRatio = 2, verbose = FALSE)
+expect_equal(gr$sequence, seqs)
+expect_equal(gr$representative, seqs[c(1, 1, 3, 4, 5)])
+
+gr <- groupSimilarSequences(seqs = seqs, scores = scores, collapseMaxDist = 9, 
+                            collapseMinScore = 4, collapseMinRatio = 2, verbose = FALSE)
+expect_equal(gr$sequence, seqs)
+expect_equal(gr$representative, seqs[c(1, 5, 5, 5, 5)])
+
+
+## collapseMutants
 Ldef <- list(
   mergeForwardReverse = TRUE, 
   minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
