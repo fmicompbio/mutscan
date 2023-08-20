@@ -86,14 +86,98 @@ se <- summarizeExperiment(x = list(sample1 = out1, sample2 = out2),
                           coldata = coldata, countType = "umis")
 
 test_that("collapseMutantsByAA fails with incorrect arguments", {
-  expect_error(collapseMutantsByAA(se = 1))
-  expect_error(collapseMutantsByAA(se = coldata))
-  expect_error(collapseMutantsByAA(se = out1))
-  expect_error(collapseMutantsByAA(se = list(sample1 = out1, sample2 = out2)))
-  expect_error(collapseMutantsByAA(se = se, nameCol = 1))
-  expect_error(collapseMutantsByAA(se = se, nameCol = c("sequence", "mutantNameAA")))
-  expect_error(collapseMutantsByAA(se = se, nameCol = "missing"))
+    expect_error(collapseMutantsByAA(se = 1))
+    expect_error(collapseMutantsByAA(se = coldata))
+    expect_error(collapseMutantsByAA(se = out1))
+    expect_error(collapseMutantsByAA(se = list(sample1 = out1, sample2 = out2)))
+    expect_error(collapseMutantsByAA(se = se, nameCol = 1))
+    expect_error(collapseMutantsByAA(se = se, nameCol = c("sequence", "mutantNameAA")))
+    expect_error(collapseMutantsByAA(se = se, nameCol = "missing"))
 })
+
+test_that("collapseMutantsBySimilarity fails with incorrect arguments", {
+    expect_error(collapseMutantsBySimilarity(se = 1))
+    expect_error(collapseMutantsBySimilarity(se = coldata))
+    expect_error(collapseMutantsBySimilarity(se = out1))
+    expect_error(collapseMutantsBySimilarity(se = list(sample1 = out1, sample2 = out2)))
+    expect_error(collapseMutantsBySimilarity(se = se, assayName = 1),
+                 "'assayName' must be of class 'character'")
+    expect_error(collapseMutantsBySimilarity(se = se, assayName = "random"),
+                 "All values in 'assayName'")
+    expect_error(collapseMutantsBySimilarity(se = se, assayName = c("counts", "counts")),
+                 "'assayName' must have length 1")
+    expect_error(collapseMutantsBySimilarity(se = se, assayName = "counts", 
+                                             scoreMethod = 1),
+                 "'scoreMethod' must be of class 'character'")
+    expect_error(collapseMutantsBySimilarity(se = se, assayName = "counts", 
+                                             scoreMethod = c("rowSum", "rowMean")),
+                 "'scoreMethod' must have length 1")
+    expect_error(collapseMutantsBySimilarity(se = se, assayName = "counts", 
+                                             scoreMethod = "random"),
+                 "All values in 'scoreMethod' must be one of")
+    expect_error(collapseMutantsBySimilarity(se = se, assayName = "counts", 
+                                             scoreMethod = "rowSum", sequenceCol = 1),
+                 "'sequenceCol' must be of class 'character'")
+    expect_error(collapseMutantsBySimilarity(se = se, assayName = "counts", 
+                                             scoreMethod = "rowSum", 
+                                             sequenceCol = c("sequence", "sequence")),
+                 "'sequenceCol' must have length 1")
+    expect_error(collapseMutantsBySimilarity(se = se, assayName = "counts", 
+                                             scoreMethod = "rowSum", sequenceCol = "abc"),
+                 "All values in 'sequenceCol' must be one of")
+    expect_error(collapseMutantsBySimilarity(se = se, assayName = "counts", 
+                                             scoreMethod = "rowSum", sequenceCol = "sequence",
+                                             collapseMaxDist = "1"),
+                 "'collapseMaxDist' must be of class 'numeric'")
+    expect_error(collapseMutantsBySimilarity(se = se, assayName = "counts", 
+                                             scoreMethod = "rowSum", sequenceCol = "sequence",
+                                             collapseMaxDist = c(1, 2)),
+                 "'collapseMaxDist' must have length 1")
+    expect_error(collapseMutantsBySimilarity(se = se, assayName = "counts", 
+                                             scoreMethod = "rowSum", sequenceCol = "sequence",
+                                             collapseMaxDist = 1, collapseMinScore = "1"),
+                 "'collapseMinScore' must be of class 'numeric'")
+    expect_error(collapseMutantsBySimilarity(se = se, assayName = "counts", 
+                                             scoreMethod = "rowSum", sequenceCol = "sequence",
+                                             collapseMaxDist = 1, collapseMinScore = c(1, 2)),
+                 "'collapseMinScore' must have length 1")
+    expect_error(collapseMutantsBySimilarity(se = se, assayName = "counts", 
+                                             scoreMethod = "rowSum", sequenceCol = "sequence",
+                                             collapseMaxDist = 1, collapseMinScore = 1,
+                                             collapseMinRatio = "1"),
+                 "'collapseMinRatio' must be of class 'numeric'")
+    expect_error(collapseMutantsBySimilarity(se = se, assayName = "counts", 
+                                             scoreMethod = "rowSum", sequenceCol = "sequence",
+                                             collapseMaxDist = 1, collapseMinScore = 1,
+                                             collapseMinRatio = c(1, 2)),
+                 "'collapseMinRatio' must have length 1")
+    expect_error(collapseMutantsBySimilarity(se = se, assayName = "counts", 
+                                             scoreMethod = "rowSum", sequenceCol = "sequence",
+                                             collapseMaxDist = 1, collapseMinScore = 1,
+                                             collapseMinRatio = 0, verbose = "TRUE"),
+                 "'verbose' must be of class 'logical'")
+    expect_error(collapseMutantsBySimilarity(se = se, assayName = "counts", 
+                                             scoreMethod = "rowSum", sequenceCol = "sequence",
+                                             collapseMaxDist = 1, collapseMinScore = 1,
+                                             collapseMinRatio = 0, verbose = c(TRUE, FALSE)),
+                 "'verbose' must have length 1")
+    
+    se0 <- se
+    SummarizedExperiment::rowData(se0)$sequence[1] <- "ACGT"
+    expect_error(collapseMutantsBySimilarity(se = se0, assayName = "counts", 
+                                             scoreMethod = "rowSum", sequenceCol = "sequence",
+                                             collapseMaxDist = 1, collapseMinScore = 1,
+                                             collapseMinRatio = 0, verbose = TRUE),
+                 "All entries in the sequence column must have the same length")
+    se0 <- se
+    SummarizedExperiment::rowData(se0)$sequence[1] <- gsub("A", "B", rowData(se0)$sequence[1])
+    expect_error(collapseMutantsBySimilarity(se = se0, assayName = "counts", 
+                                             scoreMethod = "rowSum", sequenceCol = "sequence",
+                                             collapseMaxDist = 1, collapseMinScore = 1,
+                                             collapseMinRatio = 0, verbose = TRUE),
+                 "All entries in the sequence column must consist of")
+})
+
 
 test_that("collapseMutantsByAA works as expected", {
   secoll <- collapseMutantsByAA(se)

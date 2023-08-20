@@ -35,7 +35,7 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     umiCollapseMaxDist = 4,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
-    maxNReads = -1, verbose = FALSE,
+    maxNReads = -1, verbose = TRUE,
     nThreads = 1, chunkSize = 1000, 
     maxReadLength = 1024
   )
@@ -50,9 +50,10 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   seumi <- summarizeExperiment(list(s1 = res), coldata = data.frame(Name = "s1"), 
                                countType = "umis")
   secollumi <- collapseMutantsBySimilarity(seumi, assayName = "counts", 
+                                           scoreMethod = "rowMean",
                                            collapseMaxDist = 6, 
                                            collapseMinScore = 0, collapseMinRatio = 0, 
-                                           verbose = FALSE)
+                                           verbose = TRUE)
 
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
@@ -99,7 +100,6 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
   expect_equal(sum(SummarizedExperiment::assay(secoll, "counts")), 
                res$filterSummary$nbrRetained)
-  ## TODO: Check these numbers
   expect_equal(nrow(res$summaryTable), 677L)
   expect_equal(sum(res$summaryTable$nbrUmis), 679L)
   expect_equal(nrow(secoll), 294L)
@@ -189,7 +189,6 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
-  ## TODO: Check these numbers
   expect_equal(nrow(res$summaryTable), 677L)
   expect_equal(sum(res$summaryTable$nbrUmis), 677L)
   expect_equal(nrow(secoll), 1L)
@@ -278,10 +277,11 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
-  ## TODO: Check these numbers
   expect_equal(nrow(res$summaryTable), 613L)
   expect_equal(sum(res$summaryTable$nbrUmis), 687L)
+  expect_equal(nrow(se), 613L)
   expect_equal(nrow(secoll), 52L)
+  expect_equal(nrow(seumi), 613L)
   expect_equal(nrow(secollumi), 52L)
 })
 
@@ -374,7 +374,6 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   }
 
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
-  ## TODO: Check these numbers
   expect_equal(nrow(res$summaryTable), 677L)
   expect_equal(sum(res$summaryTable$nbrUmis), 679L)
   expect_equal(nrow(secoll), 673L)
@@ -473,7 +472,6 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
-  ## TODO: Check these numbers
   expect_equal(nrow(res$summaryTable), 677L)
   expect_equal(sum(res$summaryTable$nbrUmis), 679L)
   expect_equal(nrow(secoll), 656L)
@@ -567,7 +565,6 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
-  ## TODO: Check these numbers
   expect_equal(nrow(res$summaryTable), 677L)
   expect_equal(sum(res$summaryTable$nbrUmis), 679L)
   expect_equal(nrow(secoll), 656L)
