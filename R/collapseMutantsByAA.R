@@ -83,6 +83,10 @@ collapseMutantsBySimilarity <- function(se, assayName, scoreMethod = "rowSum",
                   validValues = c("rowSum", "rowMean"))
     .assertScalar(x = sequenceCol, type = "character",
                   validValues = colnames(SummarizedExperiment::rowData(se)))
+    .assertScalar(x = collapseMaxDist, type = "numeric")
+    .assertScalar(x = collapseMinScore, type = "numeric")
+    .assertScalar(x = collapseMinRatio, type = "numeric")
+    .assertScalar(x = verbose, type = "logical")
     
     ## All sequences must be the same length, and can only consist of ACGT_
     seqs <- SummarizedExperiment::rowData(se)[, sequenceCol]
