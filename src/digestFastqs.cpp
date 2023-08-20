@@ -355,7 +355,6 @@ std::string test_makeAAHGVS(const std::vector<std::string> mutationsSorted,
 // except mutantName*HGVS will be set to the nearest wildtype name := `codonPrefix`)
 // returns true if the read needs to be filtered out
 // (and a counter has been incremented)
-// TODO:
 // - instead of conditionally creating mutantName,
 //   build mutantNameBase and mutantNameCodon in parallel and
 //   conditionally set to mutantName base at the end
@@ -370,8 +369,6 @@ std::string test_makeAAHGVS(const std::vector<std::string> mutationsSorted,
 //     all that are spaced less than 2nt appart into a delins
 //   * make sure all names (including *HGVS) always end with a final '_'
 //     (except non-HGVS names if there are no mutations)
-// - fix tests
-// - add tests for *HGVS
 bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
                        const std::vector<int> varIntQual, const double mutatedPhredMin,
                        const int nbrMutatedCodonsMax, const std::set<std::string> &forbiddenCodons,
@@ -1286,7 +1283,7 @@ Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs,
     }
     
     if (verbose) {
-        Rcout << "start collapsing variable sequences (tolerance: " << tol << ")...";
+        Rcout << "start collapsing sequences (tolerance: " << tol << ")...";
     }
     
     // sort seqsScores decreasingly by scores
@@ -1310,7 +1307,7 @@ Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs,
     BKtree tree;
     for (vecIt = vec.begin(); vecIt != vec.end(); vecIt++) {
         if ((*vecIt).first.length() != seqlen) {
-            warning("Skipping variable sequence collapsing because reads are not all of the same length");
+            warning("Skipping sequence collapsing because reads are not all of the same length");
             tree.remove_all();
             break;
         } else {
