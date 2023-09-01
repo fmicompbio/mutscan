@@ -158,6 +158,10 @@
 #'     constant sequence. If multiple constant sequences are provided, the most 
 #'     similar one is used. Reads with a larger distance to the expected 
 #'     constant sequence are discarded. If set to -1, no filtering is done.
+#' @param variableCollapseMaxDist,variableCollapseMinReads,variableCollapseMinRatio 
+#'     Deprecated. Collapsing of variable sequences is no longer performed in 
+#'     \code{digestFastqs}. Please use \code{collapseMutantsBySimilarity} 
+#'     instead.
 #' @param umiCollapseMaxDist Numeric scalar defining 
 #'     the tolerances for collapsing similar UMI sequences. If the value is 
 #'     in [0, 1), it defines the maximal Hamming distance in terms of a 
@@ -325,6 +329,7 @@
 #' 
 #' @export
 #' @import zlibbioc
+#' @importFrom lifecycle deprecated is_present deprecate_warn
 digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          mergeForwardReverse = FALSE, minOverlap = 0, maxOverlap = 0,
                          minMergedLength = 0, maxMergedLength = 0,
@@ -355,6 +360,9 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          mutNameDelimiter = ".",
                          constantMaxDistForward = -1,
                          constantMaxDistReverse = -1,
+                         variableCollapseMaxDist = deprecated(),
+                         variableCollapseMinReads = deprecated(),
+                         variableCollapseMinRatio = deprecated(),
                          umiCollapseMaxDist = 0.0,
                          filteredReadsFastqForward = "",
                          filteredReadsFastqReverse = "",
@@ -362,6 +370,46 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          nThreads = 1, chunkSize = 100000,
                          maxReadLength = 1024) {
     ## pre-flight checks ---------------------------------------------------------
+    ## deprecated arguments
+    deprecMessageColl <- paste0(
+        "Starting from mutscan v0.3.0, collapsing of variable sequences is no ", 
+        "longer supported by digestFastqs(), and arguments ", 
+        "variableCollapseMaxDist, variableCollapseMinReads ", 
+        "and variableCollapseMinRatio will be ignored. Please run ", 
+        "summarizeExperiment() to generate a SummarizedExperiment object, and ",
+        "then call collapseMutantsBySimilarity() to collapse variable ", 
+        "sequences in a consistent way across all samples."
+    )
+    if (lifecycle::is_present(variableCollapseMaxDist)) {
+        # Signal the deprecation to the user
+        lifecycle::deprecate_warn(
+            "0.3.0", "mutscan::digestFastqs(variableCollapseMaxDist = )", 
+            "mutscan::collapseMutantsBySimilarity()", 
+            id = "digestFastqs_variableCollapse",
+            details = deprecMessageColl,
+            always = TRUE)
+    }
+    if (lifecycle::is_present(variableCollapseMinReads)) {
+        # Signal the deprecation to the user
+        lifecycle::deprecate_warn(
+            "0.3.0", "mutscan::digestFastqs(variableCollapseMinReads = )", 
+            "mutscan::collapseMutantsBySimilarity()", 
+            id = "digestFastqs_variableCollapse",
+            details = deprecMessageColl,
+            always = TRUE)
+    }
+    if (lifecycle::is_present(variableCollapseMinRatio)) {
+        # Signal the deprecation to the user
+        lifecycle::deprecate_warn(
+            "0.3.0", "mutscan::digestFastqs(variableCollapseMinRatio = )", 
+            "mutscan::collapseMutantsBySimilarity()", 
+            id = "digestFastqs_variableCollapse",
+            details = deprecMessageColl,
+            always = TRUE)
+    }
+    
+    
+    
     ## fastq files exist
     if (length(fastqForward) < 1 || !all(file.exists(fastqForward)) ||
         (!is.null(fastqReverse) && (length(fastqReverse) != length(fastqForward) ||

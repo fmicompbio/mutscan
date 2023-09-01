@@ -47,7 +47,8 @@ Imports:
     IRanges,
     zlibbioc,
     utils,
-    DelayedArray
+    DelayedArray,
+    lifecycle
 Suggests: 
     testthat (>= 3.0.0),
     BiocStyle,

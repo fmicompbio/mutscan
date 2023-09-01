@@ -41,6 +41,27 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   )
 
   res <- do.call(digestFastqs, Ldef)
+  
+  ## First check that we get deprecation warnings if deprecated arguments are 
+  ## specified. Results should be the same as if these arguments are not used
+  lifecycle::expect_deprecated({
+      resdep1 <- do.call(digestFastqs, c(Ldef, list(variableCollapseMaxDist = 2)))})
+  lifecycle::expect_deprecated({
+      resdep2 <- do.call(digestFastqs, c(Ldef, list(variableCollapseMinReads = 2)))})
+  lifecycle::expect_deprecated({
+      resdep3 <- do.call(digestFastqs, c(Ldef, list(variableCollapseMinRatio = 2)))})
+  
+  expect_equal(res$filterSummary, resdep1$filterSummary)
+  expect_equal(res$summaryTable, resdep1$summaryTable)
+  expect_equal(res$errorStatistics, resdep1$errorStatistics)
+  expect_equal(res$filterSummary, resdep2$filterSummary)
+  expect_equal(res$summaryTable, resdep2$summaryTable)
+  expect_equal(res$errorStatistics, resdep2$errorStatistics)
+  expect_equal(res$filterSummary, resdep3$filterSummary)
+  expect_equal(res$summaryTable, resdep3$summaryTable)
+  expect_equal(res$errorStatistics, resdep3$errorStatistics)
+  
+  ## Summarize single sample and collapse
   se <- summarizeExperiment(list(s1 = res), coldata = data.frame(Name = "s1"), 
                             countType = "reads")
   secoll <- collapseMutantsBySimilarity(se, assayName = "counts", 

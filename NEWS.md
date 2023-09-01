@@ -1,3 +1,7 @@
+# mutscan 0.3.0
+
+* Collapsing of variable sequences is no longer supported by digestFastqs. Use collapseMutantsBySimilarity() instead
+
 # mutscan 0.2.37
 
 * accommodate changes in edgeR version 3.42 (Bioconductor 3.17)
