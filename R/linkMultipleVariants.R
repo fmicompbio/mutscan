@@ -62,8 +62,11 @@
 #' @param ... Additional arguments providing arguments to \code{digestFastqs}
 #'     for the separate runs (processing each variable sequence in turn).
 #'     Each argument must be a named list of arguments to \code{digestFastqs}.
+#'     In addition, arguments \code{collapseMaxDist}, \code{collapseMinScore}
+#'     and \code{collapseMinRatio} can be specified, and will be passed on 
+#'     to \code{collapseMutantsBySimilarity}.
 #'
-#' @author Charlotte Soneson
+#' @author Charlotte Soneson, Michael Stadler
 #'
 #' @export
 #'
@@ -86,6 +89,9 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     ## Process additional arguments
     paramsSeparate <- list(...)
 
+    collapseParams <- c("collapseMaxDist",
+                        "collapseMinScore", "collapseMinRatio")
+    
     ## --------------------------------------------------------------------- ##
     ## Initial checks
     ## --------------------------------------------------------------------- ##
@@ -98,7 +104,7 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     for (parms in paramsSeparate) {
         .assertVector(x = parms, type = "list")
         .assertVector(x = names(parms), type = "character", allowNULL = FALSE,
-                      validValues = names(defaults))
+                      validValues = c(names(defaults), collapseParams))
     }
 
     ## Fill the parameter lists with default values for all arguments
@@ -218,7 +224,17 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     ## Quantify each variable sequence separately
     ## --------------------------------------------------------------------- ##
     outSeparate <- lapply(paramsSeparate, function(ps) {
-        do.call(digestFastqs, ps)
+        tmp <- do.call(digestFastqs, ps[!names(ps) %in% collapseParams])
+        if (any(collapseParams %in% names(ps))) {
+            ## Collapse this variable region -> need to call groupSimilarSequences
+            tbl <- do.call(groupSimilarSequences, 
+                           c(list(seqs = tmp$summaryTable$sequence,
+                                  scores = tmp$summaryTable$nbrReads, verbose = FALSE),
+                             ps[names(ps) %in% collapseParams]))
+            colnames(tbl)[colnames(tbl) == "representative"] <- "mutantName"
+            tmp$summaryTable <- tbl
+        }
+        tmp
     })
 
     ## Filter tables

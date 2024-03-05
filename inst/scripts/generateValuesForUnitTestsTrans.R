@@ -116,6 +116,7 @@ processReadsTrans <- function(Ldef) {
   uniqueMutCodons <- NULL
   mutBases <- NULL
   uniqueMutBases <- NULL
+  nbrMutBasesTot <- NULL
   if (Ldef$wildTypeForward != "") {
     varForward <- Biostrings::subseq(fq1, start = Ldef$skipForward + Ldef$umiLengthForward + 
                                        Ldef$constantLengthForward + 1, width = Ldef$variableLengthForward)
@@ -471,7 +472,7 @@ processReadsTrans <- function(Ldef) {
   }
   
   ## Collapsing
-  if (Ldef$wildTypeForward == "" && Ldef$wildTypeReverse == "" && Ldef$variableCollapseMaxDist > 0) {
+  if (Ldef$wildTypeForward == "" && Ldef$wildTypeReverse == "") {
     umicoll <- list()
     if (!is.null(Ldef$fastqReverse)) {
       fqseq <- paste0(as.character(varForward), "_", as.character(varReverse))
@@ -485,13 +486,16 @@ processReadsTrans <- function(Ldef) {
       tbl$umis[i] <- paste(umis[fqseq == tbl$fqseq[i]], collapse = ",")
     }
     collseqs <- collapse_seqs(tbl$fqseq, tbl$umis, tbl$Freq, 
-                              maxdist = Ldef$variableCollapseMaxDist, umimaxdist = Ldef$umiCollapseMaxDist,
+                              maxdist = Ldef$variableCollapseMaxDist,
+                              umimaxdist = Ldef$umiCollapseMaxDist,
                               minreads = Ldef$variableCollapseMinReads, 
                               minratio = Ldef$variableCollapseMinRatio)
     message("Number of unique sequences: ", nrow(tbl))
     message("Number of collapsed sequences: ", length(collseqs))
     message("Total UMI count: ", length(unlist(collseqs)))
+    return(tbl)
   }
+  return(NULL)
 }
 
 ## ----------------------------------------------------------------------------
@@ -664,6 +668,17 @@ Ldef <- list(
 )
 processReadsTrans(Ldef)
 
+## don't add anything between the above and below runs
+## same as above but with new collapsing approach
+Ldef$variableCollapseMaxDist <- 0
+Ldef$umiCollapseMaxDist <- 5 
+Ldef$variableCollapseMinReads <- 0
+Ldef$variableCollapseMinRatio <- 0
+v <- processReadsTrans(Ldef)
+cseq <- collapse_seqs(v$fqseq, v$umis, v$Freq, maxdist = 10, 
+                      umimaxdist = 0, minreads = 0, minratio = 0)
+length(cseq)
+
 ## Collapse only highly abundant features
 fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
 fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
@@ -699,7 +714,18 @@ Ldef <- list(
   constantMaxDistForward = -1, constantMaxDistReverse = -1,
   verbose = FALSE
 )
-processReadsTrans(Ldef)
+v <- processReadsTrans(Ldef)
+
+## don't add anything between the above and below runs
+## same as above but with new collapsing approach
+Ldef$variableCollapseMaxDist <- 0
+Ldef$umiCollapseMaxDist <- 0 
+Ldef$variableCollapseMinReads <- 0
+Ldef$variableCollapseMinRatio <- 0
+v <- processReadsTrans(Ldef)
+cseq <- collapse_seqs(v$fqseq, v$umis, v$Freq, maxdist = 2, 
+                      umimaxdist = 0, minreads = 1.5, minratio = 0)
+length(cseq)
 
 ## Collapse only features with high enough count ratio
 fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
@@ -736,7 +762,18 @@ Ldef <- list(
   constantMaxDistForward = -1, constantMaxDistReverse = -1,
   verbose = FALSE
 )
-processReadsTrans(Ldef)
+v <- processReadsTrans(Ldef)
+
+## don't add anything between the above and below runs
+## same as above but with new collapsing approach
+Ldef$variableCollapseMaxDist <- 0
+Ldef$umiCollapseMaxDist <- 0 
+Ldef$variableCollapseMinReads <- 0
+Ldef$variableCollapseMinRatio <- 0
+v <- processReadsTrans(Ldef)
+cseq <- collapse_seqs(v$fqseq, v$umis, v$Freq, maxdist = 3, 
+                      umimaxdist = 0, minreads = 1, minratio = 1.5)
+length(cseq)
 
 ## filter based on constant sequences
 Ldef <- list(

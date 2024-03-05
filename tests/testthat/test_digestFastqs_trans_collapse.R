@@ -32,22 +32,49 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     mutNameDelimiter = ".",
     constantMaxDistForward = -1,
     constantMaxDistReverse = -1,
-    variableCollapseMaxDist = 6,
     umiCollapseMaxDist = 4,
-    variableCollapseMinReads = 0,
-    variableCollapseMinRatio = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
-    maxNReads = -1, verbose = FALSE,
+    maxNReads = -1, verbose = TRUE,
     nThreads = 1, chunkSize = 1000, 
     maxReadLength = 1024
   )
 
   res <- do.call(digestFastqs, Ldef)
-
-  L <- Ldef; L$variableCollapseMaxDist = 0; L$umiCollapseMaxDist = 0; res0 <- do.call(digestFastqs, L)
-  expect_equal(res$summaryTable$maxNbrReads, res0$summaryTable$nbrReads[match(res$summaryTable$mutantName,
-                                                                              res0$summaryTable$mutantName)])
+  
+  ## First check that we get deprecation warnings if deprecated arguments are 
+  ## specified. Results should be the same as if these arguments are not used
+  lifecycle::expect_deprecated({
+      resdep1 <- do.call(digestFastqs, c(Ldef, list(variableCollapseMaxDist = 2)))})
+  lifecycle::expect_deprecated({
+      resdep2 <- do.call(digestFastqs, c(Ldef, list(variableCollapseMinReads = 2)))})
+  lifecycle::expect_deprecated({
+      resdep3 <- do.call(digestFastqs, c(Ldef, list(variableCollapseMinRatio = 2)))})
+  
+  expect_equal(res$filterSummary, resdep1$filterSummary)
+  expect_equal(res$summaryTable, resdep1$summaryTable)
+  expect_equal(res$errorStatistics, resdep1$errorStatistics)
+  expect_equal(res$filterSummary, resdep2$filterSummary)
+  expect_equal(res$summaryTable, resdep2$summaryTable)
+  expect_equal(res$errorStatistics, resdep2$errorStatistics)
+  expect_equal(res$filterSummary, resdep3$filterSummary)
+  expect_equal(res$summaryTable, resdep3$summaryTable)
+  expect_equal(res$errorStatistics, resdep3$errorStatistics)
+  
+  ## Summarize single sample and collapse
+  se <- summarizeExperiment(list(s1 = res), coldata = data.frame(Name = "s1"), 
+                            countType = "reads")
+  secoll <- collapseMutantsBySimilarity(se, assayName = "counts", 
+                                        collapseMaxDist = 6, 
+                                        collapseMinScore = 0, collapseMinRatio = 0, 
+                                        verbose = FALSE)
+  seumi <- summarizeExperiment(list(s1 = res), coldata = data.frame(Name = "s1"), 
+                               countType = "umis")
+  secollumi <- collapseMutantsBySimilarity(seumi, assayName = "counts", 
+                                           scoreMethod = "rowMean",
+                                           collapseMaxDist = 6, 
+                                           collapseMinScore = 0, collapseMinRatio = 0, 
+                                           verbose = TRUE)
 
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
@@ -65,6 +92,23 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   expect_equal(res$filterSummary$f12_nbrTooManyMutConstant, 0L)
   expect_equal(res$filterSummary$f13_nbrTooManyBestConstantHits, 0L)
   expect_equal(res$filterSummary$nbrRetained, 679L)
+  
+  expect_equal(SummarizedExperiment::colData(secoll)$nbrTotal, 1000L)
+  expect_equal(SummarizedExperiment::colData(secoll)$f1_nbrAdapter, 314L)
+  expect_equal(SummarizedExperiment::colData(secoll)$f2_nbrNoPrimer, 0L)
+  expect_equal(SummarizedExperiment::colData(secoll)$f3_nbrReadWrongLength, 0L)
+  expect_equal(SummarizedExperiment::colData(secoll)$f4_nbrNoValidOverlap, 0L)
+  expect_equal(SummarizedExperiment::colData(secoll)$f5_nbrAvgVarQualTooLow, 7L)
+  expect_equal(SummarizedExperiment::colData(secoll)$f6_nbrTooManyNinVar, 0L)
+  expect_equal(SummarizedExperiment::colData(secoll)$f7_nbrTooManyNinUMI, 0L)
+  expect_equal(SummarizedExperiment::colData(secoll)$f8_nbrTooManyBestWTHits, 0L)
+  expect_equal(SummarizedExperiment::colData(secoll)$f9_nbrMutQualTooLow, 0L)
+  expect_equal(SummarizedExperiment::colData(secoll)$f10a_nbrTooManyMutCodons, 0L)
+  expect_equal(SummarizedExperiment::colData(secoll)$f10b_nbrTooManyMutBases, 0L)
+  expect_equal(SummarizedExperiment::colData(secoll)$f11_nbrForbiddenCodons, 0L)
+  expect_equal(SummarizedExperiment::colData(secoll)$f12_nbrTooManyMutConstant, 0L)
+  expect_equal(SummarizedExperiment::colData(secoll)$f13_nbrTooManyBestConstantHits, 0L)
+  expect_equal(SummarizedExperiment::colData(secoll)$nbrRetained, 679L)
 
   for (nm in setdiff(names(Ldef), c("forbiddenMutatedCodonsForward", "forbiddenMutatedCodonsReverse", "verbose", "fastqForward", "fastqReverse"))) {
     expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
@@ -74,10 +118,13 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
                  ignore_attr = TRUE)
   }
   
-
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
-  expect_equal(nrow(res$summaryTable), 294L)
-  expect_equal(sum(res$summaryTable$nbrUmis), 677)
+  expect_equal(sum(SummarizedExperiment::assay(secoll, "counts")), 
+               res$filterSummary$nbrRetained)
+  expect_equal(nrow(res$summaryTable), 677L)
+  expect_equal(sum(res$summaryTable$nbrUmis), 679L)
+  expect_equal(nrow(secoll), 294L)
+  expect_equal(nrow(secollumi), 294L)
   expect_true(all(res$summaryTable$varLengths == "96_96"))
 })
 
@@ -115,10 +162,7 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     mutNameDelimiter = ".",
     constantMaxDistForward = -1,
     constantMaxDistReverse = -1,
-    variableCollapseMaxDist = 500,
     umiCollapseMaxDist = 100,
-    variableCollapseMinReads = 0,
-    variableCollapseMinRatio = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
@@ -127,6 +171,18 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   )
 
   res <- do.call(digestFastqs, Ldef)
+  se <- summarizeExperiment(list(s1 = res), coldata = data.frame(Name = "s1"), 
+                            countType = "reads")
+  secoll <- collapseMutantsBySimilarity(se, assayName = "counts", 
+                                        collapseMaxDist = 500, 
+                                        collapseMinScore = 0, collapseMinRatio = 0, 
+                                        verbose = FALSE)
+  seumi <- summarizeExperiment(list(s1 = res), coldata = data.frame(Name = "s1"), 
+                               countType = "umis")
+  secollumi <- collapseMutantsBySimilarity(seumi, assayName = "counts", 
+                                           collapseMaxDist = 500, 
+                                           collapseMinScore = 0, collapseMinRatio = 0, 
+                                           verbose = FALSE)
 
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
@@ -154,8 +210,10 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
-  expect_equal(nrow(res$summaryTable), 1L)
-  expect_equal(sum(res$summaryTable$nbrUmis), 1)
+  expect_equal(nrow(res$summaryTable), 677L)
+  expect_equal(sum(res$summaryTable$nbrUmis), 677L)
+  expect_equal(nrow(secoll), 1L)
+  expect_equal(nrow(secollumi), 1L)
 })
 
 test_that("digestFastqs works as expected for trans experiments, when similar sequences are collapsed - only forward read", {
@@ -192,10 +250,7 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     mutNameDelimiter = ".",
     constantMaxDistForward = -1,
     constantMaxDistReverse = -1,
-    variableCollapseMaxDist = 10,
     umiCollapseMaxDist = 5,
-    variableCollapseMinReads = 0,
-    variableCollapseMinRatio = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
@@ -204,7 +259,19 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   )
 
   res <- do.call(digestFastqs, Ldef)
-
+  se <- summarizeExperiment(list(s1 = res), coldata = data.frame(Name = "s1"), 
+                            countType = "reads")
+  secoll <- collapseMutantsBySimilarity(se, assayName = "counts", 
+                                        collapseMaxDist = 10, 
+                                        collapseMinScore = 0, collapseMinRatio = 0, 
+                                        verbose = FALSE)
+  seumi <- summarizeExperiment(list(s1 = res), coldata = data.frame(Name = "s1"), 
+                               countType = "umis")
+  secollumi <- collapseMutantsBySimilarity(seumi, assayName = "counts", 
+                                           collapseMaxDist = 10, 
+                                           collapseMinScore = 0, collapseMinRatio = 0, 
+                                           verbose = FALSE)
+  
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 297L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
@@ -230,10 +297,13 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
                  ignore_attr = TRUE)
   }
   
-
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
-  expect_equal(nrow(res$summaryTable), 52L)
-  expect_equal(sum(res$summaryTable$nbrUmis), 97)
+  expect_equal(nrow(res$summaryTable), 613L)
+  expect_equal(sum(res$summaryTable$nbrUmis), 687L)
+  expect_equal(nrow(se), 613L)
+  expect_equal(nrow(secoll), 52L)
+  expect_equal(nrow(seumi), 613L)
+  expect_equal(nrow(secollumi), 52L)
 })
 
 test_that("digestFastqs works as expected for trans experiments, when similar sequences are collapsed (only abundant ones)", {
@@ -270,10 +340,7 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     mutNameDelimiter = ".",
     constantMaxDistForward = -1,
     constantMaxDistReverse = -1,
-    variableCollapseMaxDist = 2,
     umiCollapseMaxDist = 0,
-    variableCollapseMinReads = 1.5,
-    variableCollapseMinRatio = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
@@ -282,10 +349,18 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   )
 
   res <- do.call(digestFastqs, Ldef)
-
-  L <- Ldef; L$variableCollapseMaxDist = 0; L$umiCollapseMaxDist = 0; res0 <- do.call(digestFastqs, L)
-  expect_equal(res$summaryTable$maxNbrReads, res0$summaryTable$nbrReads[match(res$summaryTable$mutantName,
-                                                                              res0$summaryTable$mutantName)])
+  se <- summarizeExperiment(list(s1 = res), coldata = data.frame(Name = "s1"), 
+                            countType = "reads")
+  secoll <- collapseMutantsBySimilarity(se, assayName = "counts", 
+                                        collapseMaxDist = 2, 
+                                        collapseMinScore = 1.5, collapseMinRatio = 0, 
+                                        verbose = FALSE)
+  seumi <- summarizeExperiment(list(s1 = res), coldata = data.frame(Name = "s1"), 
+                               countType = "umis")
+  secollumi <- collapseMutantsBySimilarity(seumi, assayName = "counts", 
+                                           collapseMaxDist = 2, 
+                                           collapseMinScore = 1.5, collapseMinRatio = 0, 
+                                           verbose = FALSE)
 
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
@@ -318,11 +393,12 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     expect_equal(res$parameters[[nm]], normalizePath(Ldef[[nm]], mustWork = FALSE), 
                  ignore_attr = TRUE)
   }
-  
 
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
-  expect_equal(nrow(res$summaryTable), 673L)
-  expect_equal(sum(res$summaryTable$nbrUmis), 679)
+  expect_equal(nrow(res$summaryTable), 677L)
+  expect_equal(sum(res$summaryTable$nbrUmis), 679L)
+  expect_equal(nrow(secoll), 673L)
+  expect_equal(nrow(secollumi), 673L)
   
   ## Don't consider mutations here since we're collapsing (i.e., we have no wildtype)
   expect_equal(sum(res$summaryTable$nbrMutBases == 0), nrow(res$summaryTable))
@@ -364,10 +440,7 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     mutNameDelimiter = ".",
     constantMaxDistForward = -1,
     constantMaxDistReverse = -1,
-    variableCollapseMaxDist = 3,
     umiCollapseMaxDist = 0,
-    variableCollapseMinReads = 1,
-    variableCollapseMinRatio = 1.5,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
@@ -376,12 +449,19 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   )
 
   res <- do.call(digestFastqs, Ldef)
-
-  L <- Ldef; L$variableCollapseMaxDist = 0; L$umiCollapseMaxDist = 0
-  L$variableCollapseMinRatio <- 0; res0 <- do.call(digestFastqs, L)
-  expect_equal(res$summaryTable$maxNbrReads, res0$summaryTable$nbrReads[match(res$summaryTable$mutantName,
-                                                                              res0$summaryTable$mutantName)])
-
+  se <- summarizeExperiment(list(s1 = res), coldata = data.frame(Name = "s1"), 
+                            countType = "reads")
+  secoll <- collapseMutantsBySimilarity(se, assayName = "counts", 
+                                        collapseMaxDist = 3, 
+                                        collapseMinScore = 1, collapseMinRatio = 1.5, 
+                                        verbose = FALSE)
+  seumi <- summarizeExperiment(list(s1 = res), coldata = data.frame(Name = "s1"), 
+                               countType = "umis")
+  secollumi <- collapseMutantsBySimilarity(seumi, assayName = "counts", 
+                                           collapseMaxDist = 3, 
+                                           collapseMinScore = 1, collapseMinRatio = 1.5, 
+                                           verbose = FALSE)
+  
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
   expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
@@ -412,10 +492,11 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
                  ignore_attr = TRUE)
   }
   
-  
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
-  expect_equal(nrow(res$summaryTable), 656L)
-  expect_equal(sum(res$summaryTable$nbrUmis), 679)
+  expect_equal(nrow(res$summaryTable), 677L)
+  expect_equal(sum(res$summaryTable$nbrUmis), 679L)
+  expect_equal(nrow(secoll), 656L)
+  expect_equal(nrow(secollumi), 656L)
 })
 
 test_that("digestFastqs works as expected for trans experiments, when similar sequences are collapsed (only high ratio), specify distance threshold as ratio", {
@@ -452,10 +533,7 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
     mutNameDelimiter = ".",
     constantMaxDistForward = -1,
     constantMaxDistReverse = -1,
-    variableCollapseMaxDist = 0.016,  ## corresponds to 3 mismatches/(96+96) bases
     umiCollapseMaxDist = 0,
-    variableCollapseMinReads = 1,
-    variableCollapseMinRatio = 1.5,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
@@ -464,11 +542,18 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   )
   
   res <- do.call(digestFastqs, Ldef)
-  
-  L <- Ldef; L$variableCollapseMaxDist = 0; L$umiCollapseMaxDist = 0
-  L$variableCollapseMinRatio <- 0; res0 <- do.call(digestFastqs, L)
-  expect_equal(res$summaryTable$maxNbrReads, res0$summaryTable$nbrReads[match(res$summaryTable$mutantName,
-                                                                              res0$summaryTable$mutantName)])
+  se <- summarizeExperiment(list(s1 = res), coldata = data.frame(Name = "s1"), 
+                            countType = "reads")
+  secoll <- collapseMutantsBySimilarity(se, assayName = "counts", 
+                                        collapseMaxDist = 0.016, 
+                                        collapseMinScore = 1, collapseMinRatio = 1.5, 
+                                        verbose = FALSE)
+  seumi <- summarizeExperiment(list(s1 = res), coldata = data.frame(Name = "s1"), 
+                               countType = "umis")
+  secollumi <- collapseMutantsBySimilarity(seumi, assayName = "counts", 
+                                           collapseMaxDist = 0.016, 
+                                           collapseMinScore = 1, collapseMinRatio = 1.5, 
+                                           verbose = FALSE)
   
   expect_equal(res$filterSummary$nbrTotal, 1000L)
   expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
@@ -501,6 +586,8 @@ test_that("digestFastqs works as expected for trans experiments, when similar se
   }
   
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
-  expect_equal(nrow(res$summaryTable), 656L)
-  expect_equal(sum(res$summaryTable$nbrUmis), 679)
+  expect_equal(nrow(res$summaryTable), 677L)
+  expect_equal(sum(res$summaryTable$nbrUmis), 679L)
+  expect_equal(nrow(secoll), 656L)
+  expect_equal(nrow(secollumi), 656L)
 })

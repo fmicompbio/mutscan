@@ -54,8 +54,8 @@ test_that("linkMultipleVariants works", {
             fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
                                        package = "mutscan"),
             elementsForward = "CVCSCS", elementLengthsForward = c(6, 24, 10, 30, 10, -1),
-            avePhredMinForward = 20, variableCollapseMaxDist = 1, 
-            variableCollapseMinReads = 1, variableCollapseMinRatio = 1,
+            avePhredMinForward = 20, 
+            collapseMaxDist = 1, collapseMinScore = 1, collapseMinRatio = 1,
             verbose = verbose),
         V2 = list(
             fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
@@ -149,8 +149,8 @@ test_that("linkMultipleVariants works", {
             elementsForward = "CVCSCS", elementLengthsForward = c(6, 24, 10, 30, 10, -1),
             constantForward = truth$constFwd,
             constantMaxDistForward = 0,
-            avePhredMinForward = 20, variableCollapseMaxDist = 1, 
-            variableCollapseMinReads = 1, variableCollapseMinRatio = 1,
+            avePhredMinForward = 20,
+            collapseMaxDist = 1, collapseMinScore = 1, collapseMinRatio = 1,
             verbose = verbose),
         V2 = list(
             fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
@@ -208,7 +208,7 @@ test_that("linkMultipleVariants works", {
     expect_equal(correct$trueV2, obs$V2)
     expect_equal(correct$trueV3, obs$V3)
     expect_equal(correct$n, obs$nbrReads)
-    
+
     ## first filter out reads with deletion -> no valid overlap
     ## then reads with N in barcode -> too many N
     ## then reads with mutation in constant
@@ -263,8 +263,8 @@ test_that("linkMultipleVariants works", {
             fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
                                        package = "mutscan"),
             elementsForward = "CVCSCS", elementLengthsForward = c(6, 24, 10, 30, 10, -1),
-            avePhredMinForward = 20, variableCollapseMaxDist = 1, 
-            variableCollapseMinReads = 1, variableCollapseMinRatio = 1,
+            avePhredMinForward = 20, 
+            collapseMaxDist = 1, collapseMinScore = 1, collapseMinRatio = 1,
             verbose = verbose),
         V2 = list(
             fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
@@ -353,8 +353,8 @@ test_that("linkMultipleVariants works", {
             fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
                                        package = "mutscan"),
             elementsForward = "CVCSCS", elementLengthsForward = c(6, 24, 10, 30, 10, -1),
-            avePhredMinForward = 20, variableCollapseMaxDist = 1, 
-            variableCollapseMinReads = 1, variableCollapseMinRatio = 1,
+            avePhredMinForward = 20, 
+            collapseMaxDist = 1, collapseMinScore = 1, collapseMinRatio = 1,
             verbose = verbose),
         V2 = list(
             fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
@@ -435,8 +435,8 @@ test_that("linkMultipleVariants works", {
             elementsForward = "CVCSCS", elementLengthsForward = c(6, 24, 10, 30, 10, -1),
             constantForward = truth$constFwd,
             constantMaxDistForward = 0,
-            avePhredMinForward = 20, variableCollapseMaxDist = 0, 
-            variableCollapseMinReads = 1, variableCollapseMinRatio = 1,
+            avePhredMinForward = 20, 
+            collapseMaxDist = 0, collapseMinScore = 1, collapseMinRatio = 1,
             verbose = verbose),
         V2 = list(
             fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",

@@ -37,9 +37,6 @@ test_that("digestFastqs fails with incorrect arguments", {
     mutNameDelimiter = ".",
     constantMaxDistForward = -1,
     constantMaxDistReverse = -1,
-    variableCollapseMaxDist = 0,
-    variableCollapseMinReads = 0,
-    variableCollapseMinRatio = 0,
     umiCollapseMaxDist = 0,
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
@@ -88,8 +85,7 @@ test_that("digestFastqs fails with incorrect arguments", {
                 "nbrMutatedCodonsMaxForward", "nbrMutatedCodonsMaxReverse", 
                 "nbrMutatedBasesMaxForward", "nbrMutatedBasesMaxReverse", 
                 "mutatedPhredMinForward", "mutatedPhredMinReverse",
-                "variableCollapseMaxDist", "umiCollapseMaxDist", "variableCollapseMinReads",
-                "variableCollapseMinRatio",
+                "umiCollapseMaxDist",
                 "constantMaxDistForward", "constantMaxDistReverse", "maxNReads",
                 "nThreads", "chunkSize", "maxReadLength")) {
     L <- Ldef; L[[var]] <- "str"

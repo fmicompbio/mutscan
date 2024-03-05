@@ -158,23 +158,17 @@
 #'     constant sequence. If multiple constant sequences are provided, the most 
 #'     similar one is used. Reads with a larger distance to the expected 
 #'     constant sequence are discarded. If set to -1, no filtering is done.
-#' @param variableCollapseMaxDist,umiCollapseMaxDist Numeric scalar defining 
-#'     the tolerances for collapsing similar variable (forward + reverse,
-#'     if any) or UMI sequences. If the value is in [0, 1), it defines the 
-#'     maximal Hamming distance in terms of a fraction of sequence length:
-#'     (\code{round(variableCollapseMaxDist * nchar(variableSeq))}).
+#' @param variableCollapseMaxDist,variableCollapseMinReads,variableCollapseMinRatio 
+#'     Deprecated. Collapsing of variable sequences is no longer performed in 
+#'     \code{digestFastqs}. Please use \code{collapseMutantsBySimilarity} 
+#'     instead.
+#' @param umiCollapseMaxDist Numeric scalar defining 
+#'     the tolerances for collapsing similar UMI sequences. If the value is 
+#'     in [0, 1), it defines the maximal Hamming distance in terms of a 
+#'     fraction of sequence length:
+#'     (\code{round(umiCollapseMaxDist * nchar(umiSeq))}).
 #'     A value greater or equal to 1 is rounded and directly used as the maximum
-#'     allowed Hamming distance. Note that variable sequences can only be
-#'     collapsed if they are all of the same length and no wild type sequences
-#'     (\code{wildTypeForward} or \code{wildTypeReverse}) have been given.
-#' @param variableCollapseMinReads Numeric scalar, indicating the minimum
-#'     number of reads for the read to be considered for collapsing with similar
-#'     sequences.
-#' @param variableCollapseMinRatio Numeric scalar. During collapsing of
-#'     similar variable sequences, a low-frequency sequence will be collapsed 
-#'     with a higher-frequency sequence only if the ratio between the 
-#'     high-frequency and the low-frequency sequence counts is at least this 
-#'     high. The default value of 0 indicates that no such check is performed.
+#'     allowed Hamming distance. 
 #' @param filteredReadsFastqForward,filteredReadsFastqReverse Character 
 #'     scalars, the names of a (pair of) FASTQ file(s) where filtered-out reads 
 #'     will be written. The name(s) should end in .gz (the output will always 
@@ -335,6 +329,7 @@
 #' 
 #' @export
 #' @import zlibbioc
+#' @importFrom lifecycle deprecated is_present deprecate_warn
 digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          mergeForwardReverse = FALSE, minOverlap = 0, maxOverlap = 0,
                          minMergedLength = 0, maxMergedLength = 0,
@@ -365,9 +360,9 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          mutNameDelimiter = ".",
                          constantMaxDistForward = -1,
                          constantMaxDistReverse = -1,
-                         variableCollapseMaxDist = 0.0,
-                         variableCollapseMinReads = 0,
-                         variableCollapseMinRatio = 0,
+                         variableCollapseMaxDist = deprecated(),
+                         variableCollapseMinReads = deprecated(),
+                         variableCollapseMinRatio = deprecated(),
                          umiCollapseMaxDist = 0.0,
                          filteredReadsFastqForward = "",
                          filteredReadsFastqReverse = "",
@@ -375,6 +370,46 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          nThreads = 1, chunkSize = 100000,
                          maxReadLength = 1024) {
     ## pre-flight checks ---------------------------------------------------------
+    ## deprecated arguments
+    deprecMessageColl <- paste0(
+        "Starting from mutscan v0.3.0, collapsing of variable sequences is no ", 
+        "longer supported by digestFastqs(), and arguments ", 
+        "variableCollapseMaxDist, variableCollapseMinReads ", 
+        "and variableCollapseMinRatio will be ignored. Please run ", 
+        "summarizeExperiment() to generate a SummarizedExperiment object, and ",
+        "then call collapseMutantsBySimilarity() to collapse variable ", 
+        "sequences in a consistent way across all samples."
+    )
+    if (lifecycle::is_present(variableCollapseMaxDist)) {
+        # Signal the deprecation to the user
+        lifecycle::deprecate_warn(
+            "0.3.0", "mutscan::digestFastqs(variableCollapseMaxDist = )", 
+            "mutscan::collapseMutantsBySimilarity()", 
+            id = "digestFastqs_variableCollapse",
+            details = deprecMessageColl,
+            always = TRUE)
+    }
+    if (lifecycle::is_present(variableCollapseMinReads)) {
+        # Signal the deprecation to the user
+        lifecycle::deprecate_warn(
+            "0.3.0", "mutscan::digestFastqs(variableCollapseMinReads = )", 
+            "mutscan::collapseMutantsBySimilarity()", 
+            id = "digestFastqs_variableCollapse",
+            details = deprecMessageColl,
+            always = TRUE)
+    }
+    if (lifecycle::is_present(variableCollapseMinRatio)) {
+        # Signal the deprecation to the user
+        lifecycle::deprecate_warn(
+            "0.3.0", "mutscan::digestFastqs(variableCollapseMinRatio = )", 
+            "mutscan::collapseMutantsBySimilarity()", 
+            id = "digestFastqs_variableCollapse",
+            details = deprecMessageColl,
+            always = TRUE)
+    }
+    
+    
+    
     ## fastq files exist
     if (length(fastqForward) < 1 || !all(file.exists(fastqForward)) ||
         (!is.null(fastqReverse) && (length(fastqReverse) != length(fastqForward) ||
@@ -425,9 +460,6 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                   rngIncl = c(0, Inf), validValues = -1)
     .assertScalar(x = constantMaxDistReverse, type = "numeric",
                   rngIncl = c(0, Inf), validValues = -1)
-    .assertScalar(x = variableCollapseMaxDist, type = "numeric", rngIncl = c(0, Inf))
-    .assertScalar(x = variableCollapseMinReads, type = "numeric", rngIncl = c(0, Inf))
-    .assertScalar(x = variableCollapseMinRatio, type = "numeric", rngIncl = c(0, Inf))
     .assertScalar(x = umiCollapseMaxDist, type = "numeric", rngIncl = c(0, Inf))
     .assertScalar(x = maxNReads, type = "numeric", rngIncl = c(0, Inf),
                   validValues = -1)
@@ -713,9 +745,6 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                            mutNameDelimiter = mutNameDelimiter,
                            constantMaxDistForward = constantMaxDistForward,
                            constantMaxDistReverse = constantMaxDistReverse,
-                           variableCollapseMaxDist = variableCollapseMaxDist,
-                           variableCollapseMinReads = as.integer(ceiling(variableCollapseMinReads)),
-                           variableCollapseMinRatio = variableCollapseMinRatio,
                            umiCollapseMaxDist = umiCollapseMaxDist,
                            filteredReadsFastqForward = filteredReadsFastqForward,
                            filteredReadsFastqReverse = filteredReadsFastqReverse,
