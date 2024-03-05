@@ -12,7 +12,10 @@ linkMultipleVariants(combinedDigestParams = list(), ...)
 
 \item{...}{Additional arguments providing arguments to \code{digestFastqs}
 for the separate runs (processing each variable sequence in turn).
-Each argument must be a named list of arguments to \code{digestFastqs}.}
+Each argument must be a named list of arguments to \code{digestFastqs}.
+In addition, arguments \code{collapseMaxDist}, \code{collapseMinScore}
+and \code{collapseMinRatio} can be specified, and will be passed on 
+to \code{collapseMutantsBySimilarity}.}
 }
 \value{
 A list with the following elements: 
@@ -85,5 +88,5 @@ need to swap the 'forward' and 'reverse' specifications (since
 \code{digestFastqs} requires a forward read).
 }
 \author{
-Charlotte Soneson
+Charlotte Soneson, Michael Stadler
 }
