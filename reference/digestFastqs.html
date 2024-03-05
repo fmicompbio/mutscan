@@ -21,7 +21,7 @@ following the primer will be considered the variable sequence."><!-- mathjax -->
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.37</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
       </span>
     </div>
 
@@ -101,9 +101,9 @@ following the primer will be considered the variable sequence.</p>
 <span>  mutNameDelimiter <span class="op">=</span> <span class="st">"."</span>,</span>
 <span>  constantMaxDistForward <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,</span>
 <span>  constantMaxDistReverse <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,</span>
-<span>  variableCollapseMaxDist <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  variableCollapseMinReads <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  variableCollapseMinRatio <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  variableCollapseMaxDist <span class="op">=</span> <span class="fu">deprecated</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  variableCollapseMinReads <span class="op">=</span> <span class="fu">deprecated</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  variableCollapseMinRatio <span class="op">=</span> <span class="fu">deprecated</span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  umiCollapseMaxDist <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  filteredReadsFastqForward <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  filteredReadsFastqReverse <span class="op">=</span> <span class="st">""</span>,</span>
@@ -299,30 +299,20 @@ similar one is used. Reads with a larger distance to the expected
 constant sequence are discarded. If set to -1, no filtering is done.</p></dd>
 
 
-<dt>variableCollapseMaxDist, umiCollapseMaxDist</dt>
+<dt>variableCollapseMaxDist, variableCollapseMinReads, variableCollapseMinRatio</dt>
+<dd><p>Deprecated. Collapsing of variable sequences is no longer performed in 
+<code>digestFastqs</code>. Please use <code>collapseMutantsBySimilarity</code> 
+instead.</p></dd>
+
+
+<dt>umiCollapseMaxDist</dt>
 <dd><p>Numeric scalar defining 
-the tolerances for collapsing similar variable (forward + reverse,
-if any) or UMI sequences. If the value is in [0, 1), it defines the 
-maximal Hamming distance in terms of a fraction of sequence length:
-(<code>round(variableCollapseMaxDist * nchar(variableSeq))</code>).
+the tolerances for collapsing similar UMI sequences. If the value is 
+in [0, 1), it defines the maximal Hamming distance in terms of a 
+fraction of sequence length:
+(<code>round(umiCollapseMaxDist * nchar(umiSeq))</code>).
 A value greater or equal to 1 is rounded and directly used as the maximum
-allowed Hamming distance. Note that variable sequences can only be
-collapsed if they are all of the same length and no wild type sequences
-(<code>wildTypeForward</code> or <code>wildTypeReverse</code>) have been given.</p></dd>
-
-
-<dt>variableCollapseMinReads</dt>
-<dd><p>Numeric scalar, indicating the minimum
-number of reads for the read to be considered for collapsing with similar
-sequences.</p></dd>
-
-
-<dt>variableCollapseMinRatio</dt>
-<dd><p>Numeric scalar. During collapsing of
-similar variable sequences, a low-frequency sequence will be collapsed 
-with a higher-frequency sequence only if the ratio between the 
-high-frequency and the low-frequency sequence counts is at least this 
-high. The default value of 0 indicates that no such check is performed.</p></dd>
+allowed Hamming distance.</p></dd>
 
 
 <dt>filteredReadsFastqForward, filteredReadsFastqReverse</dt>

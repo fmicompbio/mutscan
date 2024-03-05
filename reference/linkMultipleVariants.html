@@ -25,7 +25,7 @@ reads), they will be concatenated and processed as a single unit."><!-- mathjax 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.37</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
       </span>
     </div>
 
@@ -79,7 +79,10 @@ reads), they will be concatenated and processed as a single unit.</p>
 <dt>...</dt>
 <dd><p>Additional arguments providing arguments to <code>digestFastqs</code>
 for the separate runs (processing each variable sequence in turn).
-Each argument must be a named list of arguments to <code>digestFastqs</code>.</p></dd>
+Each argument must be a named list of arguments to <code>digestFastqs</code>.
+In addition, arguments <code>collapseMaxDist</code>, <code>collapseMinScore</code>
+and <code>collapseMinRatio</code> can be specified, and will be passed on 
+to <code>collapseMutantsBySimilarity</code>.</p></dd>
 
 </dl></div>
     <div id="value">
@@ -140,7 +143,7 @@ need to swap the 'forward' and 'reverse' specifications (since
     </div>
     <div id="author">
     <h2>Author</h2>
-    <p>Charlotte Soneson</p>
+    <p>Charlotte Soneson, Michael Stadler</p>
     </div>
 
   </div>

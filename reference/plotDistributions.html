@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.37</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
       </span>
     </div>
 
@@ -108,8 +108,9 @@ observed values in the <code>selAssay</code> assay before plotting.</p></dd>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE102901_cis_se.rds"</span>, </span></span>
 <span class="r-in"><span>                          package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">200</span>, <span class="op">]</span></span></span>
 <span class="r-in"><span><span class="fu">plotDistributions</span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Transformation introduced infinite values in continuous x-axis</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Removed 19 rows containing non-finite values (`stat_density()`).</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span><span style="color: #00BB00;">log-10</span> transformation introduced infinite values.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Removed 19 rows containing non-finite outside the scale range</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> (`stat_density()`).</span>
 <span class="r-plt img"><img src="plotDistributions-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

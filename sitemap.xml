@@ -34,7 +34,7 @@
     <loc>/reference/calculateRelativeFC.html</loc>
   </url>
   <url>
-    <loc>/reference/collapseMutantsByAA.html</loc>
+    <loc>/reference/collapseMutantsBySimilarity.html</loc>
   </url>
   <url>
     <loc>/reference/digestFastqs.html</loc>
