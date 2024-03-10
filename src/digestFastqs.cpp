@@ -565,7 +565,7 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
 // return true
 bool tabulateBasesByQual(const std::string constSeq, const std::string constant,
                          const std::vector<int> constIntQual,
-                         std::vector<int> &nPhredCorrect, std::vector<int> &nPhredMismatch) {
+                         std::vector<size_t> &nPhredCorrect, std::vector<size_t> &nPhredMismatch) {
   for (size_t i = 0; i < constSeq.length(); i++) { // for each base
     if (constSeq[i] != constant[i]) { // found mismatch
 #ifdef _OPENMP
@@ -1463,8 +1463,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
 
   std::map<std::string, mutantInfo> mutantSummary;
   std::map<std::string, mutantInfo>::iterator mutantSummaryIt, mutantSummarySimIt;
-  std::vector<int> nPhredCorrectForward(100, 0), nPhredMismatchForward(100, 0);
-  std::vector<int> nPhredCorrectReverse(100, 0), nPhredMismatchReverse(100, 0);
+  std::vector<size_t> nPhredCorrectForward(100, 0), nPhredMismatchForward(100, 0);
+  std::vector<size_t> nPhredCorrectReverse(100, 0), nPhredMismatchReverse(100, 0);
 
   // enumerate forbidden codons based on forbiddenMutatedCodons
   std::set<std::string> forbiddenCodonsForward = enumerateCodonsFromIUPAC(forbiddenMutatedCodonsForward, IUPAC, verbose);
