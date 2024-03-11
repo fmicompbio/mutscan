@@ -565,7 +565,7 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
 // return true
 bool tabulateBasesByQual(const std::string constSeq, const std::string constant,
                          const std::vector<int> constIntQual,
-                         std::vector<int> &nPhredCorrect, std::vector<int> &nPhredMismatch) {
+                         std::vector<size_t> &nPhredCorrect, std::vector<size_t> &nPhredMismatch) {
   for (size_t i = 0; i < constSeq.length(); i++) { // for each base
     if (constSeq[i] != constant[i]) { // found mismatch
 #ifdef _OPENMP
@@ -1252,9 +1252,45 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
     return df;
 }
 
-// Collapse similar sequences
-//   `seqs`: unique valid nucleotide sequences (or pairs of sequences  concatenated with "_") of equal lengths
-//   `scores`: scores corresponding to `seqs`
+//' Create a conversion table for collapsing similar sequences
+//' @param seqs Character vector with nucleotide sequences (or pairs of 
+//' sequences concatenated with "_") to be collapsed. The sequences must 
+//' all be of the same length.
+//' @param scores Numeric vector of "scores" for the sequences. Typically
+//' the total read/UMI count. A higher score will be preferred when 
+//' deciding which sequence to use as the representative for a group of 
+//' collapsed sequences.
+//' @param collapseMaxDist Numeric scalar defining the tolerance for collapsing 
+//' similar sequences. If the value is in [0, 1), it defines the maximal 
+//' Hamming distance in terms of a fraction of sequence length:
+//' (\code{round(collapseMaxDist * nchar(sequence))}).
+//' A value greater or equal to 1 is rounded and directly used as the maximum
+//' allowed Hamming distance. Note that sequences can only be
+//' collapsed if they are all of the same length.
+//' @param collapseMinScore Numeric scalar, indicating the minimum score 
+//' required for a sequence to be considered as a representative for a 
+//' group of similar sequences (i.e., to allow other sequences to be 
+//' collapsed into it).
+//' @param collapseMinRatio Numeric scalar. During collapsing of
+//' similar sequences, a low-frequency sequence will be collapsed 
+//' with a higher-frequency sequence only if the ratio between the 
+//' high-frequency and the low-frequency scores is at least this 
+//' high. A value of 0 indicates that no such check is performed.
+//' @param verbose Logical scalar, whether to print progress messages.
+//' 
+//' @return A data.frame with two columns, containing the input sequences 
+//' and the representatives for the groups resulting from grouping similar
+//' sequences, respectively.
+//' 
+//' @examples
+//' seqs <- c("AACGTAGCA", "ACCGTAGCA", "AACGGAGCA", "ATCGGAGCA", "TGAGGCATA")
+//' scores <- c(5, 1, 3, 1, 8)
+//' groupSimilarSequences(seqs = seqs, scores = scores, 
+//'                       collapseMaxDist = 1, collapseMinScore = 0, 
+//'                       collapseMinRatio = 0, verbose = FALSE)
+//'                             
+//' @export
+//' @author Michael Stadler, Charlotte Soneson
 // [[Rcpp::export]]
 Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs,
                                       std::vector<double> scores, 
@@ -1463,8 +1499,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
 
   std::map<std::string, mutantInfo> mutantSummary;
   std::map<std::string, mutantInfo>::iterator mutantSummaryIt, mutantSummarySimIt;
-  std::vector<int> nPhredCorrectForward(100, 0), nPhredMismatchForward(100, 0);
-  std::vector<int> nPhredCorrectReverse(100, 0), nPhredMismatchReverse(100, 0);
+  std::vector<size_t> nPhredCorrectForward(100, 0), nPhredMismatchForward(100, 0);
+  std::vector<size_t> nPhredCorrectReverse(100, 0), nPhredMismatchReverse(100, 0);
 
   // enumerate forbidden codons based on forbiddenMutatedCodons
   std::set<std::string> forbiddenCodonsForward = enumerateCodonsFromIUPAC(forbiddenMutatedCodonsForward, IUPAC, verbose);
