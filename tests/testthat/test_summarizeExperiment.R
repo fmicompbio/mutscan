@@ -117,6 +117,8 @@ test_that("summarizeExperiment works as expected with reads output", {
 
     expect_equal(S4Vectors::metadata(se)$parameters[["sample1"]], out1$parameters)
     expect_equal(S4Vectors::metadata(se)$parameters[["sample2"]], out2$parameters)
+    expect_equal(S4Vectors::metadata(se)$errorStatistics[["sample1"]], out1$errorStatistics)
+    expect_equal(S4Vectors::metadata(se)$errorStatistics[["sample2"]], out2$errorStatistics)
 
     expect_true(all(c("mutantName", "sequence", "nbrMutBases",
                       "minNbrMutBases", "maxNbrMutBases",
@@ -198,6 +200,8 @@ test_that("summarizeExperiment works as expected with umis output", {
 
     expect_equal(S4Vectors::metadata(se)$parameters[["sample1"]], out1$parameters)
     expect_equal(S4Vectors::metadata(se)$parameters[["sample2"]], out2$parameters)
+    expect_equal(S4Vectors::metadata(se)$errorStatistics[["sample1"]], out1$errorStatistics)
+    expect_equal(S4Vectors::metadata(se)$errorStatistics[["sample2"]], out2$errorStatistics)
 })
 
 test_that("summarizeExperiment orders samples equally in count matrix/colData", {
@@ -223,8 +227,13 @@ test_that("summarizeExperiment recognizes the presence of UMI counts correctly",
 })
 
 test_that("summarizeExperiment works as expected when collapsing to WT", {
+    ## Also test that errorStatistics is empty if there is no constant sequence
     Ldef1$collapseToWTForward <- TRUE
     Ldef2$collapseToWTForward <- TRUE
+    Ldef1$elementsForward = "SUSV"
+    Ldef1$elementsReverse = "SUSV"
+    Ldef2$elementsForward = "SUSV"
+    Ldef2$elementsReverse = "SUSV"
     
     out1 <- do.call(digestFastqs, Ldef1)
     out2 <- do.call(digestFastqs, Ldef2)
@@ -259,6 +268,10 @@ test_that("summarizeExperiment works as expected when collapsing to WT", {
     
     expect_equal(S4Vectors::metadata(se)$parameters[["sample1"]], out1$parameters)
     expect_equal(S4Vectors::metadata(se)$parameters[["sample2"]], out2$parameters)
+    expect_equal(S4Vectors::metadata(se)$errorStatistics[["sample1"]], out1$errorStatistics)
+    expect_equal(S4Vectors::metadata(se)$errorStatistics[["sample2"]], out2$errorStatistics)
+    expect_equal(sum(S4Vectors::metadata(se)$errorStatistics[["sample1"]][, c("nbrMatchForward", "nbrMismatchForward", "nbrMatchReverse", "nbrMismatchReverse")]), 0)
+    expect_equal(sum(S4Vectors::metadata(se)$errorStatistics[["sample2"]][, c("nbrMatchForward", "nbrMismatchForward", "nbrMatchReverse", "nbrMismatchReverse")]), 0)
     
     expect_true(all(c("mutantName", "sequence", "nbrMutBases",
                       "minNbrMutBases", "maxNbrMutBases",

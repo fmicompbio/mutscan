@@ -1,3 +1,8 @@
+# mutscan 0.3.1
+
+* Adapt summarizeExperiment to include errorStatistics in metadata(se)
+* Modify plotPairs to ignore NAs rather than give an error when calculating correlations
+
 # mutscan 0.3.0
 
 * Collapsing of variable sequences is no longer supported by digestFastqs. Use collapseMutantsBySimilarity() instead

@@ -58,7 +58,8 @@
 #'                                package = "mutscan"), 
 #'     elementsForward = "SUCV", elementLengthsForward = c(1, 10, 18, 96), 
 #'     constantForward = "AACCGGAGGAGGGAGCTG", 
-#'     wildTypeForward = c(FOS = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"),
+#'     wildTypeForward = c(FOS = paste0("ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
+#'                                      "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
 #'     nbrMutatedCodonsMaxForward = 1
 #' )
 #' ## Output sample
@@ -67,7 +68,8 @@
 #'                                package = "mutscan"), 
 #'     elementsForward = "SUCV", elementLengthsForward = c(1, 10, 18, 96), 
 #'     constantForward = "AACCGGAGGAGGGAGCTG", 
-#'     wildTypeForward = c(FOS = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"),
+#'     wildTypeForward = c(FOS = paste0("ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
+#'                                      "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
 #'     nbrMutatedCodonsMaxForward = 1
 #' )
 #' ## Combine
@@ -199,6 +201,7 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
         colData = coldata[match(allSamples, coldata$Name), , drop = FALSE],
         rowData = allSequences,
         metadata = list(parameters = lapply(allSamples, function(w) x[[w]]$parameters),
+                        errorStatistics = lapply(allSamples, function(w) x[[w]]$errorStatistics),
                         countType = countType,
                         mutNameDelimiter = mutnamedel)
     )
