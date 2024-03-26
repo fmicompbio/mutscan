@@ -103,7 +103,8 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
         yData <- GGally::eval_data_col(data, mapping$y)
 
         ## Calculate correlation
-        mainCor <- stats::cor(xData, yData, method = corMethod)
+        mainCor <- stats::cor(xData, yData, method = corMethod, 
+                              use = "pairwise.complete.obs")
         transfCor <- (abs(mainCor) - min(corRange))/(max(corRange) - min(corRange))
         ## Protect against numerical imprecision leading to values outside
         ## the allowed range
@@ -205,7 +206,7 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
                     substr(corMethod, 2, nchar(corMethod)), " correlation")
 
     ## Calculate correlations and get range
-    allCors <- stats::cor(mat, method = corMethod)
+    allCors <- stats::cor(mat, method = corMethod, use = "pairwise.complete.obs")
     if (!is.null(corrColorRange)) {
         corRange <- corrColorRange
     } else {
