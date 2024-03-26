@@ -201,6 +201,7 @@ summarizeExperiment <- function(x, coldata, countType = "umis") {
         colData = coldata[match(allSamples, coldata$Name), , drop = FALSE],
         rowData = allSequences,
         metadata = list(parameters = lapply(allSamples, function(w) x[[w]]$parameters),
+                        errorStatistics = lapply(allSamples, function(w) x[[w]]$errorStatistics),
                         countType = countType,
                         mutNameDelimiter = mutnamedel)
     )
