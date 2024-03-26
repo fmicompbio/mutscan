@@ -58,7 +58,8 @@
 #'                                package = "mutscan"), 
 #'     elementsForward = "SUCV", elementLengthsForward = c(1, 10, 18, 96), 
 #'     constantForward = "AACCGGAGGAGGGAGCTG", 
-#'     wildTypeForward = c(FOS = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"),
+#'     wildTypeForward = c(FOS = paste0("ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
+#'                                      "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
 #'     nbrMutatedCodonsMaxForward = 1
 #' )
 #' ## Output sample
@@ -67,7 +68,8 @@
 #'                                package = "mutscan"), 
 #'     elementsForward = "SUCV", elementLengthsForward = c(1, 10, 18, 96), 
 #'     constantForward = "AACCGGAGGAGGGAGCTG", 
-#'     wildTypeForward = c(FOS = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"),
+#'     wildTypeForward = c(FOS = paste0("ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
+#'                                      "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
 #'     nbrMutatedCodonsMaxForward = 1
 #' )
 #' ## Combine

@@ -261,7 +261,8 @@
 #'                                package = "mutscan"), 
 #'     elementsForward = "SUCV", elementLengthsForward = c(1, 10, 18, 96), 
 #'     constantForward = "AACCGGAGGAGGGAGCTG", 
-#'     wildTypeForward = c(FOS = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"),
+#'     wildTypeForward = c(FOS = paste0("ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
+#'                                      "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
 #'     nbrMutatedCodonsMaxForward = 1
 #' )
 #' ## Table with read counts and mutant information
@@ -288,7 +289,8 @@
 #'     elementsReverse = "SUCVS", elementLengthsReverse = c(1, 7, 17, 96, -1),
 #'     constantForward = "AACCGGAGGAGGGAGCTG", 
 #'     constantReverse = "GAGTTCATCCTGGCAGC",
-#'     wildTypeForward = c(FOS = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"),
+#'     wildTypeForward = c(FOS = paste0("ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
+#'                                      "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
 #'     nbrMutatedCodonsMaxForward = 1
 #' )
 #' ## Table with read counts and mutant information
@@ -315,8 +317,10 @@
 #'     elementsReverse = "SUCV", elementLengthsReverse = c(1, 8, 20, 96),
 #'     constantForward = "AACCGGAGGAGGGAGCTG", 
 #'     constantReverse = "GAAAAAGGAAGCTGGAGAGA",
-#'     wildTypeForward = c(FOS = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"),
-#'     wildTypeReverse = c(JUN = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT"), 
+#'     wildTypeForward = c(FOS = paste0("ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
+#'                                      "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
+#'     wildTypeReverse = c(JUN = paste0("ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTC", 
+#'                                      "GGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT")), 
 #'     nbrMutatedCodonsMaxForward = 1,
 #'     nbrMutatedCodonsMaxReverse = 1
 #' )
