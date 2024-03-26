@@ -626,6 +626,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     
     CposFwd <- gregexpr(pattern = "C", elementsForward)[[1]]
     if (nchar(constantForward[1]) > 0 &&
+        sum(CposFwd) != -1 && 
         sum(elementLengthsForward[CposFwd]) != nchar(constantForward[1])) {
         stop("The sum of the constant sequence lengths in elementsForward (",
              sum(elementLengthsForward[CposFwd]),
@@ -634,6 +635,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     }
     CposRev <- gregexpr(pattern = "C", elementsReverse)[[1]]
     if (nchar(constantReverse[1]) > 0 &&
+        sum(CposRev) != -1 && 
         sum(elementLengthsReverse[CposRev]) != nchar(constantReverse[1])) {
         stop("The sum of the constant sequence lengths in elementsReverse (",
              sum(elementLengthsReverse[CposRev]),
