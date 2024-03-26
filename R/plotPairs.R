@@ -44,6 +44,7 @@
 #' @importFrom ggplot2 ggplot annotate theme_void ylim stat_density2d
 #'     scale_fill_continuous geom_point theme_bw theme element_blank aes
 #'     geom_histogram scale_x_continuous scale_y_continuous geom_abline
+#'     after_stat
 #' @importFrom stats cor
 #' @importFrom SummarizedExperiment assayNames assay
 #' @importFrom grDevices hcl.colors rgb colorRamp
@@ -141,7 +142,7 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
     ## Define function to create smoothscatter-like plot (for use with ggpairs)
     smoothscat <- function(data, mapping, ...) {
         ggplot2::ggplot(data = data, mapping = mapping) +
-            ggplot2::stat_density2d(ggplot2::aes(fill = (.data$..density..)^0.25), geom = "tile",
+            ggplot2::stat_density2d(ggplot2::aes(fill = ggplot2::after_stat(.data$density)^0.25), geom = "tile",
                                     contour = FALSE, n = 200) +
             ggplot2::scale_fill_continuous(low = "white", high = "darkgreen") +
             ggtheme +
