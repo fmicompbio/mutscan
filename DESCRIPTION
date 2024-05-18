@@ -54,6 +54,7 @@ Suggests:
     BiocStyle,
     knitr,
     Biostrings,
+    pwalign,
     plotly
 SystemRequirements: GNU make
 biocViews: GeneticVariability, GenomicVariation, Preprocessing

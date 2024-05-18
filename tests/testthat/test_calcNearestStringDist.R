@@ -20,8 +20,8 @@ test_that("calcNearestStringDist works as expected", {
                                                    width = 8),
                       size = 200))
 
-    d0 <- Biostrings::stringDist(x = strs1, method = "hamming")
-    e0 <- Biostrings::stringDist(x = strs2, method = "levenshtein")
+    d0 <- pwalign::stringDist(x = strs1, method = "hamming")
+    e0 <- pwalign::stringDist(x = strs2, method = "levenshtein")
 
     dm <- as.matrix(d0)
     em <- as.matrix(e0)
