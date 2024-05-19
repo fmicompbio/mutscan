@@ -295,7 +295,7 @@ processReadsTrans <- function(Ldef) {
   if (!all(Ldef$constantForward == "") && Ldef$constantMaxDistForward > (-1)) {
     constForward <- Biostrings::subseq(fq1, start = Ldef$skipForward + Ldef$umiLengthForward + 1, 
                                        width = Ldef$constantLengthForward)
-    dists <- as.matrix(Biostrings::stringDist(
+    dists <- as.matrix(pwalign::stringDist(
       c(DNAStringSet(structure(Ldef$constantForward, 
                                names = paste0("C", length(Ldef$constantForward)))),
         DNAStringSet(constForward)
@@ -307,7 +307,7 @@ processReadsTrans <- function(Ldef) {
   if (!all(Ldef$constantReverse == "") && Ldef$constantMaxDistReverse > (-1)) {
     constReverse <- Biostrings::subseq(fq2, start = Ldef$skipReverse + Ldef$umiLengthReverse + 1, 
                                        width = Ldef$constantLengthReverse)
-    dists <- as.matrix(Biostrings::stringDist(
+    dists <- as.matrix(pwalign::stringDist(
       c(DNAStringSet(structure(Ldef$constantReverse, 
                                names = paste0("C", length(Ldef$constantReverse)))),
         DNAStringSet(constReverse)

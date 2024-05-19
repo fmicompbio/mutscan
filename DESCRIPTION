@@ -1,6 +1,6 @@
 Package: mutscan
 Title: Preprocessing and Analysis of Deep Mutational Scanning Data
-Version: 0.3.1
+Version: 0.3.2
 Authors@R: 
     c(person(given = "Charlotte",
              family = "Soneson",
@@ -54,6 +54,7 @@ Suggests:
     BiocStyle,
     knitr,
     Biostrings,
+    pwalign,
     plotly
 SystemRequirements: GNU make
 biocViews: GeneticVariability, GenomicVariation, Preprocessing
