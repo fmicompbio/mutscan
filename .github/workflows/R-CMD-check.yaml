@@ -48,10 +48,10 @@ jobs:
           install.packages('remotes')
         shell: Rscript {0}
 
-      - name: Install Matrix.utils (from CRAN archive)
-        run: |
-          remotes::install_version("Matrix.utils", version = "0.9.8", repos = "http://cran.us.r-project.org")
-        shell: Rscript {0}
+      #- name: Install Matrix.utils (from CRAN archive)
+      #  run: |
+      #    remotes::install_version("Matrix.utils", version = "0.9.8", repos = "http://cran.us.r-project.org")
+      #  shell: Rscript {0}
         
       - name: Query dependencies
         run: |
