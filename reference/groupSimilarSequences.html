@@ -3,8 +3,6 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
-
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -17,10 +15,9 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.2</span>
       </span>
     </div>
-
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li>
   <a href="../articles/mutscan.html">Get started</a>
@@ -34,21 +31,15 @@
       </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
-
-      
-
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Create a conversion table for collapsing similar sequences</h1>
-    
     <div class="hidden name"><code>groupSimilarSequences.Rd</code></div>
     </div>
-
     <div class="ref-description">
     <p>Create a conversion table for collapsing similar sequences</p>
     </div>
-
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">groupSimilarSequences</span><span class="op">(</span></span>
 <span>  <span class="va">seqs</span>,</span>
@@ -59,56 +50,42 @@
 <span>  <span class="va">verbose</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
-
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>seqs</dt>
-<dd><p>Character vector with nucleotide sequences (or pairs of 
-sequences concatenated with "_") to be collapsed. The sequences must 
+    <dl><dt id="arg-seqs">seqs<a class="anchor" aria-label="anchor" href="#arg-seqs"></a></dt>
+<dd><p>Character vector with nucleotide sequences (or pairs of
+sequences concatenated with "_") to be collapsed. The sequences must
 all be of the same length.</p></dd>
-
-
-<dt>scores</dt>
+<dt id="arg-scores">scores<a class="anchor" aria-label="anchor" href="#arg-scores"></a></dt>
 <dd><p>Numeric vector of "scores" for the sequences. Typically
-the total read/UMI count. A higher score will be preferred when 
-deciding which sequence to use as the representative for a group of 
+the total read/UMI count. A higher score will be preferred when
+deciding which sequence to use as the representative for a group of
 collapsed sequences.</p></dd>
-
-
-<dt>collapseMaxDist</dt>
-<dd><p>Numeric scalar defining the tolerance for collapsing 
-similar sequences. If the value is in [0, 1), it defines the maximal 
+<dt id="arg-collapsemaxdist">collapseMaxDist<a class="anchor" aria-label="anchor" href="#arg-collapsemaxdist"></a></dt>
+<dd><p>Numeric scalar defining the tolerance for collapsing
+similar sequences. If the value is in [0, 1), it defines the maximal
 Hamming distance in terms of a fraction of sequence length:
 (<code>round(collapseMaxDist * nchar(sequence))</code>).
 A value greater or equal to 1 is rounded and directly used as the maximum
 allowed Hamming distance. Note that sequences can only be
 collapsed if they are all of the same length.</p></dd>
-
-
-<dt>collapseMinScore</dt>
-<dd><p>Numeric scalar, indicating the minimum score 
-required for a sequence to be considered as a representative for a 
-group of similar sequences (i.e., to allow other sequences to be 
+<dt id="arg-collapseminscore">collapseMinScore<a class="anchor" aria-label="anchor" href="#arg-collapseminscore"></a></dt>
+<dd><p>Numeric scalar, indicating the minimum score
+required for a sequence to be considered as a representative for a
+group of similar sequences (i.e., to allow other sequences to be
 collapsed into it).</p></dd>
-
-
-<dt>collapseMinRatio</dt>
+<dt id="arg-collapseminratio">collapseMinRatio<a class="anchor" aria-label="anchor" href="#arg-collapseminratio"></a></dt>
 <dd><p>Numeric scalar. During collapsing of
-similar sequences, a low-frequency sequence will be collapsed 
-with a higher-frequency sequence only if the ratio between the 
-high-frequency and the low-frequency scores is at least this 
+similar sequences, a low-frequency sequence will be collapsed
+with a higher-frequency sequence only if the ratio between the
+high-frequency and the low-frequency scores is at least this
 high. A value of 0 indicates that no such check is performed.</p></dd>
-
-
-<dt>verbose</dt>
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
 <dd><p>Logical scalar, whether to print progress messages.</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>A data.frame with two columns, containing the input sequences 
+<p>A data.frame with two columns, containing the input sequences
 and the representatives for the groups resulting from grouping similar
 sequences, respectively.</p>
     </div>
@@ -116,7 +93,6 @@ sequences, respectively.</p>
     <h2>Author</h2>
     <p>Michael Stadler, Charlotte Soneson</p>
     </div>
-
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">seqs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AACGTAGCA"</span>, <span class="st">"ACCGTAGCA"</span>, <span class="st">"AACGGAGCA"</span>, <span class="st">"ATCGGAGCA"</span>, <span class="st">"TGAGGCATA"</span><span class="op">)</span></span></span>
@@ -138,22 +114,12 @@ sequences, respectively.</p>
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
     </nav></div>
 </div>
-
-
       <footer><div class="copyright">
   <p></p><p>Developed by Charlotte Soneson, Michael Stadler.</p>
 </div>
-
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.9000.</p>
 </div>
-
       </footer></div>
-
-  
-
-
-  
-
   </body></html>
 

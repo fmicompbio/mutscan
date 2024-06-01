@@ -6,8 +6,6 @@ histograms of the respective columns."><!-- mathjax --><script src="https://cdnj
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
-
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -20,10 +18,9 @@ histograms of the respective columns."><!-- mathjax --><script src="https://cdnj
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.2</span>
       </span>
     </div>
-
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li>
   <a href="../articles/mutscan.html">Get started</a>
@@ -37,24 +34,18 @@ histograms of the respective columns."><!-- mathjax --><script src="https://cdnj
       </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
-
-      
-
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Make pairs plot of selected assay from a SummarizedExperiment object</h1>
-    
     <div class="hidden name"><code>plotPairs.Rd</code></div>
     </div>
-
     <div class="ref-description">
     <p>Construct a pairs plot of all columns of a given assay. The lower-triangular
 panels display the scatter plots, the upper-triangular ones print out
 the (Pearson or Spearman) correlations, and the diagonal panels show
 histograms of the respective columns.</p>
     </div>
-
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plotPairs</span><span class="op">(</span></span>
 <span>  <span class="va">se</span>,</span>
@@ -73,84 +64,57 @@ histograms of the respective columns.</p>
 <span>  addIdentityLine <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
-
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>se</dt>
+    <dl><dt id="arg-se">se<a class="anchor" aria-label="anchor" href="#arg-se"></a></dt>
 <dd><p>A SummarizedExperiment object, e.g. the output of
 <code>summarizeExperiment</code></p></dd>
-
-
-<dt>selAssay</dt>
+<dt id="arg-selassay">selAssay<a class="anchor" aria-label="anchor" href="#arg-selassay"></a></dt>
 <dd><p>Character scalar, the assay to use as the basis for the
 pairs plot.</p></dd>
-
-
-<dt>doLog</dt>
+<dt id="arg-dolog">doLog<a class="anchor" aria-label="anchor" href="#arg-dolog"></a></dt>
 <dd><p>Logical scalar, whether or not to log-transform the values
 before plotting.</p></dd>
-
-
-<dt>pseudocount</dt>
+<dt id="arg-pseudocount">pseudocount<a class="anchor" aria-label="anchor" href="#arg-pseudocount"></a></dt>
 <dd><p>Numeric scalar, the pseudocount to add to the values
 before log-transforming (if <code>doLog</code> is <code>TRUE</code>).</p></dd>
-
-
-<dt>corMethod</dt>
+<dt id="arg-cormethod">corMethod<a class="anchor" aria-label="anchor" href="#arg-cormethod"></a></dt>
 <dd><p>Either "pearson" or "spearman", the type of correlation
 to calculate.</p></dd>
-
-
-<dt>histBreaks</dt>
+<dt id="arg-histbreaks">histBreaks<a class="anchor" aria-label="anchor" href="#arg-histbreaks"></a></dt>
 <dd><p>Numeric scalar, the number of breaks in the histograms
 to put in the diagonal panels.</p></dd>
-
-
-<dt>pointsType</dt>
+<dt id="arg-pointstype">pointsType<a class="anchor" aria-label="anchor" href="#arg-pointstype"></a></dt>
 <dd><p>Either "points" or "smoothscatter", determining the
 type of plots that will be made.</p></dd>
-
-
-<dt>corSizeMult, corSizeAdd</dt>
+<dt id="arg-corsizemult-corsizeadd">corSizeMult, corSizeAdd<a class="anchor" aria-label="anchor" href="#arg-corsizemult-corsizeadd"></a></dt>
 <dd><p>Numeric scalars determining how the
 absolute correlation value is transformed into a font size. The
 transformation is corSizeMult * abs(corr) + corSizeAdd.</p></dd>
-
-
-<dt>pointSize, pointAlpha</dt>
+<dt id="arg-pointsize-pointalpha">pointSize, pointAlpha<a class="anchor" aria-label="anchor" href="#arg-pointsize-pointalpha"></a></dt>
 <dd><p>Numeric scalars determining the size and
 opacity of points in the plot.</p></dd>
-
-
-<dt>colorByCorrelation</dt>
+<dt id="arg-colorbycorrelation">colorByCorrelation<a class="anchor" aria-label="anchor" href="#arg-colorbycorrelation"></a></dt>
 <dd><p>Logical scalar, indicating whether the correlation
 panels should be colored according to the correlation value.</p></dd>
-
-
-<dt>corrColorRange</dt>
-<dd><p>Numeric vector of length 2, providing the lower and 
-upper limits of the color scale when coloring by correlation. Both 
-values should be positive; the same range is used for negative 
-correlations. If <code>NULL</code> (the default), the range is inferred from 
+<dt id="arg-corrcolorrange">corrColorRange<a class="anchor" aria-label="anchor" href="#arg-corrcolorrange"></a></dt>
+<dd><p>Numeric vector of length 2, providing the lower and
+upper limits of the color scale when coloring by correlation. Both
+values should be positive; the same range is used for negative
+correlations. If <code>NULL</code> (the default), the range is inferred from
 the data.</p></dd>
-
-
-<dt>addIdentityLine</dt>
-<dd><p>Logical scalar, indicating whether the identity line 
+<dt id="arg-addidentityline">addIdentityLine<a class="anchor" aria-label="anchor" href="#arg-addidentityline"></a></dt>
+<dd><p>Logical scalar, indicating whether the identity line
 should be added (only used if <code>pointsType = "points"</code>).</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
 <p>A <code>ggplot</code> object.</p>
     </div>
     <div id="author">
     <h2>Author</h2>
     <p>Charlotte Soneson</p>
     </div>
-
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE102901_cis_se.rds"</span>, </span></span>
@@ -165,22 +129,12 @@ should be added (only used if <code>pointsType = "points"</code>).</p></dd>
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
     </nav></div>
 </div>
-
-
       <footer><div class="copyright">
   <p></p><p>Developed by Charlotte Soneson, Michael Stadler.</p>
 </div>
-
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.9000.</p>
 </div>
-
       </footer></div>
-
-  
-
-
-  
-
   </body></html>
 

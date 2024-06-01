@@ -5,8 +5,6 @@ The observed counts for the WT variants can be used as offsets in the model."><!
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
-
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -19,10 +17,9 @@ The observed counts for the WT variants can be used as offsets in the model."><!
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.2</span>
       </span>
     </div>
-
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li>
   <a href="../articles/mutscan.html">Get started</a>
@@ -36,23 +33,17 @@ The observed counts for the WT variants can be used as offsets in the model."><!
       </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
-
-      
-
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Calculate logFCs relative to WT using edgeR</h1>
-    
     <div class="hidden name"><code>calculateRelativeFC.Rd</code></div>
     </div>
-
     <div class="ref-description">
     <p>Calculate logFCs and associated p-values for a given comparison, using
 either limma or the Negative Binomial quasi-likelihood framework of edgeR.
 The observed counts for the WT variants can be used as offsets in the model.</p>
     </div>
-
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">calculateRelativeFC</span><span class="op">(</span></span>
 <span>  <span class="va">se</span>,</span>
@@ -66,68 +57,47 @@ The observed counts for the WT variants can be used as offsets in the model.</p>
 <span>  normMethod <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">WTrows</span><span class="op">)</span>, <span class="st">"TMM"</span>, <span class="st">"sum"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
-
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>se</dt>
+    <dl><dt id="arg-se">se<a class="anchor" aria-label="anchor" href="#arg-se"></a></dt>
 <dd><p>SummarizedExperiment object.</p></dd>
-
-
-<dt>design</dt>
+<dt id="arg-design">design<a class="anchor" aria-label="anchor" href="#arg-design"></a></dt>
 <dd><p>Design matrix. The rows of the design matrix must be in the
 same order as the columns in <code>se</code>.</p></dd>
-
-
-<dt>coef</dt>
+<dt id="arg-coef">coef<a class="anchor" aria-label="anchor" href="#arg-coef"></a></dt>
 <dd><p>Coefficient(s) to test with edgeR or limma.</p></dd>
-
-
-<dt>contrast</dt>
+<dt id="arg-contrast">contrast<a class="anchor" aria-label="anchor" href="#arg-contrast"></a></dt>
 <dd><p>Numeric contrast to test with edgeR or limma.</p></dd>
-
-
-<dt>WTrows</dt>
+<dt id="arg-wtrows">WTrows<a class="anchor" aria-label="anchor" href="#arg-wtrows"></a></dt>
 <dd><p>Vector of row names that will be used as the reference when
 calculating logFCs and statistics. If more than one value is provided, the
 sum of the corresponding counts is used to generate offsets. If NULL,
 offsets will be defined as the effective library sizes (using TMM
 normalization factors).</p></dd>
-
-
-<dt>selAssay</dt>
+<dt id="arg-selassay">selAssay<a class="anchor" aria-label="anchor" href="#arg-selassay"></a></dt>
 <dd><p>Assay to select from <code>se</code> for the analysis.</p></dd>
-
-
-<dt>pseudocount</dt>
+<dt id="arg-pseudocount">pseudocount<a class="anchor" aria-label="anchor" href="#arg-pseudocount"></a></dt>
 <dd><p>Pseudocount to add when calculating log-fold changes.</p></dd>
-
-
-<dt>method</dt>
+<dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
 <dd><p>Either 'edgeR' or 'limma'. If set to 'limma', voom is used to
 transform the counts and estimate observation weights before applying
 limma. In this case, the results also contain the standard errors of the
 logFCs.</p></dd>
-
-
-<dt>normMethod</dt>
+<dt id="arg-normmethod">normMethod<a class="anchor" aria-label="anchor" href="#arg-normmethod"></a></dt>
 <dd><p>Character scalar indicating which normalization method
 should be used to calculate size factors. Should be either <code>"TMM"</code> or
 <code>"csaw"</code> when <code>WTrows</code> is <code>NULL</code>, and <code>"geomean"</code> or
 <code>"sum"</code> when <code>WTrows</code> is provided.</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>A <code>data.frame</code> with output from the statistical testing 
+<p>A <code>data.frame</code> with output from the statistical testing
 framework (edgeR or limma).</p>
     </div>
     <div id="author">
     <h2>Author</h2>
     <p>Charlotte Soneson, Michael Stadler</p>
     </div>
-
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE102901_cis_se.rds"</span>,</span></span>
@@ -139,13 +109,13 @@ framework (edgeR or limma).</p>
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">calculateRelativeFC</span><span class="op">(</span><span class="va">se</span>, <span class="va">design</span>, coef <span class="op">=</span> <span class="st">"Conditioncis_output"</span>, </span></span>
 <span class="r-in"><span>                           method <span class="op">=</span> <span class="st">"edgeR"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             logFC    logCPM         F       PValue          FDR logFC_shrunk</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT  1.9721335 20.083627 27.532794 2.145445e-07 1.159700e-06    1.9721331</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC 1.3087303  4.688782 16.225636 6.344919e-05 2.226287e-04    1.2984544</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG 1.0380054  5.677955 12.571727 4.221560e-04 1.319237e-03    1.0342409</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC 2.0874169 12.862431 63.510847 8.064604e-15 2.016151e-13    2.0873503</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACG 1.8698799 13.513672 49.686087 4.976328e-12 5.854503e-11    1.8698442</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AGC 0.9289962  4.754181  8.417687 3.852141e-03 9.752256e-03    0.9228638</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             logFC    logCPM        F       PValue          FDR logFC_shrunk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT  1.9637951 20.083627 24.33238 1.051127e-06 4.777849e-06    1.9721331</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC 1.3319093  4.688782 19.37203 1.273355e-05 5.093420e-05    1.2984544</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG 1.0555688  5.677955 20.05408 9.013609e-06 3.679024e-05    1.0342409</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC 2.0475950 12.862431 49.74209 4.846866e-12 6.799833e-11    2.0873503</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACG 1.8255747 13.513672 32.79661 1.618863e-08 9.522722e-08    1.8698442</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AGC 0.9502053  4.754181 10.73136 1.114080e-03 3.593807e-03    0.9228638</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         df.total df.prior df.test</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT       600      Inf       1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC      600      Inf       1</span>
@@ -158,20 +128,20 @@ framework (edgeR or limma).</p>
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">calculateRelativeFC</span><span class="op">(</span><span class="va">se</span>, <span class="va">design</span>, coef <span class="op">=</span> <span class="st">"Conditioncis_output"</span>, </span></span>
 <span class="r-in"><span>                           method <span class="op">=</span> <span class="st">"edgeR"</span>, WTrows <span class="op">=</span> <span class="st">"f.0.WT"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 logFC    logCPM        F       PValue          FDR</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT   4.383938e-16 19.757846  0.00000 1.000000e+00 1.000000e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC -6.730437e-01  4.553595  4.09304 4.697062e-02 5.337571e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG -8.855800e-01  5.655807 10.60344 1.757716e-03 2.493214e-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC  1.207057e-01 12.506900 35.28527 1.064256e-07 4.343902e-07</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACG -1.016650e-01 13.217924 59.46509 7.083771e-11 4.570175e-10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AGC -1.038758e+00  4.738963 10.15502 2.169621e-03 3.055805e-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 logFC    logCPM          F       PValue          FDR</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT   4.243947e-16 19.757846   0.000000 1.000000e+00 1.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC -5.886419e-01  4.553595   4.657014 6.312723e-02 7.173549e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG -8.663766e-01  5.655807  11.337818 9.806465e-03 1.282123e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC  1.216867e-01 12.506900  25.788753 9.495627e-04 1.637177e-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACG -1.012637e-01 13.217924 212.190574 4.744502e-07 5.930627e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AGC -9.676183e-01  4.738963  10.227266 1.267053e-02 1.614080e-02</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          logFC_shrunk df.total df.prior df.test</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT   5.223775e-16 68.39919 65.39919       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC -6.661972e-01 68.39919 65.39919       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG -8.823465e-01 68.39919 65.39919       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC  1.207031e-01 68.39919 65.39919       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACG -1.016627e-01 68.39919 65.39919       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AGC -1.030935e+00 68.39919 65.39919       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT   4.802398e-16 8.015412 5.015384       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC -6.661972e-01 7.966136 5.015384       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG -8.823465e-01 8.011358 5.015384       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC  1.207031e-01 8.015411 5.015384       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACG -1.016627e-01 8.015412 5.015384       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AGC -1.030935e+00 7.990169 5.015384       1</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Calculate "absolute" log-fold changes with limma</span></span></span>
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">calculateRelativeFC</span><span class="op">(</span><span class="va">se</span>, <span class="va">design</span>, coef <span class="op">=</span> <span class="st">"Conditioncis_output"</span>, </span></span>
@@ -218,22 +188,12 @@ framework (edgeR or limma).</p>
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
     </nav></div>
 </div>
-
-
       <footer><div class="copyright">
   <p></p><p>Developed by Charlotte Soneson, Michael Stadler.</p>
 </div>
-
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.9000.</p>
 </div>
-
       </footer></div>
-
-  
-
-
-  
-
   </body></html>
 

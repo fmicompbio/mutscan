@@ -7,8 +7,6 @@ following the primer will be considered the variable sequence."><!-- mathjax -->
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
-
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -21,10 +19,9 @@ following the primer will be considered the variable sequence."><!-- mathjax -->
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mutscan</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.2</span>
       </span>
     </div>
-
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li>
   <a href="../articles/mutscan.html">Get started</a>
@@ -38,17 +35,12 @@ following the primer will be considered the variable sequence."><!-- mathjax -->
       </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
-
-      
-
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Read, filter and digest sequences from fastq file(s).</h1>
-    
     <div class="hidden name"><code>digestFastqs.Rd</code></div>
     </div>
-
     <div class="ref-description">
     <p>Read sequences for one or a pair of fastq files and digest them (extract
 umis, constant and variable parts, filter, extract mismatch information from
@@ -56,7 +48,6 @@ constant and count the observed unique variable parts). Alternatively, primer
 sequences could be specified, in which case the sequence immediately
 following the primer will be considered the variable sequence.</p>
     </div>
-
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">digestFastqs</span><span class="op">(</span></span>
 <span>  <span class="va">fastqForward</span>,</span>
@@ -114,244 +105,178 @@ following the primer will be considered the variable sequence.</p>
 <span>  maxReadLength <span class="op">=</span> <span class="fl">1024</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
-
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>fastqForward, fastqReverse</dt>
-<dd><p>Character vectors, paths to gzipped FASTQ 
-files corresponding to forward and reverse reads, respectively. If more 
-than one forward/reverse sequence file is given, they need to be 
-provided in the same order. Note that if multiple fastq files are 
-provided, they are all assumed to correspond to the same sample, and 
+    <dl><dt id="arg-fastqforward-fastqreverse">fastqForward, fastqReverse<a class="anchor" aria-label="anchor" href="#arg-fastqforward-fastqreverse"></a></dt>
+<dd><p>Character vectors, paths to gzipped FASTQ
+files corresponding to forward and reverse reads, respectively. If more
+than one forward/reverse sequence file is given, they need to be
+provided in the same order. Note that if multiple fastq files are
+provided, they are all assumed to correspond to the same sample, and
 will effectively be concatenated.</p></dd>
-
-
-<dt>mergeForwardReverse</dt>
+<dt id="arg-mergeforwardreverse">mergeForwardReverse<a class="anchor" aria-label="anchor" href="#arg-mergeforwardreverse"></a></dt>
 <dd><p>Logical scalar, whether to fuse the forward and
 reverse variable sequences.</p></dd>
-
-
-<dt>minOverlap, maxOverlap</dt>
+<dt id="arg-minoverlap-maxoverlap">minOverlap, maxOverlap<a class="anchor" aria-label="anchor" href="#arg-minoverlap-maxoverlap"></a></dt>
 <dd><p>Numeric scalar, the minimal and maximal allowed
 overlap between the forward and reverse reads when merging. Only used if
 <code>mergeForwardReverse</code> is <code>TRUE</code>. If set to 0, only overlaps
 covering the full length of the shortest of the two reads will be
 considered.</p></dd>
-
-
-<dt>minMergedLength, maxMergedLength</dt>
-<dd><p>Numeric scalar, the minimal and 
-maximal allowed total length of the merged product (if 
-<code>mergeForwardReverse</code> is <code>TRUE</code>). If set to 0, any length is 
+<dt id="arg-minmergedlength-maxmergedlength">minMergedLength, maxMergedLength<a class="anchor" aria-label="anchor" href="#arg-minmergedlength-maxmergedlength"></a></dt>
+<dd><p>Numeric scalar, the minimal and
+maximal allowed total length of the merged product (if
+<code>mergeForwardReverse</code> is <code>TRUE</code>). If set to 0, any length is
 allowed.</p></dd>
-
-
-<dt>maxFracMismatchOverlap</dt>
+<dt id="arg-maxfracmismatchoverlap">maxFracMismatchOverlap<a class="anchor" aria-label="anchor" href="#arg-maxfracmismatchoverlap"></a></dt>
 <dd><p>Numeric scalar, maximal mismatch rate in the
 overlap. Only used if <code>mergeForwardReverse</code> is <code>TRUE</code>.</p></dd>
-
-
-<dt>greedyOverlap</dt>
-<dd><p>Logical scalar. If <code>TRUE</code>, the first overlap 
+<dt id="arg-greedyoverlap">greedyOverlap<a class="anchor" aria-label="anchor" href="#arg-greedyoverlap"></a></dt>
+<dd><p>Logical scalar. If <code>TRUE</code>, the first overlap
 satisfying <code>minOverlap</code>, <code>maxOverlap</code>, <code>minMergedLength</code>,
 <code>maxMergedLength</code> and <code>maxFracMismatchOverlap</code> will
-be retained. If <code>FALSE</code>, all valid overlaps will be scored and the 
+be retained. If <code>FALSE</code>, all valid overlaps will be scored and the
 one with the highest score (largest number of matches) will be retained.</p></dd>
-
-
-<dt>revComplForward, revComplReverse</dt>
+<dt id="arg-revcomplforward-revcomplreverse">revComplForward, revComplReverse<a class="anchor" aria-label="anchor" href="#arg-revcomplforward-revcomplreverse"></a></dt>
 <dd><p>Logical scalar, whether to reverse
-complement the forward/reverse variable and constant sequences, 
+complement the forward/reverse variable and constant sequences,
 respectively.</p></dd>
-
-
-<dt>adapterForward, adapterReverse</dt>
-<dd><p>Character scalars, the adapter sequence 
-for forward/reverse reads, respectively. If a forward/reverse read 
-contains the corresponding adapter sequence, the sequence pair will be 
-filtered out. If set to <code>NULL</code>, no adapter filtering is performed. 
+<dt id="arg-adapterforward-adapterreverse">adapterForward, adapterReverse<a class="anchor" aria-label="anchor" href="#arg-adapterforward-adapterreverse"></a></dt>
+<dd><p>Character scalars, the adapter sequence
+for forward/reverse reads, respectively. If a forward/reverse read
+contains the corresponding adapter sequence, the sequence pair will be
+filtered out. If set to <code>NULL</code>, no adapter filtering is performed.
 The number of filtered read pairs are reported in the return value.</p></dd>
-
-
-<dt>elementsForward, elementsReverse</dt>
+<dt id="arg-elementsforward-elementsreverse">elementsForward, elementsReverse<a class="anchor" aria-label="anchor" href="#arg-elementsforward-elementsreverse"></a></dt>
 <dd><p>Character scalars representing the
-composition of the forward and reverse reads, respectively. The strings 
-should consist only of the letters S (skip), C (constant), U (umi), 
-P (primer), V (variable), and cover the full extent of the read. Most 
-combinations are allowed (and a given letter can appear multiple times), 
-but there can be at most one occurrence of P. If a given letter is 
-included multiple times, the corresponding sequences will be 
+composition of the forward and reverse reads, respectively. The strings
+should consist only of the letters S (skip), C (constant), U (umi),
+P (primer), V (variable), and cover the full extent of the read. Most
+combinations are allowed (and a given letter can appear multiple times),
+but there can be at most one occurrence of P. If a given letter is
+included multiple times, the corresponding sequences will be
 concatenated in the output.</p></dd>
-
-
-<dt>elementLengthsForward, elementLengthsReverse</dt>
+<dt id="arg-elementlengthsforward-elementlengthsreverse">elementLengthsForward, elementLengthsReverse<a class="anchor" aria-label="anchor" href="#arg-elementlengthsforward-elementlengthsreverse"></a></dt>
 <dd><p>Numeric vectors containing
-the lengths of each read component from 
-<code>elementsForward</code>/<code>elementsReverse</code>, respectively. If the 
-length of one element is set to -1, it will be inferred from the other 
-lengths (as the remainder of the read). At most one number (or one 
+the lengths of each read component from
+<code>elementsForward</code>/<code>elementsReverse</code>, respectively. If the
+length of one element is set to -1, it will be inferred from the other
+lengths (as the remainder of the read). At most one number (or one
 number on each side of the primer P) can be set to -1. The indicated
-length of the primer is not used (instead it's inferred from the 
+length of the primer is not used (instead it's inferred from the
 provided primer sequence) and can also be set to -1.</p></dd>
-
-
-<dt>primerForward, primerReverse</dt>
+<dt id="arg-primerforward-primerreverse">primerForward, primerReverse<a class="anchor" aria-label="anchor" href="#arg-primerforward-primerreverse"></a></dt>
 <dd><p>Character vectors, representing the primer
 sequence(s) for forward/reverse reads, respectively. Only read pairs that
-contain perfect matches to both the forward and reverse primers (if 
+contain perfect matches to both the forward and reverse primers (if
 given) will be retained. Multiple primers can be specified - they will be
 considered in order and the first match will be used.</p></dd>
-
-
-<dt>wildTypeForward, wildTypeReverse</dt>
+<dt id="arg-wildtypeforward-wildtypereverse">wildTypeForward, wildTypeReverse<a class="anchor" aria-label="anchor" href="#arg-wildtypeforward-wildtypereverse"></a></dt>
 <dd><p>Character scalars or named character
-vectors, the wild type sequence for the forward and reverse variable 
-region. If given as a single string, the reference sequence will be 
+vectors, the wild type sequence for the forward and reverse variable
+region. If given as a single string, the reference sequence will be
 named 'f' (for forward) or 'r' (for reverse).</p></dd>
-
-
-<dt>constantForward, constantReverse</dt>
+<dt id="arg-constantforward-constantreverse">constantForward, constantReverse<a class="anchor" aria-label="anchor" href="#arg-constantforward-constantreverse"></a></dt>
 <dd><p>Character vectors giving,
-the expected constant forward and reverse sequences. If more than one 
+the expected constant forward and reverse sequences. If more than one
 sequence is provided, they must all have the same length.</p></dd>
-
-
-<dt>avePhredMinForward, avePhredMinReverse</dt>
-<dd><p>Numeric scalar, the minimum 
-average Phred score in the variable region for a read to be retained. 
-If a read pair contains both forward and reverse variable regions, the 
-minimum average Phred score has to be achieved in both for a read pair 
+<dt id="arg-avephredminforward-avephredminreverse">avePhredMinForward, avePhredMinReverse<a class="anchor" aria-label="anchor" href="#arg-avephredminforward-avephredminreverse"></a></dt>
+<dd><p>Numeric scalar, the minimum
+average Phred score in the variable region for a read to be retained.
+If a read pair contains both forward and reverse variable regions, the
+minimum average Phred score has to be achieved in both for a read pair
 to be retained.</p></dd>
-
-
-<dt>variableNMaxForward, variableNMaxReverse</dt>
-<dd><p>Numeric scalar, the maximum 
+<dt id="arg-variablenmaxforward-variablenmaxreverse">variableNMaxForward, variableNMaxReverse<a class="anchor" aria-label="anchor" href="#arg-variablenmaxforward-variablenmaxreverse"></a></dt>
+<dd><p>Numeric scalar, the maximum
 number of Ns allowed in the variable region for a read to be retained.</p></dd>
-
-
-<dt>umiNMax</dt>
-<dd><p>Numeric scalar, the maximum number of Ns allowed in the UMI 
+<dt id="arg-uminmax">umiNMax<a class="anchor" aria-label="anchor" href="#arg-uminmax"></a></dt>
+<dd><p>Numeric scalar, the maximum number of Ns allowed in the UMI
 for a read to be retained.</p></dd>
-
-
-<dt>nbrMutatedCodonsMaxForward, nbrMutatedCodonsMaxReverse</dt>
+<dt id="arg-nbrmutatedcodonsmaxforward-nbrmutatedcodonsmaxreverse">nbrMutatedCodonsMaxForward, nbrMutatedCodonsMaxReverse<a class="anchor" aria-label="anchor" href="#arg-nbrmutatedcodonsmaxforward-nbrmutatedcodonsmaxreverse"></a></dt>
 <dd><p>Numeric
-scalar, the maximum number of mutated codons that are allowed. Note that 
+scalar, the maximum number of mutated codons that are allowed. Note that
 for the forward and reverse sequence, respectively, exactly one of
 <code>nbrMutatedCodonsMax</code> and <code>nbrMutatedBasesMax</code> must be -1,
 and the other must be a non-negative number. The one that is not -1
 will be used to filter and name the identified mutants.</p></dd>
-
-
-<dt>nbrMutatedBasesMaxForward, nbrMutatedBasesMaxReverse</dt>
+<dt id="arg-nbrmutatedbasesmaxforward-nbrmutatedbasesmaxreverse">nbrMutatedBasesMaxForward, nbrMutatedBasesMaxReverse<a class="anchor" aria-label="anchor" href="#arg-nbrmutatedbasesmaxforward-nbrmutatedbasesmaxreverse"></a></dt>
 <dd><p>Numeric scalar,
 the maximum number of mutated bases that are allowed. Note that for the
 forward and reverse sequence, respectively, exactly one of
 <code>nbrMutatedCodonsMax</code> and <code>nbrMutatedBasesMax</code> must be -1,
 and the other must be a non-negative number. The one that is not -1
 will be used to filter and name the identified mutants.</p></dd>
-
-
-<dt>forbiddenMutatedCodonsForward, forbiddenMutatedCodonsReverse</dt>
+<dt id="arg-forbiddenmutatedcodonsforward-forbiddenmutatedcodonsreverse">forbiddenMutatedCodonsForward, forbiddenMutatedCodonsReverse<a class="anchor" aria-label="anchor" href="#arg-forbiddenmutatedcodonsforward-forbiddenmutatedcodonsreverse"></a></dt>
 <dd><p>Character
 vector of codons (can contain ambiguous IUPAC characters, see
 <code><a href="https://rdrr.io/pkg/Biostrings/man/IUPAC_CODE_MAP.html" class="external-link">IUPAC_CODE_MAP</a></code>). If a read pair contains a
 mutated codon matching this pattern, it will be filtered out.</p></dd>
-
-
-<dt>useTreeWTmatch</dt>
+<dt id="arg-usetreewtmatch">useTreeWTmatch<a class="anchor" aria-label="anchor" href="#arg-usetreewtmatch"></a></dt>
 <dd><p>Logical scalar. Should a tree-based matching
 to wild type sequences be used if possible? If the number of allowed
 mismatches is small, and the number of wild type sequences is large,
 this is typically faster.</p></dd>
-
-
-<dt>collapseToWTForward, collapseToWTReverse</dt>
+<dt id="arg-collapsetowtforward-collapsetowtreverse">collapseToWTForward, collapseToWTReverse<a class="anchor" aria-label="anchor" href="#arg-collapsetowtforward-collapsetowtreverse"></a></dt>
 <dd><p>Logical scalar, indicating
 whether to just represent the observed variable sequence by the
 closest wildtype sequence rather than retaining the information about
 the mutations.</p></dd>
-
-
-<dt>mutatedPhredMinForward, mutatedPhredMinReverse</dt>
-<dd><p>Numeric scalar, the 
-minimum Phred score of a mutated base for the read to be retained. If 
-any mutated base has a Phred score lower than <code>mutatedPhredMin</code>, 
+<dt id="arg-mutatedphredminforward-mutatedphredminreverse">mutatedPhredMinForward, mutatedPhredMinReverse<a class="anchor" aria-label="anchor" href="#arg-mutatedphredminforward-mutatedphredminreverse"></a></dt>
+<dd><p>Numeric scalar, the
+minimum Phred score of a mutated base for the read to be retained. If
+any mutated base has a Phred score lower than <code>mutatedPhredMin</code>,
 the read (pair) will be discarded.</p></dd>
-
-
-<dt>mutNameDelimiter</dt>
-<dd><p>Character scalar, the delimiter used in the naming 
-of mutants. Generally, mutants will be named as XX.YY.NNN, where XX 
-is the closest provided reference sequence, YY is the mutated base or 
-codon number (depending on whether <code>nbrMutatedBases*</code> or 
+<dt id="arg-mutnamedelimiter">mutNameDelimiter<a class="anchor" aria-label="anchor" href="#arg-mutnamedelimiter"></a></dt>
+<dd><p>Character scalar, the delimiter used in the naming
+of mutants. Generally, mutants will be named as XX.YY.NNN, where XX
+is the closest provided reference sequence, YY is the mutated base or
+codon number (depending on whether <code>nbrMutatedBases*</code> or
 <code>nbrMutatedCodons*</code> is specified), and NNN is the
-mutated base or codon. Here, . is the provided <code>mutNameDelimiter</code>. 
-The delimiter must be a single character (not "_"), and can not appear 
+mutated base or codon. Here, . is the provided <code>mutNameDelimiter</code>.
+The delimiter must be a single character (not "_"), and can not appear
 in any of the provided reference sequence names.</p></dd>
-
-
-<dt>constantMaxDistForward, constantMaxDistReverse</dt>
-<dd><p>Numeric scalars, the 
-maximum allowed Hamming distance between the extracted and expected 
-constant sequence. If multiple constant sequences are provided, the most 
-similar one is used. Reads with a larger distance to the expected 
+<dt id="arg-constantmaxdistforward-constantmaxdistreverse">constantMaxDistForward, constantMaxDistReverse<a class="anchor" aria-label="anchor" href="#arg-constantmaxdistforward-constantmaxdistreverse"></a></dt>
+<dd><p>Numeric scalars, the
+maximum allowed Hamming distance between the extracted and expected
+constant sequence. If multiple constant sequences are provided, the most
+similar one is used. Reads with a larger distance to the expected
 constant sequence are discarded. If set to -1, no filtering is done.</p></dd>
-
-
-<dt>variableCollapseMaxDist, variableCollapseMinReads, variableCollapseMinRatio</dt>
-<dd><p>Deprecated. Collapsing of variable sequences is no longer performed in 
-<code>digestFastqs</code>. Please use <code>collapseMutantsBySimilarity</code> 
+<dt id="arg-variablecollapsemaxdist-variablecollapseminreads-variablecollapseminratio">variableCollapseMaxDist, variableCollapseMinReads, variableCollapseMinRatio<a class="anchor" aria-label="anchor" href="#arg-variablecollapsemaxdist-variablecollapseminreads-variablecollapseminratio"></a></dt>
+<dd><p>Deprecated. Collapsing of variable sequences is no longer performed in
+<code>digestFastqs</code>. Please use <code>collapseMutantsBySimilarity</code>
 instead.</p></dd>
-
-
-<dt>umiCollapseMaxDist</dt>
-<dd><p>Numeric scalar defining 
-the tolerances for collapsing similar UMI sequences. If the value is 
-in [0, 1), it defines the maximal Hamming distance in terms of a 
+<dt id="arg-umicollapsemaxdist">umiCollapseMaxDist<a class="anchor" aria-label="anchor" href="#arg-umicollapsemaxdist"></a></dt>
+<dd><p>Numeric scalar defining
+the tolerances for collapsing similar UMI sequences. If the value is
+in [0, 1), it defines the maximal Hamming distance in terms of a
 fraction of sequence length:
 (<code>round(umiCollapseMaxDist * nchar(umiSeq))</code>).
 A value greater or equal to 1 is rounded and directly used as the maximum
 allowed Hamming distance.</p></dd>
-
-
-<dt>filteredReadsFastqForward, filteredReadsFastqReverse</dt>
-<dd><p>Character 
-scalars, the names of a (pair of) FASTQ file(s) where filtered-out reads 
-will be written. The name(s) should end in .gz (the output will always 
+<dt id="arg-filteredreadsfastqforward-filteredreadsfastqreverse">filteredReadsFastqForward, filteredReadsFastqReverse<a class="anchor" aria-label="anchor" href="#arg-filteredreadsfastqforward-filteredreadsfastqreverse"></a></dt>
+<dd><p>Character
+scalars, the names of a (pair of) FASTQ file(s) where filtered-out reads
+will be written. The name(s) should end in .gz (the output will always
 be compressed). If empty, filtered reads will not be written to a file.</p></dd>
-
-
-<dt>maxNReads</dt>
-<dd><p>Integer scalar, the maximum number of reads to process. 
+<dt id="arg-maxnreads">maxNReads<a class="anchor" aria-label="anchor" href="#arg-maxnreads"></a></dt>
+<dd><p>Integer scalar, the maximum number of reads to process.
 If set to -1, all reads in the FASTQ file(s) will be processed.</p></dd>
-
-
-<dt>verbose</dt>
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
 <dd><p>Logical scalar, whether to print out progress messages.</p></dd>
-
-
-<dt>nThreads</dt>
-<dd><p>Numeric scalar, the number of threads to use for parallel 
+<dt id="arg-nthreads">nThreads<a class="anchor" aria-label="anchor" href="#arg-nthreads"></a></dt>
+<dd><p>Numeric scalar, the number of threads to use for parallel
 processing.</p></dd>
-
-
-<dt>chunkSize</dt>
-<dd><p>Numeric scalar, the number of read (pairs) to keep in 
-memory for parallel processing. Reduce from the default value if you 
+<dt id="arg-chunksize">chunkSize<a class="anchor" aria-label="anchor" href="#arg-chunksize"></a></dt>
+<dd><p>Numeric scalar, the number of read (pairs) to keep in
+memory for parallel processing. Reduce from the default value if you
 run out of memory.</p></dd>
-
-
-<dt>maxReadLength</dt>
-<dd><p>Numeric scalar, the maximum allowed read length. Longer 
-read lengths lead to higher memory allocation, and may require 
+<dt id="arg-maxreadlength">maxReadLength<a class="anchor" aria-label="anchor" href="#arg-maxreadlength"></a></dt>
+<dd><p>Numeric scalar, the maximum allowed read length. Longer
+read lengths lead to higher memory allocation, and may require
 the <code>chunkSize</code> to be decreased.</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
 <p>A list with four entries:</p><dl><dt>summaryTable</dt>
 <dd><p>A <code>data.frame</code> that contains, for each observed
 mutation combination, the corresponding variable region sequences (or pair of
@@ -366,9 +291,8 @@ names based on base, codon or amino acid sequence are provided in columns
 'mutantNameBaseHGVS' and 'mutantNameAAHGVS' give base- and amino acid-based
 names following the HGVS nomenclature (https://varnomen.hgvs.org/). Please
 note that the provided reference sequence names are used for the HGVS
-sequence identifiers. It is up to the user to use appropriately named 
+sequence identifiers. It is up to the user to use appropriately named
 reference sequences in order to obtain valid HGVS variant names.</p></dd>
-
 <dt>filterSummary</dt>
 <dd><p>A <code>data.frame</code> that contains the number of input
 reads, the number of reads filtered out in the processing, and the number of
@@ -377,19 +301,15 @@ retained reads. The filters are named according to the convention
 applied, and "filter" indicates the type of filter. Note that filters are
 applied successively, and the reads filtered out in one step are not
 considered for successive filtering steps.</p></dd>
-
 <dt>errorStatistics</dt>
 <dd><p>A <code>data.frame</code> that contains, for each Phred
 quality score between 0 and 99, the number of bases in the extracted constant
 sequences with that quality score that match/mismatch with the provided
 reference constant sequence.</p></dd>
-
 <dt>parameters</dt>
 <dd><p>A <code>list</code> with all parameter settings that were used in
 the processing. Also contains the version of the package and the time of
 processing.</p></dd>
-
-
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -403,12 +323,12 @@ processing.</p></dd>
 <li><p>If requested, collapse forward and reverse variable regions by
  retaining, for each position, the base with the highest reported base
  quality.</p></li>
-<li><p>Filter out the read (pair) if the average quality in the variable 
- region is below <code>avePhredMinForward</code>/<code>avePhredMinReverse</code>, in 
+<li><p>Filter out the read (pair) if the average quality in the variable
+ region is below <code>avePhredMinForward</code>/<code>avePhredMinReverse</code>, in
  either the forward or reverse read (or the merged read).</p></li>
 <li><p>Filter out the read (pair) if the number of Ns in the variable region
  exceeds <code>variableNMaxForward</code>/<code>variableNMaxReverse</code>.</p></li>
-<li><p>Filter out the read (pair) if the number of Ns in the combined forward 
+<li><p>Filter out the read (pair) if the number of Ns in the combined forward
  and reverse UMI sequence exceeds <code>umiNMax</code></p></li>
 <li><p>If one or more wild type sequences (for the variable region) are
  provided, find the mismatches between the (forward/reverse) variable region
@@ -418,20 +338,19 @@ processing.</p></dd>
  <code>mutatedPhredMinForward</code>/<code>mutatedPhredMinReverse</code>.</p></li>
 <li><p>Filter out the read (pair) if the number of mutated codons exceeds
  <code>nbrMutatedCodonsMaxForward</code>/<code>nbrMutatedCodonsMaxReverse</code>.</p></li>
-<li><p>Filter out the read (pair) if any of the mutated codons match any of 
+<li><p>Filter out the read (pair) if any of the mutated codons match any of
  the codons encoded by
  <code>forbiddenMutatedCodonsForward</code>/<code>forbiddenMutatedCodonsReverse</code>.</p></li>
-<li><p>Assign a 'mutation name' to the read (pair). This name is a 
- combination of parts of the form XX.YY.NNN, where XX is the name of the 
- most similar reference sequence, YY is the mutated codon number, and NNN is 
- the mutated codon. . is a delimiter, specified via 
+<li><p>Assign a 'mutation name' to the read (pair). This name is a
+ combination of parts of the form XX.YY.NNN, where XX is the name of the
+ most similar reference sequence, YY is the mutated codon number, and NNN is
+ the mutated codon. . is a delimiter, specified via
  <code>mutNameDelimiter</code>. If no wildtype sequences are provided, the
  variable sequence will be used as the mutation name'.</p></li>
 </ol><p>Based on the retained reads following this filtering process, count the
 number of reads, and the number of unique UMIs, for each variable sequence
 (or pair of variable sequences).</p>
     </div>
-
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## See the vignette for complete worked-out examples for different types of </span></span></span>
@@ -1628,22 +1547,12 @@ number of reads, and the number of unique UMIs, for each variable sequence
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
     </nav></div>
 </div>
-
-
       <footer><div class="copyright">
   <p></p><p>Developed by Charlotte Soneson, Michael Stadler.</p>
 </div>
-
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.9000.</p>
 </div>
-
       </footer></div>
-
-  
-
-
-  
-
   </body></html>
 
