@@ -4,6 +4,8 @@ as described by Diss and Lehner (2018)."><!-- mathjax --><script src="https://cd
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
+
+
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -19,6 +21,7 @@ as described by Diss and Lehner (2018)."><!-- mathjax --><script src="https://cd
         <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.2</span>
       </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li>
   <a href="../articles/mutscan.html">Get started</a>
@@ -32,16 +35,22 @@ as described by Diss and Lehner (2018)."><!-- mathjax --><script src="https://cd
       </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
+
+
+
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Calculate fitness scores.</h1>
+
     <div class="hidden name"><code>calculateFitnessScore.Rd</code></div>
     </div>
+
     <div class="ref-description">
     <p>Using sequence counts before and after selection, calculate fitness scores
 as described by Diss and Lehner (2018).</p>
     </div>
+
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">calculateFitnessScore</span><span class="op">(</span></span>
 <span>  <span class="va">se</span>,</span>
@@ -52,18 +61,27 @@ as described by Diss and Lehner (2018).</p>
 <span>  selAssay <span class="op">=</span> <span class="st">"counts"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
+
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt id="arg-se">se<a class="anchor" aria-label="anchor" href="#arg-se"></a></dt>
+
+
+<dl><dt id="arg-se">se<a class="anchor" aria-label="anchor" href="#arg-se"></a></dt>
 <dd><p>SummarizedExperiment object as returned by
 <code><a href="summarizeExperiment.html">summarizeExperiment</a></code>.</p></dd>
+
+
 <dt id="arg-pairingcol">pairingCol<a class="anchor" aria-label="anchor" href="#arg-pairingcol"></a></dt>
 <dd><p>Name of column in <code>colData(se)</code> with
 replicate/pairing information. Samples with the same value in this
 column will be paired.</p></dd>
+
+
 <dt id="arg-odcols">ODCols<a class="anchor" aria-label="anchor" href="#arg-odcols"></a></dt>
 <dd><p>Name(s) of column(s) in <code>colData(se)</code> with OD values
 (numeric), used to normalize for different numbers of cells.</p></dd>
+
+
 <dt id="arg-comparison">comparison<a class="anchor" aria-label="anchor" href="#arg-comparison"></a></dt>
 <dd><p>3-element character vector of the form
 <code>(column, numerator, denominator)</code>. <code>column</code> is the name of
@@ -72,17 +90,22 @@ the column in <code>colData(se)</code> with experimental conditions.
 e.g. <code>c("cond", "output", "input")</code> will look in the
 <code>"cond"</code> column and calculate fitness for the ratio of
 <code>"output"</code> over <code>"input"</code> counts.</p></dd>
+
+
 <dt id="arg-wtrows">WTrows<a class="anchor" aria-label="anchor" href="#arg-wtrows"></a></dt>
 <dd><p>Vector of row names that will be used as the reference when
 calculating fitness scores. If more than one value is provided, the
 average of the corresponding fitness scores is used as a reference.
 If NULL, no division by WT scores will be done.</p></dd>
+
+
 <dt id="arg-selassay">selAssay<a class="anchor" aria-label="anchor" href="#arg-selassay"></a></dt>
 <dd><p>Assay to select from <code>se</code> for the analysis.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-<p>A numeric vector with fitness scores.</p>
+    <p>A numeric vector with fitness scores.</p>
     </div>
     <div id="references">
     <h2>References</h2>
@@ -93,6 +116,7 @@ If NULL, no division by WT scores will be done.</p></dd>
     <h2>Author</h2>
     <p>Michael Stadler and Charlotte Soneson</p>
     </div>
+
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE102901_cis_se.rds"</span>, </span></span>
@@ -129,12 +153,22 @@ If NULL, no division by WT scores will be done.</p></dd>
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
     </nav></div>
 </div>
+
+
       <footer><div class="copyright">
   <p></p><p>Developed by Charlotte Soneson, Michael Stadler.</p>
 </div>
+
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.9000.</p>
 </div>
+
       </footer></div>
+
+
+
+
+
+
   </body></html>
 

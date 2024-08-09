@@ -11,6 +11,8 @@ reads), they will be concatenated and processed as a single unit."><!-- mathjax 
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
+
+
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -26,6 +28,7 @@ reads), they will be concatenated and processed as a single unit."><!-- mathjax 
         <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.2</span>
       </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li>
   <a href="../articles/mutscan.html">Get started</a>
@@ -39,12 +42,17 @@ reads), they will be concatenated and processed as a single unit."><!-- mathjax 
       </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
+
+
+
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Process an experiment with multiple variable sequences</h1>
+
     <div class="hidden name"><code>linkMultipleVariants.Rd</code></div>
     </div>
+
     <div class="ref-description">
     <p>This function enables the processing of data sets with multiple
 variable sequences, which should potentially be handled in different
@@ -56,14 +64,20 @@ In contrast, while <code>digestFastqs</code> allow the specification
 of multiple variable sequences (within each of the forward and reverse
 reads), they will be concatenated and processed as a single unit.</p>
     </div>
+
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">linkMultipleVariants</span><span class="op">(</span>combinedDigestParams <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
+
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt id="arg-combineddigestparams">combinedDigestParams<a class="anchor" aria-label="anchor" href="#arg-combineddigestparams"></a></dt>
+
+
+<dl><dt id="arg-combineddigestparams">combinedDigestParams<a class="anchor" aria-label="anchor" href="#arg-combineddigestparams"></a></dt>
 <dd><p>A named list of arguments to
 <code>digestFastqs</code> for the combined ("naive") run.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments providing arguments to <code>digestFastqs</code>
 for the separate runs (processing each variable sequence in turn).
@@ -71,10 +85,11 @@ Each argument must be a named list of arguments to <code>digestFastqs</code>.
 In addition, arguments <code>collapseMaxDist</code>, <code>collapseMinScore</code>
 and <code>collapseMinRatio</code> can be specified, and will be passed on
 to <code>collapseMutantsBySimilarity</code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-<p>A list with the following elements:</p><ul><li><p>countAggregated - a <code>tibble</code> with columns corresponding to
+    <p>A list with the following elements:</p><ul><li><p>countAggregated - a <code>tibble</code> with columns corresponding to
     each of the variable sequences, and a column with the total observed
     read count for the combination.</p></li>
 <li><p>convSeparate - a list of conversion tables from the respective
@@ -130,17 +145,28 @@ need to swap the 'forward' and 'reverse' specifications (since
     <h2>Author</h2>
     <p>Charlotte Soneson, Michael Stadler</p>
     </div>
+
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
     </nav></div>
 </div>
+
+
       <footer><div class="copyright">
   <p></p><p>Developed by Charlotte Soneson, Michael Stadler.</p>
 </div>
+
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.9000.</p>
 </div>
+
       </footer></div>
+
+
+
+
+
+
   </body></html>
 
