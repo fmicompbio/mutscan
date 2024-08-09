@@ -174,7 +174,8 @@
 #'     will be written. The name(s) should end in .gz (the output will always 
 #'     be compressed). If empty, filtered reads will not be written to a file.
 #' @param maxNReads Integer scalar, the maximum number of reads to process. 
-#'     If set to -1, all reads in the FASTQ file(s) will be processed.
+#'     The first \code{maxNReads} read (pairs) in the FASTQ file(s) will be 
+#'     used. If set to -1, all reads in the FASTQ file(s) will be processed.
 #' @param verbose Logical scalar, whether to print out progress messages.
 #' @param nThreads Numeric scalar, the number of threads to use for parallel 
 #'     processing.
