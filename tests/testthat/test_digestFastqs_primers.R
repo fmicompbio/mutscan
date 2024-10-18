@@ -144,7 +144,9 @@ test_that("digestFastqs works as expected for primer experiments", {
                       "FOSL2:p_r:p.(Ala13Gly)", "JUNB:p_r:p", "XBP1:p_r:p")))
   expect_equal(res$summaryTable$nbrUmis, rep(0L, nrow(res$summaryTable))) ## no UMIs in this experiment
   
+  ## ---------------------------------------------------------------------------
   ## Test that we get the same results with useTreeWTmatch = TRUE
+  ## ---------------------------------------------------------------------------
   Ldef$useTreeWTmatch <- TRUE
   res2 <- do.call(digestFastqs, Ldef)
   
@@ -168,4 +170,62 @@ test_that("digestFastqs works as expected for primer experiments", {
   expect_equal(res$summaryTable$nbrReads, res2$summaryTable$nbrReads)
   expect_equal(res$summaryTable$mutantName, res2$summaryTable$mutantName)
   expect_equal(res$summaryTable$sequence, res2$summaryTable$sequence)
+  
+  ## ---------------------------------------------------------------------------
+  ## Test aggregating across groups of wildtype sequences
+  ## ---------------------------------------------------------------------------
+  Ldef <- list(
+      fastqForward = fqt1, fastqReverse = fqt2, 
+      mergeForwardReverse = FALSE, 
+      minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE, 
+      revComplForward = FALSE, revComplReverse = FALSE,
+      elementsForward = "SPV", elementsReverse = "SPSS",
+      elementLengthsForward = c(-1, -1, -1),
+      elementLengthsReverse = c(-1, -1, 96, -1),
+      adapterForward = "", 
+      adapterReverse = "",
+      primerForward = "GTCAGGTGGAGGCGGATCC",
+      primerReverse = "GAAAAAGGAAGCTGGAGAGA",
+      wildTypeForward = leu,
+      wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT", 
+      constantForward = "", 
+      constantReverse = "", 
+      avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+      variableNMaxForward = 0, variableNMaxReverse = 0, 
+      umiNMax = 0,
+      nbrMutatedCodonsMaxForward = 0,
+      nbrMutatedCodonsMaxReverse = 0,
+      nbrMutatedBasesMaxForward = -1,
+      nbrMutatedBasesMaxReverse = -1,
+      forbiddenMutatedCodonsForward = "",
+      forbiddenMutatedCodonsReverse = "NNW",
+      useTreeWTmatch = FALSE,
+      mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+      mutNameDelimiter = ".", 
+      constantMaxDistForward = -1,
+      constantMaxDistReverse = -1,
+      umiCollapseMaxDist = 0,
+      filteredReadsFastqForward = "",
+      filteredReadsFastqReverse = "",
+      maxNReads = -1, verbose = FALSE,
+      nThreads = 1, chunkSize = 1000, 
+      maxReadLength = 1024
+  )
+  res1 <- do.call(digestFastqs, Ldef)
+  leu2 <- leu
+  names(leu2)[1:5] <- "ATF2"
+  Ldef$wildTypeForward <- leu2
+  res2 <- do.call(digestFastqs, Ldef)
+  
+  expect_identical(res1$filterSummary, res2$filterSummary)
+  expect_identical(res1$errorStatistics, res2$errorStatistics)
+  expect_equal(nrow(res1$summaryTable), nrow(res2$summaryTable) + 4)
+  idx <- which(!res1$summaryTable$mutantName %in% paste0(names(leu)[1:5], ".0.WT_r.0.WT"))
+  expect_identical(res1$summaryTable[idx, ], 
+                   res2$summaryTable[match(res1$summaryTable$mutantName[idx], 
+                                           res2$summaryTable$mutantName), ],
+                   ignore_attr = TRUE)
+  expect_equal(sum(res1$summaryTable[-idx, "nbrReads"]), 
+               res2$summaryTable[res2$summaryTable$mutantName == 
+                                     paste0(names(leu2)[1], ".0.WT_r.0.WT"), "nbrReads"])
 })
