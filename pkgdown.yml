@@ -1,6 +1,9 @@
 pandoc: 3.1.11
-pkgdown: 2.1.0.9000
-pkgdown_sha: 1d40a80e6b3564a6d7da0ce467b0a4570aa5665e
+pkgdown: 2.1.1.9000
+pkgdown_sha: 8d9cba19fe597bba170f8d4c99f351491ab4f4d1
 articles:
   mutscan: mutscan.html
-last_built: 2024-08-09T14:30Z
+last_built: 2024-10-20T16:56Z
+urls:
+  reference: https://fmicompbio.github.io/mutscan/reference
+  article: https://fmicompbio.github.io/mutscan/articles
