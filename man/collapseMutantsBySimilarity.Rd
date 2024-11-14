@@ -99,6 +99,8 @@ sec2 <- collapseMutantsBySimilarity(
 dim(sec2)
 head(rownames(sec2))
 head(SummarizedExperiment::rowData(sec2))
+## collapsed count matrix
+SummarizedExperiment::assay(sec2, "counts")
 
 }
 \author{
