@@ -131,38 +131,38 @@ framework (edgeR or limma).</p>
 <span class="r-in"><span>                           method <span class="op">=</span> <span class="st">"edgeR"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             logFC    logCPM         F       PValue          FDR logFC_shrunk</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT  1.9721333 20.083627 38.666961 3.163946e-08 2.343664e-07    1.9721331</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC 1.3157930  4.688782 17.296632 8.896834e-05 3.235212e-04    1.2984544</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG 1.0399851  5.677955 14.561800 2.886478e-04 9.463863e-04    1.0342409</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC 2.0873878 12.862431 63.169776 2.209929e-11 5.524823e-10    2.0873503</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACG 1.8698584 13.513672 49.888966 9.368789e-10 1.046578e-08    1.8698442</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AGC 0.9319829  4.754181  9.086603 3.579022e-03 8.947554e-03    0.9228638</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT  1.9721334 20.083627 56.768150 2.160897e-10 3.601495e-09    1.9721331</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC 1.3136230  4.688782 17.640288 8.439695e-05 2.910240e-04    1.2984544</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG 1.0392549  5.677955 13.791731 4.313291e-04 1.327167e-03    1.0342409</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC 2.0874024 12.862431 62.628899 4.638644e-11 1.159661e-09    2.0873503</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACG 1.8698694 13.513672 50.764347 1.134839e-09 1.194568e-08    1.8698442</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AGC 0.9309018  4.754181  9.170734 3.545487e-03 8.975917e-03    0.9228638</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         df.total df.prior df.test</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT  70.34738 67.34721       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC 70.34639 67.34721       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG 70.34710 67.34721       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC 70.34738 67.34721       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACG 70.34738 67.34721       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AGC 70.34666 67.34721       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT  63.85553 60.85531       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC 63.85462 60.85531       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG 63.85524 60.85531       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC 63.85553 60.85531       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACG 63.85553 60.85531       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AGC 63.85487 60.85531       1</span>
 <span class="r-in"><span><span class="co">## Calculate log-fold changes relative to the WT sequence with edgeR</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="st">"f.0.WT"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">calculateRelativeFC</span><span class="op">(</span><span class="va">se</span>, <span class="va">design</span>, coef <span class="op">=</span> <span class="st">"Conditioncis_output"</span>, </span></span>
 <span class="r-in"><span>                           method <span class="op">=</span> <span class="st">"edgeR"</span>, WTrows <span class="op">=</span> <span class="st">"f.0.WT"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 logFC    logCPM          F       PValue          FDR</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT   4.099586e-16 19.757846   0.000000 1.000000e+00 1.000000e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC -5.886411e-01  4.553595   4.660404 6.307107e-02 7.167167e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG -8.663762e-01  5.655807  11.344846 9.798276e-03 1.281435e-02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC  1.216878e-01 12.506900  25.796517 9.500342e-04 1.637990e-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACG -1.012631e-01 13.217924 211.588815 4.819333e-07 6.024167e-06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AGC -9.676176e-01  4.738963  10.232883 1.266371e-02 1.613212e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 logFC    logCPM         F       PValue          FDR</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT   4.209817e-16 19.757846  0.000000 1.000000e+00 1.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC -6.078796e-01  4.553595  9.224434 1.337186e-02 1.601421e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG -8.740695e-01  5.655807 24.839338 6.574158e-04 1.125187e-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC  1.207258e-01 12.506900 28.957264 3.790068e-04 7.018644e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACG -1.016593e-01 13.217924 67.771782 1.324404e-05 4.905202e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AGC -9.855150e-01  4.738963 18.559705 1.767705e-03 2.658202e-03</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          logFC_shrunk df.total df.prior df.test</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT   4.802398e-16 8.011638 5.011611       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC -6.661972e-01 7.961207 5.011611       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG -8.823465e-01 8.007441 5.011611       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC  1.207031e-01 8.011638 5.011611       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACG -1.016627e-01 8.011638 5.011611       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AGC -1.030935e+00 7.985412 5.011611       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT   4.802398e-16 9.426352 6.426305       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC -6.661972e-01 9.423708 6.426305       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG -8.823465e-01 9.425925 6.426305       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC  1.207031e-01 9.426352 6.426305       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACG -1.016627e-01 9.426352 6.426305       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AGC -1.030935e+00 9.424817 6.426305       1</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Calculate "absolute" log-fold changes with limma</span></span></span>
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">calculateRelativeFC</span><span class="op">(</span><span class="va">se</span>, <span class="va">design</span>, coef <span class="op">=</span> <span class="st">"Conditioncis_output"</span>, </span></span>
