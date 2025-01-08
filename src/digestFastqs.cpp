@@ -829,12 +829,15 @@ bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQu
   if (maxMergedLength == 0) {
     maxMergedLength = lenF + lenR;
   }
+  if (maxMergedLength > lenF + lenR) {
+    maxMergedLength = lenF + lenR;
+  }
   // if maxMergedLength is specified, adjust allowed minOverlap
   if (minOverlap < (lenF + lenR - maxMergedLength)) {
     minOverlap = (lenF + lenR - maxMergedLength);
   }
   if (minOverlap > lenF || minOverlap > lenR) {
-    return true; //  no valid overlap possible
+      return true; //  no valid overlap possible
   }
 
   if (maxOverlap == 0) {
@@ -850,6 +853,9 @@ bool mergeReadPairPartial(std::string &varSeqForward, std::vector<int> &varIntQu
     if (minMergedLength < lenR) {
       minMergedLength = lenR;
     }
+  }
+  if (minMergedLength > lenF + lenR) {
+    return true; // no valid overlap possible
   }
   // if minMergedLength is specified, adjust allowed maxOverlap
   if (maxOverlap > (lenF + lenR - minMergedLength)) {
