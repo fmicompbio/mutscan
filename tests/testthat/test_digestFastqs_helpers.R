@@ -397,7 +397,22 @@ test_that("mergeReadPairsPartial works", {
   expect_identical(res0d$mergedQual, qF2)
   expect_identical(res0d$mergedLengths, 7L)
   expect_true(res0d$return)
-
+  
+  ## minMergedLength > lenF + lenR -> no valid overlap
+  res0e <- mutscan:::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, lF2, lR2, 1, 7, 15, 9, 1, FALSE)
+  expect_type(res0e, "list")
+  expect_identical(res0e$mergedSeq, sF2)
+  expect_identical(res0e$mergedQual, qF2)
+  expect_identical(res0e$mergedLengths, 7L)
+  expect_true(res0e$return)
+  ## maxMergedLength > lenF + lenR -> maxMergedLength = lenF + lenR
+  res0f <- mutscan:::test_mergeReadPairPartial(sF0, qF0, sR0, qR0, lF0, lR0, 1, 0, 5, 19, 1, FALSE)
+  expect_type(res0f, "list")
+  expect_identical(res0f$mergedSeq, sF0)
+  expect_identical(res0f$mergedQual, rep(c(10L, 40L), c(2, 5)))
+  expect_identical(res0f$mergedLengths, 7L)
+  expect_false(res0f$return)
+  
   ## padded reads
   for (i in 1:10) {
     sF <- paste(rep(c("C","A"), c(i, 6)), collapse = "")
