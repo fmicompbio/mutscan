@@ -55,7 +55,8 @@ Suggests:
     knitr,
     Biostrings,
     pwalign,
-    plotly
+    plotly,
+    scattermore
 SystemRequirements: GNU make
 biocViews: GeneticVariability, GenomicVariation, Preprocessing
 License: MIT + file LICENSE
