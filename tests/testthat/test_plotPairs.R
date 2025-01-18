@@ -111,6 +111,22 @@ test_that("plotPairs works with correct arguments", {
                               corSizeAdd = 2, pointSize = 0.1, pointAlpha = 0.3,
                               colorByCorrelation = TRUE, corrColorRange = NULL, 
                               addIdentityLine = FALSE), "ggmatrix")
+    
+    ## scattermore
+    expect_s3_class(plotPairs(se = se, selAssay = "counts", doLog = TRUE,
+                              pseudocount = 1, corMethod = "pearson",
+                              histBreaks = 40, pointsType = "scattermore", corSizeMult = 5,
+                              corSizeAdd = 2, pointSize = 3.5, pointAlpha = 0.3,
+                              colorByCorrelation = TRUE, corrColorRange = NULL, 
+                              addIdentityLine = FALSE), "ggmatrix")
+    
+    ## scattermost
+    expect_s3_class(plotPairs(se = se, selAssay = "counts", doLog = TRUE,
+                              pseudocount = 1, corMethod = "pearson",
+                              histBreaks = 40, pointsType = "scattermost", corSizeMult = 5,
+                              corSizeAdd = 2, pointSize = 3.5, pointAlpha = 0.3,
+                              colorByCorrelation = TRUE, corrColorRange = NULL, 
+                              addIdentityLine = FALSE), "ggmatrix")
 
     ## Change font size to correlation relation
     expect_s3_class(plotPairs(se = se, selAssay = "counts", doLog = TRUE,
