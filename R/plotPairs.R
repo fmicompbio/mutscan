@@ -145,77 +145,80 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
     ## ----------------------------------------------------------------------- ##
     ## Scatter plots
     ## ----------------------------------------------------------------------- ##
-    ## Define function to create smoothscatter-like plot (for use with ggpairs)
-    smoothscat <- function(data, mapping, ...) {
-        ggplot2::ggplot(data = data, mapping = mapping) +
-            ggplot2::stat_density2d(ggplot2::aes(fill = ggplot2::after_stat(.data$density)^0.25), geom = "tile",
-                                    contour = FALSE, n = 200) +
-            ggplot2::scale_fill_continuous(low = "white", high = "darkgreen") +
-            ggtheme +
-            ggplot2::scale_x_continuous(expand = c(0, 0)) +
-            ggplot2::scale_y_continuous(expand = c(0, 0))
-    }
-
-    ## Define function to create scatter plot (for use with ggpairs)
-    if (addIdentityLine) {
-        plotpoints <- function(data, mapping, ...) {
+    if (pointsType == "smoothscatter") {
+        ## Define function to create smoothscatter-like plot (for use with ggpairs)
+        smoothscat <- function(data, mapping, ...) {
             ggplot2::ggplot(data = data, mapping = mapping) +
-                ggplot2::geom_abline(slope = 1, intercept = 0, 
-                                     linetype = "dashed", color = "grey") + 
-                ggplot2::geom_point(alpha = pointAlpha, size = pointSize) +
-                ggtheme
+                ggplot2::stat_density2d(
+                    ggplot2::aes(fill = ggplot2::after_stat(.data$density)^0.25), geom = "tile",
+                    contour = FALSE, n = 200) +
+                ggplot2::scale_fill_continuous(low = "white", high = "darkgreen") +
+                ggtheme +
+                ggplot2::scale_x_continuous(expand = c(0, 0)) +
+                ggplot2::scale_y_continuous(expand = c(0, 0))
         }
-    } else {
-        plotpoints <- function(data, mapping, ...) {
-            ggplot2::ggplot(data = data, mapping = mapping) +
-                ggplot2::geom_point(alpha = pointAlpha, size = pointSize) +
-                ggtheme
+    } else if (pointsType == "points") {
+        ## Define function to create scatter plot (for use with ggpairs)
+        if (addIdentityLine) {
+            plotpoints <- function(data, mapping, ...) {
+                ggplot2::ggplot(data = data, mapping = mapping) +
+                    ggplot2::geom_abline(slope = 1, intercept = 0, 
+                                         linetype = "dashed", color = "grey") + 
+                    ggplot2::geom_point(alpha = pointAlpha, size = pointSize) +
+                    ggtheme
+            }
+        } else {
+            plotpoints <- function(data, mapping, ...) {
+                ggplot2::ggplot(data = data, mapping = mapping) +
+                    ggplot2::geom_point(alpha = pointAlpha, size = pointSize) +
+                    ggtheme
+            }
         }
-    }
-    
-    ## Define function to create scattermore plot (for use with ggpairs)
-    if (addIdentityLine) {
-        plotscattermore <- function(data, mapping, ...) {
-            ggplot2::ggplot(data = data, mapping = mapping) +
-                ggplot2::geom_abline(slope = 1, intercept = 0, 
-                                     linetype = "dashed", color = "grey") + 
-                scattermore::geom_scattermore(alpha = pointAlpha, 
-                                              pointsize = pointSize) +
-                ggtheme
+    } else if (pointsType == "scattermore") {
+        ## Define function to create scattermore plot (for use with ggpairs)
+        if (addIdentityLine) {
+            plotscattermore <- function(data, mapping, ...) {
+                ggplot2::ggplot(data = data, mapping = mapping) +
+                    ggplot2::geom_abline(slope = 1, intercept = 0, 
+                                         linetype = "dashed", color = "grey") + 
+                    scattermore::geom_scattermore(alpha = pointAlpha, 
+                                                  pointsize = pointSize) +
+                    ggtheme
+            }
+        } else {
+            plotscattermore <- function(data, mapping, ...) {
+                ggplot2::ggplot(data = data, mapping = mapping) +
+                    scattermore::geom_scattermore(alpha = pointAlpha, 
+                                                  pointsize = pointSize) +
+                    ggtheme
+            }
         }
-    } else {
-        plotscattermore <- function(data, mapping, ...) {
-            ggplot2::ggplot(data = data, mapping = mapping) +
-                scattermore::geom_scattermore(alpha = pointAlpha, 
-                                              pointsize = pointSize) +
-                ggtheme
-        }
-    }
-    
-    ## Define function to create scattermost plot (for use with ggpairs)
-    if (addIdentityLine) {
-        plotscattermost <- function(data, mapping, ...) {
-            ## Get data
-            xData <- GGally::eval_data_col(data, mapping$x)
-            yData <- GGally::eval_data_col(data, mapping$y)
-            
-            ggplot2::ggplot(data = data, mapping = mapping) +
-                ggplot2::geom_abline(slope = 1, intercept = 0, 
-                                     linetype = "dashed", color = "grey") + 
-                scattermore::geom_scattermost(xy = cbind(xData, yData), 
-                                              pointsize = pointSize) +
-                ggtheme
-        }
-    } else {
-        plotscattermost <- function(data, mapping, ...) {
-            ## Get data
-            xData <- GGally::eval_data_col(data, mapping$x)
-            yData <- GGally::eval_data_col(data, mapping$y)
-            
-            ggplot2::ggplot(data = data, mapping = mapping) +
-                scattermore::geom_scattermost(xy = cbind(xData, yData), 
-                                              pointsize = pointSize) +
-                ggtheme
+    } else if (pointsType == "scattermost") {
+        ## Define function to create scattermost plot (for use with ggpairs)
+        if (addIdentityLine) {
+            plotscattermost <- function(data, mapping, ...) {
+                ## Get data
+                xData <- GGally::eval_data_col(data, mapping$x)
+                yData <- GGally::eval_data_col(data, mapping$y)
+                
+                ggplot2::ggplot(data = data, mapping = mapping) +
+                    ggplot2::geom_abline(slope = 1, intercept = 0, 
+                                         linetype = "dashed", color = "grey") + 
+                    scattermore::geom_scattermost(xy = cbind(xData, yData), 
+                                                  pointsize = pointSize) +
+                    ggtheme
+            }
+        } else {
+            plotscattermost <- function(data, mapping, ...) {
+                ## Get data
+                xData <- GGally::eval_data_col(data, mapping$x)
+                yData <- GGally::eval_data_col(data, mapping$y)
+                
+                ggplot2::ggplot(data = data, mapping = mapping) +
+                    scattermore::geom_scattermost(xy = cbind(xData, yData), 
+                                                  pointsize = pointSize) +
+                    ggtheme
+            }
         }
     }
     
