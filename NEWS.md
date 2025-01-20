@@ -1,3 +1,7 @@
+# mutscan 0.3.4
+
+* Allow use of scattermore/scattermost in plotPairs
+
 # mutscan 0.3.3
 
 * Bugfix in mergeReadPairPartial for situation where specified minMergedLength/maxMergedLength is larger than the total length of the two merged sequences

@@ -40,8 +40,9 @@ to calculate.}
 \item{histBreaks}{Numeric scalar, the number of breaks in the histograms
 to put in the diagonal panels.}
 
-\item{pointsType}{Either "points" or "smoothscatter", determining the
-type of plots that will be made.}
+\item{pointsType}{Either "points", "smoothscatter", "scattermore" or 
+"scattermost" (the latter two require the "scattermore" package to be 
+installed), determining the type of plots that will be made.}
 
 \item{corSizeMult, corSizeAdd}{Numeric scalars determining how the
 absolute correlation value is transformed into a font size. The
