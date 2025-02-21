@@ -23,8 +23,9 @@
 #'     to calculate.
 #' @param histBreaks Numeric scalar, the number of breaks in the histograms
 #'     to put in the diagonal panels.
-#' @param pointsType Either "points" or "smoothscatter", determining the
-#'     type of plots that will be made.
+#' @param pointsType Either "points", "smoothscatter", "scattermore" or 
+#'     "scattermost" (the latter two require the "scattermore" package to be 
+#'     installed), determining the type of plots that will be made.
 #' @param corSizeMult,corSizeAdd Numeric scalars determining how the
 #'     absolute correlation value is transformed into a font size. The
 #'     transformation is corSizeMult * abs(corr) + corSizeAdd.
@@ -71,7 +72,8 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
                   validValues = c("pearson", "spearman"))
     .assertScalar(x = histBreaks, type = "numeric", rngExcl = c(0, Inf))
     .assertScalar(x = pointsType, type = "character",
-                  validValues = c("smoothscatter", "points"))
+                  validValues = c("smoothscatter", "points", "scattermore",
+                                  "scattermost"))
     .assertScalar(x = corSizeMult, type = "numeric", rngExcl = c(0, Inf))
     .assertScalar(x = corSizeAdd, type = "numeric", rngIncl = c(0, Inf))
     .assertScalar(x = pointSize, type = "numeric", rngExcl = c(0, Inf))
@@ -83,6 +85,9 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
         stopifnot(corrColorRange[2] >= corrColorRange[1])
     }
     .assertScalar(x = addIdentityLine, type = "logical")
+    if (pointsType %in% c("scattermore", "scattermost")) {
+        .assertPackagesAvailable("scattermore")
+    }
 
     ## ----------------------------------------------------------------------- ##
     ## Define shared theme elements
@@ -140,31 +145,80 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
     ## ----------------------------------------------------------------------- ##
     ## Scatter plots
     ## ----------------------------------------------------------------------- ##
-    ## Define function to create smoothscatter-like plot (for use with ggpairs)
-    smoothscat <- function(data, mapping, ...) {
-        ggplot2::ggplot(data = data, mapping = mapping) +
-            ggplot2::stat_density2d(ggplot2::aes(fill = ggplot2::after_stat(.data$density)^0.25), geom = "tile",
-                                    contour = FALSE, n = 200) +
-            ggplot2::scale_fill_continuous(low = "white", high = "darkgreen") +
-            ggtheme +
-            ggplot2::scale_x_continuous(expand = c(0, 0)) +
-            ggplot2::scale_y_continuous(expand = c(0, 0))
-    }
-
-    ## Define function to create scatter plot (for use with ggpairs)
-    if (addIdentityLine) {
-        plotpoints <- function(data, mapping, ...) {
+    if (pointsType == "smoothscatter") {
+        ## Define function to create smoothscatter-like plot (for use with ggpairs)
+        smoothscat <- function(data, mapping, ...) {
             ggplot2::ggplot(data = data, mapping = mapping) +
-                ggplot2::geom_abline(slope = 1, intercept = 0, 
-                                     linetype = "dashed", color = "grey") + 
-                ggplot2::geom_point(alpha = pointAlpha, size = pointSize) +
-                ggtheme
+                ggplot2::stat_density2d(
+                    ggplot2::aes(fill = ggplot2::after_stat(.data$density)^0.25), geom = "tile",
+                    contour = FALSE, n = 200) +
+                ggplot2::scale_fill_continuous(low = "white", high = "darkgreen") +
+                ggtheme +
+                ggplot2::scale_x_continuous(expand = c(0, 0)) +
+                ggplot2::scale_y_continuous(expand = c(0, 0))
         }
-    } else {
-        plotpoints <- function(data, mapping, ...) {
-            ggplot2::ggplot(data = data, mapping = mapping) +
-                ggplot2::geom_point(alpha = pointAlpha, size = pointSize) +
-                ggtheme
+    } else if (pointsType == "points") {
+        ## Define function to create scatter plot (for use with ggpairs)
+        if (addIdentityLine) {
+            plotpoints <- function(data, mapping, ...) {
+                ggplot2::ggplot(data = data, mapping = mapping) +
+                    ggplot2::geom_abline(slope = 1, intercept = 0, 
+                                         linetype = "dashed", color = "grey") + 
+                    ggplot2::geom_point(alpha = pointAlpha, size = pointSize) +
+                    ggtheme
+            }
+        } else {
+            plotpoints <- function(data, mapping, ...) {
+                ggplot2::ggplot(data = data, mapping = mapping) +
+                    ggplot2::geom_point(alpha = pointAlpha, size = pointSize) +
+                    ggtheme
+            }
+        }
+    } else if (pointsType == "scattermore") {
+        ## Define function to create scattermore plot (for use with ggpairs)
+        if (addIdentityLine) {
+            plotscattermore <- function(data, mapping, ...) {
+                ggplot2::ggplot(data = data, mapping = mapping) +
+                    ggplot2::geom_abline(slope = 1, intercept = 0, 
+                                         linetype = "dashed", color = "grey") + 
+                    scattermore::geom_scattermore(alpha = pointAlpha, 
+                                                  pointsize = pointSize) +
+                    ggtheme
+            }
+        } else {
+            plotscattermore <- function(data, mapping, ...) {
+                ggplot2::ggplot(data = data, mapping = mapping) +
+                    scattermore::geom_scattermore(alpha = pointAlpha, 
+                                                  pointsize = pointSize) +
+                    ggtheme
+            }
+        }
+    } else if (pointsType == "scattermost") {
+        ## Define function to create scattermost plot (for use with ggpairs)
+        if (addIdentityLine) {
+            plotscattermost <- function(data, mapping, ...) {
+                ## Get data
+                xData <- GGally::eval_data_col(data, mapping$x)
+                yData <- GGally::eval_data_col(data, mapping$y)
+                
+                ggplot2::ggplot(data = data, mapping = mapping) +
+                    ggplot2::geom_abline(slope = 1, intercept = 0, 
+                                         linetype = "dashed", color = "grey") + 
+                    scattermore::geom_scattermost(xy = cbind(xData, yData), 
+                                                  pointsize = pointSize) +
+                    ggtheme
+            }
+        } else {
+            plotscattermost <- function(data, mapping, ...) {
+                ## Get data
+                xData <- GGally::eval_data_col(data, mapping$x)
+                yData <- GGally::eval_data_col(data, mapping$y)
+                
+                ggplot2::ggplot(data = data, mapping = mapping) +
+                    scattermore::geom_scattermost(xy = cbind(xData, yData), 
+                                                  pointsize = pointSize) +
+                    ggtheme
+            }
         }
     }
     
@@ -173,6 +227,10 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
         lower <- list(continuous = smoothscat)
     } else if (pointsType == "points") {
         lower <- list(continuous = plotpoints)
+    } else if (pointsType == "scattermore") {
+        lower <- list(continuous = plotscattermore)
+    } else if (pointsType == "scattermost") {
+        lower <- list(continuous = plotscattermost)
     }
 
     ## ----------------------------------------------------------------------- ##
