@@ -13,8 +13,8 @@ Names are used to link the objects to the metadata provided in
 
 \item{coldata}{A \code{data.frame} with at least one column "Name", which
 will be used to link to objects in \code{x}. A potentially subset and
-reordered version of \code{coldata} is stored in the \code{colData} of the
-returned \code{\link[SummarizedExperiment]{SummarizedExperiment}}.}
+reordered version of \code{coldata} is stored in the \code{colData} of 
+the returned \code{\link[SummarizedExperiment]{SummarizedExperiment}}.}
 
 \item{countType}{Either "reads" or "umis". If "reads", the "count" assay of
 the returned object will contain the observed number of reads for each
@@ -25,12 +25,14 @@ unique UMIs observed for each sequence (pair).}
 A \code{\link[SummarizedExperiment]{SummarizedExperiment}} \code{x}
     with
     \describe{
-        \item{assays(x)$counts}{containing the observed number of sequences or
-        sequence pairs (if \code{countType} = "reads"), or the observed number of
-        unique UMIs for each sequence or sequence pair (if \code{countType} =
-        "umis").}
-        \item{rowData(x)}{containing the unique sequences or sequence pairs.}
-        \item{colData(x)}{containing the metadata provided by \code{coldata}.}
+        \item{assays(x)$counts}{containing the observed number of sequences 
+        or sequence pairs (if \code{countType} = "reads"), or the observed 
+        number of unique UMIs for each sequence or sequence pair (if 
+        \code{countType} = "umis").}
+        \item{rowData(x)}{containing the unique sequences or sequence 
+        pairs.}
+        \item{colData(x)}{containing the metadata provided by 
+        \code{coldata}.}
     }
 }
 \description{
@@ -45,8 +47,9 @@ inp <- digestFastqs(
                                package = "mutscan"), 
     elementsForward = "SUCV", elementLengthsForward = c(1, 10, 18, 96), 
     constantForward = "AACCGGAGGAGGGAGCTG", 
-    wildTypeForward = c(FOS = paste0("ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
-                                     "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
+    wildTypeForward = c(FOS = paste0(
+        "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
+        "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
     nbrMutatedCodonsMaxForward = 1
 )
 ## Output sample
@@ -55,8 +58,9 @@ outp <- digestFastqs(
                                package = "mutscan"), 
     elementsForward = "SUCV", elementLengthsForward = c(1, 10, 18, 96), 
     constantForward = "AACCGGAGGAGGGAGCTG", 
-    wildTypeForward = c(FOS = paste0("ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
-                                     "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
+    wildTypeForward = c(FOS = paste0(
+        "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
+        "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
     nbrMutatedCodonsMaxForward = 1
 )
 ## Combine
