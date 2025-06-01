@@ -333,7 +333,6 @@
 #' out$errorStatistics
 #' 
 #' @export
-#' @import zlibbioc
 #' @importFrom lifecycle deprecated is_present deprecate_warn
 digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          mergeForwardReverse = FALSE, minOverlap = 0, maxOverlap = 0,

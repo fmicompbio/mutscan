@@ -45,7 +45,6 @@ Imports:
     DT,
     ggrepel,
     IRanges,
-    zlibbioc,
     utils,
     DelayedArray,
     lifecycle
