@@ -27,10 +27,10 @@ same order as the columns in \code{se}.}
 \item{contrast}{Numeric contrast to test with edgeR or limma.}
 
 \item{WTrows}{Vector of row names that will be used as the reference when
-calculating logFCs and statistics. If more than one value is provided, the
-sum of the corresponding counts is used to generate offsets. If NULL,
-offsets will be defined as the effective library sizes (using TMM
-normalization factors).}
+calculating logFCs and statistics. If more than one value is provided, 
+the sum of the corresponding counts is used to generate offsets. If 
+\code{NULL}, offsets will be defined as the effective library sizes 
+(using TMM normalization factors).}
 
 \item{selAssay}{Assay to select from \code{se} for the analysis.}
 
@@ -42,9 +42,9 @@ limma. In this case, the results also contain the standard errors of the
 logFCs.}
 
 \item{normMethod}{Character scalar indicating which normalization method
-should be used to calculate size factors. Should be either \code{"TMM"} or
-\code{"csaw"} when \code{WTrows} is \code{NULL}, and \code{"geomean"} or
-\code{"sum"} when \code{WTrows} is provided.}
+should be used to calculate size factors. Should be either \code{"TMM"}
+or \code{"csaw"} when \code{WTrows} is \code{NULL}, and \code{"geomean"}
+or \code{"sum"} when \code{WTrows} is provided.}
 }
 \value{
 A \code{data.frame} with output from the statistical testing 
@@ -56,10 +56,11 @@ either limma or the Negative Binomial quasi-likelihood framework of edgeR.
 The observed counts for the WT variants can be used as offsets in the model.
 }
 \examples{
+library(SummarizedExperiment)
 se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds",
                           package = "mutscan"))[1:200, ]
-design <- stats::model.matrix(~ Replicate + Condition,
-                              data = SummarizedExperiment::colData(se))
+design <- model.matrix(~ Replicate + Condition,
+                       data = colData(se))
                               
 ## Calculate "absolute" log-fold changes with edgeR
 res <- calculateRelativeFC(se, design, coef = "Conditioncis_output", 
