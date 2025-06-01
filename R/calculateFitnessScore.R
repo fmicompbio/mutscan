@@ -59,22 +59,23 @@ calculateFitnessScore <- function(se, pairingCol, ODCols, comparison, WTrows,
     
     ## pairingCol is in colData(se)
     .assertScalar(x = pairingCol, type = "character", 
-                  validValues = colnames(SummarizedExperiment::colData(se)))
+                  validValues = colnames(colData(se)))
     
     ## ODCols are all in colData(se) and contain numeric values
     .assertVector(x = ODCols, type = "character", rngLen = c(1, Inf),
-                  validValues = colnames(SummarizedExperiment::colData(se)))
+                  validValues = colnames(colData(se)))
     for (odc in ODCols) {
-        .assertVector(x = SummarizedExperiment::colData(se)[[odc]], 
+        .assertVector(x = colData(se)[[odc]], 
                       type = "numeric")
     }
     
     ## comparison is length(3)-character with column and values in colData(se)
     .assertVector(x = comparison, type = "character", len = 3)
     .assertScalar(x = comparison[1], type = "character", 
-                  validValues = colnames(SummarizedExperiment::colData(se)))
-    .assertVector(x = comparison[2:3], type = "character", 
-                  validValues = SummarizedExperiment::colData(se)[[comparison[1]]])
+                  validValues = colnames(colData(se)))
+    .assertVector(
+        x = comparison[2:3], type = "character", 
+        validValues = colData(se)[[comparison[1]]])
     
     ## there is exactly one observation per pairing and condition
     if (any(table(colData(se)[colData(se)[, comparison[1]] %in% 
@@ -100,25 +101,29 @@ calculateFitnessScore <- function(se, pairingCol, ODCols, comparison, WTrows,
                              colData(se_denominator)[, pairingCol])
     se_numerator <- se_numerator[, match(shared_repl, 
                                          colData(se_numerator)[, pairingCol])]
-    se_denominator <- se_denominator[, match(shared_repl, 
-                                             colData(se_denominator)[, pairingCol])]
+    se_denominator <- 
+        se_denominator[, match(shared_repl, 
+                               colData(se_denominator)[, pairingCol])]
     
     ## ------------------------------------------------------------------------
     ## calculate normalized counts (n_i)
     ## ------------------------------------------------------------------------
     norm_counts_numerator <- sweep(
         as.matrix(assay(se_numerator, selAssay)), MARGIN = 2, 
-        STATS = apply(colData(se_numerator)[, ODCols, drop = FALSE], MARGIN = 1, prod) /
-            Matrix::colSums(assay(se_numerator, selAssay)), 
+        STATS = apply(colData(se_numerator)[, ODCols, drop = FALSE], 
+                      MARGIN = 1, prod) /
+            colSums(assay(se_numerator, selAssay)), 
         FUN = "*")
     norm_counts_denominator <- sweep(
         as.matrix(assay(se_denominator, selAssay)), MARGIN = 2, 
-        STATS = apply(colData(se_denominator)[, ODCols, drop = FALSE], MARGIN = 1, prod) /
-            Matrix::colSums(assay(se_denominator, selAssay)), 
+        STATS = apply(colData(se_denominator)[, ODCols, drop = FALSE], 
+                      MARGIN = 1, prod) /
+            colSums(assay(se_denominator, selAssay)), 
         FUN = "*")
     n <- log2(norm_counts_numerator/norm_counts_denominator)
     n[!is.finite(n)] <- NA
-    colnames(n) <- paste0(comparison[2], "_vs_", comparison[3], "_repl", shared_repl)
+    colnames(n) <- paste0(comparison[2], "_vs_", comparison[3],
+                          "_repl", shared_repl)
     
     
     ## ------------------------------------------------------------------------
