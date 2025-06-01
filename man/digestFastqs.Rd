@@ -181,11 +181,11 @@ any mutated base has a Phred score lower than \code{mutatedPhredMin},
 the read (pair) will be discarded.}
 
 \item{mutNameDelimiter}{Character scalar, the delimiter used in the naming 
-of mutants. Generally, mutants will be named as XX{.}YY{.}NNN, where XX 
+of mutants. Generally, mutants will be named as XX\{.\}YY\{.\}NNN, where XX 
 is the closest provided reference sequence, YY is the mutated base or 
 codon number (depending on whether \code{nbrMutatedBases*} or 
 \code{nbrMutatedCodons*} is specified), and NNN is the
-mutated base or codon. Here, {.} is the provided \code{mutNameDelimiter}. 
+mutated base or codon. Here, \{.\} is the provided \code{mutNameDelimiter}. 
 The delimiter must be a single character (not "_"), and can not appear 
 in any of the provided reference sequence names.}
 
@@ -302,9 +302,9 @@ The processing of a read pair goes as follows:
  the codons encoded by
  \code{forbiddenMutatedCodonsForward}/\code{forbiddenMutatedCodonsReverse}.
  \item Assign a 'mutation name' to the read (pair). This name is a 
- combination of parts of the form XX{.}YY{.}NNN, where XX is the name of the 
+ combination of parts of the form XX\{.\}YY\{.\}NNN, where XX is the name of the 
  most similar reference sequence, YY is the mutated codon number, and NNN is 
- the mutated codon. {.} is a delimiter, specified via 
+ the mutated codon. \{.\} is a delimiter, specified via 
  \code{mutNameDelimiter}. If no wildtype sequences are provided, the
  variable sequence will be used as the mutation name'.
 }

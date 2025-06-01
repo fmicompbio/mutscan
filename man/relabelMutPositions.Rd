@@ -8,9 +8,9 @@ relabelMutPositions(se, conversionTable, mutNameDelimiter = ".")
 }
 \arguments{
 \item{se}{SummarizedExperiment object, with row names of the form
-XX{.}AA{.}NNN, where XX is the name of the reference sequence, AA is the
+XX\{.\}AA\{.\}NNN, where XX is the name of the reference sequence, AA is the
 position of the mutated codon, and NNN is the mutated codon or amino 
-acid. {.} is the delimiter, to be specified in the 
+acid. \{.\} is the delimiter, to be specified in the 
 \code{mutNameDelimiter} argument. For rows corresponding to sequences 
 with multiple mutated codons, the row names contain multiple names of 
 the form above in a single string, separated by "_".}
@@ -24,7 +24,7 @@ mutation name)
 name, if the reference sequence matches seqname)
 }}
 
-\item{mutNameDelimiter}{The delimiter used in the mutation name ({.} above).}
+\item{mutNameDelimiter}{The delimiter used in the mutation name (\{.\} above).}
 }
 \value{
 A SummarizedExperiment object with modified row names.

@@ -1,9 +1,9 @@
 #' Relabel the positions of mutations in the designated ID
 #' 
 #' @param se SummarizedExperiment object, with row names of the form
-#'     XX{.}AA{.}NNN, where XX is the name of the reference sequence, AA is the
+#'     XX\{.\}AA\{.\}NNN, where XX is the name of the reference sequence, AA is the
 #'     position of the mutated codon, and NNN is the mutated codon or amino 
-#'     acid. {.} is the delimiter, to be specified in the 
+#'     acid. \{.\} is the delimiter, to be specified in the 
 #'     \code{mutNameDelimiter} argument. For rows corresponding to sequences 
 #'     with multiple mutated codons, the row names contain multiple names of 
 #'     the form above in a single string, separated by "_".
@@ -15,7 +15,7 @@
 #'     \item name The new name for the codon (will replace AA in the mutation 
 #'     name, if the reference sequence matches seqname)
 #'     } 
-#' @param mutNameDelimiter The delimiter used in the mutation name ({.} above).
+#' @param mutNameDelimiter The delimiter used in the mutation name (\{.\} above).
 #' 
 #' @author Charlotte Soneson
 #' @export
