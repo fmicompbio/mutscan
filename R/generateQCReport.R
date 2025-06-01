@@ -23,6 +23,7 @@
 #' @importFrom SummarizedExperiment colData
 #' @importFrom dplyr bind_rows full_join
 #' @importFrom S4Vectors metadata
+#' @importFrom tools file_ext
 #'
 #' @examples
 #' ## Load SummarizedExperiment object
@@ -43,7 +44,7 @@ generateQCReport <- function(se, outFile, reportTitle = "mutscan QC report",
     .assertVector(x = se, type = "SummarizedExperiment")
     .assertScalar(x = outFile, type = "character")
     .assertScalar(x = forceOverwrite, type = "logical")
-    if (tools::file_ext(outFile) != "html") {
+    if (file_ext(outFile) != "html") {
         stop("'outFile' must have the file extension '.html'.")
     }
     outDir <- dirname(outFile)
@@ -52,9 +53,11 @@ generateQCReport <- function(se, outFile, reportTitle = "mutscan QC report",
     }
     if (file.exists(outFile)) {
         if (!forceOverwrite) {
-            stop(outFile, " already exists and forceOverwrite = FALSE, stopping.")
+            stop(outFile, " already exists and forceOverwrite = FALSE, ", 
+                 "stopping.")
         } else {
-            message(outFile, " already exists but forceOverwrite = TRUE, overwriting.")
+            message(outFile, " already exists but forceOverwrite = TRUE, ", 
+                    "overwriting.")
         }
     }
 
@@ -77,9 +80,8 @@ generateQCReport <- function(se, outFile, reportTitle = "mutscan QC report",
     }
     args <- c(args, list(...)[setdiff(...names(), names(args))])
 
-    outputReport <- xfun::Rscript_call(
-        rmarkdown::render,
-        args
+    outputReport <- Rscript_call(
+        render, args
     )
 
     ## --------------------------------------------------------------------- ##
