@@ -41,8 +41,8 @@ variants.}
 similar sequences. If the value is in [0, 1), it defines the maximal 
 Hamming distance in terms of a fraction of sequence length:
 (\code{round(collapseMaxDist * nchar(sequence))}).
-A value greater or equal to 1 is rounded and directly used as the maximum
-allowed Hamming distance. Note that sequences can only be
+A value greater or equal to 1 is rounded and directly used as the 
+maximum allowed Hamming distance. Note that sequences can only be
 collapsed if they are all of the same length.}
 
 \item{collapseMinScore}{Numeric scalar, indicating the minimum score for the 
@@ -66,16 +66,18 @@ A \code{\link[SummarizedExperiment]{SummarizedExperiment}} where
 }
 \description{
 These functions can be used to collapse variants, either by similarity or 
-according to a pre-defined grouping. The functions \code{collapseMutants} and 
-\code{collapseMutantsByAA} assume that a grouping variable is available as a 
-column in \code{rowData(se)} (\code{collapseMutantsByAA} is a convenience 
-function for the case when this column is "mutantNameAA", and is provided 
-for backwards compatibility). The \code{collapseMutantsBySimilarity} will 
-generate the grouping variable based on user-provided thresholds on the 
-sequence similarity (defined by the Hamming distance), and subsequently
-collapse based on the derived grouping.
+according to a pre-defined grouping. The functions \code{collapseMutants} 
+and \code{collapseMutantsByAA} assume that a grouping variable is available 
+as a column in \code{rowData(se)} (\code{collapseMutantsByAA} is a 
+convenience function for the case when this column is "mutantNameAA", and 
+is provided for backwards compatibility). The 
+\code{collapseMutantsBySimilarity} will generate the grouping variable 
+based on user-provided thresholds on the sequence similarity (defined by 
+the Hamming distance), and subsequently collapse based on the derived 
+grouping.
 }
 \examples{
+library(SummarizedExperiment)
 se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds",
                           package = "mutscan"))[1:200, ]
 ## The rows of this object correspond to individual codon variants
@@ -89,7 +91,7 @@ dim(sec)
 head(rownames(sec))
 ## The mutantName column contains the individual codon variants that were 
 ## collapsed
-head(SummarizedExperiment::rowData(sec))
+head(rowData(sec))
 
 ## Collapse similar sequences
 sec2 <- collapseMutantsBySimilarity(
@@ -98,9 +100,9 @@ sec2 <- collapseMutantsBySimilarity(
     collapseMinScore = 0, collapseMinRatio = 0)
 dim(sec2)
 head(rownames(sec2))
-head(SummarizedExperiment::rowData(sec2))
+head(rowData(sec2))
 ## collapsed count matrix
-SummarizedExperiment::assay(sec2, "counts")
+assay(sec2, "counts")
 
 }
 \author{
