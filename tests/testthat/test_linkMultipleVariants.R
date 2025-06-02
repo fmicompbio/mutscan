@@ -93,12 +93,12 @@ test_that("linkMultipleVariants works", {
     keep <- !grepl("N|del", truth$truth$status)
     
     ## Truth
-    correct <- truth$truth[keep, ] %>%
-        dplyr::group_by(trueBarcode, trueV2, trueV3) %>% dplyr::tally() %>%
+    correct <- truth$truth[keep, ] |>
+        dplyr::group_by(trueBarcode, trueV2, trueV3) |> dplyr::tally() |>
         dplyr::arrange(dplyr::desc(n), trueBarcode, trueV2, trueV3)
     
     ## Obs
-    obs <- res$countAggregated %>% dplyr::arrange(desc(nbrReads), barcode, V2, V3)
+    obs <- res$countAggregated |> dplyr::arrange(desc(nbrReads), barcode, V2, V3)
     
     expect_equal(sum(obs$nbrReads), sum(keep))
     expect_equal(correct$trueBarcode, obs$barcode)
@@ -196,12 +196,12 @@ test_that("linkMultipleVariants works", {
     keep <- !grepl("C.*mut|N|del", truth$truth$status)
     
     ## Truth
-    correct <- truth$truth[keep, ] %>%
-        dplyr::group_by(trueBarcode, trueV2, trueV3) %>% dplyr::tally() %>%
+    correct <- truth$truth[keep, ] |>
+        dplyr::group_by(trueBarcode, trueV2, trueV3) |> dplyr::tally() |>
         dplyr::arrange(dplyr::desc(n), trueBarcode, trueV2, trueV3)
     
     ## Obs
-    obs <- res$countAggregated %>% dplyr::arrange(desc(nbrReads), barcode, V2, V3)
+    obs <- res$countAggregated |> dplyr::arrange(desc(nbrReads), barcode, V2, V3)
     
     expect_equal(sum(obs$nbrReads), sum(keep))
     expect_equal(correct$trueBarcode, obs$barcode)
@@ -302,14 +302,14 @@ test_that("linkMultipleVariants works", {
     keep <- !grepl("N|del", truth$truth$status)
     
     ## Truth
-    correct <- truth$truth[keep, ] %>%
+    correct <- truth$truth[keep, ] |>
         dplyr::mutate(trueV2 = gsub("\\..*", "", trueV2),
-                      trueV3 = gsub("\\..*", "", trueV3)) %>%
-        dplyr::group_by(trueBarcode, trueV2, trueV3) %>% dplyr::tally() %>%
+                      trueV3 = gsub("\\..*", "", trueV3)) |>
+        dplyr::group_by(trueBarcode, trueV2, trueV3) |> dplyr::tally() |>
         dplyr::arrange(dplyr::desc(n), trueBarcode, trueV2, trueV3)
     
     ## Obs
-    obs <- res$countAggregated %>% dplyr::arrange(desc(nbrReads), barcode, V2, V3)
+    obs <- res$countAggregated |> dplyr::arrange(desc(nbrReads), barcode, V2, V3)
     
     expect_equal(sum(obs$nbrReads), sum(keep))
     expect_equal(correct$trueBarcode, obs$barcode)
@@ -384,12 +384,12 @@ test_that("linkMultipleVariants works", {
     keep <- !grepl("N|del", truth$truth$status)
     
     ## Truth
-    correct <- truth$truth[keep, ] %>%
-        dplyr::group_by(trueBarcode, trueV2, trueV3) %>% dplyr::tally() %>%
+    correct <- truth$truth[keep, ] |>
+        dplyr::group_by(trueBarcode, trueV2, trueV3) |> dplyr::tally() |>
         dplyr::arrange(dplyr::desc(n), trueBarcode, trueV2, trueV3)
     
     ## Obs
-    obs <- res$countAggregated %>% dplyr::arrange(desc(nbrReads), barcode, V2, V3)
+    obs <- res$countAggregated |> dplyr::arrange(desc(nbrReads), barcode, V2, V3)
     
     expect_equal(sum(obs$nbrReads), sum(keep))
     expect_equal(correct$trueBarcode, obs$barcode)
@@ -482,12 +482,12 @@ test_that("linkMultipleVariants works", {
     keep <- !grepl("C.*mut|N|del|V2|V3", truth$truth$status)
     
     ## Truth
-    correct <- truth$truth[keep, ] %>%
-        dplyr::group_by(obsBarcode, trueV2, trueV3) %>% dplyr::tally() %>%
+    correct <- truth$truth[keep, ] |>
+        dplyr::group_by(obsBarcode, trueV2, trueV3) |> dplyr::tally() |>
         dplyr::arrange(dplyr::desc(n), obsBarcode, trueV2, trueV3)
     
     ## Obs
-    obs <- res$countAggregated %>% dplyr::arrange(desc(nbrReads), barcode, V2, V3)
+    obs <- res$countAggregated |> dplyr::arrange(desc(nbrReads), barcode, V2, V3)
     
     expect_equal(sum(obs$nbrReads), sum(keep))
     expect_equal(correct$obsBarcode, obs$barcode)

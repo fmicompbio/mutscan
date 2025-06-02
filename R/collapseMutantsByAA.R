@@ -184,7 +184,7 @@ collapseMutants <- function(se, nameCol) {
     
     ## Collapse rowData - simple columns
     rd <- mergeValues(rowData(se)[[nameCol]],
-                      rowData(se)$sequence) %>%
+                      rowData(se)$sequence) |>
         setNames(c(nameCol, "sequence"))
     for (v in setdiff(
         intersect(c("mutantName", "mutantNameBase", "mutantNameBaseHGVS",
@@ -197,8 +197,8 @@ collapseMutants <- function(se, nameCol) {
                            rowData(se)[[v]])
         rd[[v]] <- tmp$valueColl[match(rd[[nameCol]], tmp$mutantNameColl)]
     }
-    rd0 <- as.data.frame(rowData(se)) %>%
-        group_by(.data[[nameCol]]) %>%
+    rd0 <- as.data.frame(rowData(se)) |>
+        group_by(.data[[nameCol]]) |>
         summarize(
             across(c("minNbrMutBases", "minNbrMutCodons",
                      "minNbrMutAAs"),
@@ -206,7 +206,7 @@ collapseMutants <- function(se, nameCol) {
             across(c("maxNbrMutBases", "maxNbrMutCodons",
                      "maxNbrMutAAs"),
                    function(x) max(x)))
-    rd <- rd %>% 
+    rd <- rd |>
         full_join(rd0, by = nameCol)
     
     rd <- DataFrame(rd)

@@ -160,28 +160,28 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     outCombined <- do.call(digestFastqs, combinedDigestParams)
 
     ## Get count matrix with "raw" (uncorrected) sequences
-    countCombined <- outCombined$summaryTable %>%
-        dplyr::select("sequence", "nbrReads", "varLengths") %>%
+    countCombined <- outCombined$summaryTable |>
+        dplyr::select("sequence", "nbrReads", "varLengths") |>
         mutate(idx = paste0("I", seq_along(.data$sequence)))
 
     ## If applicable, separate into forward and reverse sequences
     if (any(grepl("_", countCombined$sequence))) {
-        countCombined <- countCombined %>%
+        countCombined <- countCombined |>
             separate(.data$sequence, into = c("sequenceForward", 
                                                      "sequenceReverse"), 
-                            sep = "_") %>%
+                            sep = "_") |>
             separate(.data$varLengths, into = c("varLengthsForward", 
                                                        "varLengthsReverse"),
-                            sep = "_") %>%
+                            sep = "_") |>
             mutate(
                 nCompForward = vapply(strsplit(.data$varLengthsForward, ","), 
                                       length, 0),
                 nCompReverse = vapply(strsplit(.data$varLengthsReverse, ","), 
                                       length, 0))
     } else {
-        countCombined <- countCombined %>%
+        countCombined <- countCombined |>
             rename(sequenceForward = "sequence",
-                          varLengthsForward = "varLengths") %>%
+                          varLengthsForward = "varLengths") |>
             mutate(
                 nCompForward = vapply(strsplit(.data$varLengthsForward, ","), 
                                       length, 0))
@@ -197,7 +197,7 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
         tmp <- split(countCombined, countCombined$varLengthsForward)
         countCombined <- unsplit(lapply(tmp, function(df) {
             w <- as.numeric(strsplit(df$varLengthsForward[1], ",")[[1]])
-            df <- df %>%
+            df <- df |>
                 separate(
                     .data$sequenceForward, 
                     into = names(paramsSeparate)[seq_along(w)],
@@ -212,7 +212,7 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
         tmp <- split(countCombined, countCombined$varLengthsReverse)
         countCombined <- unsplit(lapply(tmp, function(df) {
             w <- as.numeric(strsplit(df$varLengthsReverse[1], ",")[[1]])
-            df <- df %>%
+            df <- df |>
                 separate(
                     .data$sequenceReverse, 
                     into = names(paramsSeparate)[offsetForward + seq_along(w)],
@@ -245,8 +245,8 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     
     ## Conversion tables
     convSeparate <- lapply(outSeparate, function(out) {
-        out$summaryTable %>%
-            dplyr::select("mutantName", "sequence") %>%
+        out$summaryTable |>
+            dplyr::select("mutantName", "sequence") |>
             separate_rows("sequence", sep = ",")
     })
 
@@ -264,8 +264,8 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
                                    drop = FALSE]
 
     ## Aggregate counts
-    countAggregated <- countCombined %>%
-        group_by(across(names(paramsSeparate))) %>%
+    countAggregated <- countCombined |>
+        group_by(across(names(paramsSeparate))) |>
         summarize(nbrReads = sum(.data$nbrReads), .groups = "drop")
 
     list(countAggregated = countAggregated, convSeparate = convSeparate,

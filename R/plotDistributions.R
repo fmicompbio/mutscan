@@ -57,14 +57,14 @@ plotDistributions <- function(se, selAssay = "counts",
     
     df <- as.data.frame(as.matrix(
         assay(se, selAssay, withDimnames = TRUE)
-    )) %>%
-        rownames_to_column("feature") %>%
-        gather(key = "Name", value = "value", -"feature") %>%
-        group_by(.data$Name) %>%
-        arrange(desc(.data$value)) %>%
+    )) |>
+        rownames_to_column("feature") |>
+        gather(key = "Name", value = "value", -"feature") |>
+        group_by(.data$Name) |>
+        arrange(desc(.data$value)) |>
         mutate(idx = seq_along(.data$value), 
-               value = .data$value + pseudocount) %>%
-        ungroup() %>%
+               value = .data$value + pseudocount) |>
+        ungroup() |>
         left_join(as.data.frame(colData(se)),
                   by = "Name")
     

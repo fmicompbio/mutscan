@@ -32,7 +32,7 @@
 #'     should be facetted. Either \code{"sample"} or \code{"step"}.
 #' 
 #' @importFrom tidyselect matches
-#' @importFrom dplyr select %>% mutate group_by summarize pull ungroup filter
+#' @importFrom dplyr select mutate group_by summarize pull ungroup filter
 #' @importFrom tibble rownames_to_column 
 #' @importFrom tidyr gather
 #' @importFrom ggplot2 ggplot aes geom_bar facet_wrap theme theme_bw labs
@@ -61,8 +61,8 @@ plotFiltering <- function(se, valueType = "reads", onlyActiveFilters = TRUE,
     ## --------------------------------------------------------------------- ##
     ## Extract relevant columns from colData(se)
     ## --------------------------------------------------------------------- ##
-    cd <- as.data.frame(colData(se)) %>%
-        dplyr::select("nbrTotal":"nbrRetained") %>%
+    cd <- as.data.frame(colData(se)) |>
+        dplyr::select("nbrTotal":"nbrRetained") |>
         dplyr::select(c("nbrTotal", matches("^f.*_"), 
                         "nbrRetained"))
     
@@ -84,43 +84,43 @@ plotFiltering <- function(se, valueType = "reads", onlyActiveFilters = TRUE,
     ## --------------------------------------------------------------------- ##
     ## Reshape into long format
     ## --------------------------------------------------------------------- ##
-    cd <- cd %>% 
-        rownames_to_column("sample") %>%
-        gather(key = "step", value = "nbrReads", -"sample") %>%
+    cd <- cd |> 
+        rownames_to_column("sample") |>
+        gather(key = "step", value = "nbrReads", -"sample") |>
         mutate(step = factor(.data$step, levels = colnames(cd)))
     
     ## Check that numbers add up (total - all filters = retained)
     stopifnot(all(
-        cd %>% 
-            group_by(sample) %>%
+        cd |> 
+            group_by(sample) |>
             summarize(
                 remdiff = .data$nbrReads[.data$step == "nbrTotal"] - 
                     sum(.data$nbrReads[grepl("^f", .data$step)]),
-                remlist = .data$nbrReads[.data$step == "nbrRetained"]) %>%
-            mutate(obsdiff = .data$remdiff - .data$remlist) %>%
+                remlist = .data$nbrReads[.data$step == "nbrRetained"]) |>
+            mutate(obsdiff = .data$remdiff - .data$remlist) |>
             pull(.data$obsdiff) == 0)) 
     
     ## --------------------------------------------------------------------- ##
     ## Calculate number of remaining reads at each step
     ## --------------------------------------------------------------------- ##
-    cd <- cd %>%
-        group_by(sample) %>%
+    cd <- cd |>
+        group_by(sample) |>
         mutate(fracReads = signif(
             .data$nbrReads / 
                 .data$nbrReads[.data$step == "nbrTotal"],
-            digits = 3)) %>%
+            digits = 3)) |>
         mutate(cumulsum = vapply(seq_along(.data$step), function(i) {
             sum(.data$nbrReads[as.numeric(.data$step) <= 
                                    as.numeric(.data$step[i]) & 
                                    .data$step != "nbrTotal"])
-        }, NA_real_)) %>%
+        }, NA_real_)) |>
         mutate(nbrRemaining = .data$nbrReads[.data$step == "nbrTotal"] - 
-                   .data$cumulsum) %>%
+                   .data$cumulsum) |>
         mutate(fracRemaining = signif(
             .data$nbrRemaining /
                 .data$nbrReads[.data$step == "nbrTotal"],
-            digits = 3)) %>%
-        filter(.data$step != "nbrRetained") %>%
+            digits = 3)) |>
+        filter(.data$step != "nbrRetained") |>
         ungroup()
     
     ## --------------------------------------------------------------------- ##
@@ -145,7 +145,7 @@ plotFiltering <- function(se, valueType = "reads", onlyActiveFilters = TRUE,
         filtered = " filtered out in"
     )
     if (plotType == "filtered") {
-        cd <- cd %>% 
+        cd <- cd |> 
             filter(.data$step != "nbrTotal")
     }
     gg <- ggplot(cd, aes(
