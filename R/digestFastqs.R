@@ -2,8 +2,8 @@
 #'
 #' Read sequences for one or a pair of fastq files and digest them (extract
 #' umis, constant and variable parts, filter, extract mismatch information from
-#' constant and count the observed unique variable parts). Alternatively, primer
-#' sequences could be specified, in which case the sequence immediately
+#' constant and count the observed unique variable parts). Alternatively, 
+#' primer sequences could be specified, in which case the sequence immediately
 #' following the primer will be considered the variable sequence.
 #'
 #' The processing of a read pair goes as follows:
@@ -23,8 +23,8 @@
 #'  either the forward or reverse read (or the merged read).
 #'  \item Filter out the read (pair) if the number of Ns in the variable region
 #'  exceeds \code{variableNMaxForward}/\code{variableNMaxReverse}.
-#'  \item Filter out the read (pair) if the number of Ns in the combined forward 
-#'  and reverse UMI sequence exceeds \code{umiNMax}
+#'  \item Filter out the read (pair) if the number of Ns in the combined 
+#'  forward and reverse UMI sequence exceeds \code{umiNMax}
 #'  \item If one or more wild type sequences (for the variable region) are
 #'  provided, find the mismatches between the (forward/reverse) variable region
 #'  and the provided wild type sequence (if more than one wild type sequence is
@@ -37,9 +37,9 @@
 #'  the codons encoded by
 #'  \code{forbiddenMutatedCodonsForward}/\code{forbiddenMutatedCodonsReverse}.
 #'  \item Assign a 'mutation name' to the read (pair). This name is a 
-#'  combination of parts of the form XX\{.\}YY\{.\}NNN, where XX is the name of the 
-#'  most similar reference sequence, YY is the mutated codon number, and NNN is 
-#'  the mutated codon. \{.\} is a delimiter, specified via 
+#'  combination of parts of the form XX\{.\}YY\{.\}NNN, where XX is the name of 
+#'  the most similar reference sequence, YY is the mutated codon number, and 
+#'  NNN is the mutated codon. \{.\} is a delimiter, specified via 
 #'  \code{mutNameDelimiter}. If no wildtype sequences are provided, the
 #'  variable sequence will be used as the mutation name'.
 #'}
@@ -83,8 +83,8 @@
 #'     but there can be at most one occurrence of P. If a given letter is 
 #'     included multiple times, the corresponding sequences will be 
 #'     concatenated in the output.
-#' @param elementLengthsForward,elementLengthsReverse Numeric vectors containing
-#'     the lengths of each read component from 
+#' @param elementLengthsForward,elementLengthsReverse Numeric vectors 
+#'     containing the lengths of each read component from 
 #'     \code{elementsForward}/\code{elementsReverse}, respectively. If the 
 #'     length of one element is set to -1, it will be inferred from the other 
 #'     lengths (as the remainder of the read). At most one number (or one 
@@ -96,11 +96,11 @@
 #'     contains the corresponding adapter sequence, the sequence pair will be 
 #'     filtered out. If set to \code{NULL}, no adapter filtering is performed. 
 #'     The number of filtered read pairs are reported in the return value.
-#' @param primerForward,primerReverse Character vectors, representing the primer
-#'     sequence(s) for forward/reverse reads, respectively. Only read pairs that
-#'     contain perfect matches to both the forward and reverse primers (if 
-#'     given) will be retained. Multiple primers can be specified - they will be
-#'     considered in order and the first match will be used.
+#' @param primerForward,primerReverse Character vectors, representing the 
+#'     primer sequence(s) for forward/reverse reads, respectively. Only read 
+#'     pairs that contain perfect matches to both the forward and reverse 
+#'     primers (if given) will be retained. Multiple primers can be specified - 
+#'     they will be considered in order and the first match will be used.
 #' @param wildTypeForward,wildTypeReverse Character scalars or named character
 #'     vectors, the wild type sequence for the forward and reverse variable 
 #'     region. If given as a single string, the reference sequence will be 
@@ -146,13 +146,14 @@
 #'     any mutated base has a Phred score lower than \code{mutatedPhredMin}, 
 #'     the read (pair) will be discarded.
 #' @param mutNameDelimiter Character scalar, the delimiter used in the naming 
-#'     of mutants. Generally, mutants will be named as XX\{.\}YY\{.\}NNN, where XX 
-#'     is the closest provided reference sequence, YY is the mutated base or 
+#'     of mutants. Generally, mutants will be named as XX\{.\}YY\{.\}NNN, where 
+#'     XX is the closest provided reference sequence, YY is the mutated base or 
 #'     codon number (depending on whether \code{nbrMutatedBases*} or 
 #'     \code{nbrMutatedCodons*} is specified), and NNN is the
-#'     mutated base or codon. Here, \{.\} is the provided \code{mutNameDelimiter}. 
-#'     The delimiter must be a single character (not "_"), and can not appear 
-#'     in any of the provided reference sequence names.
+#'     mutated base or codon. Here, \{.\} is the provided 
+#'     \code{mutNameDelimiter}. The delimiter must be a single character 
+#'     (not "_"), and can not appear in any of the provided reference sequence 
+#'     names.
 #' @param constantMaxDistForward,constantMaxDistReverse Numeric scalars, the 
 #'     maximum allowed Hamming distance between the extracted and expected 
 #'     constant sequence. If multiple constant sequences are provided, the most 
@@ -167,8 +168,8 @@
 #'     in [0, 1), it defines the maximal Hamming distance in terms of a 
 #'     fraction of sequence length:
 #'     (\code{round(umiCollapseMaxDist * nchar(umiSeq))}).
-#'     A value greater or equal to 1 is rounded and directly used as the maximum
-#'     allowed Hamming distance. 
+#'     A value greater or equal to 1 is rounded and directly used as the 
+#'     maximum allowed Hamming distance. 
 #' @param filteredReadsFastqForward,filteredReadsFastqReverse Character 
 #'     scalars, the names of a (pair of) FASTQ file(s) where filtered-out reads 
 #'     will be written. The name(s) should end in .gz (the output will always 
@@ -189,20 +190,21 @@
 #' @return A list with four entries:
 #' \describe{
 #' \item{summaryTable}{A \code{data.frame} that contains, for each observed
-#' mutation combination, the corresponding variable region sequences (or pair of
-#' sequences), the number of observed such sequences, and the number of unique
-#' UMIs observed for the sequence. It also has additional columns: 'maxNbrReads'
-#' contains the number of reads for the most frequent observed sequence
-#' represented by the feature (only relevant if similar variable regions are
-#' collapsed). 'nbrMutBases', 'nbrMutCodons' and 'nbrMutAAs' give the number of
-#' mutated bases, codons or amino acids in each variant. Alternative variant
-#' names based on base, codon or amino acid sequence are provided in columns
-#' 'mutantNameBase', 'mutantNameCodon', 'mutantNameAA'. In addition,
-#' 'mutantNameBaseHGVS' and 'mutantNameAAHGVS' give base- and amino acid-based
-#' names following the HGVS nomenclature (https://varnomen.hgvs.org/). Please
-#' note that the provided reference sequence names are used for the HGVS
-#' sequence identifiers. It is up to the user to use appropriately named 
-#' reference sequences in order to obtain valid HGVS variant names.}
+#' mutation combination, the corresponding variable region sequences (or pair 
+#' of sequences), the number of observed such sequences, and the number of 
+#' unique UMIs observed for the sequence. It also has additional columns: 
+#' 'maxNbrReads' contains the number of reads for the most frequent observed 
+#' sequence represented by the feature (only relevant if similar variable 
+#' regions are collapsed). 'nbrMutBases', 'nbrMutCodons' and 'nbrMutAAs' give 
+#' the number of mutated bases, codons or amino acids in each variant. 
+#' Alternative variant names based on base, codon or amino acid sequence are 
+#' provided in columns mutantNameBase', 'mutantNameCodon', 'mutantNameAA'. In 
+#' addition, mutantNameBaseHGVS' and 'mutantNameAAHGVS' give base- and amino 
+#' acid-based names following the HGVS nomenclature 
+#' (https://varnomen.hgvs.org/). Please note that the provided reference 
+#' sequence names are used for the HGVS sequence identifiers. It is up to the 
+#' user to use appropriately named reference sequences in order to obtain 
+#' valid HGVS variant names.}
 #' \item{filterSummary}{A \code{data.frame} that contains the number of input
 #' reads, the number of reads filtered out in the processing, and the number of
 #' retained reads. The filters are named according to the convention
@@ -211,11 +213,11 @@
 #' applied successively, and the reads filtered out in one step are not
 #' considered for successive filtering steps.}
 #' \item{errorStatistics}{A \code{data.frame} that contains, for each Phred
-#' quality score between 0 and 99, the number of bases in the extracted constant
-#' sequences with that quality score that match/mismatch with the provided
-#' reference constant sequence.}
-#' \item{parameters}{A \code{list} with all parameter settings that were used in
-#' the processing. Also contains the version of the package and the time of
+#' quality score between 0 and 99, the number of bases in the extracted 
+#' constant sequences with that quality score that match/mismatch with the 
+#' provided reference constant sequence.}
+#' \item{parameters}{A \code{list} with all parameter settings that were used 
+#' in the processing. Also contains the version of the package and the time of
 #' processing.}
 #' }
 #' 
@@ -223,7 +225,7 @@
 #' ## See the vignette for complete worked-out examples for different types of 
 #' ## data sets
 #' 
-#' ## ----------------------------------------------------------------------- ## 
+#' ## ---------------------------------------------------------------------- ## 
 #' ## Process a single-end data set, assume that the full read represents  
 #' ## the variable region
 #' out <- digestFastqs(
@@ -236,7 +238,7 @@
 #' ## Filter summary
 #' out$filterSummary
 #' 
-#' ## ----------------------------------------------------------------------- ## 
+#' ## ---------------------------------------------------------------------- ## 
 #' ## Process a single-end data set, specify the read as a combination of 
 #' ## UMI, constant region and variable region (skip the first base)
 #' out <- digestFastqs(
@@ -252,7 +254,7 @@
 #' ## Error statistics
 #' out$errorStatistics
 #' 
-#' ## ----------------------------------------------------------------------- ## 
+#' ## ---------------------------------------------------------------------- ## 
 #' ## Process a single-end data set, specify the read as a combination of 
 #' ## UMI, constant region and variable region (skip the first base), provide 
 #' ## the wild type sequence to compare the variable region to and limit the 
@@ -262,8 +264,9 @@
 #'                                package = "mutscan"), 
 #'     elementsForward = "SUCV", elementLengthsForward = c(1, 10, 18, 96), 
 #'     constantForward = "AACCGGAGGAGGGAGCTG", 
-#'     wildTypeForward = c(FOS = paste0("ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
-#'                                      "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
+#'     wildTypeForward = c(FOS = paste0(
+#'         "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
+#'         "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
 #'     nbrMutatedCodonsMaxForward = 1
 #' )
 #' ## Table with read counts and mutant information
@@ -273,7 +276,7 @@
 #' ## Error statistics
 #' out$errorStatistics
 #' 
-#' ## ----------------------------------------------------------------------- ## 
+#' ## ---------------------------------------------------------------------- ## 
 #' ## Process a paired-end data set where both the forward and reverse reads 
 #' ## contain the same variable region and thus should be merged to generate 
 #' ## the final variable sequence, specify the reads as a combination of 
@@ -285,13 +288,15 @@
 #'                                package = "mutscan"),
 #'     fastqReverse = system.file("extdata", "cisInput_2.fastq.gz",
 #'                                package = "mutscan"), 
-#'     mergeForwardReverse = TRUE, revComplForward = FALSE, revComplReverse = TRUE, 
+#'     mergeForwardReverse = TRUE, 
+#'     revComplForward = FALSE, revComplReverse = TRUE, 
 #'     elementsForward = "SUCV", elementLengthsForward = c(1, 10, 18, 96),
 #'     elementsReverse = "SUCVS", elementLengthsReverse = c(1, 7, 17, 96, -1),
 #'     constantForward = "AACCGGAGGAGGGAGCTG", 
 #'     constantReverse = "GAGTTCATCCTGGCAGC",
-#'     wildTypeForward = c(FOS = paste0("ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
-#'                                      "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
+#'     wildTypeForward = c(FOS = paste0(
+#'         "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
+#'         "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
 #'     nbrMutatedCodonsMaxForward = 1
 #' )
 #' ## Table with read counts and mutant information
@@ -301,7 +306,7 @@
 #' ## Error statistics
 #' out$errorStatistics
 #' 
-#' ## ----------------------------------------------------------------------- ## 
+#' ## ---------------------------------------------------------------------- ## 
 #' ## Process a paired-end data set where the forward and reverse reads 
 #' ## contain variable regions corresponding to different proteins, and thus 
 #' ## should not be merged, specify the reads as a combination of 
@@ -318,10 +323,12 @@
 #'     elementsReverse = "SUCV", elementLengthsReverse = c(1, 8, 20, 96),
 #'     constantForward = "AACCGGAGGAGGGAGCTG", 
 #'     constantReverse = "GAAAAAGGAAGCTGGAGAGA",
-#'     wildTypeForward = c(FOS = paste0("ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
-#'                                      "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
-#'     wildTypeReverse = c(JUN = paste0("ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTC", 
-#'                                      "GGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT")), 
+#'     wildTypeForward = c(FOS = paste0(
+#'         "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
+#'         "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
+#'     wildTypeReverse = c(JUN = paste0(
+#'         "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTC", 
+#'         "GGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT")), 
 #'     nbrMutatedCodonsMaxForward = 1,
 #'     nbrMutatedCodonsMaxReverse = 1
 #' )
@@ -334,8 +341,10 @@
 #' 
 #' @export
 #' @importFrom lifecycle deprecated is_present deprecate_warn
+#' @importFrom utils packageVersion
 digestFastqs <- function(fastqForward, fastqReverse = NULL,
-                         mergeForwardReverse = FALSE, minOverlap = 0, maxOverlap = 0,
+                         mergeForwardReverse = FALSE, 
+                         minOverlap = 0, maxOverlap = 0,
                          minMergedLength = 0, maxMergedLength = 0,
                          maxFracMismatchOverlap = 1, greedyOverlap = TRUE,
                          revComplForward = FALSE, revComplReverse = FALSE,
@@ -376,12 +385,12 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     ## pre-flight checks ---------------------------------------------------------
     ## deprecated arguments
     deprecMessageColl <- paste0(
-        "Starting from mutscan v0.3.0, collapsing of variable sequences is no ", 
-        "longer supported by digestFastqs(), and arguments ", 
+        "Starting from mutscan v0.3.0, collapsing of variable sequences is ", 
+        "no longer supported by digestFastqs(), and arguments ", 
         "variableCollapseMaxDist, variableCollapseMinReads ", 
         "and variableCollapseMinRatio will be ignored. Please run ", 
-        "summarizeExperiment() to generate a SummarizedExperiment object, and ",
-        "then call collapseMutantsBySimilarity() to collapse variable ", 
+        "summarizeExperiment() to generate a SummarizedExperiment object, ",
+        "and then call collapseMutantsBySimilarity() to collapse variable ", 
         "sequences in a consistent way across all samples."
     )
     if (lifecycle::is_present(variableCollapseMaxDist)) {
@@ -416,14 +425,17 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     
     ## fastq files exist
     if (length(fastqForward) < 1 || !all(file.exists(fastqForward)) ||
-        (!is.null(fastqReverse) && (length(fastqReverse) != length(fastqForward) ||
-                                    !all(file.exists(fastqReverse))))) {
-        stop("'fastqForward' and 'fastqReverse' must point to one or several matching existing files");
+        (!is.null(fastqReverse) && 
+         (length(fastqReverse) != length(fastqForward) ||
+          !all(file.exists(fastqReverse))))) {
+        stop("'fastqForward' and 'fastqReverse' must point to one or ", 
+             "several matching existing files")
     }
     if (is.null(fastqReverse)) {
         fastqReverse <- rep("", length(fastqForward))
     }
-    ## Convert file paths to canonical form, expand ~ and complete relative paths
+    ## Convert file paths to canonical form, expand ~ and complete 
+    ## relative paths
     fastqForward <- normalizePath(fastqForward, mustWork = FALSE)
     fastqReverse <- normalizePath(fastqReverse, mustWork = FALSE)
     
@@ -432,8 +444,8 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     .assertScalar(x = revComplForward, type = "logical")
     .assertScalar(x = revComplReverse, type = "logical")
     if (any(fastqReverse == "") && mergeForwardReverse) {
-        stop("Both forward and reverse FASTQ files must be given in order to merge ",
-             "forward and reverse reads")
+        stop("Both forward and reverse FASTQ files must be given in order to ",
+             "merge forward and reverse reads")
     }
     
     ## check numeric inputs
@@ -445,10 +457,14 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     .assertScalar(x = maxOverlap, type = "numeric", rngIncl = c(0, Inf))
     .assertScalar(x = minMergedLength, type = "numeric", rngIncl = c(0, Inf))
     .assertScalar(x = maxMergedLength, type = "numeric", rngIncl = c(0, Inf))
-    .assertScalar(x = avePhredMinForward, type = "numeric", rngIncl = c(0, Inf))
-    .assertScalar(x = avePhredMinReverse, type = "numeric", rngIncl = c(0, Inf))
-    .assertScalar(x = variableNMaxForward, type = "numeric", rngIncl = c(0, Inf))
-    .assertScalar(x = variableNMaxReverse, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = avePhredMinForward, type = "numeric", 
+                  rngIncl = c(0, Inf))
+    .assertScalar(x = avePhredMinReverse, type = "numeric", 
+                  rngIncl = c(0, Inf))
+    .assertScalar(x = variableNMaxForward, type = "numeric", 
+                  rngIncl = c(0, Inf))
+    .assertScalar(x = variableNMaxReverse, type = "numeric", 
+                  rngIncl = c(0, Inf))
     .assertScalar(x = umiNMax, type = "numeric", rngIncl = c(0, Inf))
     .assertScalar(x = nbrMutatedCodonsMaxForward, type = "numeric",
                   rngIncl = c(0, Inf), validValues = -1)
@@ -458,38 +474,51 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                   rngIncl = c(0, Inf), validValues = -1)
     .assertScalar(x = nbrMutatedBasesMaxReverse, type = "numeric",
                   rngIncl = c(0, Inf), validValues = -1)
-    .assertScalar(x = mutatedPhredMinForward, type = "numeric", rngIncl = c(0, Inf))
-    .assertScalar(x = mutatedPhredMinReverse, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = mutatedPhredMinForward, type = "numeric", 
+                  rngIncl = c(0, Inf))
+    .assertScalar(x = mutatedPhredMinReverse, type = "numeric", 
+                  rngIncl = c(0, Inf))
     .assertScalar(x = constantMaxDistForward, type = "numeric",
                   rngIncl = c(0, Inf), validValues = -1)
     .assertScalar(x = constantMaxDistReverse, type = "numeric",
                   rngIncl = c(0, Inf), validValues = -1)
-    .assertScalar(x = umiCollapseMaxDist, type = "numeric", rngIncl = c(0, Inf))
+    .assertScalar(x = umiCollapseMaxDist, type = "numeric", 
+                  rngIncl = c(0, Inf))
     .assertScalar(x = maxNReads, type = "numeric", rngIncl = c(0, Inf),
                   validValues = -1)
     .assertScalar(x = nThreads, type = "numeric", rngExcl = c(0, Inf))
     .assertScalar(x = chunkSize, type = "numeric", rngExcl = c(0, Inf))
     .assertScalar(x = maxReadLength, type = "numeric", rngExcl = c(0, Inf))
     
-    ## If a wildtype sequence is provided, it must be unambiguous how to identify and name mutants
+    ## If a wildtype sequence is provided, 
+    ## it must be unambiguous how to identify and name mutants
     if (any(wildTypeForward != "")) {
-        if ((nbrMutatedCodonsMaxForward == (-1) && nbrMutatedBasesMaxForward == (-1)) ||
-            (nbrMutatedCodonsMaxForward != (-1) && nbrMutatedBasesMaxForward != (-1))) {
-            stop("Exactly one of 'nbrMutatedCodonsMaxForward' and 'nbrMutatedBasesMaxForward' must be -1")
+        if ((nbrMutatedCodonsMaxForward == (-1) && 
+             nbrMutatedBasesMaxForward == (-1)) ||
+            (nbrMutatedCodonsMaxForward != (-1) && 
+             nbrMutatedBasesMaxForward != (-1))) {
+            stop("Exactly one of 'nbrMutatedCodonsMaxForward' and ", 
+                 "'nbrMutatedBasesMaxForward' must be -1")
         }
     }
     if (any(wildTypeReverse != "")) {
-        if ((nbrMutatedCodonsMaxReverse == (-1) && nbrMutatedBasesMaxReverse == (-1)) ||
-            (nbrMutatedCodonsMaxReverse != (-1) && nbrMutatedBasesMaxReverse != (-1))) {
-            stop("Exactly one of 'nbrMutatedCodonsMaxReverse' and 'nbrMutatedBasesMaxReverse' must be -1")
+        if ((nbrMutatedCodonsMaxReverse == (-1) && 
+             nbrMutatedBasesMaxReverse == (-1)) ||
+            (nbrMutatedCodonsMaxReverse != (-1) && 
+             nbrMutatedBasesMaxReverse != (-1))) {
+            stop("Exactly one of 'nbrMutatedCodonsMaxReverse' and ", 
+                 "'nbrMutatedBasesMaxReverse' must be -1")
         }
     }
     
     ## adapters must be strings, valid DNA characters
     if (length(adapterForward) != 1 || !is.character(adapterForward) ||
-        !grepl("^[AaCcGgTt]*$", adapterForward) || length(adapterReverse) != 1 ||
-        !is.character(adapterReverse) || !grepl("^[AaCcGgTt]*$", adapterReverse)) {
-        stop("Adapters must be character strings, only containing valid DNA characters")
+        !grepl("^[AaCcGgTt]*$", adapterForward) || 
+        length(adapterReverse) != 1 ||
+        !is.character(adapterReverse) || 
+        !grepl("^[AaCcGgTt]*$", adapterReverse)) {
+        stop("Adapters must be character strings, only containing ", 
+             "valid DNA characters")
     } else {
         adapterForward <- toupper(adapterForward)
         adapterReverse <- toupper(adapterReverse)
@@ -510,18 +539,22 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
         stop("'elementsReverse' must be a non-empty character scalar")
     }
     
-    if (!all(strsplit(elementsForward, "")[[1]] %in% c("C", "U", "S", "V", "P"))) {
+    if (!all(strsplit(elementsForward, "")[[1]] %in% 
+             c("C", "U", "S", "V", "P"))) {
         stop("'elementsForward' can only contain letters 'CUSVP'")
     }
-    if (!all(strsplit(elementsReverse, "")[[1]] %in% c("C", "U", "S", "V", "P"))) {
+    if (!all(strsplit(elementsReverse, "")[[1]] %in% 
+             c("C", "U", "S", "V", "P"))) {
         stop("'elementsReverse' can only contain letters 'CUSVP'")
     }
     
     if (nchar(elementsForward) != length(elementLengthsForward)) {
-        stop("'elementsForward' and 'elementsLengthsForward' must have the same length")
+        stop("'elementsForward' and 'elementsLengthsForward' must ", 
+             "have the same length")
     }
     if (nchar(elementsReverse) != length(elementLengthsReverse)) {
-        stop("'elementsReverse' and 'elementsLengthsReverse' must have the same length")
+        stop("'elementsReverse' and 'elementsLengthsReverse' must ", 
+             "have the same length")
     }
     
     ## Max one 'P'
@@ -547,24 +580,31 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     
     ## If a 'P', max one -1 length on each side
     if (length(PposFwd) == 1 && PposFwd != -1) {
-        if ((PposFwd != 1 && sum(elementLengthsForward[seq_len(PposFwd - 1)] == -1) > 1) ||
+        if ((PposFwd != 1 && 
+             sum(elementLengthsForward[seq_len(PposFwd - 1)] == -1) > 1) ||
             (PposFwd != nchar(elementsForward) &&
              sum(elementLengthsForward[(PposFwd + 1):nchar(elementsForward)] == -1) > 1)) {
-            stop("Max one element length (forward) on each side of the primer can be -1")
+            stop("Max one element length (forward) on each side ", 
+                 "of the primer can be -1")
         }
     }
     if (length(PposRev) == 1 && PposRev != -1) {
-        if ((PposRev != 1 && sum(elementLengthsReverse[seq_len(PposRev - 1)] == -1) > 1) ||
+        if ((PposRev != 1 && 
+             sum(elementLengthsReverse[seq_len(PposRev - 1)] == -1) > 1) ||
             (PposRev != nchar(elementsReverse) &&
              sum(elementLengthsReverse[(PposRev + 1):nchar(elementsReverse)] == -1) > 1)) {
-            stop("Max one element length (reverse) on each side of the primer can be -1")
+            stop("Max one element length (reverse) on each side ", 
+                 "of the primer can be -1")
         }
     }
     
     if (!is.character(primerForward) || length(primerForward) < 1 ||
-        !all(grepl("^[AaCcGgTt]*$", primerForward)) || !is.character(primerReverse) ||
-        length(primerReverse) < 1 || !all(grepl("^[AaCcGgTt]*$", primerReverse))) {
-        stop("Primers must be character vectors, only containing valid DNA characters")
+        !all(grepl("^[AaCcGgTt]*$", primerForward)) || 
+        !is.character(primerReverse) ||
+        length(primerReverse) < 1 || 
+        !all(grepl("^[AaCcGgTt]*$", primerReverse))) {
+        stop("Primers must be character vectors, ", 
+             "only containing valid DNA characters")
     } else {
         primerForward <- vapply(primerForward, toupper, "")
         primerReverse <- vapply(primerReverse, toupper, "")
@@ -579,18 +619,22 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     }
     
     ## wild type sequences must be given in named vectors
-    if (any(is.null(names(wildTypeForward))) || any(names(wildTypeForward) == "") ||
-        any(is.null(names(wildTypeReverse))) || any(names(wildTypeReverse) == "")) {
+    if (any(is.null(names(wildTypeForward))) || 
+        any(names(wildTypeForward) == "") ||
+        any(is.null(names(wildTypeReverse))) || 
+        any(names(wildTypeReverse) == "")) {
         stop('wild type sequences must be given in named vectors')
     }
     
     ## wild type sequences must be strings, valid DNA characters
     if (!all(vapply(wildTypeForward, is.character, FALSE)) || 
         !all(vapply(wildTypeForward, length, 0) == 1) ||
-        !all(vapply(wildTypeForward, function(w) grepl("^[AaCcGgTt]*$", w), FALSE)) ||
+        !all(vapply(wildTypeForward, 
+                    function(w) grepl("^[AaCcGgTt]*$", w), FALSE)) ||
         !all(vapply(wildTypeReverse, is.character, FALSE)) || 
         !all(vapply(wildTypeReverse, length, 0) == 1) ||
-        !all(vapply(wildTypeReverse, function(w) grepl("^[AaCcGgTt]*$", w), FALSE))) {
+        !all(vapply(wildTypeReverse, 
+                    function(w) grepl("^[AaCcGgTt]*$", w), FALSE))) {
         stop("wild type sequences must be character strings, ",
              "only containing valid DNA characters")
     } else {
@@ -606,7 +650,8 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
     
     ## cis experiment - should not have wildTypeReverse
     if (mergeForwardReverse && any(vapply(wildTypeReverse, nchar, 1) > 0)) {
-        warning("Ignoring 'wildTypeReverse' when forward and reverse reads are merged")
+        warning("Ignoring 'wildTypeReverse' when forward and ", 
+                "reverse reads are merged")
         wildTypeReverse <- c(r = "")
     }
     
@@ -623,8 +668,10 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
         constantReverse <- toupper(constantReverse)
     }
     
-    if (!all(vapply(constantForward, nchar, 0L) == nchar(constantForward[1])) ||
-        !all(vapply(constantReverse, nchar, 0L) == nchar(constantReverse[1]))) {
+    if (!all(vapply(constantForward, nchar, 0L) == 
+             nchar(constantForward[1])) ||
+        !all(vapply(constantReverse, nchar, 0L) == 
+             nchar(constantReverse[1]))) {
         stop("All constant sequences must be of the same length")
     }
     
@@ -634,7 +681,8 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
         sum(elementLengthsForward[CposFwd]) != nchar(constantForward[1])) {
         stop("The sum of the constant sequence lengths in elementsForward (",
              sum(elementLengthsForward[CposFwd]),
-             ") does not correspond to the length of the given 'constantForward' (",
+             ") does not correspond to the length of the given ", 
+             "'constantForward' (",
              nchar(constantForward[1]), ")")
     }
     CposRev <- gregexpr(pattern = "C", elementsReverse)[[1]]
@@ -643,15 +691,18 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
         sum(elementLengthsReverse[CposRev]) != nchar(constantReverse[1])) {
         stop("The sum of the constant sequence lengths in elementsReverse (",
              sum(elementLengthsReverse[CposRev]),
-             ") does not correspond to the length of the given 'constantReverse' (",
+             ") does not correspond to the length of the given ", 
+             "'constantReverse' (",
              nchar(constantReverse[1]), ")")
     }
     
     if (!all(is.character(forbiddenMutatedCodonsForward)) ||
-        !all(grepl("^[ACGTMRWSYKVHDBN]{3}$", toupper(forbiddenMutatedCodonsForward)) |
+        !all(grepl("^[ACGTMRWSYKVHDBN]{3}$", 
+                   toupper(forbiddenMutatedCodonsForward)) |
              forbiddenMutatedCodonsForward == "") ||
         !all(is.character(forbiddenMutatedCodonsReverse)) ||
-        !all(grepl("^[ACGTMRWSYKVHDBN]{3}$", toupper(forbiddenMutatedCodonsReverse)) |
+        !all(grepl("^[ACGTMRWSYKVHDBN]{3}$", 
+                   toupper(forbiddenMutatedCodonsReverse)) |
              forbiddenMutatedCodonsReverse == "")) {
         stop("All elements of 'forbiddenMutatedCodonsForward' and 'forbiddenMutatedCodonsReverse' must be ",
              "character strings consisting of three valid IUPAC letters.")
@@ -671,96 +722,109 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
         stop("'collapseToWTReverse' must be a logical scalar.")
     }
     
-    ## mutNameDelimiter must be a single character, and can not appear in any of the WT sequence names
+    ## mutNameDelimiter must be a single character, and can not 
+    ## appear in any of the WT sequence names
     if (!is.character(mutNameDelimiter) || length(mutNameDelimiter) != 1 ||
         nchar(mutNameDelimiter) != 1 || mutNameDelimiter == "_") {
-        stop("'mutNameDelimiter' must be a single-letter character scalar, not equal to '_'")
+        stop("'mutNameDelimiter' must be a single-letter character scalar, ", 
+             "not equal to '_'")
     }
-    if (any(grepl(mutNameDelimiter, c(names(wildTypeForward), names(wildTypeReverse)), fixed = TRUE))) {
-        stop("'mutNameDelimiter' can not appear in the name of any of the provided wild type sequences.")
+    if (any(grepl(mutNameDelimiter, 
+                  c(names(wildTypeForward), names(wildTypeReverse)), 
+                  fixed = TRUE))) {
+        stop("'mutNameDelimiter' can not appear in the name of any of ", 
+             "the provided wild type sequences.")
     }
     
-    if (!is.character(filteredReadsFastqForward) || !is.character(filteredReadsFastqReverse) ||
-        length(filteredReadsFastqForward) != 1 || length(filteredReadsFastqReverse) != 1 ||
-        (filteredReadsFastqForward != "" && !grepl("\\.gz$", filteredReadsFastqForward)) ||
-        (filteredReadsFastqReverse != "" && !grepl("\\.gz$", filteredReadsFastqReverse))) {
-        stop("'filteredReadsFastqForward' and 'filteredReadsFastqReverse' must be character ",
-             "scalars ending with .gz.")
+    if (!is.character(filteredReadsFastqForward) || 
+        !is.character(filteredReadsFastqReverse) ||
+        length(filteredReadsFastqForward) != 1 || 
+        length(filteredReadsFastqReverse) != 1 ||
+        (filteredReadsFastqForward != "" && 
+         !grepl("\\.gz$", filteredReadsFastqForward)) ||
+        (filteredReadsFastqReverse != "" && 
+         !grepl("\\.gz$", filteredReadsFastqReverse))) {
+        stop("'filteredReadsFastqForward' and 'filteredReadsFastqReverse' ", 
+             "must be character scalars ending with .gz.")
     }
     ## If path is "", it will still be ""
-    filteredReadsFastqForward <- normalizePath(filteredReadsFastqForward, mustWork = FALSE)
-    filteredReadsFastqReverse <- normalizePath(filteredReadsFastqReverse, mustWork = FALSE)
+    filteredReadsFastqForward <- 
+        normalizePath(filteredReadsFastqForward, mustWork = FALSE)
+    filteredReadsFastqReverse <- 
+        normalizePath(filteredReadsFastqReverse, mustWork = FALSE)
     
     if ((any(fastqReverse == "") && filteredReadsFastqReverse != "") ||
         (all(fastqReverse != "") && filteredReadsFastqForward != "" && filteredReadsFastqReverse == "") ||
         (all(fastqForward != "") && filteredReadsFastqForward == "" && filteredReadsFastqReverse != "")) {
-        stop("The pairing of the output FASTQ files must be compatible with that of the input files.")
+        stop("The pairing of the output FASTQ files must be compatible ", 
+             "with that of the input files.")
     }
     
     .assertScalar(x = verbose, type = "logical")
     
-    ## call digestFastqsCpp ------------------------------------------------------
-    ## Represent the wildtype sequences as pairs of vectors (one with sequences,
-    ## one with names), to make things faster on the C++ side
+    ## call digestFastqsCpp ---------------------------------------------------
+    ## Represent the wildtype sequences as pairs of vectors (one with 
+    ## sequences, one with names), to make things faster on the C++ side
     wildTypeForwardNames <- names(wildTypeForward)
     wildTypeForward <- unname(wildTypeForward)
     wildTypeReverseNames <- names(wildTypeReverse)
     wildTypeReverse <- unname(wildTypeReverse)
     
-    res <- digestFastqsCpp(fastqForwardVect = fastqForward,
-                           fastqReverseVect = fastqReverse,
-                           mergeForwardReverse = mergeForwardReverse,
-                           minOverlap = minOverlap,
-                           maxOverlap = maxOverlap,
-                           minMergedLength = minMergedLength,
-                           maxMergedLength = maxMergedLength,
-                           maxFracMismatchOverlap = maxFracMismatchOverlap,
-                           greedyOverlap = greedyOverlap,
-                           revComplForward = revComplForward,
-                           revComplReverse = revComplReverse,
-                           elementsForward = elementsForward,
-                           elementLengthsForward = as.numeric(elementLengthsForward),
-                           elementsReverse = elementsReverse,
-                           elementLengthsReverse = as.numeric(elementLengthsReverse),
-                           adapterForward = adapterForward,
-                           adapterReverse = adapterReverse,
-                           primerForward = primerForward,
-                           primerReverse = primerReverse,
-                           wildTypeForward = wildTypeForward,
-                           wildTypeForwardNames = wildTypeForwardNames,
-                           wildTypeReverse = wildTypeReverse,
-                           wildTypeReverseNames = wildTypeReverseNames,
-                           constantForward = constantForward,
-                           constantReverse = constantReverse,
-                           avePhredMinForward = avePhredMinForward,
-                           avePhredMinReverse = avePhredMinReverse,
-                           variableNMaxForward = variableNMaxForward,
-                           variableNMaxReverse = variableNMaxReverse,
-                           umiNMax = umiNMax,
-                           nbrMutatedCodonsMaxForward = nbrMutatedCodonsMaxForward,
-                           nbrMutatedCodonsMaxReverse = nbrMutatedCodonsMaxReverse,
-                           nbrMutatedBasesMaxForward = nbrMutatedBasesMaxForward,
-                           nbrMutatedBasesMaxReverse = nbrMutatedBasesMaxReverse,
-                           forbiddenMutatedCodonsForward = forbiddenMutatedCodonsForward,
-                           forbiddenMutatedCodonsReverse = forbiddenMutatedCodonsReverse,
-                           useTreeWTmatch = useTreeWTmatch,
-                           collapseToWTForward = collapseToWTForward,
-                           collapseToWTReverse = collapseToWTReverse,
-                           mutatedPhredMinForward = mutatedPhredMinForward,
-                           mutatedPhredMinReverse = mutatedPhredMinReverse,
-                           mutNameDelimiter = mutNameDelimiter,
-                           constantMaxDistForward = constantMaxDistForward,
-                           constantMaxDistReverse = constantMaxDistReverse,
-                           umiCollapseMaxDist = umiCollapseMaxDist,
-                           filteredReadsFastqForward = filteredReadsFastqForward,
-                           filteredReadsFastqReverse = filteredReadsFastqReverse,
-                           maxNReads = maxNReads,
-                           verbose = verbose,
-                           nThreads = as.integer(nThreads),
-                           chunkSize = as.integer(chunkSize),
-                           maxReadLength = maxReadLength)
+    res <- digestFastqsCpp(
+        fastqForwardVect = fastqForward,
+        fastqReverseVect = fastqReverse,
+        mergeForwardReverse = mergeForwardReverse,
+        minOverlap = minOverlap,
+        maxOverlap = maxOverlap,
+        minMergedLength = minMergedLength,
+        maxMergedLength = maxMergedLength,
+        maxFracMismatchOverlap = maxFracMismatchOverlap,
+        greedyOverlap = greedyOverlap,
+        revComplForward = revComplForward,
+        revComplReverse = revComplReverse,
+        elementsForward = elementsForward,
+        elementLengthsForward = as.numeric(elementLengthsForward),
+        elementsReverse = elementsReverse,
+        elementLengthsReverse = as.numeric(elementLengthsReverse),
+        adapterForward = adapterForward,
+        adapterReverse = adapterReverse,
+        primerForward = primerForward,
+        primerReverse = primerReverse,
+        wildTypeForward = wildTypeForward,
+        wildTypeForwardNames = wildTypeForwardNames,
+        wildTypeReverse = wildTypeReverse,
+        wildTypeReverseNames = wildTypeReverseNames,
+        constantForward = constantForward,
+        constantReverse = constantReverse,
+        avePhredMinForward = avePhredMinForward,
+        avePhredMinReverse = avePhredMinReverse,
+        variableNMaxForward = variableNMaxForward,
+        variableNMaxReverse = variableNMaxReverse,
+        umiNMax = umiNMax,
+        nbrMutatedCodonsMaxForward = nbrMutatedCodonsMaxForward,
+        nbrMutatedCodonsMaxReverse = nbrMutatedCodonsMaxReverse,
+        nbrMutatedBasesMaxForward = nbrMutatedBasesMaxForward,
+        nbrMutatedBasesMaxReverse = nbrMutatedBasesMaxReverse,
+        forbiddenMutatedCodonsForward = forbiddenMutatedCodonsForward,
+        forbiddenMutatedCodonsReverse = forbiddenMutatedCodonsReverse,
+        useTreeWTmatch = useTreeWTmatch,
+        collapseToWTForward = collapseToWTForward,
+        collapseToWTReverse = collapseToWTReverse,
+        mutatedPhredMinForward = mutatedPhredMinForward,
+        mutatedPhredMinReverse = mutatedPhredMinReverse,
+        mutNameDelimiter = mutNameDelimiter,
+        constantMaxDistForward = constantMaxDistForward,
+        constantMaxDistReverse = constantMaxDistReverse,
+        umiCollapseMaxDist = umiCollapseMaxDist,
+        filteredReadsFastqForward = filteredReadsFastqForward,
+        filteredReadsFastqReverse = filteredReadsFastqReverse,
+        maxNReads = maxNReads,
+        verbose = verbose,
+        nThreads = as.integer(nThreads),
+        chunkSize = as.integer(chunkSize),
+        maxReadLength = maxReadLength)
     
-    ## Add package version and processing date -----------------------------------
+    ## Add package version and processing date --------------------------------
     res$parameters$processingInfo <- paste0(
         "Processed by mutscan v", utils::packageVersion("mutscan"), " on ",
         Sys.time()
