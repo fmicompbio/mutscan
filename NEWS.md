@@ -1,3 +1,7 @@
+# mutscan 0.99.0
+
+* Prepare for Bioconductor submission
+
 # mutscan 0.3.4
 
 * Allow use of scattermore/scattermost in plotPairs
