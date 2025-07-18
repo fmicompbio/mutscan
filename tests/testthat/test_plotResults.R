@@ -113,29 +113,33 @@ test_that("plotResults functions work as expected", {
                                 pseudocount = 1, method = "limma",
                                 normMethod = "sum")
 
-    expect_s3_class(plotMeanDiff(res1), "ggplot")
-    expect_s3_class(plotMeanDiff(res2), "ggplot")
-    expect_s3_class(plotVolcano(res1), "ggplot")
-    expect_s3_class(plotVolcano(res2), "ggplot")
+    expect_true(ggplot2::is_ggplot(plotMeanDiff(res1)))
+    expect_true(ggplot2::is_ggplot(plotMeanDiff(res2)))
+    expect_true(ggplot2::is_ggplot(plotVolcano(res1)))
+    expect_true(ggplot2::is_ggplot(plotVolcano(res2)))
 
-    expect_s3_class(plotMeanDiff(res1, meanCol = "logCPM", logFCCol = "logFC",
-                                 padjCol = "FDR", padjThreshold = 0.1), "ggplot")
-    expect_s3_class(plotMeanDiff(res2, meanCol = "AveExpr", logFCCol = "logFC",
-                                 padjCol = "adj.P.Val", padjThreshold = 0.1), "ggplot")
-    expect_s3_class(plotVolcano(res1, logFCCol = "logFC", pvalCol = "PValue",
-                                padjCol = "FDR", padjThreshold = 0.1), "ggplot")
-    expect_s3_class(plotVolcano(res2, logFCCol = "logFC", pvalCol = "P.Value",
-                                padjCol = "adj.P.Val", padjThreshold = 0.1), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotMeanDiff(res1, meanCol = "logCPM", logFCCol = "logFC",
+                     padjCol = "FDR", padjThreshold = 0.1)))
+    expect_true(ggplot2::is_ggplot(
+        plotMeanDiff(res2, meanCol = "AveExpr", logFCCol = "logFC",
+                     padjCol = "adj.P.Val", padjThreshold = 0.1)))
+    expect_true(ggplot2::is_ggplot(
+        plotVolcano(res1, logFCCol = "logFC", pvalCol = "PValue",
+                    padjCol = "FDR", padjThreshold = 0.1)))
+    expect_true(ggplot2::is_ggplot(
+        plotVolcano(res2, logFCCol = "logFC", pvalCol = "P.Value",
+                    padjCol = "adj.P.Val", padjThreshold = 0.1)))
 
-    expect_s3_class(plotMeanDiff(res1, nTopToLabel = 5), "ggplot")
-    expect_s3_class(plotMeanDiff(res2, nTopToLabel = 5), "ggplot")
-    expect_s3_class(plotVolcano(res1, nTopToLabel = 5), "ggplot")
-    expect_s3_class(plotVolcano(res2, nTopToLabel = 5), "ggplot")
+    expect_true(ggplot2::is_ggplot(plotMeanDiff(res1, nTopToLabel = 5)))
+    expect_true(ggplot2::is_ggplot(plotMeanDiff(res2, nTopToLabel = 5)))
+    expect_true(ggplot2::is_ggplot(plotVolcano(res1, nTopToLabel = 5)))
+    expect_true(ggplot2::is_ggplot(plotVolcano(res2, nTopToLabel = 5)))
 
-    expect_s3_class(plotMeanDiff(res1, pointSize = "large"), "ggplot")
-    expect_s3_class(plotMeanDiff(res2, pointSize = "large"), "ggplot")
-    expect_s3_class(plotVolcano(res1, pointSize = "large"), "ggplot")
-    expect_s3_class(plotVolcano(res2, pointSize = "large"), "ggplot")
+    expect_true(ggplot2::is_ggplot(plotMeanDiff(res1, pointSize = "large")))
+    expect_true(ggplot2::is_ggplot(plotMeanDiff(res2, pointSize = "large")))
+    expect_true(ggplot2::is_ggplot(plotVolcano(res1, pointSize = "large")))
+    expect_true(ggplot2::is_ggplot(plotVolcano(res2, pointSize = "large")))
 
     ## These tests won't run if the X11 display connection can not be opened
     # skip_if_not_installed("plotly")
