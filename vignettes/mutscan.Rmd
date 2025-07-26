@@ -611,7 +611,8 @@ that for this, at least two replicates are required.
 We start by looking at the design matrix, in order to determine which of the 
 coefficients to specify for the testing in `calculateRelativeFC()`. For more 
 information about how to set up and interpret design matrices in `edgeR` or 
-`limma`, see e.g. [Law et al (2020)](https://f1000research.com/articles/9-1444), 
+`limma`, see e.g. 
+[Law et al (2020)](https://f1000research.com/articles/9-1444), 
 or [Soneson et al (2020)](https://f1000research.com/articles/9-512).
 
 ```{r def-mm}

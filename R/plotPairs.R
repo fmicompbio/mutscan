@@ -147,9 +147,9 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
             )
     }
     
-    ## ----------------------------------------------------------------------- ##
+    ## --------------------------------------------------------------------- ##
     ## Scatter plots
-    ## ----------------------------------------------------------------------- ##
+    ## --------------------------------------------------------------------- ##
     if (pointsType == "smoothscatter") {
         ## Define function to create smoothscatter-like plot 
         ## (for use with ggpairs)

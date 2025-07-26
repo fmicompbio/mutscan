@@ -382,7 +382,7 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
                          maxNReads = -1, verbose = FALSE,
                          nThreads = 1, chunkSize = 100000,
                          maxReadLength = 1024) {
-    ## pre-flight checks ---------------------------------------------------------
+    ## pre-flight checks ------------------------------------------------------
     ## deprecated arguments
     deprecMessageColl <- paste0(
         "Starting from mutscan v0.3.0, collapsing of variable sequences is ", 
@@ -704,7 +704,8 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
         !all(grepl("^[ACGTMRWSYKVHDBN]{3}$", 
                    toupper(forbiddenMutatedCodonsReverse)) |
              forbiddenMutatedCodonsReverse == "")) {
-        stop("All elements of 'forbiddenMutatedCodonsForward' and 'forbiddenMutatedCodonsReverse' must be ",
+        stop("All elements of 'forbiddenMutatedCodonsForward' and ", 
+             "'forbiddenMutatedCodonsReverse' must be ",
              "character strings consisting of three valid IUPAC letters.")
     } else {
         forbiddenMutatedCodonsForward <- toupper(forbiddenMutatedCodonsForward)
@@ -754,8 +755,10 @@ digestFastqs <- function(fastqForward, fastqReverse = NULL,
         normalizePath(filteredReadsFastqReverse, mustWork = FALSE)
     
     if ((any(fastqReverse == "") && filteredReadsFastqReverse != "") ||
-        (all(fastqReverse != "") && filteredReadsFastqForward != "" && filteredReadsFastqReverse == "") ||
-        (all(fastqForward != "") && filteredReadsFastqForward == "" && filteredReadsFastqReverse != "")) {
+        (all(fastqReverse != "") && filteredReadsFastqForward != "" && 
+         filteredReadsFastqReverse == "") ||
+        (all(fastqForward != "") && filteredReadsFastqForward == "" && 
+         filteredReadsFastqReverse != "")) {
         stop("The pairing of the output FASTQ files must be compatible ", 
              "with that of the input files.")
     }
