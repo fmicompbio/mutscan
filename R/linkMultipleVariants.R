@@ -80,6 +80,26 @@
 #' \item outCombined - the \code{digestFastqs} output for the combined run.
 #' }
 #' 
+#' @examples 
+#' fqFile <- system.file("extdata", "cisInput_1.fastq.gz", 
+#'                       package = "mutscan")
+#' out <- linkMultipleVariants(
+#'     combinedDigestParams = list(fastqForward = fqFile, 
+#'                                 elementsForward = "SVCV", 
+#'                                 elementLengthsForward = c(1, 10, 18, 96)),
+#'     # the first variable sequence is the UMI
+#'     umi = list(fastqForward = fqFile, elementsForward = "SVCS",
+#'                elementLengthsForward = c(1, 10, 18, 96)),
+#'     # the second variable sequence is the amplicon variant
+#'     var = list(fastqForward = fqFile, elementsForward = "SSCV",
+#'                elementLengthsForward = c(1, 10, 18, 96), 
+#'                collapseMaxDist = 3, collapseMinScore = 1)
+#' )
+#' # conversion tables
+#' lapply(out$convSeparate, head)
+#' # aggregated count table
+#' head(out$countAggregated)
+#' 
 #' @importFrom dplyr select rename group_by summarize across matches mutate
 #' @importFrom tidyr separate separate_rows
 #' @importFrom rlang .data
