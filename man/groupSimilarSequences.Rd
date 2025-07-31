@@ -7,10 +7,10 @@
 groupSimilarSequences(
   seqs,
   scores,
-  collapseMaxDist,
-  collapseMinScore,
-  collapseMinRatio,
-  verbose
+  collapseMaxDist = 0,
+  collapseMinScore = 0,
+  collapseMinRatio = 0,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -29,12 +29,12 @@ Hamming distance in terms of a fraction of sequence length:
 (\code{round(collapseMaxDist * nchar(sequence))}).
 A value greater or equal to 1 is rounded and directly used as the maximum
 allowed Hamming distance. Note that sequences can only be
-collapsed if they are all of the same length.}
+collapsed if they are all of the same length. The default value is 0.}
 
 \item{collapseMinScore}{Numeric scalar, indicating the minimum score 
 required for a sequence to be considered as a representative for a 
 group of similar sequences (i.e., to allow other sequences to be 
-collapsed into it).}
+collapsed into it). The default value is 0.}
 
 \item{collapseMinRatio}{Numeric scalar. During collapsing of
 similar sequences, a low-frequency sequence will be collapsed 

@@ -1272,11 +1272,11 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
 //' (\code{round(collapseMaxDist * nchar(sequence))}).
 //' A value greater or equal to 1 is rounded and directly used as the maximum
 //' allowed Hamming distance. Note that sequences can only be
-//' collapsed if they are all of the same length.
+//' collapsed if they are all of the same length. The default value is 0.
 //' @param collapseMinScore Numeric scalar, indicating the minimum score 
 //' required for a sequence to be considered as a representative for a 
 //' group of similar sequences (i.e., to allow other sequences to be 
-//' collapsed into it).
+//' collapsed into it). The default value is 0.
 //' @param collapseMinRatio Numeric scalar. During collapsing of
 //' similar sequences, a low-frequency sequence will be collapsed 
 //' with a higher-frequency sequence only if the ratio between the 
@@ -1300,10 +1300,10 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
 // [[Rcpp::export]]
 Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs,
                                       std::vector<double> scores, 
-                                      double collapseMaxDist, 
-                                      double collapseMinScore,
-                                      double collapseMinRatio,
-                                      bool verbose) {
+                                      double collapseMaxDist=0.0, 
+                                      double collapseMinScore=0.0,
+                                      double collapseMinRatio=0.0,
+                                      bool verbose=false) {
     
     // combine seqs and scores
     std::map<std::string, double> seqsScores;

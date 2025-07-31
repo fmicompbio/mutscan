@@ -70,11 +70,11 @@ findClosestRefSeqEarlyStop <- function(varSeq, wtSeq, upperBoundMismatch, sim) {
 #' (\code{round(collapseMaxDist * nchar(sequence))}).
 #' A value greater or equal to 1 is rounded and directly used as the maximum
 #' allowed Hamming distance. Note that sequences can only be
-#' collapsed if they are all of the same length.
+#' collapsed if they are all of the same length. The default value is 0.
 #' @param collapseMinScore Numeric scalar, indicating the minimum score 
 #' required for a sequence to be considered as a representative for a 
 #' group of similar sequences (i.e., to allow other sequences to be 
-#' collapsed into it).
+#' collapsed into it). The default value is 0.
 #' @param collapseMinRatio Numeric scalar. During collapsing of
 #' similar sequences, a low-frequency sequence will be collapsed 
 #' with a higher-frequency sequence only if the ratio between the 
@@ -95,7 +95,7 @@ findClosestRefSeqEarlyStop <- function(varSeq, wtSeq, upperBoundMismatch, sim) {
 #'                             
 #' @export
 #' @author Michael Stadler, Charlotte Soneson
-groupSimilarSequences <- function(seqs, scores, collapseMaxDist, collapseMinScore, collapseMinRatio, verbose) {
+groupSimilarSequences <- function(seqs, scores, collapseMaxDist = 0.0, collapseMinScore = 0.0, collapseMinRatio = 0.0, verbose = FALSE) {
     .Call(`_mutscan_groupSimilarSequences`, seqs, scores, collapseMaxDist, collapseMinScore, collapseMinRatio, verbose)
 }
 
