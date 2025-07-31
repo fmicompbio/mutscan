@@ -1,6 +1,7 @@
 # mutscan 0.99.0
 
 * Prepare for Bioconductor submission
+* Remove deprecated arguments variableCollapseMaxDist, variableCollapseMinReads and variableCollapseMinRatio from digestFastqs (deprecated in mutscan 0.3.0)
 
 # mutscan 0.3.4
 

@@ -47,9 +47,6 @@ digestFastqs(
   mutNameDelimiter = ".",
   constantMaxDistForward = -1,
   constantMaxDistReverse = -1,
-  variableCollapseMaxDist = deprecated(),
-  variableCollapseMinReads = deprecated(),
-  variableCollapseMinRatio = deprecated(),
   umiCollapseMaxDist = 0,
   filteredReadsFastqForward = "",
   filteredReadsFastqReverse = "",
@@ -195,10 +192,6 @@ maximum allowed Hamming distance between the extracted and expected
 constant sequence. If multiple constant sequences are provided, the most 
 similar one is used. Reads with a larger distance to the expected 
 constant sequence are discarded. If set to -1, no filtering is done.}
-
-\item{variableCollapseMaxDist, variableCollapseMinReads, variableCollapseMinRatio}{Deprecated. Collapsing of variable sequences is no longer performed in 
-\code{digestFastqs}. Please use \code{collapseMutantsBySimilarity} 
-instead.}
 
 \item{umiCollapseMaxDist}{Numeric scalar defining 
 the tolerances for collapsing similar UMI sequences. If the value is 

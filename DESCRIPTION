@@ -47,7 +47,6 @@ Imports:
     IRanges,
     utils,
     DelayedArray,
-    lifecycle,
     tools
 Suggests: 
     testthat (>= 3.0.0),

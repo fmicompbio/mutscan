@@ -1366,7 +1366,7 @@ Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs,
     size_t start_size = (double)tree.size;
     while (tree.size > 0) {
         querySeq = tree.first();
-        // check in seqsScores if score for querySeq is < variableCollapseMinReads
+        // check in seqsScores if score for querySeq is < collapseMinScore
         seqsScoresIt = seqsScores.find(querySeq);
         if (collapseMinScore > 0 &&
             seqsScoresIt != seqsScores.end() &&
