@@ -986,10 +986,12 @@ int findClosestRefSeq(std::string &varSeq, std::vector<std::string> &wtSeq,
   int maxsim = 0;
   int nbrbesthits = 0;
   int currsim;
+  size_t minl;
   for (size_t i = 0; i < wtSeq.size(); i++) {
     currsim = 0;
     std::string currSeq = wtSeq[i];
-    for (size_t j = 0; j < currSeq.length(); j++) {
+    minl = std::min(varSeq.size(), currSeq.size());
+    for (size_t j = 0; j < minl; j++) {
       currsim += (currSeq[j] == varSeq[j]);
     }
     if (((int)varSeq.size() - currsim <= (int)upperBoundMismatch)) {
@@ -997,7 +999,7 @@ int findClosestRefSeq(std::string &varSeq, std::vector<std::string> &wtSeq,
         nbrbesthits++;
       } else if (currsim > maxsim) {
         nbrbesthits = 1;
-        idx = i;
+        idx = (int)i;
         maxsim = currsim;
       }
     }
