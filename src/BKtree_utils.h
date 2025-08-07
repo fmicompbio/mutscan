@@ -177,7 +177,7 @@ public:
   void print() {
     Rcout << size << "\n";
     if (size > 0) {
-      _print(root, root, 0); // recursive node printing starting from root at zero identation
+      _print(root, root, 0); // recursive node printing starting from root at zero indentation
     }
   }
 
@@ -398,10 +398,10 @@ private:
   // and the recurse on all children of n
   void _print(node* r = nullptr, node* n = nullptr, int depth = 0) {
     if (n == nullptr) {
-      n = root;
+      n = root; // # nocov
     }
     if (r == nullptr) {
-      r = root;
+      r = root; // # nocov
     }
 
     for (int i = 0; i < depth; ++i) {
