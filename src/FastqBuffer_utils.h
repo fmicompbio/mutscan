@@ -16,7 +16,7 @@ private:
   //   (space for seq2 and qual2 is only allocated for paired=true)
 public:
   char *seq1, *qual1, *seq2, *qual2;
-  
+
   // constructor
   FastqBuffer(size_t n, size_t b, bool p = true) {
     nentries = n;
@@ -33,7 +33,7 @@ public:
       qual2 = NULL;
     }
   }
-  
+
   // copy constructor
   FastqBuffer(const FastqBuffer& fqb) {
     paired = fqb.paired;
@@ -51,12 +51,12 @@ public:
       qual2 = NULL;
     }
   }
-  
+
   // destructor
   ~FastqBuffer() {
     delete[] buffer;
   }
-  
+
   // Write one (pair of) filtered reads to output fastq file(s)
   bool write_seq(size_t i, gzFile file1, gzFile file2, const int n, const char* label) {
     bool success = (i < nentries);
@@ -67,32 +67,32 @@ public:
     if (success && file1 != NULL) {
       std::string read_id = "@S" + std::to_string(n) + "_" + label + " 1\n";
       if (success && gzputs(file1, read_id.c_str()) == (-1)) {
-        success = false;
+        success = false; // # nocov
       }
       if (success && gzputs(file1, seq1 + (i * BUFFER_SIZE)) == (-1)) {
-        success = false;
+        success = false; // # nocov
       }
       if (success && gzputs(file1, "+\n") == (-1)) {
-        success = false;
+        success = false; // # nocov
       }
       if (success && gzputs(file1, qual1 + (i * BUFFER_SIZE)) == (-1)) {
-        success = false;
+        success = false; // # nocov
       }
     }
-    
+
     if (success && file2 != NULL) {
       std::string read_id = "@S" + std::to_string(n) + "_" + label + " 2\n";
       if (success && gzputs(file2, read_id.c_str()) == (-1)) {
-        success = false;
+        success = false; // # nocov
       }
       if (success && gzputs(file2, seq2 + (i * BUFFER_SIZE)) == (-1)) {
-        success = false;
+        success = false; // # nocov
       }
       if (success && gzputs(file2, "+\n") == (-1)) {
-        success = false;
+        success = false; // # nocov
       }
       if (success && gzputs(file2, qual2 + (i * BUFFER_SIZE)) == (-1)) {
-        success = false;
+        success = false; // # nocov
       }
     }
 }
