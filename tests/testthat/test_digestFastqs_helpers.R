@@ -513,6 +513,10 @@ test_that("makeBaseHGVS works", {
     expect_equal(makeBaseHGVS(c("f.1.A", "r.4.A", "f.6.C"), ".", "TAGTGTAGTCCGT", "AAGAGCAGTCCGT"),
                  "[1T>A;4_6delinsAGC]_")
     expect_equal(makeBaseHGVS(c("r.4.A"), ".", "TAGTGTAGTCCGT", "TAGAGTAGTCCGT"), "4T>A_")
+    expect_equal(makeBaseHGVS(character(0), ".", "AAA", "AAA"), "_")
+    expect_equal(makeBaseHGVS(c("f.1.A", "r.4.A", "r.8.A"), ".",
+                              "TACTTTAT", "AAGAAAAA"),
+                 "[1T>A;4T>A;8T>A]_")
 })
 
 test_that("makeAAHGVS works", {
@@ -524,6 +528,8 @@ test_that("makeAAHGVS works", {
                  "[(Thr1Leu);(Asp2Met)]_")
     expect_equal(test_makeAAHGVS(c("f.1.L", "f.2.M", "f.7.M"), ".", "TDTLQAETDQLEDEKSALQTEIANLLKEKEKL"),
                  "[(Thr1Leu);(Asp2Met);(Glu7Met)]_")
+    expect_equal(test_makeAAHGVS(character(0), ".", "TDTL"), "_")
+})
 
 ## ----------------------------------------------------------------------------
 ## compareToWildtype
@@ -586,4 +592,22 @@ test_that("compareToWildtype works", {
                                collapseToWT = TRUE),
         list())
 })
+
+## ----------------------------------------------------------------------------
+## groupSimilarSequences
+## ----------------------------------------------------------------------------
+test_that("groupSimilarSequences works", {
+    expect_identical(
+        groupSimilarSequences(c("AA", "AT", "AC", "TT"), 1:4, collapseMaxDist = 0),
+        data.frame(sequence = c("AA", "AT", "AC", "TT"),
+                   representative = c("AA", "AT", "AC", "TT"))
+    )
+    expect_identical(
+        groupSimilarSequences(c("AA", "AT", "AC", "TT"), 1:4, collapseMaxDist = 1),
+        data.frame(sequence = c("AA", "AT", "AC", "TT"),
+                   representative = c("AC", "TT", "AC", "TT"))
+    )
+    expect_warning(groupSimilarSequences(c("AA", "AT", "AC", "TTT"), 1:4,
+                                       collapseMaxDist = 1),
+                 "not all of the same length")
 })
