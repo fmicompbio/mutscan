@@ -535,6 +535,60 @@ test_that("linkMultipleVariants works", {
     expect_equal(res$filtSeparate$V3[, "nbrRetained"], 
                  sum(!grepl("C.*mut|del|V3\\.", truth$truth$status)))
     
+    # --------------------------------------------------------------------------
+    # Get warning when summing UMIs
+    expect_warning({
+        res <- linkMultipleVariants(
+            combinedDigestParams = list(
+                fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
+                                           package = "mutscan"),
+                fastqReverse = system.file("extdata", "multipleVariableRegions_R2.fastq.gz",
+                                           package = "mutscan"),
+                elementsForward = "UVCVCV", elementLengthsForward = c(6, 24, 10, 30, 10, -1),
+                elementsReverse = "CVCV", elementLengthsReverse = c(6, 40, 10, -1),
+                mergeForwardReverse = TRUE, minOverlap = 20, 
+                maxOverlap = 30, maxFracMismatchOverlap = 0,
+                revComplForward = FALSE, revComplReverse = TRUE,
+                avePhredMinForward = 20, avePhredMinReverse = 20,
+                verbose = verbose),
+            barcode = list(
+                fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
+                                           package = "mutscan"),
+                elementsForward = "CVCSCS", elementLengthsForward = c(6, 24, 10, 30, 10, -1),
+                avePhredMinForward = 20, 
+                collapseMaxDist = 1, collapseMinScore = 1, collapseMinRatio = 1,
+                verbose = verbose),
+            V2 = list(
+                fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
+                                           package = "mutscan"),
+                fastqReverse = system.file("extdata", "multipleVariableRegions_R2.fastq.gz",
+                                           package = "mutscan"),
+                elementsForward = "CSCVCS", elementLengthsForward = c(6, 24, 10, 30, 10, -1),
+                elementsReverse = "CSCV", elementLengthsReverse = c(6, 40, 10, -1),
+                mergeForwardReverse = TRUE, minOverlap = 10, 
+                maxOverlap = 20, maxFracMismatchOverlap = 0,
+                revComplForward = FALSE, revComplReverse = TRUE,
+                avePhredMinForward = 20, avePhredMinReverse = 20,
+                wildTypeForward = truth$WTV2,
+                nbrMutatedCodonsMaxForward = -1, nbrMutatedBasesMaxForward = 1, 
+                forbiddenMutatedCodonsForward = "", collapseToWTForward = FALSE,
+                verbose = verbose, useTreeWTmatch = TRUE),
+            V3 = list(
+                fastqForward = system.file("extdata", "multipleVariableRegions_R1.fastq.gz",
+                                           package = "mutscan"),
+                fastqReverse = system.file("extdata", "multipleVariableRegions_R2.fastq.gz",
+                                           package = "mutscan"),
+                elementsForward = "CSCSCV", elementLengthsForward = c(6, 24, 10, 30, 10, -1),
+                elementsReverse = "CVCS", elementLengthsReverse = c(6, 40, 10, -1),
+                mergeForwardReverse = TRUE, minOverlap = 5, 
+                maxOverlap = 15, maxFracMismatchOverlap = 0,
+                revComplForward = FALSE, revComplReverse = TRUE,
+                avePhredMinForward = 20, avePhredMinReverse = 20,
+                wildTypeForward = truth$WTV3,
+                nbrMutatedCodonsMaxForward = -1, nbrMutatedBasesMaxForward = 1, 
+                forbiddenMutatedCodonsForward = "", collapseToWTForward = FALSE,
+                verbose = verbose, useTreeWTmatch = TRUE)
+        )}, "Aggregating UMI counts")
 })
 
 

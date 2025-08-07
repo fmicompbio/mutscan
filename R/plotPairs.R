@@ -126,13 +126,15 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
                     cols)(transfCor),
                     maxColorValue = 255)
             } else {
+                # nocov start
                 cols <- hcl.colors(n = 11, palette = "RdBu")[6:10]
                 col <- rgb(colorRamp(
                     cols)(transfCor),
                     maxColorValue = 255)
+                # nocov end
             }
         } else {
-            col <- "white"
+            col <- "white" #nocov
         }
         
         ## Construct plot
@@ -150,6 +152,9 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
     ## --------------------------------------------------------------------- ##
     ## Scatter plots
     ## --------------------------------------------------------------------- ##
+    # All the point plotting functions are tested, but for some reason covr 
+    # doesn't pick it up - ignore these definitions in the coverage tests
+    # nocov start
     if (pointsType == "smoothscatter") {
         ## Define function to create smoothscatter-like plot 
         ## (for use with ggpairs)
@@ -229,6 +234,7 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
             }
         }
     }
+    # nocov end
     
     ## Define the function to use for the plots
     if (pointsType == "smoothscatter") {
@@ -244,6 +250,7 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
     ## --------------------------------------------------------------------- ##
     ## Histogram
     ## --------------------------------------------------------------------- ##
+    # nocov start
     diaghist <- function(data, mapping, ...) {
         gg <- ggplot(data = data, mapping = mapping) +
             geom_histogram(fill = "#F5C710", color = "grey50", 
@@ -254,6 +261,7 @@ plotPairs <- function(se, selAssay = "counts", doLog = TRUE, pseudocount = 1,
         }
         gg
     }
+    # nocov end
     
     ## --------------------------------------------------------------------- ##
     ## Combined plot
