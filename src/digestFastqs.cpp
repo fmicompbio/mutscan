@@ -751,7 +751,7 @@ bool decomposeRead(const std::string sseq,
                                   umiSeq, varSeq, varQual, varLengths, constSeq,
                                   constQual, nNoPrimer, nReadWrongLength);
         if (!post) {
-          return false;
+          return false; // # nocov
         }
         break;
       }
@@ -1028,7 +1028,7 @@ void removeEOL(std::string &seq) {
     seq.pop_back();
   }
   if (seq.back() == '\r') {
-    seq.pop_back();
+    seq.pop_back(); // # nocov
   }
 }
 
@@ -1458,12 +1458,12 @@ Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs,
 
             // check for user interruption and print progress
             if ((start_size - tree.size) % 2000 == 0) { // every 2,000 queries (every ~1-2s)
-                Rcpp::checkUserInterrupt(); // ... check for user interrupt
+                Rcpp::checkUserInterrupt(); // ... check for user interrupt # nocov start
                 // ... and give an update
                 if (verbose && (start_size - tree.size) % 2000 == 0) {
                     Rcout << "    " << std::setprecision(4) <<
                         (100.0 * ((double)(start_size - tree.size) / (double)start_size)) <<
-                            "% done" << std::endl;
+                            "% done" << std::endl; // # nocov end
                 }
             }
         }
@@ -1648,7 +1648,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     // if maxNReads has been reached in the previous file, break
     bool done;
     if (maxNReads != (-1) && nTot >= maxNReads) {
-      done = true;
+      done = true; // # nocov
     } else {
       done = false;
     }
@@ -1689,7 +1689,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         nTot++;
       }
       if (nTot % 200000 == 0) { // every 200,000 reads (every ~1.6 seconds)
-        Rcpp::checkUserInterrupt(); // ... check for user interrupt
+        Rcpp::checkUserInterrupt(); // ... check for user interrupt # nocov
       }
 
       // if maxNReads has been reached, break
@@ -2276,7 +2276,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
       mutCounter++;
       // check for user interruption and print progress
       if (mutCounter % 200 == 0) { // every 200 queries
-        Rcpp::checkUserInterrupt(); // ... check for user interrupt
+        Rcpp::checkUserInterrupt(); // ... check for user interrupt # nocov
       }
     }
 
