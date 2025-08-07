@@ -62,7 +62,7 @@
     .assertScalar(x = interactivePlot, type = "logical")
     
     if (interactivePlot && !requireNamespace("plotly", quietly = TRUE)) {
-        stop("The 'plotly' package is required to make interactive plots.")
+        stop("The 'plotly' package is required to make interactive plots.") # nocov
     }
     xr <- range(res[[xCol]], na.rm = TRUE)
     yr <- range(res[[yCol]], na.rm = TRUE)
@@ -113,7 +113,7 @@
         }
     }
     if (interactivePlot) {
-        plotly::ggplotly(gg)
+        plotly::ggplotly(gg) # nocov
     } else {
         if (!is.null(labelCol) && length(labelValues) > 0) {
             .assertVector(x = labelValues, type = "character", 
