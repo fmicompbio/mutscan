@@ -608,12 +608,12 @@ struct mutantInfo {
 gzFile  openFastq(std::string filename, const char* mode = "rb") {
   gzFile file = gzopen(filename.c_str(), mode);
   if (!file) {
-    if (errno) {
+    if (errno) { // # nocov start
       stop("Failed to open file '", filename,  "': ",
            strerror(errno), " (errno=", errno, ")");
     } else {
       stop("Failed to open file '", filename, "': zlib out of memory");
-    }
+    } // # nocov end
   }
   return file;
 }
