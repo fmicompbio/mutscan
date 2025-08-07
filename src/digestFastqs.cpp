@@ -2125,13 +2125,13 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             mutantNameBase.pop_back(); // remove '_' at the end
             mutantNameCodon.pop_back(); // remove '_' at the end
           } else {
-            // will we ever go in here?
+            // will we ever go in here? // # nocov start
             if (wildTypeForward[0].compare("") != 0 ||
                 (!noReverse && wildTypeReverse[0].compare("") != 0)) {
               mutantName = "WT";
               mutantNameBase = "WT";
               mutantNameCodon = "WT";
-            }
+            } // # nocov end
           }
           if (mutantNameBaseHGVS.length() > 0) { // we have a (closest) wildtype name
             mutantNameBaseHGVS.pop_back(); // remove '_' at the end
@@ -2140,11 +2140,11 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           if (mutantNameAA.length() > 0) { // we have a least one mutation, or sequence-based name
             mutantNameAA.pop_back(); // remove '_' at the end
           } else {
-            // will we ever go in here?
+            // will we ever go in here? // # nocov start
             if (wildTypeForward[0].compare("") != 0 ||
                 (!noReverse && wildTypeReverse[0].compare("") != 0)) {
               mutantNameAA = "WT";
-            }
+            } // # nocov end
           }
           if (!noReverse) { // "trans" experiment
             varSeqForward += (std::string("_") + varSeqReverse);
