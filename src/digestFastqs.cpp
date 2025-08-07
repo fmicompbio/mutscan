@@ -80,6 +80,7 @@ bool get_next_seq(gzFile file, char *seq, char *qual, size_t BUFFER_SIZE) {
 }
 
 // create the complement of a base
+// [[Rcpp::export]]
 char complement(char n) {
   switch(n) {
     case 'A':

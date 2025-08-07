@@ -23,6 +23,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// complement
+char complement(char n);
+RcppExport SEXP _mutscan_complement(SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< char >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(complement(n));
+    return rcpp_result_gen;
+END_RCPP
+}
 // compareCodonPositions
 bool compareCodonPositions(std::string a, std::string b, const char mutNameDelimiter);
 RcppExport SEXP _mutscan_compareCodonPositions(SEXP aSEXP, SEXP bSEXP, SEXP mutNameDelimiterSEXP) {
@@ -282,6 +293,7 @@ RcppExport SEXP _rcpp_module_boot_mod_BKtree();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_mutscan_calcNearestStringDist", (DL_FUNC) &_mutscan_calcNearestStringDist, 3},
+    {"_mutscan_complement", (DL_FUNC) &_mutscan_complement, 1},
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 3},
     {"_mutscan_translateString", (DL_FUNC) &_mutscan_translateString, 1},
     {"_mutscan_makeBaseHGVS", (DL_FUNC) &_mutscan_makeBaseHGVS, 4},

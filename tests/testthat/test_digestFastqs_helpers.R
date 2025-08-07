@@ -1,4 +1,22 @@
 ## ----------------------------------------------------------------------------
+## complement
+## ----------------------------------------------------------------------------
+test_that("complement works", {
+    expect_identical(complement("a"), "T")
+    expect_identical(complement("A"), "T")
+    expect_identical(complement("c"), "G")
+    expect_identical(complement("C"), "G")
+    expect_identical(complement("g"), "C")
+    expect_identical(complement("G"), "C")
+    expect_identical(complement("t"), "A")
+    expect_identical(complement("T"), "A")
+    expect_identical(complement("n"), "N")
+    expect_identical(complement("N"), "N")
+    expect_error(complement("B"), "Invalid DNA base")
+    expect_error(complement("Q"), "Invalid DNA base")
+})
+
+## ----------------------------------------------------------------------------
 ## compareCodonPositions
 ## ----------------------------------------------------------------------------
 test_that("compareCodonPositions works", {
@@ -365,7 +383,7 @@ test_that("mergeReadPairsPartial works", {
   expect_identical(res2e$mergedSeq, "TTACAACACACA")
   expect_identical(res2e$mergedQual, rep(c(10L, 40L), c(5, 7)))
   expect_identical(res2e$mergedLengths, 12L)
-  
+
   ## invalid overlaps specified/overlaps modified internally
   ## minOverlap > lenF -> no valid overlap
   res0a <- mutscan:::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, lF2, lR2, 8, 7, 9, 9, 1, FALSE)
@@ -397,7 +415,7 @@ test_that("mergeReadPairsPartial works", {
   expect_identical(res0d$mergedQual, qF2)
   expect_identical(res0d$mergedLengths, 7L)
   expect_true(res0d$return)
-  
+
   ## minMergedLength > lenF + lenR -> no valid overlap
   res0e <- mutscan:::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, lF2, lR2, 1, 7, 15, 9, 1, FALSE)
   expect_type(res0e, "list")
@@ -412,7 +430,7 @@ test_that("mergeReadPairsPartial works", {
   expect_identical(res0f$mergedQual, rep(c(10L, 40L), c(2, 5)))
   expect_identical(res0f$mergedLengths, 7L)
   expect_false(res0f$return)
-  
+
   ## padded reads
   for (i in 1:10) {
     sF <- paste(rep(c("C","A"), c(i, 6)), collapse = "")
