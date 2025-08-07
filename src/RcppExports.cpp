@@ -85,6 +85,26 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// test_compareToWildtype
+Rcpp::List test_compareToWildtype(const std::string varSeq, const std::string wtSeq, const std::vector<int> varIntQual, const std::vector<std::string> forbiddenCodons_vect, const double mutatedPhredMin, const int nbrMutatedCodonsMax, const std::string codonPrefix, const int nbrMutatedBasesMax, const std::string mutNameDelimiter, const bool collapseToWT);
+RcppExport SEXP _mutscan_test_compareToWildtype(SEXP varSeqSEXP, SEXP wtSeqSEXP, SEXP varIntQualSEXP, SEXP forbiddenCodons_vectSEXP, SEXP mutatedPhredMinSEXP, SEXP nbrMutatedCodonsMaxSEXP, SEXP codonPrefixSEXP, SEXP nbrMutatedBasesMaxSEXP, SEXP mutNameDelimiterSEXP, SEXP collapseToWTSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const std::string >::type varSeq(varSeqSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type wtSeq(wtSeqSEXP);
+    Rcpp::traits::input_parameter< const std::vector<int> >::type varIntQual(varIntQualSEXP);
+    Rcpp::traits::input_parameter< const std::vector<std::string> >::type forbiddenCodons_vect(forbiddenCodons_vectSEXP);
+    Rcpp::traits::input_parameter< const double >::type mutatedPhredMin(mutatedPhredMinSEXP);
+    Rcpp::traits::input_parameter< const int >::type nbrMutatedCodonsMax(nbrMutatedCodonsMaxSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type codonPrefix(codonPrefixSEXP);
+    Rcpp::traits::input_parameter< const int >::type nbrMutatedBasesMax(nbrMutatedBasesMaxSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type mutNameDelimiter(mutNameDelimiterSEXP);
+    Rcpp::traits::input_parameter< const bool >::type collapseToWT(collapseToWTSEXP);
+    rcpp_result_gen = Rcpp::wrap(test_compareToWildtype(varSeq, wtSeq, varIntQual, forbiddenCodons_vect, mutatedPhredMin, nbrMutatedCodonsMax, codonPrefix, nbrMutatedBasesMax, mutNameDelimiter, collapseToWT));
+    return rcpp_result_gen;
+END_RCPP
+}
 // test_decomposeRead
 List test_decomposeRead(const std::string sseq, const std::string squal, const std::string elements, const std::vector<int> elementLengths, const std::vector<std::string> primerSeqs, std::string umiSeq, std::string varSeq, std::string varQual, std::vector<int> varLengths, std::string constSeq, std::string constQual, int nNoPrimer, int nReadWrongLength);
 RcppExport SEXP _mutscan_test_decomposeRead(SEXP sseqSEXP, SEXP squalSEXP, SEXP elementsSEXP, SEXP elementLengthsSEXP, SEXP primerSeqsSEXP, SEXP umiSeqSEXP, SEXP varSeqSEXP, SEXP varQualSEXP, SEXP varLengthsSEXP, SEXP constSeqSEXP, SEXP constQualSEXP, SEXP nNoPrimerSEXP, SEXP nReadWrongLengthSEXP) {
@@ -298,6 +318,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mutscan_translateString", (DL_FUNC) &_mutscan_translateString, 1},
     {"_mutscan_makeBaseHGVS", (DL_FUNC) &_mutscan_makeBaseHGVS, 4},
     {"_mutscan_test_makeAAHGVS", (DL_FUNC) &_mutscan_test_makeAAHGVS, 3},
+    {"_mutscan_test_compareToWildtype", (DL_FUNC) &_mutscan_test_compareToWildtype, 10},
     {"_mutscan_test_decomposeRead", (DL_FUNC) &_mutscan_test_decomposeRead, 13},
     {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 12},
     {"_mutscan_findClosestRefSeq", (DL_FUNC) &_mutscan_findClosestRefSeq, 4},

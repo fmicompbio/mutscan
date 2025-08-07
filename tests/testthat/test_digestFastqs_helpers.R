@@ -524,4 +524,66 @@ test_that("makeAAHGVS works", {
                  "[(Thr1Leu);(Asp2Met)]_")
     expect_equal(test_makeAAHGVS(c("f.1.L", "f.2.M", "f.7.M"), ".", "TDTLQAETDQLEDEKSALQTEIANLLKEKEKL"),
                  "[(Thr1Leu);(Asp2Met);(Glu7Met)]_")
+
+## ----------------------------------------------------------------------------
+## compareToWildtype
+## ----------------------------------------------------------------------------
+test_that("compareToWildtype works", {
+    # read is kept
+    expect_identical(
+        test_compareToWildtype(varSeq = "AAAGGACGA", wtSeq = "AATGGACGT",
+                               varIntQual = rep(32L, 9L),
+                               forbiddenCodons_vect = character(0),
+                               mutatedPhredMin = 0.0,
+                               nbrMutatedCodonsMax = 3L,
+                               codonPrefix = "xyz",
+                               nbrMutatedBasesMax = 3L,
+                               mutNameDelimiter = ".",
+                               collapseToWT = TRUE),
+        list(nMutQualTooLow = 0L, nTooManyMutCodons = 0L, nForbiddenCodons = 0L,
+             nTooManyMutBases = 0L, nMutBases = 2L, nMutCodons = 2L,
+             nMutAAs = 1L, mutantName = "xyz_", mutantNameBase = "xyz_",
+             mutantNameCodon = "xyz_", mutantNameBaseHGVS = "xyz:c_",
+             mutantNameAA = "xyz_", mutantNameAAHGVS = "xyz:p_",
+             mutationTypes = c("nonsynonymous", "silent")))
+    expect_identical(
+        test_compareToWildtype(varSeq = "AAAGGACGA", wtSeq = "AATGGACGT",
+                               varIntQual = rep(32L, 9L),
+                               forbiddenCodons_vect = character(0),
+                               mutatedPhredMin = 0.0,
+                               nbrMutatedCodonsMax = 3L,
+                               codonPrefix = "xyz:c",
+                               nbrMutatedBasesMax = 3L,
+                               mutNameDelimiter = ".",
+                               collapseToWT = TRUE),
+        list(nMutQualTooLow = 0L, nTooManyMutCodons = 0L, nForbiddenCodons = 0L,
+             nTooManyMutBases = 0L, nMutBases = 2L, nMutCodons = 2L,
+             nMutAAs = 1L, mutantName = "xyz:c_", mutantNameBase = "xyz:c_",
+             mutantNameCodon = "xyz:c_", mutantNameBaseHGVS = "xyz:c_",
+             mutantNameAA = "xyz:c_", mutantNameAAHGVS = "xyz:p_",
+             mutationTypes = c("nonsynonymous", "silent")))
+    # read is filtered out
+    expect_identical(
+        test_compareToWildtype(varSeq = "CGTCGTCGA", wtSeq = "CGTCGTCGT",
+                               varIntQual = rep(32L, 9L),
+                               forbiddenCodons_vect = character(0),
+                               mutatedPhredMin = 33.0, # <---
+                               nbrMutatedCodonsMax = 3L,
+                               codonPrefix = "xyz",
+                               nbrMutatedBasesMax = 3L,
+                               mutNameDelimiter = ".",
+                               collapseToWT = TRUE),
+        list())
+    expect_identical(
+        test_compareToWildtype(varSeq = "CGACGACGA", wtSeq = "CGTCGTCGT",
+                               varIntQual = rep(32L, 9L),
+                               forbiddenCodons_vect = character(0),
+                               mutatedPhredMin = 0.0,
+                               nbrMutatedCodonsMax = -1L,
+                               codonPrefix = "xyz",
+                               nbrMutatedBasesMax = 2L, # <---
+                               mutNameDelimiter = ".",
+                               collapseToWT = TRUE),
+        list())
+})
 })

@@ -561,6 +561,62 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
   return false;
 }
 
+// [[Rcpp::export]]
+Rcpp::List test_compareToWildtype(
+        const std::string varSeq,
+        const std::string wtSeq,
+        const std::vector<int> varIntQual,
+        const std::vector<std::string> forbiddenCodons_vect,
+        const double mutatedPhredMin = 0.0,
+        const int nbrMutatedCodonsMax = -1,
+        const std::string codonPrefix = "c",
+        const int nbrMutatedBasesMax = -1,
+        const std::string mutNameDelimiter = ".",
+        const bool collapseToWT = false) {
+    // allocate C++ only variables
+    std::map<char,std::string> threeAA = initializeThreeAA();
+    std::set<std::string> forbiddenCodons(forbiddenCodons_vect.begin(),
+                                          forbiddenCodons_vect.end());
+    int nMutQualTooLow = 0, nTooManyMutCodons = 0, nForbiddenCodons = 0;
+    int nTooManyMutBases = 0, nMutBases = 0, nMutCodons = 0, nMutAAs = 0;
+    std::string mutantName(""), mutantNameBase("");
+    std::string mutantNameCodon(""), mutantNameBaseHGVS("");
+    std::string mutantNameAA(""), mutantNameAAHGVS("");
+    std::set<std::string> mutationTypes;
+
+    // call compareToWildtype
+    if (compareToWildtype(varSeq, wtSeq, varIntQual, mutatedPhredMin,
+                          nbrMutatedCodonsMax, forbiddenCodons,
+                          codonPrefix, nbrMutatedBasesMax, nMutQualTooLow,
+                          nTooManyMutCodons, nForbiddenCodons,
+                          nTooManyMutBases, mutantName,
+                          mutantNameBase, mutantNameCodon,
+                          mutantNameBaseHGVS, mutantNameAA,
+                          mutantNameAAHGVS, nMutBases,
+                          nMutCodons, nMutAAs, mutationTypes,
+                          mutNameDelimiter, collapseToWT, threeAA)) {
+        // read should be filtered out -> return empty list
+        return Rcpp::List::create();
+    } else {
+        std::vector<std::string> mutationTypes_vect(mutationTypes.begin(),
+                                                    mutationTypes.end());
+        return Rcpp::List::create(Rcpp::_["nMutQualTooLow"] = nMutQualTooLow,
+                                  Rcpp::_["nTooManyMutCodons"] = nTooManyMutCodons,
+                                  Rcpp::_["nForbiddenCodons"] = nForbiddenCodons,
+                                  Rcpp::_["nTooManyMutBases"] = nTooManyMutBases,
+                                  Rcpp::_["nMutBases"] = nMutBases,
+                                  Rcpp::_["nMutCodons"] = nMutCodons,
+                                  Rcpp::_["nMutAAs"] = nMutAAs,
+                                  Rcpp::_["mutantName"] = mutantName,
+                                  Rcpp::_["mutantNameBase"] = mutantNameBase,
+                                  Rcpp::_["mutantNameCodon"] = mutantNameCodon,
+                                  Rcpp::_["mutantNameBaseHGVS"] = mutantNameBaseHGVS,
+                                  Rcpp::_["mutantNameAA"] = mutantNameAA,
+                                  Rcpp::_["mutantNameAAHGVS"] = mutantNameAAHGVS,
+                                  Rcpp::_["mutationTypes"] = mutationTypes_vect);
+    }
+}
+
 // compare constSeq to constant sequence and update
 // counter by match/mismatch and by base Phred quality
 // return true

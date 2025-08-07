@@ -44,6 +44,10 @@ test_makeAAHGVS <- function(mutationsSorted, mutNameDelimiter, wtSeq) {
     .Call(`_mutscan_test_makeAAHGVS`, mutationsSorted, mutNameDelimiter, wtSeq)
 }
 
+test_compareToWildtype <- function(varSeq, wtSeq, varIntQual, forbiddenCodons_vect, mutatedPhredMin = 0.0, nbrMutatedCodonsMax = -1L, codonPrefix = "c", nbrMutatedBasesMax = -1L, mutNameDelimiter = ".", collapseToWT = FALSE) {
+    .Call(`_mutscan_test_compareToWildtype`, varSeq, wtSeq, varIntQual, forbiddenCodons_vect, mutatedPhredMin, nbrMutatedCodonsMax, codonPrefix, nbrMutatedBasesMax, mutNameDelimiter, collapseToWT)
+}
+
 test_decomposeRead <- function(sseq, squal, elements, elementLengths, primerSeqs, umiSeq, varSeq, varQual, varLengths, constSeq, constQual, nNoPrimer, nReadWrongLength) {
     .Call(`_mutscan_test_decomposeRead`, sseq, squal, elements, elementLengths, primerSeqs, umiSeq, varSeq, varQual, varLengths, constSeq, constQual, nNoPrimer, nReadWrongLength)
 }
