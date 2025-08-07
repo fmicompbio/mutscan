@@ -1261,3 +1261,153 @@ test_that("digestFastqs works as expected for trans experiments, if collapsing t
   expect_equal(res$summaryTable$varLengths, "80,16_16,80")
 })
 
+test_that("reads are filtered out if there are too many constant hits", {
+    fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
+    fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
+    ## default arguments
+    Ldef <- list(
+        fastqForward = fqt1, fastqReverse = fqt2,
+        mergeForwardReverse = FALSE,
+        minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE,
+        revComplForward = FALSE, revComplReverse = FALSE,
+        elementsForward = "SUCVV", elementsReverse = "SUCVV",
+        elementLengthsForward = c(1, 10, 18, 80, 16),
+        elementLengthsReverse = c(1, 8, 20, 16, 80),
+        adapterForward = "GGAAGAGCACACGTC",
+        adapterReverse = "GGAAGAGCGTCGTGT",
+        primerForward = "",
+        primerReverse = "",
+        wildTypeForward = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+        wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT",
+        constantForward = "AACCGGAGGAGGGAGCTG",
+        constantReverse = "GAAAAAGGAAGCTGGAGAGA",
+        avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+        variableNMaxForward = 0, variableNMaxReverse = 0,
+        umiNMax = 0,
+        nbrMutatedCodonsMaxForward = 1,
+        nbrMutatedCodonsMaxReverse = 1,
+        nbrMutatedBasesMaxForward = -1,
+        nbrMutatedBasesMaxReverse = -1,
+        forbiddenMutatedCodonsForward = "NNW",
+        forbiddenMutatedCodonsReverse = "NNW",
+        useTreeWTmatch = FALSE,
+        collapseToWTForward = TRUE,
+        collapseToWTReverse = TRUE, 
+        mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+        mutNameDelimiter = ".",
+        constantMaxDistForward = -1,
+        constantMaxDistReverse = -1,
+        umiCollapseMaxDist = 0,
+        filteredReadsFastqForward = "",
+        filteredReadsFastqReverse = "",
+        maxNReads = -1, verbose = FALSE,
+        nThreads = 1, chunkSize = 1000, 
+        maxReadLength = 1024
+    )
+    
+    ## Forward
+    Ldef1 <- Ldef; Ldef1$constantForward <- c(c1 = "AACCGGAGGAGGGAGCTA", c2 = "AACCGGAGGAGGGAGCTC")
+    res1 <- do.call(digestFastqs, Ldef1)
+    
+    expect_equal(res1$filterSummary$nbrTotal, 1000L)
+    expect_equal(res1$filterSummary$f1_nbrAdapter, 314L)
+    expect_equal(res1$filterSummary$f2_nbrNoPrimer, 0L)
+    expect_equal(res1$filterSummary$f3_nbrReadWrongLength, 0L)
+    expect_equal(res1$filterSummary$f4_nbrNoValidOverlap, 0L)
+    expect_equal(res1$filterSummary$f5_nbrAvgVarQualTooLow, 7L)
+    expect_equal(res1$filterSummary$f6_nbrTooManyNinVar, 0L)
+    expect_equal(res1$filterSummary$f7_nbrTooManyNinUMI, 0L)
+    expect_equal(res1$filterSummary$f8_nbrTooManyBestWTHits, 0L)
+    expect_equal(res1$filterSummary$f9_nbrMutQualTooLow, 0L)
+    expect_equal(res1$filterSummary$f10a_nbrTooManyMutCodons, 192L + 95L + 68L + 37L)
+    expect_equal(res1$filterSummary$f10b_nbrTooManyMutBases, 0L)
+    expect_equal(res1$filterSummary$f11_nbrForbiddenCodons, 6L + 2L)
+    expect_equal(res1$filterSummary$f12_nbrTooManyMutConstant, 0L)
+    expect_equal(res1$filterSummary$f13_nbrTooManyBestConstantHits, 279L)
+    expect_equal(res1$filterSummary$nbrRetained, 0L)
+    
+    ## Reverse
+    Ldef1 <- Ldef; Ldef1$constantReverse <- c(c1 = "GAAAAAGGAAGCTGGAGAGG", c2 = "GAAAAAGGAAGCTGGAGAGT")
+    res1 <- do.call(digestFastqs, Ldef1)
+    
+    expect_equal(res1$filterSummary$nbrTotal, 1000L)
+    expect_equal(res1$filterSummary$f1_nbrAdapter, 314L)
+    expect_equal(res1$filterSummary$f2_nbrNoPrimer, 0L)
+    expect_equal(res1$filterSummary$f3_nbrReadWrongLength, 0L)
+    expect_equal(res1$filterSummary$f4_nbrNoValidOverlap, 0L)
+    expect_equal(res1$filterSummary$f5_nbrAvgVarQualTooLow, 7L)
+    expect_equal(res1$filterSummary$f6_nbrTooManyNinVar, 0L)
+    expect_equal(res1$filterSummary$f7_nbrTooManyNinUMI, 0L)
+    expect_equal(res1$filterSummary$f8_nbrTooManyBestWTHits, 0L)
+    expect_equal(res1$filterSummary$f9_nbrMutQualTooLow, 0L)
+    expect_equal(res1$filterSummary$f10a_nbrTooManyMutCodons, 192L + 95L + 68L + 37L)
+    expect_equal(res1$filterSummary$f10b_nbrTooManyMutBases, 0L)
+    expect_equal(res1$filterSummary$f11_nbrForbiddenCodons, 6L + 2L)
+    expect_equal(res1$filterSummary$f12_nbrTooManyMutConstant, 0L)
+    expect_equal(res1$filterSummary$f13_nbrTooManyBestConstantHits, 279L)
+    expect_equal(res1$filterSummary$nbrRetained, 0L)
+})
+
+test_that("digestFastqs runs with revComplForward = TRUE", {
+    fqt1 <- system.file("extdata/transInput_1.fastq.gz", package = "mutscan")
+    fqt2 <- system.file("extdata/transInput_2.fastq.gz", package = "mutscan")
+    ## default arguments
+    Ldef <- list(
+        fastqForward = fqt1, fastqReverse = fqt2,
+        mergeForwardReverse = FALSE,
+        minOverlap = 0, maxOverlap = 0, maxFracMismatchOverlap = 0, greedyOverlap = TRUE,
+        revComplForward = TRUE, revComplReverse = FALSE,
+        elementsForward = "SUCVV", elementsReverse = "SUCVV",
+        elementLengthsForward = c(1, 10, 18, 80, 16),
+        elementLengthsReverse = c(1, 8, 20, 16, 80),
+        adapterForward = "GGAAGAGCACACGTC",
+        adapterReverse = "GGAAGAGCGTCGTGT",
+        primerForward = "",
+        primerReverse = "",
+        wildTypeForward = "TAGTTTTTCCTTCTCCTTCAGCAGGTTGGCAATCTCGGTCTGCAAAGCAGACTTCTCATCTTCTAGTTGGTCTGTCTCCGCTTGGAGTGTATCAGT",
+        wildTypeReverse = "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTCGGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT",
+        constantForward = "CAGCTCCCTCCTCCGGTT",
+        constantReverse = "GAAAAAGGAAGCTGGAGAGA",
+        avePhredMinForward = 20.0, avePhredMinReverse = 20.0,
+        variableNMaxForward = 0, variableNMaxReverse = 0,
+        umiNMax = 0,
+        nbrMutatedCodonsMaxForward = 1,
+        nbrMutatedCodonsMaxReverse = 1,
+        nbrMutatedBasesMaxForward = -1,
+        nbrMutatedBasesMaxReverse = -1,
+        forbiddenMutatedCodonsForward = "",
+        forbiddenMutatedCodonsReverse = "",
+        useTreeWTmatch = FALSE,
+        collapseToWTForward = TRUE,
+        collapseToWTReverse = TRUE, 
+        mutatedPhredMinForward = 0.0, mutatedPhredMinReverse = 0.0,
+        mutNameDelimiter = ".",
+        constantMaxDistForward = -1,
+        constantMaxDistReverse = -1,
+        umiCollapseMaxDist = 0,
+        filteredReadsFastqForward = "",
+        filteredReadsFastqReverse = "",
+        maxNReads = -1, verbose = FALSE,
+        nThreads = 1, chunkSize = 1000, 
+        maxReadLength = 1024
+    )
+    
+    res <- do.call(digestFastqs, Ldef)
+
+    expect_equal(res$filterSummary$nbrTotal, 1000L)
+    expect_equal(res$filterSummary$f1_nbrAdapter, 314L)
+    expect_equal(res$filterSummary$f2_nbrNoPrimer, 0L)
+    expect_equal(res$filterSummary$f3_nbrReadWrongLength, 0L)
+    expect_equal(res$filterSummary$f4_nbrNoValidOverlap, 0L)
+    expect_equal(res$filterSummary$f5_nbrAvgVarQualTooLow, 7L)
+    expect_equal(res$filterSummary$f6_nbrTooManyNinVar, 0L)
+    expect_equal(res$filterSummary$f7_nbrTooManyNinUMI, 0L)
+    expect_equal(res$filterSummary$f8_nbrTooManyBestWTHits, 0L)
+    expect_equal(res$filterSummary$f9_nbrMutQualTooLow, 0L)
+    expect_equal(res$filterSummary$f10a_nbrTooManyMutCodons, 394L)
+    expect_equal(res$filterSummary$f10b_nbrTooManyMutBases, 0L)
+    expect_equal(res$filterSummary$f11_nbrForbiddenCodons, 0L)
+    expect_equal(res$filterSummary$f12_nbrTooManyMutConstant, 0L)
+    expect_equal(res$filterSummary$f13_nbrTooManyBestConstantHits, 0L)
+    expect_equal(res$filterSummary$nbrRetained, 285L)
+})
