@@ -11,7 +11,7 @@ observed variable sequences (sequence pairs) in rows and samples in columns."></
 
     <a class="navbar-brand me-2" href="../index.html">mutscan</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,6 +24,7 @@ observed variable sequences (sequence pairs) in rows and samples in columns."></
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/fmicompbio/mutscan/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -33,7 +34,7 @@ observed variable sequences (sequence pairs) in rows and samples in columns."></
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Summarize and collapse multiple mutational scanning experiments</h1>
-
+      <small class="dont-index">Source: <a href="https://github.com/fmicompbio/mutscan/blob/master/R/summarizeExperiment.R" class="external-link"><code>R/summarizeExperiment.R</code></a></small>
       <div class="d-none name"><code>summarizeExperiment.Rd</code></div>
     </div>
 
@@ -61,8 +62,8 @@ Names are used to link the objects to the metadata provided in
 <dt id="arg-coldata">coldata<a class="anchor" aria-label="anchor" href="#arg-coldata"></a></dt>
 <dd><p>A <code>data.frame</code> with at least one column "Name", which
 will be used to link to objects in <code>x</code>. A potentially subset and
-reordered version of <code>coldata</code> is stored in the <code>colData</code> of the
-returned <code><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">SummarizedExperiment</a></code>.</p></dd>
+reordered version of <code>coldata</code> is stored in the <code>colData</code> of
+the returned <code><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">SummarizedExperiment</a></code>.</p></dd>
 
 
 <dt id="arg-counttype">countType<a class="anchor" aria-label="anchor" href="#arg-counttype"></a></dt>
@@ -76,16 +77,18 @@ unique UMIs observed for each sequence (pair).</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">SummarizedExperiment</a></code> <code>x</code>
     with</p><dl><dt>assays(x)$counts</dt>
-<dd><p>containing the observed number of sequences or
-        sequence pairs (if <code>countType</code> = "reads"), or the observed number of
-        unique UMIs for each sequence or sequence pair (if <code>countType</code> =
-        "umis").</p></dd>
+<dd><p>containing the observed number of sequences
+        or sequence pairs (if <code>countType</code> = "reads"), or the observed
+        number of unique UMIs for each sequence or sequence pair (if
+        <code>countType</code> = "umis").</p></dd>
 
         <dt>rowData(x)</dt>
-<dd><p>containing the unique sequences or sequence pairs.</p></dd>
+<dd><p>containing the unique sequences or sequence
+        pairs.</p></dd>
 
         <dt>colData(x)</dt>
-<dd><p>containing the metadata provided by <code>coldata</code>.</p></dd>
+<dd><p>containing the metadata provided by
+        <code>coldata</code>.</p></dd>
 
 
 </dl></div>
@@ -102,8 +105,9 @@ unique UMIs observed for each sequence (pair).</p></dd>
 <span class="r-in"><span>                               package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span>, </span></span>
 <span class="r-in"><span>    elementsForward <span class="op">=</span> <span class="st">"SUCV"</span>, elementLengthsForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">18</span>, <span class="fl">96</span><span class="op">)</span>, </span></span>
 <span class="r-in"><span>    constantForward <span class="op">=</span> <span class="st">"AACCGGAGGAGGGAGCTG"</span>, </span></span>
-<span class="r-in"><span>    wildTypeForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>FOS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC"</span>, </span></span>
-<span class="r-in"><span>                                     <span class="st">"TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    wildTypeForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>FOS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="st">"ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC"</span>, </span></span>
+<span class="r-in"><span>        <span class="st">"TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    nbrMutatedCodonsMaxForward <span class="op">=</span> <span class="fl">1</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co">## Output sample</span></span></span>
@@ -112,8 +116,9 @@ unique UMIs observed for each sequence (pair).</p></dd>
 <span class="r-in"><span>                               package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span>, </span></span>
 <span class="r-in"><span>    elementsForward <span class="op">=</span> <span class="st">"SUCV"</span>, elementLengthsForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">18</span>, <span class="fl">96</span><span class="op">)</span>, </span></span>
 <span class="r-in"><span>    constantForward <span class="op">=</span> <span class="st">"AACCGGAGGAGGGAGCTG"</span>, </span></span>
-<span class="r-in"><span>    wildTypeForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>FOS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC"</span>, </span></span>
-<span class="r-in"><span>                                     <span class="st">"TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    wildTypeForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>FOS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="st">"ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC"</span>, </span></span>
+<span class="r-in"><span>        <span class="st">"TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA"</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    nbrMutatedCodonsMaxForward <span class="op">=</span> <span class="fl">1</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co">## Combine</span></span></span>
@@ -146,7 +151,7 @@ unique UMIs observed for each sequence (pair).</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.9000.</p>
 </div>
 
     </footer></div>

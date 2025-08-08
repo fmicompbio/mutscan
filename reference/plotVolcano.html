@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mutscan</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,6 +20,7 @@
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/fmicompbio/mutscan/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -29,7 +30,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Construct a volcano plot</h1>
-
+      <small class="dont-index">Source: <a href="https://github.com/fmicompbio/mutscan/blob/master/R/plotResults.R" class="external-link"><code>R/plotResults.R</code></a></small>
       <div class="d-none name"><code>plotVolcano.Rd</code></div>
     </div>
 
@@ -110,10 +111,11 @@ be labeled by the corresponding row names. Only used if
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE102901_cis_se.rds"</span>,</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/SummarizedExperiment" class="external-link">SummarizedExperiment</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE102901_cis_se.rds"</span>,</span></span>
 <span class="r-in"><span>                          package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">200</span>, <span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Replicate</span> <span class="op">+</span> <span class="va">Condition</span>,</span></span>
-<span class="r-in"><span>                       data <span class="op">=</span> <span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                       data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="calculateRelativeFC.html">calculateRelativeFC</a></span><span class="op">(</span><span class="va">se</span>, <span class="va">design</span>, coef <span class="op">=</span> <span class="st">"Conditioncis_output"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">plotVolcano</span><span class="op">(</span><span class="va">res</span>, pointSize <span class="op">=</span> <span class="st">"large"</span>, nTopToLabel <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plotVolcano-1.png" alt="" width="700" height="433"></span>
@@ -129,7 +131,7 @@ be labeled by the corresponding row names. Only used if
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.9000.</p>
 </div>
 
     </footer></div>

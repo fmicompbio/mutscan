@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mutscan</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,6 +20,7 @@
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/fmicompbio/mutscan/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -29,7 +30,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Create a conversion table for collapsing similar sequences</h1>
-
+      <small class="dont-index">Source: <a href="https://github.com/fmicompbio/mutscan/blob/master/R/RcppExports.R" class="external-link"><code>R/RcppExports.R</code></a></small>
       <div class="d-none name"><code>groupSimilarSequences.Rd</code></div>
     </div>
 
@@ -42,10 +43,10 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">groupSimilarSequences</span><span class="op">(</span></span>
 <span>  <span class="va">seqs</span>,</span>
 <span>  <span class="va">scores</span>,</span>
-<span>  <span class="va">collapseMaxDist</span>,</span>
-<span>  <span class="va">collapseMinScore</span>,</span>
-<span>  <span class="va">collapseMinRatio</span>,</span>
-<span>  <span class="va">verbose</span></span>
+<span>  collapseMaxDist <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  collapseMinScore <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  collapseMinRatio <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -73,14 +74,14 @@ Hamming distance in terms of a fraction of sequence length:
 (<code>round(collapseMaxDist * nchar(sequence))</code>).
 A value greater or equal to 1 is rounded and directly used as the maximum
 allowed Hamming distance. Note that sequences can only be
-collapsed if they are all of the same length.</p></dd>
+collapsed if they are all of the same length. The default value is 0.</p></dd>
 
 
 <dt id="arg-collapseminscore">collapseMinScore<a class="anchor" aria-label="anchor" href="#arg-collapseminscore"></a></dt>
 <dd><p>Numeric scalar, indicating the minimum score
 required for a sequence to be considered as a representative for a
 group of similar sequences (i.e., to allow other sequences to be
-collapsed into it).</p></dd>
+collapsed into it). The default value is 0.</p></dd>
 
 
 <dt id="arg-collapseminratio">collapseMinRatio<a class="anchor" aria-label="anchor" href="#arg-collapseminratio"></a></dt>
@@ -131,7 +132,7 @@ sequences, respectively.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.9000.</p>
 </div>
 
     </footer></div>

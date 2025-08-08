@@ -11,7 +11,7 @@ The observed counts for the WT variants can be used as offsets in the model."></
 
     <a class="navbar-brand me-2" href="../index.html">mutscan</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,6 +24,7 @@ The observed counts for the WT variants can be used as offsets in the model."></
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/fmicompbio/mutscan/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -33,7 +34,7 @@ The observed counts for the WT variants can be used as offsets in the model."></
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Calculate logFCs relative to WT using edgeR</h1>
-
+      <small class="dont-index">Source: <a href="https://github.com/fmicompbio/mutscan/blob/master/R/calculateRelativeFC.R" class="external-link"><code>R/calculateRelativeFC.R</code></a></small>
       <div class="d-none name"><code>calculateRelativeFC.Rd</code></div>
     </div>
 
@@ -81,10 +82,10 @@ same order as the columns in <code>se</code>.</p></dd>
 
 <dt id="arg-wtrows">WTrows<a class="anchor" aria-label="anchor" href="#arg-wtrows"></a></dt>
 <dd><p>Vector of row names that will be used as the reference when
-calculating logFCs and statistics. If more than one value is provided, the
-sum of the corresponding counts is used to generate offsets. If NULL,
-offsets will be defined as the effective library sizes (using TMM
-normalization factors).</p></dd>
+calculating logFCs and statistics. If more than one value is provided,
+the sum of the corresponding counts is used to generate offsets. If
+<code>NULL</code>, offsets will be defined as the effective library sizes
+(using TMM normalization factors).</p></dd>
 
 
 <dt id="arg-selassay">selAssay<a class="anchor" aria-label="anchor" href="#arg-selassay"></a></dt>
@@ -104,9 +105,9 @@ logFCs.</p></dd>
 
 <dt id="arg-normmethod">normMethod<a class="anchor" aria-label="anchor" href="#arg-normmethod"></a></dt>
 <dd><p>Character scalar indicating which normalization method
-should be used to calculate size factors. Should be either <code>"TMM"</code> or
-<code>"csaw"</code> when <code>WTrows</code> is <code>NULL</code>, and <code>"geomean"</code> or
-<code>"sum"</code> when <code>WTrows</code> is provided.</p></dd>
+should be used to calculate size factors. Should be either <code>"TMM"</code>
+or <code>"csaw"</code> when <code>WTrows</code> is <code>NULL</code>, and <code>"geomean"</code>
+or <code>"sum"</code> when <code>WTrows</code> is provided.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -121,10 +122,80 @@ framework (edgeR or limma).</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE102901_cis_se.rds"</span>,</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/SummarizedExperiment" class="external-link">SummarizedExperiment</a></span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: MatrixGenerics</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: matrixStats</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Attaching package: ‘MatrixGenerics’</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The following objects are masked from ‘package:matrixStats’:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     colAlls, colAnyNAs, colAnys, colAvgsPerRowSet, colCollapse,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     colCounts, colCummaxs, colCummins, colCumprods, colCumsums,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     colDiffs, colIQRDiffs, colIQRs, colLogSumExps, colMadDiffs,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     colMads, colMaxs, colMeans2, colMedians, colMins, colOrderStats,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     colProds, colQuantiles, colRanges, colRanks, colSdDiffs, colSds,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     colSums2, colTabulates, colVarDiffs, colVars, colWeightedMads,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     colWeightedMeans, colWeightedMedians, colWeightedSds,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     colWeightedVars, rowAlls, rowAnyNAs, rowAnys, rowAvgsPerColSet,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     rowCollapse, rowCounts, rowCummaxs, rowCummins, rowCumprods,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     rowCumsums, rowDiffs, rowIQRDiffs, rowIQRs, rowLogSumExps,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     rowMadDiffs, rowMads, rowMaxs, rowMeans2, rowMedians, rowMins,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     rowOrderStats, rowProds, rowQuantiles, rowRanges, rowRanks,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     rowSdDiffs, rowSds, rowSums2, rowTabulates, rowVarDiffs, rowVars,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     rowWeightedMads, rowWeightedMeans, rowWeightedMedians,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     rowWeightedSds, rowWeightedVars</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: GenomicRanges</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: stats4</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: BiocGenerics</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: generics</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Attaching package: ‘generics’</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The following objects are masked from ‘package:base’:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     as.difftime, as.factor, as.ordered, intersect, is.element, setdiff,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     setequal, union</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Attaching package: ‘BiocGenerics’</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The following objects are masked from ‘package:stats’:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     IQR, mad, sd, var, xtabs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The following objects are masked from ‘package:base’:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     Filter, Find, Map, Position, Reduce, anyDuplicated, aperm, append,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     as.data.frame, basename, cbind, colnames, dirname, do.call,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     duplicated, eval, evalq, get, grep, grepl, is.unsorted, lapply,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     mapply, match, mget, order, paste, pmax, pmax.int, pmin, pmin.int,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     rank, rbind, rownames, sapply, saveRDS, table, tapply, unique,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     unsplit, which.max, which.min</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: S4Vectors</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Attaching package: ‘S4Vectors’</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The following object is masked from ‘package:utils’:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     findMatches</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The following objects are masked from ‘package:base’:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     I, expand.grid, unname</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: IRanges</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: Seqinfo</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: Biobase</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Welcome to Bioconductor</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     Vignettes contain introductory material; view with</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     'browseVignettes()'. To cite Bioconductor, see</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     'citation("Biobase")', and for packages 'citation("pkgname")'.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Attaching package: ‘Biobase’</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The following object is masked from ‘package:MatrixGenerics’:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     rowMedians</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The following objects are masked from ‘package:matrixStats’:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     anyMissing, rowMedians</span>
+<span class="r-in"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE102901_cis_se.rds"</span>,</span></span>
 <span class="r-in"><span>                          package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">200</span>, <span class="op">]</span></span></span>
-<span class="r-in"><span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Replicate</span> <span class="op">+</span> <span class="va">Condition</span>,</span></span>
-<span class="r-in"><span>                              data <span class="op">=</span> <span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Replicate</span> <span class="op">+</span> <span class="va">Condition</span>,</span></span>
+<span class="r-in"><span>                       data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>                              </span></span>
 <span class="r-in"><span><span class="co">## Calculate "absolute" log-fold changes with edgeR</span></span></span>
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">calculateRelativeFC</span><span class="op">(</span><span class="va">se</span>, <span class="va">design</span>, coef <span class="op">=</span> <span class="st">"Conditioncis_output"</span>, </span></span>
@@ -150,14 +221,14 @@ framework (edgeR or limma).</p>
 <span class="r-in"><span>                           method <span class="op">=</span> <span class="st">"edgeR"</span>, WTrows <span class="op">=</span> <span class="st">"f.0.WT"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 logFC    logCPM         F       PValue          FDR</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT   4.209817e-16 19.757846  0.000000 1.000000e+00 1.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT   3.461728e-16 19.757846  0.000000 1.000000e+00 1.000000e+00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC -6.078796e-01  4.553595  9.224434 1.337186e-02 1.601421e-02</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG -8.740695e-01  5.655807 24.839338 6.574158e-04 1.125187e-03</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC  1.207258e-01 12.506900 28.957264 3.790068e-04 7.018644e-04</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACG -1.016593e-01 13.217924 67.771782 1.324404e-05 4.905202e-05</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AGC -9.855150e-01  4.738963 18.559705 1.767705e-03 2.658202e-03</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          logFC_shrunk df.total df.prior df.test</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT   4.802398e-16 9.426352 6.426305       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f.0.WT   5.181525e-16 9.426352 6.426305       1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAC -6.661972e-01 9.423708 6.426305       1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> f.1.AAG -8.823465e-01 9.425925 6.426305       1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> f.1.ACC  1.207031e-01 9.426352 6.426305       1</span>
@@ -213,7 +284,7 @@ framework (edgeR or limma).</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.9000.</p>
 </div>
 
     </footer></div>

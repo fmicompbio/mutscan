@@ -23,7 +23,7 @@ reads), they will be concatenated and processed as a single unit."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">mutscan</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,7 @@ reads), they will be concatenated and processed as a single unit."></head><body>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/fmicompbio/mutscan/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -45,7 +46,7 @@ reads), they will be concatenated and processed as a single unit."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Process an experiment with multiple variable sequences</h1>
-
+      <small class="dont-index">Source: <a href="https://github.com/fmicompbio/mutscan/blob/master/R/linkMultipleVariants.R" class="external-link"><code>R/linkMultipleVariants.R</code></a></small>
       <div class="d-none name"><code>linkMultipleVariants.Rd</code></div>
     </div>
 
@@ -143,6 +144,60 @@ need to swap the 'forward' and 'reverse' specifications (since
     <p>Charlotte Soneson, Michael Stadler</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fqFile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"cisInput_1.fastq.gz"</span>, </span></span>
+<span class="r-in"><span>                      package <span class="op">=</span> <span class="st">"mutscan"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">linkMultipleVariants</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    combinedDigestParams <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>fastqForward <span class="op">=</span> <span class="va">fqFile</span>, </span></span>
+<span class="r-in"><span>                                elementsForward <span class="op">=</span> <span class="st">"SVCV"</span>, </span></span>
+<span class="r-in"><span>                                elementLengthsForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">18</span>, <span class="fl">96</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="co"># the first variable sequence is the UMI</span></span></span>
+<span class="r-in"><span>    umi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>fastqForward <span class="op">=</span> <span class="va">fqFile</span>, elementsForward <span class="op">=</span> <span class="st">"SVCS"</span>,</span></span>
+<span class="r-in"><span>               elementLengthsForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">18</span>, <span class="fl">96</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="co"># the second variable sequence is the amplicon variant</span></span></span>
+<span class="r-in"><span>    var <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>fastqForward <span class="op">=</span> <span class="va">fqFile</span>, elementsForward <span class="op">=</span> <span class="st">"SSCV"</span>,</span></span>
+<span class="r-in"><span>               elementLengthsForward <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">18</span>, <span class="fl">96</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>               collapseMaxDist <span class="op">=</span> <span class="fl">3</span>, collapseMinScore <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># conversion tables</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">convSeparate</span>, <span class="va">head</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $umi</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 2</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   mutantName sequence  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> AAAAATATTT AAAAATATTT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> AAAAGCCTCG AAAAGCCTCG</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> AAACATCAAC AAACATCAAC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> AAACCGGAGG AAACCGGAGG</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> AAACTACCGG AAACTACCGG</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> AAATAAAGAC AAATAAAGAC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $var</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 2</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   mutantName                                                            sequence</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                                                 <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> AAATATAACGTTGACGATGTAGCTTTAGGTGTCTGTAAAACAGGTGCCGAAGAAGCTGGAGTAACAGA… AAATATA…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> AAGAGCACACGTCTGAACTCCAGTCACATCACGATCTCGTATGCCGTCTTCTGCTTGAAAAAAAAAAA… AAGAGCA…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> AAGAGCACACGTCTGAACTCCAGTCACATCACGATCTCGTATGCCGTCTTCTGCTTGAAAAAAAAAAA… AAGAGCA…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> AATGATACACTCCAAACGGAGACAGACCAACTAGAATATGAGAAGTCTGCTTTGCAGACCGAGATTGC… AATGATA…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGC… AATGATA…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGC… AATGATA…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="co"># aggregated count table</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">countAggregated</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   umi        var                                                        nbrReads</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                                         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> AAACATCAAC ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAG…        1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> AAACCGGAGG CTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATT…        1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> AAACTACCGG ACTGATACACTCCAAGCGTAGACAGACCAACTAGAAGTTGAGAAGTCTGCTCTGCAG…        1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> AAATCCAGAC ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAG…        1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> AAATGAACGA ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAG…        1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> AAATGATCCG ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAG…        1</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
@@ -152,7 +207,7 @@ need to swap the 'forward' and 'reverse' specifications (since
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.9000.</p>
 </div>
 
     </footer></div>
