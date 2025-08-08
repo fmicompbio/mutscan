@@ -36,10 +36,50 @@ test_that("digestFastqs works as expected for cis experiments", {
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1000, 
+    nThreads = 1, chunkSize = 1000,
     maxReadLength = 1024
   )
 
+  ## hit maxNReads
+  Ldef0 <- Ldef
+  Ldef0$maxNReads <- 10
+  res0 <- do.call(digestFastqs, Ldef0)
+  expect_identical(res0$filterSummary$nbrTotal, 10L)
+
+  ## hit nTooManyNinUMI
+  Ldef0 <- Ldef
+  Ldef0$elementsForward <- "UV"
+  Ldef0$elementsReverse <- "UVS"
+  Ldef0$elementLengthsForward <- c(115, 10)
+  Ldef0$elementLengthsReverse = c(111, 10, -1)
+  Ldef0$adapterForward <- Ldef0$adapterReverse <- ""
+  Ldef0$primerForward <- Ldef0$primerReverse <- ""
+  Ldef0$wildTypeForward <- "GGAAAAACTA"
+  Ldef0$constantForward <- Ldef0$constantReverse <- ""
+  res0 <- do.call(digestFastqs, Ldef0)
+  expect_identical(res0$filterSummary$f7_nbrTooManyNinUMI, 497L)
+
+  ## hit nTooManyMutBases
+  Ldef0 <- Ldef
+  Ldef0$nbrMutatedBasesMaxForward <- 0
+  Ldef0$nbrMutatedBasesMaxReverse <- 0
+  Ldef0$nbrMutatedCodonsMaxForward <- -1
+  Ldef0$nbrMutatedCodonsMaxReverse <- -1
+  res0 <- do.call(digestFastqs, Ldef0)
+  expect_identical(res0$filterSummary$f10b_nbrTooManyMutBases, 753L)
+
+  ## hit not all WT sequences are of the same length
+  Ldef0 <- Ldef
+  Ldef0$maxNReads <- 100
+  Ldef0$useTreeWTmatch <- TRUE
+  Ldef0$mergeForwardReverse <- FALSE
+  Ldef0$wildTypeForward <- ""
+  Ldef0$wildTypeReverse <- c(w1 = "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTCTGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA",
+                             w2 = "GACAGACCAACTAGAAGTTACATGAGAAGTCTGCTTTGCAGACCGAGATTGCCA")
+  res0 <- do.call(digestFastqs, Ldef0)
+  expect_true(any(grepl("_w1", res0$summaryTable$mutantNameBase)))
+
+  ## now run with the unmodified arguments
   res <- do.call(digestFastqs, Ldef)
 
   ## Specify reverse WT - check that it's ignored
@@ -72,10 +112,10 @@ test_that("digestFastqs works as expected for cis experiments", {
     expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
   }
   for (nm in c("fastqForward", "fastqReverse")) {
-    expect_equal(res$parameters[[nm]], normalizePath(Ldef[[nm]], mustWork = FALSE), 
+    expect_equal(res$parameters[[nm]], normalizePath(Ldef[[nm]], mustWork = FALSE),
                  ignore_attr = TRUE)
   }
-  
+
   expect_equal(sum(res$summaryTable$nbrReads), res$filterSummary$nbrRetained)
   expect_equal(sum(res$summaryTable$nbrReads == 2), 11L)
   expect_equal(sort(res$summaryTable$mutantName[res$summaryTable$nbrReads == 2]),
@@ -116,11 +156,11 @@ test_that("digestFastqs works as expected for cis experiments", {
                "f:c.11T>G")
   expect_equal(res$summaryTable$mutantNameAAHGVS[res$summaryTable$sequence == example_seq],
                "f:p.(Leu4Arg)")
-  
-  expect_equal(res$summaryTable$sequenceAA, 
+
+  expect_equal(res$summaryTable$sequenceAA,
                as.character(Biostrings::translate(
                  Biostrings::DNAStringSet(res$summaryTable$sequence))))
-  expect_equal(as.numeric(res$summaryTable$varLengths), 
+  expect_equal(as.numeric(res$summaryTable$varLengths),
                nchar(res$summaryTable$sequence))
   expect_equal(sum(grepl("WT", res$summaryTable$mutantNameAA) & res$summaryTable$nbrMutBases > 0), 13)
   expect_true(all(grepl("silent", res$summaryTable$mutationTypes[grepl("WT", res$summaryTable$mutantNameAA) & res$summaryTable$nbrMutBases > 0])))
@@ -198,7 +238,7 @@ test_that("digestFastqs works as expected when specifying max nbr of mutated bas
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1000, 
+    nThreads = 1, chunkSize = 1000,
     maxReadLength = 125
   )
 
@@ -233,7 +273,7 @@ test_that("digestFastqs works as expected when specifying max nbr of mutated bas
     expect_equal(res$parameters[[nm]], Ldef[[nm]], ignore_attr = TRUE)
   }
   for (nm in c("fastqForward", "fastqReverse")) {
-    expect_equal(res$parameters[[nm]], normalizePath(Ldef[[nm]], mustWork = FALSE), 
+    expect_equal(res$parameters[[nm]], normalizePath(Ldef[[nm]], mustWork = FALSE),
                  ignore_attr = TRUE)
   }
 
@@ -270,7 +310,7 @@ test_that("digestFastqs works as expected when specifying max nbr of mutated bas
                         "GCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")
   expect_equal(res$summaryTable$mutantName[res$summaryTable$sequence == example_seq],
                "f.11.G")
-  expect_equal(res$summaryTable$mutantNameAA[res$summaryTable$sequence == example_seq], 
+  expect_equal(res$summaryTable$mutantNameAA[res$summaryTable$sequence == example_seq],
                "f.4.R")
   expect_equal(res$summaryTable$mutantNameBase[res$summaryTable$sequence == example_seq],
                "f.11.G")
@@ -280,7 +320,7 @@ test_that("digestFastqs works as expected when specifying max nbr of mutated bas
                "f:c.11T>G")
   expect_equal(res$summaryTable$mutantNameAAHGVS[res$summaryTable$sequence == example_seq],
                "f:p.(Leu4Arg)")
-  
+
   expect_equal(sum(res$errorStatistics$nbrMatchForward + res$errorStatistics$nbrMismatchForward),
                nchar(Ldef$constantForward[1]) * res$filterSummary$nbrRetained)
   expect_equal(sum(res$errorStatistics$nbrMatchReverse + res$errorStatistics$nbrMismatchReverse),
@@ -348,7 +388,7 @@ test_that("digestFastqs gives the same results regardless of how WT matching is 
     filteredReadsFastqForward = "",
     filteredReadsFastqReverse = "",
     maxNReads = -1, verbose = FALSE,
-    nThreads = 1, chunkSize = 1000, 
+    nThreads = 1, chunkSize = 1000,
     maxReadLength = 1024
   )
 

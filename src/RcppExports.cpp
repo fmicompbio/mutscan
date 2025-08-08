@@ -23,6 +23,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// complement
+char complement(char n);
+RcppExport SEXP _mutscan_complement(SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< char >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(complement(n));
+    return rcpp_result_gen;
+END_RCPP
+}
 // compareCodonPositions
 bool compareCodonPositions(std::string a, std::string b, const char mutNameDelimiter);
 RcppExport SEXP _mutscan_compareCodonPositions(SEXP aSEXP, SEXP bSEXP, SEXP mutNameDelimiterSEXP) {
@@ -71,6 +82,26 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const std::string >::type mutNameDelimiter(mutNameDelimiterSEXP);
     Rcpp::traits::input_parameter< const std::string >::type wtSeq(wtSeqSEXP);
     rcpp_result_gen = Rcpp::wrap(test_makeAAHGVS(mutationsSorted, mutNameDelimiter, wtSeq));
+    return rcpp_result_gen;
+END_RCPP
+}
+// test_compareToWildtype
+Rcpp::List test_compareToWildtype(const std::string varSeq, const std::string wtSeq, const std::vector<int> varIntQual, const std::vector<std::string> forbiddenCodons_vect, const double mutatedPhredMin, const int nbrMutatedCodonsMax, const std::string codonPrefix, const int nbrMutatedBasesMax, const std::string mutNameDelimiter, const bool collapseToWT);
+RcppExport SEXP _mutscan_test_compareToWildtype(SEXP varSeqSEXP, SEXP wtSeqSEXP, SEXP varIntQualSEXP, SEXP forbiddenCodons_vectSEXP, SEXP mutatedPhredMinSEXP, SEXP nbrMutatedCodonsMaxSEXP, SEXP codonPrefixSEXP, SEXP nbrMutatedBasesMaxSEXP, SEXP mutNameDelimiterSEXP, SEXP collapseToWTSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const std::string >::type varSeq(varSeqSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type wtSeq(wtSeqSEXP);
+    Rcpp::traits::input_parameter< const std::vector<int> >::type varIntQual(varIntQualSEXP);
+    Rcpp::traits::input_parameter< const std::vector<std::string> >::type forbiddenCodons_vect(forbiddenCodons_vectSEXP);
+    Rcpp::traits::input_parameter< const double >::type mutatedPhredMin(mutatedPhredMinSEXP);
+    Rcpp::traits::input_parameter< const int >::type nbrMutatedCodonsMax(nbrMutatedCodonsMaxSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type codonPrefix(codonPrefixSEXP);
+    Rcpp::traits::input_parameter< const int >::type nbrMutatedBasesMax(nbrMutatedBasesMaxSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type mutNameDelimiter(mutNameDelimiterSEXP);
+    Rcpp::traits::input_parameter< const bool >::type collapseToWT(collapseToWTSEXP);
+    rcpp_result_gen = Rcpp::wrap(test_compareToWildtype(varSeq, wtSeq, varIntQual, forbiddenCodons_vect, mutatedPhredMin, nbrMutatedCodonsMax, codonPrefix, nbrMutatedBasesMax, mutNameDelimiter, collapseToWT));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -282,10 +313,12 @@ RcppExport SEXP _rcpp_module_boot_mod_BKtree();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_mutscan_calcNearestStringDist", (DL_FUNC) &_mutscan_calcNearestStringDist, 3},
+    {"_mutscan_complement", (DL_FUNC) &_mutscan_complement, 1},
     {"_mutscan_compareCodonPositions", (DL_FUNC) &_mutscan_compareCodonPositions, 3},
     {"_mutscan_translateString", (DL_FUNC) &_mutscan_translateString, 1},
     {"_mutscan_makeBaseHGVS", (DL_FUNC) &_mutscan_makeBaseHGVS, 4},
     {"_mutscan_test_makeAAHGVS", (DL_FUNC) &_mutscan_test_makeAAHGVS, 3},
+    {"_mutscan_test_compareToWildtype", (DL_FUNC) &_mutscan_test_compareToWildtype, 10},
     {"_mutscan_test_decomposeRead", (DL_FUNC) &_mutscan_test_decomposeRead, 13},
     {"_mutscan_test_mergeReadPairPartial", (DL_FUNC) &_mutscan_test_mergeReadPairPartial, 12},
     {"_mutscan_findClosestRefSeq", (DL_FUNC) &_mutscan_findClosestRefSeq, 4},

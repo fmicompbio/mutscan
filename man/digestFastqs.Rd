@@ -47,9 +47,6 @@ digestFastqs(
   mutNameDelimiter = ".",
   constantMaxDistForward = -1,
   constantMaxDistReverse = -1,
-  variableCollapseMaxDist = deprecated(),
-  variableCollapseMinReads = deprecated(),
-  variableCollapseMinRatio = deprecated(),
   umiCollapseMaxDist = 0,
   filteredReadsFastqForward = "",
   filteredReadsFastqReverse = "",
@@ -110,8 +107,8 @@ but there can be at most one occurrence of P. If a given letter is
 included multiple times, the corresponding sequences will be 
 concatenated in the output.}
 
-\item{elementLengthsForward, elementLengthsReverse}{Numeric vectors containing
-the lengths of each read component from 
+\item{elementLengthsForward, elementLengthsReverse}{Numeric vectors 
+containing the lengths of each read component from 
 \code{elementsForward}/\code{elementsReverse}, respectively. If the 
 length of one element is set to -1, it will be inferred from the other 
 lengths (as the remainder of the read). At most one number (or one 
@@ -119,11 +116,11 @@ number on each side of the primer P) can be set to -1. The indicated
 length of the primer is not used (instead it's inferred from the 
 provided primer sequence) and can also be set to -1.}
 
-\item{primerForward, primerReverse}{Character vectors, representing the primer
-sequence(s) for forward/reverse reads, respectively. Only read pairs that
-contain perfect matches to both the forward and reverse primers (if 
-given) will be retained. Multiple primers can be specified - they will be
-considered in order and the first match will be used.}
+\item{primerForward, primerReverse}{Character vectors, representing the 
+primer sequence(s) for forward/reverse reads, respectively. Only read 
+pairs that contain perfect matches to both the forward and reverse 
+primers (if given) will be retained. Multiple primers can be specified - 
+they will be considered in order and the first match will be used.}
 
 \item{wildTypeForward, wildTypeReverse}{Character scalars or named character
 vectors, the wild type sequence for the forward and reverse variable 
@@ -181,13 +178,14 @@ any mutated base has a Phred score lower than \code{mutatedPhredMin},
 the read (pair) will be discarded.}
 
 \item{mutNameDelimiter}{Character scalar, the delimiter used in the naming 
-of mutants. Generally, mutants will be named as XX{.}YY{.}NNN, where XX 
-is the closest provided reference sequence, YY is the mutated base or 
+of mutants. Generally, mutants will be named as XX\{.\}YY\{.\}NNN, where 
+XX is the closest provided reference sequence, YY is the mutated base or 
 codon number (depending on whether \code{nbrMutatedBases*} or 
 \code{nbrMutatedCodons*} is specified), and NNN is the
-mutated base or codon. Here, {.} is the provided \code{mutNameDelimiter}. 
-The delimiter must be a single character (not "_"), and can not appear 
-in any of the provided reference sequence names.}
+mutated base or codon. Here, \{.\} is the provided 
+\code{mutNameDelimiter}. The delimiter must be a single character 
+(not "_"), and can not appear in any of the provided reference sequence 
+names.}
 
 \item{constantMaxDistForward, constantMaxDistReverse}{Numeric scalars, the 
 maximum allowed Hamming distance between the extracted and expected 
@@ -195,17 +193,13 @@ constant sequence. If multiple constant sequences are provided, the most
 similar one is used. Reads with a larger distance to the expected 
 constant sequence are discarded. If set to -1, no filtering is done.}
 
-\item{variableCollapseMaxDist, variableCollapseMinReads, variableCollapseMinRatio}{Deprecated. Collapsing of variable sequences is no longer performed in 
-\code{digestFastqs}. Please use \code{collapseMutantsBySimilarity} 
-instead.}
-
 \item{umiCollapseMaxDist}{Numeric scalar defining 
 the tolerances for collapsing similar UMI sequences. If the value is 
 in [0, 1), it defines the maximal Hamming distance in terms of a 
 fraction of sequence length:
 (\code{round(umiCollapseMaxDist * nchar(umiSeq))}).
-A value greater or equal to 1 is rounded and directly used as the maximum
-allowed Hamming distance.}
+A value greater or equal to 1 is rounded and directly used as the 
+maximum allowed Hamming distance.}
 
 \item{filteredReadsFastqForward, filteredReadsFastqReverse}{Character 
 scalars, the names of a (pair of) FASTQ file(s) where filtered-out reads 
@@ -233,20 +227,21 @@ the \code{chunkSize} to be decreased.}
 A list with four entries:
 \describe{
 \item{summaryTable}{A \code{data.frame} that contains, for each observed
-mutation combination, the corresponding variable region sequences (or pair of
-sequences), the number of observed such sequences, and the number of unique
-UMIs observed for the sequence. It also has additional columns: 'maxNbrReads'
-contains the number of reads for the most frequent observed sequence
-represented by the feature (only relevant if similar variable regions are
-collapsed). 'nbrMutBases', 'nbrMutCodons' and 'nbrMutAAs' give the number of
-mutated bases, codons or amino acids in each variant. Alternative variant
-names based on base, codon or amino acid sequence are provided in columns
-'mutantNameBase', 'mutantNameCodon', 'mutantNameAA'. In addition,
-'mutantNameBaseHGVS' and 'mutantNameAAHGVS' give base- and amino acid-based
-names following the HGVS nomenclature (https://varnomen.hgvs.org/). Please
-note that the provided reference sequence names are used for the HGVS
-sequence identifiers. It is up to the user to use appropriately named 
-reference sequences in order to obtain valid HGVS variant names.}
+mutation combination, the corresponding variable region sequences (or pair 
+of sequences), the number of observed such sequences, and the number of 
+unique UMIs observed for the sequence. It also has additional columns: 
+'maxNbrReads' contains the number of reads for the most frequent observed 
+sequence represented by the feature (only relevant if similar variable 
+regions are collapsed). 'nbrMutBases', 'nbrMutCodons' and 'nbrMutAAs' give 
+the number of mutated bases, codons or amino acids in each variant. 
+Alternative variant names based on base, codon or amino acid sequence are 
+provided in columns mutantNameBase', 'mutantNameCodon', 'mutantNameAA'. In 
+addition, mutantNameBaseHGVS' and 'mutantNameAAHGVS' give base- and amino 
+acid-based names following the HGVS nomenclature 
+(https://varnomen.hgvs.org/). Please note that the provided reference 
+sequence names are used for the HGVS sequence identifiers. It is up to the 
+user to use appropriately named reference sequences in order to obtain 
+valid HGVS variant names.}
 \item{filterSummary}{A \code{data.frame} that contains the number of input
 reads, the number of reads filtered out in the processing, and the number of
 retained reads. The filters are named according to the convention
@@ -255,19 +250,19 @@ applied, and "filter" indicates the type of filter. Note that filters are
 applied successively, and the reads filtered out in one step are not
 considered for successive filtering steps.}
 \item{errorStatistics}{A \code{data.frame} that contains, for each Phred
-quality score between 0 and 99, the number of bases in the extracted constant
-sequences with that quality score that match/mismatch with the provided
-reference constant sequence.}
-\item{parameters}{A \code{list} with all parameter settings that were used in
-the processing. Also contains the version of the package and the time of
+quality score between 0 and 99, the number of bases in the extracted 
+constant sequences with that quality score that match/mismatch with the 
+provided reference constant sequence.}
+\item{parameters}{A \code{list} with all parameter settings that were used 
+in the processing. Also contains the version of the package and the time of
 processing.}
 }
 }
 \description{
 Read sequences for one or a pair of fastq files and digest them (extract
 umis, constant and variable parts, filter, extract mismatch information from
-constant and count the observed unique variable parts). Alternatively, primer
-sequences could be specified, in which case the sequence immediately
+constant and count the observed unique variable parts). Alternatively, 
+primer sequences could be specified, in which case the sequence immediately
 following the primer will be considered the variable sequence.
 }
 \details{
@@ -288,8 +283,8 @@ The processing of a read pair goes as follows:
  either the forward or reverse read (or the merged read).
  \item Filter out the read (pair) if the number of Ns in the variable region
  exceeds \code{variableNMaxForward}/\code{variableNMaxReverse}.
- \item Filter out the read (pair) if the number of Ns in the combined forward 
- and reverse UMI sequence exceeds \code{umiNMax}
+ \item Filter out the read (pair) if the number of Ns in the combined 
+ forward and reverse UMI sequence exceeds \code{umiNMax}
  \item If one or more wild type sequences (for the variable region) are
  provided, find the mismatches between the (forward/reverse) variable region
  and the provided wild type sequence (if more than one wild type sequence is
@@ -302,9 +297,9 @@ The processing of a read pair goes as follows:
  the codons encoded by
  \code{forbiddenMutatedCodonsForward}/\code{forbiddenMutatedCodonsReverse}.
  \item Assign a 'mutation name' to the read (pair). This name is a 
- combination of parts of the form XX{.}YY{.}NNN, where XX is the name of the 
- most similar reference sequence, YY is the mutated codon number, and NNN is 
- the mutated codon. {.} is a delimiter, specified via 
+ combination of parts of the form XX\{.\}YY\{.\}NNN, where XX is the name of 
+ the most similar reference sequence, YY is the mutated codon number, and 
+ NNN is the mutated codon. \{.\} is a delimiter, specified via 
  \code{mutNameDelimiter}. If no wildtype sequences are provided, the
  variable sequence will be used as the mutation name'.
 }
@@ -317,7 +312,7 @@ number of reads, and the number of unique UMIs, for each variable sequence
 ## See the vignette for complete worked-out examples for different types of 
 ## data sets
 
-## ----------------------------------------------------------------------- ## 
+## ---------------------------------------------------------------------- ## 
 ## Process a single-end data set, assume that the full read represents  
 ## the variable region
 out <- digestFastqs(
@@ -330,7 +325,7 @@ head(out$summaryTable)
 ## Filter summary
 out$filterSummary
 
-## ----------------------------------------------------------------------- ## 
+## ---------------------------------------------------------------------- ## 
 ## Process a single-end data set, specify the read as a combination of 
 ## UMI, constant region and variable region (skip the first base)
 out <- digestFastqs(
@@ -346,7 +341,7 @@ out$filterSummary
 ## Error statistics
 out$errorStatistics
 
-## ----------------------------------------------------------------------- ## 
+## ---------------------------------------------------------------------- ## 
 ## Process a single-end data set, specify the read as a combination of 
 ## UMI, constant region and variable region (skip the first base), provide 
 ## the wild type sequence to compare the variable region to and limit the 
@@ -356,8 +351,9 @@ out <- digestFastqs(
                                package = "mutscan"), 
     elementsForward = "SUCV", elementLengthsForward = c(1, 10, 18, 96), 
     constantForward = "AACCGGAGGAGGGAGCTG", 
-    wildTypeForward = c(FOS = paste0("ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
-                                     "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
+    wildTypeForward = c(FOS = paste0(
+        "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
+        "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
     nbrMutatedCodonsMaxForward = 1
 )
 ## Table with read counts and mutant information
@@ -367,7 +363,7 @@ out$filterSummary
 ## Error statistics
 out$errorStatistics
 
-## ----------------------------------------------------------------------- ## 
+## ---------------------------------------------------------------------- ## 
 ## Process a paired-end data set where both the forward and reverse reads 
 ## contain the same variable region and thus should be merged to generate 
 ## the final variable sequence, specify the reads as a combination of 
@@ -379,13 +375,15 @@ out <- digestFastqs(
                                package = "mutscan"),
     fastqReverse = system.file("extdata", "cisInput_2.fastq.gz",
                                package = "mutscan"), 
-    mergeForwardReverse = TRUE, revComplForward = FALSE, revComplReverse = TRUE, 
+    mergeForwardReverse = TRUE, 
+    revComplForward = FALSE, revComplReverse = TRUE, 
     elementsForward = "SUCV", elementLengthsForward = c(1, 10, 18, 96),
     elementsReverse = "SUCVS", elementLengthsReverse = c(1, 7, 17, 96, -1),
     constantForward = "AACCGGAGGAGGGAGCTG", 
     constantReverse = "GAGTTCATCCTGGCAGC",
-    wildTypeForward = c(FOS = paste0("ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
-                                     "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
+    wildTypeForward = c(FOS = paste0(
+        "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
+        "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
     nbrMutatedCodonsMaxForward = 1
 )
 ## Table with read counts and mutant information
@@ -395,7 +393,7 @@ out$filterSummary
 ## Error statistics
 out$errorStatistics
 
-## ----------------------------------------------------------------------- ## 
+## ---------------------------------------------------------------------- ## 
 ## Process a paired-end data set where the forward and reverse reads 
 ## contain variable regions corresponding to different proteins, and thus 
 ## should not be merged, specify the reads as a combination of 
@@ -412,10 +410,12 @@ out <- digestFastqs(
     elementsReverse = "SUCV", elementLengthsReverse = c(1, 8, 20, 96),
     constantForward = "AACCGGAGGAGGGAGCTG", 
     constantReverse = "GAAAAAGGAAGCTGGAGAGA",
-    wildTypeForward = c(FOS = paste0("ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
-                                     "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
-    wildTypeReverse = c(JUN = paste0("ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTC", 
-                                     "GGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT")), 
+    wildTypeForward = c(FOS = paste0(
+        "ACTGATACACTCCAAGCGGAGACAGACCAACTAGAAGATGAGAAGTC", 
+        "TGCTTTGCAGACCGAGATTGCCAACCTGCTGAAGGAGAAGGAAAAACTA")),
+    wildTypeReverse = c(JUN = paste0(
+        "ATCGCCCGGCTGGAGGAAAAAGTGAAAACCTTGAAAGCTCAGAACTC", 
+        "GGAGCTGGCGTCCACGGCCAACATGCTCAGGGAACAGGTGGCACAGCTT")), 
     nbrMutatedCodonsMaxForward = 1,
     nbrMutatedCodonsMaxReverse = 1
 )

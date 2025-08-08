@@ -479,7 +479,7 @@ processReadsTrans <- function(Ldef) {
     } else {
       fqseq <- as.character(varForward)
     }
-    tbl <- as.data.frame(table(fqseq)) %>% dplyr::arrange(desc(Freq), fqseq) %>%
+    tbl <- as.data.frame(table(fqseq)) |> dplyr::arrange(desc(Freq), fqseq) |>
       dplyr::mutate(fqseq = as.character(fqseq))
     tbl$umis <- ""
     for (i in seq_len(nrow(tbl))) {

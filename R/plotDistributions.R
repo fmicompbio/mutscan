@@ -21,7 +21,7 @@
 #' @importFrom tibble rownames_to_column
 #' @importFrom tidyr gather
 #' @importFrom dplyr group_by arrange mutate desc ungroup left_join
-#' @importFrom SummarizedExperiment colData assay
+#' @importFrom SummarizedExperiment colData assay assayNames
 #' @importFrom ggplot2 ggplot scale_x_log10 scale_y_log10 labs geom_line 
 #'     facet_wrap geom_density geom_histogram theme_minimal theme 
 #'     element_text aes
@@ -37,35 +37,36 @@ plotDistributions <- function(se, selAssay = "counts",
                               facet = FALSE, pseudocount = 0) {
     .assertVector(x = se, type = "SummarizedExperiment")
     .assertScalar(x = selAssay, type = "character", 
-                  validValues = SummarizedExperiment::assayNames(se))
+                  validValues = assayNames(se))
     if (!is.null(groupBy)) {
-        .assertScalar(x = groupBy, type = "character",
-                      validValues = colnames(SummarizedExperiment::colData(se)))
+        .assertScalar(
+            x = groupBy, type = "character",
+            validValues = colnames(colData(se)))
     }
     .assertScalar(x = plotType, type = "character", 
                   validValues = c("density", "knee", "histogram"))
     .assertScalar(x = facet, type = "logical")
     .assertScalar(x = pseudocount, type = "numeric", rngIncl = c(0, Inf))
-
+    
     ## Define a common theme to use for the plots
     commonTheme <- list(
-        ggplot2::theme_minimal(),
-        ggplot2::theme(axis.text = ggplot2::element_text(size = 12),
-                       axis.title = ggplot2::element_text(size = 14))
+        theme_minimal(),
+        theme(axis.text = element_text(size = 12),
+              axis.title = element_text(size = 14))
     )
     
     df <- as.data.frame(as.matrix(
-        SummarizedExperiment::assay(se, selAssay, withDimnames = TRUE)
-    )) %>%
-        tibble::rownames_to_column("feature") %>%
-        tidyr::gather(key = "Name", value = "value", -"feature") %>%
-        dplyr::group_by(.data$Name) %>%
-        dplyr::arrange(dplyr::desc(.data$value)) %>%
-        dplyr::mutate(idx = seq_along(.data$value), 
-                      value = .data$value + pseudocount) %>%
-        dplyr::ungroup() %>%
-        dplyr::left_join(as.data.frame(SummarizedExperiment::colData(se)),
-                         by = "Name")
+        assay(se, selAssay, withDimnames = TRUE)
+    )) |>
+        rownames_to_column("feature") |>
+        gather(key = "Name", value = "value", -"feature") |>
+        group_by(.data$Name) |>
+        arrange(desc(.data$value)) |>
+        mutate(idx = seq_along(.data$value), 
+               value = .data$value + pseudocount) |>
+        ungroup() |>
+        left_join(as.data.frame(colData(se)),
+                  by = "Name")
     
     ## If the user doesn't explicitly group by any variable, impose grouping
     ## by the sample ID. In that case, don't color by sample ID if facetting
@@ -80,65 +81,71 @@ plotDistributions <- function(se, selAssay = "counts",
     
     ## Specify plot depending on desired type
     if (plotType == "knee") {
-        gg <- ggplot2::ggplot(df, ggplot2::aes(x = .data$idx, y = .data$value)) + 
-            ggplot2::scale_x_log10() + ggplot2::scale_y_log10() + 
-            ggplot2::labs(x = "Feature (sorted)", 
-                          y = paste0(selAssay, 
-                                     ifelse(pseudocount == 0, 
-                                            "", paste0(" + ", pseudocount))))
+        gg <- ggplot(df, aes(x = .data$idx, 
+                             y = .data$value)) + 
+            scale_x_log10() + scale_y_log10() + 
+            labs(x = "Feature (sorted)", 
+                 y = paste0(selAssay, 
+                            ifelse(pseudocount == 0, 
+                                   "", paste0(" + ", pseudocount))))
         if (facet) {
             if (colorFacetByName) {
-                gg <- gg + ggplot2::geom_line(ggplot2::aes(color = .data$Name))
+                gg <- gg + geom_line(aes(color = .data$Name))
             } else {
-                gg <- gg + ggplot2::geom_line(ggplot2::aes(group = .data$Name))
+                gg <- gg + geom_line(aes(group = .data$Name))
             }
             gg <- gg + 
-                ggplot2::facet_wrap(~ .data[[groupBy]])
+                facet_wrap(~ .data[[groupBy]])
         } else {
-            gg <- gg + ggplot2::geom_line(ggplot2::aes(group = .data$Name, 
-                                                       color = .data[[groupBy]]))
+            gg <- gg + 
+                geom_line(aes(group = .data$Name, 
+                              color = .data[[groupBy]]))
         }
     } else if (plotType == "density") {
-        gg <- ggplot2::ggplot(df, ggplot2::aes(x = .data$value)) + 
-            ggplot2::scale_x_log10() + 
-            ggplot2::labs(x = paste0(selAssay, 
-                                     ifelse(pseudocount == 0, 
-                                            "", paste0(" + ", pseudocount))),
-                          y = "Density")
+        gg <- ggplot(df, aes(x = .data$value)) + 
+            scale_x_log10() + 
+            labs(x = paste0(selAssay, 
+                            ifelse(pseudocount == 0, 
+                                   "", paste0(" + ", pseudocount))),
+                 y = "Density")
         if (facet) {
             if (colorFacetByName) {
-                gg <- gg + ggplot2::geom_density(ggplot2::aes(color = .data$Name))
+                gg <- gg + 
+                    geom_density(aes(color = .data$Name))
             } else {
-                gg <- gg + ggplot2::geom_density(ggplot2::aes(group = .data$Name))
+                gg <- gg + 
+                    geom_density(aes(group = .data$Name))
             }
             gg <- gg + 
-                ggplot2::facet_wrap(~ .data[[groupBy]])
+                facet_wrap(~ .data[[groupBy]])
         } else {
-            gg <- gg + ggplot2::geom_density(ggplot2::aes(group = .data$Name, 
-                                                          color = .data[[groupBy]]))
+            gg <- gg + 
+                geom_density(aes(group = .data$Name, 
+                                 color = .data[[groupBy]]))
         }
     } else if (plotType == "histogram") {
-        gg <- ggplot2::ggplot(df, ggplot2::aes(x = .data$value)) + 
-            ggplot2::scale_x_log10() + 
-            ggplot2::labs(x = paste0(selAssay, 
-                                     ifelse(pseudocount == 0, 
-                                            "", paste0(" + ", pseudocount))),
-                          y = "Count")
+        gg <- ggplot(df, aes(x = .data$value)) + 
+            scale_x_log10() + 
+            labs(x = paste0(selAssay, 
+                            ifelse(pseudocount == 0, 
+                                   "", paste0(" + ", pseudocount))),
+                 y = "Count")
         if (facet) {
             if (colorFacetByName) {
                 gg <- gg + 
-                    ggplot2::geom_histogram(ggplot2::aes(fill = .data$Name), 
-                                            bins = 50)
+                    geom_histogram(aes(fill = .data$Name), 
+                                   bins = 50)
             } else {
                 gg <- gg + 
-                    ggplot2::geom_histogram(ggplot2::aes(group = .data$Name), 
-                                            bins = 50)
+                    geom_histogram(aes(group = .data$Name), 
+                                   bins = 50)
             }
             gg <- gg +
-                ggplot2::facet_wrap(~ .data[[groupBy]])
+                facet_wrap(~ .data[[groupBy]])
         } else {
-            gg <- gg + ggplot2::geom_histogram(ggplot2::aes(group = .data$Name,
-                                                            fill = .data[[groupBy]]))
+            gg <- gg + 
+                geom_histogram(aes(group = .data$Name,
+                                   fill = .data[[groupBy]]))
         }
     }
     

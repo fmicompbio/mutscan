@@ -32,78 +32,99 @@ test_that("plotDistributions fails with incorrect arguments", {
 
 test_that("plotDistributions works as expected", {
     ## Defaults
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = NULL, plotType = "density",
-                                      facet = FALSE, pseudocount = 0), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = NULL, plotType = "density",
+                          facet = FALSE, pseudocount = 0)))
 
     ## Change plot type
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = NULL, plotType = "histogram",
-                                      facet = FALSE, pseudocount = 0), "ggplot")
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = NULL, plotType = "knee",
-                                      facet = FALSE, pseudocount = 0), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = NULL, plotType = "histogram",
+                          facet = FALSE, pseudocount = 0)))
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = NULL, plotType = "knee",
+                          facet = FALSE, pseudocount = 0)))
     
     ## groupBy Name
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = "Name", plotType = "density",
-                                      facet = FALSE, pseudocount = 0), "ggplot")
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = "Name", plotType = "histogram",
-                                      facet = FALSE, pseudocount = 0), "ggplot")
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = "Name", plotType = "knee",
-                                      facet = FALSE, pseudocount = 0), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = "Name", plotType = "density",
+                          facet = FALSE, pseudocount = 0)))
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = "Name", plotType = "histogram",
+                          facet = FALSE, pseudocount = 0)))
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = "Name", plotType = "knee",
+                          facet = FALSE, pseudocount = 0)))
     
     ## groupBy Condition
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = "Condition", plotType = "density",
-                                      facet = FALSE, pseudocount = 0), "ggplot")
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = "Condition", plotType = "histogram",
-                                      facet = FALSE, pseudocount = 0), "ggplot")
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = "Condition", plotType = "knee",
-                                      facet = FALSE, pseudocount = 0), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = "Condition", plotType = "density",
+                          facet = FALSE, pseudocount = 0)))
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = "Condition", plotType = "histogram",
+                          facet = FALSE, pseudocount = 0)))
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = "Condition", plotType = "knee",
+                          facet = FALSE, pseudocount = 0)))
     
     ## Facet
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = NULL, plotType = "density",
-                                      facet = TRUE, pseudocount = 0), "ggplot")
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = NULL, plotType = "histogram",
-                                      facet = TRUE, pseudocount = 0), "ggplot")
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = NULL, plotType = "knee",
-                                      facet = TRUE, pseudocount = 0), "ggplot")
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = "Name", plotType = "density",
-                                      facet = TRUE, pseudocount = 0), "ggplot")
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = "Name", plotType = "histogram",
-                                      facet = TRUE, pseudocount = 0), "ggplot")
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = "Name", plotType = "knee",
-                                      facet = TRUE, pseudocount = 0), "ggplot")
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = "Condition", plotType = "density",
-                                      facet = TRUE, pseudocount = 0), "ggplot")
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = "Condition", plotType = "histogram",
-                                      facet = TRUE, pseudocount = 0), "ggplot")
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = "Condition", plotType = "knee",
-                                      facet = TRUE, pseudocount = 0), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = NULL, plotType = "density",
+                          facet = TRUE, pseudocount = 0)))
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = NULL, plotType = "histogram",
+                          facet = TRUE, pseudocount = 0)))
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = NULL, plotType = "knee",
+                          facet = TRUE, pseudocount = 0)))
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = "Name", plotType = "density",
+                          facet = TRUE, pseudocount = 0)))
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = "Name", plotType = "histogram",
+                          facet = TRUE, pseudocount = 0)))
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = "Name", plotType = "knee",
+                          facet = TRUE, pseudocount = 0)))
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = "Condition", plotType = "density",
+                          facet = TRUE, pseudocount = 0)))
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = "Condition", plotType = "histogram",
+                          facet = TRUE, pseudocount = 0)))
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = "Condition", plotType = "knee",
+                          facet = TRUE, pseudocount = 0)))
     
     ## Increase pseudocount
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = "Condition", plotType = "density",
-                                      facet = FALSE, pseudocount = 2), "ggplot")
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = "Condition", plotType = "histogram",
-                                      facet = FALSE, pseudocount = 3), "ggplot")
-    expect_s3_class(plotDistributions(se = se, selAssay = "counts",
-                                      groupBy = "Condition", plotType = "knee",
-                                      facet = FALSE, pseudocount = 4), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = "Condition", plotType = "density",
+                          facet = FALSE, pseudocount = 2)))
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = "Condition", plotType = "histogram",
+                          facet = FALSE, pseudocount = 3)))
+    expect_true(ggplot2::is_ggplot(
+        plotDistributions(se = se, selAssay = "counts",
+                          groupBy = "Condition", plotType = "knee",
+                          facet = FALSE, pseudocount = 4)))
     
 })

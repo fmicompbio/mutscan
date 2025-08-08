@@ -36,69 +36,80 @@ test_that("plotFiltering fails with incorrect arguments", {
 
 test_that("plotFiltering works with correct arguments", {
     ## Defaults
-    expect_s3_class(plotFiltering(se = se, valueType = "reads", 
-                                  onlyActiveFilters = FALSE, 
-                                  displayNumbers = TRUE, numberSize = 4,
-                                  plotType = "remaining", facetBy = "sample"), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotFiltering(se = se, valueType = "reads", 
+                      onlyActiveFilters = FALSE, 
+                      displayNumbers = TRUE, numberSize = 4,
+                      plotType = "remaining", facetBy = "sample")))
     
     ## Fractions
-    expect_s3_class(plotFiltering(se = se, valueType = "fractions", 
-                                  onlyActiveFilters = FALSE, 
-                                  displayNumbers = TRUE, numberSize = 4,
-                                  plotType = "remaining", facetBy = "sample"), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotFiltering(se = se, valueType = "fractions", 
+                      onlyActiveFilters = FALSE, 
+                      displayNumbers = TRUE, numberSize = 4,
+                      plotType = "remaining", facetBy = "sample")))
     
     ## Only active filters
-    expect_s3_class(plotFiltering(se = se, valueType = "reads", 
-                                  onlyActiveFilters = TRUE, 
-                                  displayNumbers = TRUE, numberSize = 4,
-                                  plotType = "remaining", facetBy = "sample"), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotFiltering(se = se, valueType = "reads", 
+                      onlyActiveFilters = TRUE, 
+                      displayNumbers = TRUE, numberSize = 4,
+                      plotType = "remaining", facetBy = "sample")))
     
     ## Don't display numbers
-    expect_s3_class(plotFiltering(se = se, valueType = "reads", 
-                                  onlyActiveFilters = FALSE, 
-                                  displayNumbers = FALSE, numberSize = 4,
-                                  plotType = "remaining", facetBy = "sample"), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotFiltering(se = se, valueType = "reads", 
+                      onlyActiveFilters = FALSE, 
+                      displayNumbers = FALSE, numberSize = 4,
+                      plotType = "remaining", facetBy = "sample")))
     
     ## Change size of displayed numbers
-    expect_s3_class(plotFiltering(se = se, valueType = "reads", 
-                                  onlyActiveFilters = FALSE, 
-                                  displayNumbers = FALSE, numberSize = 2,
-                                  plotType = "remaining", facetBy = "sample"), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotFiltering(se = se, valueType = "reads", 
+                      onlyActiveFilters = FALSE, 
+                      displayNumbers = FALSE, numberSize = 2,
+                      plotType = "remaining", facetBy = "sample")))
     
     ## Reads + Filtered + Sample
-    expect_s3_class(plotFiltering(se = se, valueType = "reads", 
-                                  onlyActiveFilters = FALSE, 
-                                  displayNumbers = TRUE, numberSize = 4,
-                                  plotType = "filtered", facetBy = "sample"), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotFiltering(se = se, valueType = "reads", 
+                      onlyActiveFilters = FALSE, 
+                      displayNumbers = TRUE, numberSize = 4,
+                      plotType = "filtered", facetBy = "sample")))
 
     ## Reads + Filtered + Step
-    expect_s3_class(plotFiltering(se = se, valueType = "reads", 
-                                  onlyActiveFilters = FALSE, 
-                                  displayNumbers = TRUE, numberSize = 4,
-                                  plotType = "filtered", facetBy = "step"), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotFiltering(se = se, valueType = "reads", 
+                      onlyActiveFilters = FALSE, 
+                      displayNumbers = TRUE, numberSize = 4,
+                      plotType = "filtered", facetBy = "step")))
 
     ## Reads + Remaining + Step
-    expect_s3_class(plotFiltering(se = se, valueType = "reads", 
-                                  onlyActiveFilters = FALSE, 
-                                  displayNumbers = TRUE, numberSize = 4,
-                                  plotType = "remaining", facetBy = "step"), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotFiltering(se = se, valueType = "reads", 
+                      onlyActiveFilters = FALSE, 
+                      displayNumbers = TRUE, numberSize = 4,
+                      plotType = "remaining", facetBy = "step")))
 
     ## Fractions + Filtered + Sample
-    expect_s3_class(plotFiltering(se = se, valueType = "fractions", 
-                                  onlyActiveFilters = FALSE, 
-                                  displayNumbers = TRUE, numberSize = 4,
-                                  plotType = "filtered", facetBy = "sample"), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotFiltering(se = se, valueType = "fractions", 
+                      onlyActiveFilters = FALSE, 
+                      displayNumbers = TRUE, numberSize = 4,
+                      plotType = "filtered", facetBy = "sample")))
     
     ## Fractions + Filtered + Step
-    expect_s3_class(plotFiltering(se = se, valueType = "fractions", 
-                                  onlyActiveFilters = FALSE, 
-                                  displayNumbers = TRUE, numberSize = 4,
-                                  plotType = "filtered", facetBy = "step"), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotFiltering(se = se, valueType = "fractions", 
+                      onlyActiveFilters = FALSE, 
+                      displayNumbers = TRUE, numberSize = 4,
+                      plotType = "filtered", facetBy = "step")))
     
     ## Fractions + Remaining + Step
-    expect_s3_class(plotFiltering(se = se, valueType = "fractions", 
-                                  onlyActiveFilters = FALSE, 
-                                  displayNumbers = TRUE, numberSize = 4,
-                                  plotType = "remaining", facetBy = "step"), "ggplot")
+    expect_true(ggplot2::is_ggplot(
+        plotFiltering(se = se, valueType = "fractions", 
+                      onlyActiveFilters = FALSE, 
+                      displayNumbers = TRUE, numberSize = 4,
+                      plotType = "remaining", facetBy = "step")))
     
 })

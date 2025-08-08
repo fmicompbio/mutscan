@@ -59,10 +59,11 @@ If \code{interactivePlot} is \code{TRUE}, a \code{plotly}
 Construct an MA (mean-difference) plot
 }
 \examples{
+library(SummarizedExperiment)
 se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds",
                           package = "mutscan"))[1:200, ]
 design <- model.matrix(~ Replicate + Condition,
-                       data = SummarizedExperiment::colData(se))
+                       data = colData(se))
 res <- calculateRelativeFC(se, design, coef = "Conditioncis_output")
 plotMeanDiff(res, pointSize = "large", nTopToLabel = 3)
 

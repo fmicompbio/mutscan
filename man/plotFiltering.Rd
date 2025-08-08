@@ -23,8 +23,8 @@ plot the number of reads, or the fraction of the total number of reads,
 that are retained after/filtered out in each filtering step.}
 
 \item{onlyActiveFilters}{Logical scalar, whether to only include the 
-active filters (i.e., where any read was filtered out in any of the samples). 
-Defaults to \code{TRUE}.}
+active filters (i.e., where any read was filtered out in any of the 
+samples). Defaults to \code{TRUE}.}
 
 \item{displayNumbers}{Logical scalar, indicating whether to display the 
 number (or fraction) of reads retained at every filtering step.}

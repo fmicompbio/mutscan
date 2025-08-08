@@ -14,7 +14,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r, include = FALSE}
+```{r chunk-opts, include = FALSE}
 knitr::opts_chunk$set(
     collapse = TRUE,
     comment = "#>"
@@ -48,7 +48,7 @@ knitr::include_graphics("mutscan-overview.001.png")
 The `mutscan` package contains several small example FASTQ files 
 representing different types of experiments:
 
-```{r readTrans}
+```{r list-files}
 datadir <- system.file("extdata", package = "mutscan")
 dir(datadir)
 ```
@@ -102,33 +102,34 @@ As an example, a read with the following composition:
 would be specified to `digestFastqs()` by an elements string `"SUCV"`, 
 and an element length vector `c(1, 10, 18, 96)`. 
 
-The package can also accommodate designs with primer sequences. In this situation, 
-the primer acts as an 'anchor', and the read composition before and after the 
-primer is specified. For example, a read with the following composition:
+The package can also accommodate designs with primer sequences. In this 
+situation, the primer acts as an 'anchor', and the read composition before and 
+after the primer is specified. For example, a read with the following 
+composition:
 
 [unknown sequence] - [10 nt primer] - [variable region, constituting the remainder of the read]
 
 would be represented by an elements string `"SPV"`, and an element length 
 vector `c(-1, 10, -1)`, where the -1 indicates that the corresponding read part
-consists of the remaining part of the read, not accounted for by any of the other 
-specified parts. In addition, the sequence of the primer must be specified, and 
-any read where the primer is not present will be discarded. 
+consists of the remaining part of the read, not accounted for by any of the 
+other specified parts. In addition, the sequence of the primer must be 
+specified, and any read where the primer is not present will be discarded. 
 
 The forward and reverse reads can have different compositions. The user can 
 also specify whether the variable parts of the forward and/or
-reverse reads should be reverse complemented before being processed, and whether the
-variable regions of the forward and reverse reads should be merged into a single
-consensus sequence.
+reverse reads should be reverse complemented before being processed, and 
+whether the variable regions of the forward and reverse reads should be merged 
+into a single consensus sequence.
 
 ## Filtering 
 
-In addition to reading the FASTQ files, the `digestFastqs()` function will perform
-a series of filtering steps, in the following order:
+In addition to reading the FASTQ files, the `digestFastqs()` function will 
+perform a series of filtering steps, in the following order:
 
 * Search for perfect matches to forward/reverse adapter sequences, filter out
 the read pair if a match is found in either the forward or reverse read.
-* Search for perfect matches to forward/reverse primer sequences, filter out the
-read pair if not both are found.
+* Search for perfect matches to forward/reverse primer sequences, filter out 
+the read pair if not both are found.
 * Filter out reads whose length is not compatible with the indicated 
 composition.
 * If forward and reverse variable regions should be merged, filter out read
@@ -161,16 +162,16 @@ other reasons).
 # Processing TRANS data
 
 Here, we illustrate the processing of the provided TRANS experiment example
-data. We filter out reads with any adapter match, an average phred quality below
-20, any Ns in the UMI or variable sequence, more than one mutated codon, or a
-mutated codon ending with A or T (represented by the `NNW` value of the
+data. We filter out reads with any adapter match, an average phred quality 
+below 20, any Ns in the UMI or variable sequence, more than one mutated codon, 
+or a mutated codon ending with A or T (represented by the `NNW` value of the
 `forbiddenMutatedCodonsForward` and `forbiddenMutatedCodonsReverse` arguments). 
 In order to identify the number of mutations, we have to provide the wild type 
 sequences of _FOS_ and _JUN_ (forward and reverse reads, respectively). This 
 will additionally name the final mutants according to the positions and 
 sequences of the mutated codons. 
 
-```{r}
+```{r trans-digest}
 transInput <- digestFastqs(
     fastqForward = file.path(datadir, "transInput_1.fastq.gz"),
     fastqReverse = file.path(datadir, "transInput_2.fastq.gz"),
@@ -203,20 +204,20 @@ transInput <- digestFastqs(
 )
 ```
 
-The `digestFastqs()` function returns a list with four elements. The `parameters`
-list records all parameter values used during the processing, as well as the
-`mutscan` version and time of processing.
+The `digestFastqs()` function returns a list with four elements. The 
+`parameters` list records all parameter values used during the processing, as 
+well as the `mutscan` version and time of processing.
 
-```{r}
+```{r trans-pars}
 transInput$parameters
 ```
 
 The `filterSummary` data.frame contains a summary of the number of reads
 filtered out in each step. Note that for any given filtering step, only the
-reads retained by the previous filters are considered. The numbers in the filter
-column names indicate the order of the filters.
+reads retained by the previous filters are considered. The numbers in the 
+filter column names indicate the order of the filters.
 
-```{r}
+```{r trans-filter}
 transInput$filterSummary
 ```
 
@@ -225,15 +226,16 @@ each variable sequence pair. The underscore in the strings in the sequence
 column indicate the separation between the forward and reverse wild type 
 sequences. In addition, the table contains a column `mutantName`, which
 provides a shorthand notation for each mutant. The format of the values in this
-column is a combination of `WTS.xx.NNN` (separated by `_`), where `WTS` provides 
-the name of the closest matching wild type sequence (if only one, unnamed wild 
-type sequence is provided, the name will be `f/r` depending on if it corresponds
-to the forward/reverse read, respectively). The `xx` part indicates the mutated 
-codon or nucleotide number, and `NNN` gives the observed sequence for the mutated 
-codon or nucleotide. A sequence without mutations is named `WTS.0.WT`, where, 
-again, `WTS` is the name of the matching wild type sequence.
+column is a combination of `WTS.xx.NNN` (separated by `_`), where `WTS` 
+provides the name of the closest matching wild type sequence (if only one, 
+unnamed wild type sequence is provided, the name will be `f/r` depending on 
+if it corresponds to the forward/reverse read, respectively). The `xx` part 
+indicates the mutated codon or nucleotide number, and `NNN` gives the 
+observed sequence for the mutated codon or nucleotide. A sequence without 
+mutations is named `WTS.0.WT`, where, again, `WTS` is the name of the 
+matching wild type sequence.
 
-```{r}
+```{r trans-summary}
 head(transInput$summaryTable)
 ```
 
@@ -241,17 +243,19 @@ Finally, the `errorStatistics` data.frame lists the number of matching and
 mismatching bases in the constant sequences, stratified by the phred quality
 score (from 0 to 99).
 
-```{r}
+```{r trans-error}
 transInput$errorStatistics[rowSums(transInput$errorStatistics[, -1]) != 0, ]
 ```
 
 The `errorStatistics` output can be used to estimate the sequencing error rate:
 
-```{r errStats}
+```{r trans-error-stats}
 (propErrorsConstantF <- sum(transInput$errorStatistics$nbrMismatchForward) /
-   (nchar(transInput$parameters$constantForward) * transInput$filterSummary$nbrRetained))
+   (nchar(transInput$parameters$constantForward) * 
+        transInput$filterSummary$nbrRetained))
 (propErrorsConstantR <- sum(transInput$errorStatistics$nbrMismatchReverse) /
-   (nchar(transInput$parameters$constantReverse) * transInput$filterSummary$nbrRetained))
+   (nchar(transInput$parameters$constantReverse) * 
+        transInput$filterSummary$nbrRetained))
 ```
 
 # Processing CIS data
@@ -269,7 +273,7 @@ forward and reverse variable sequences are merged into one variable
 sequence, only one wild type sequence is provided (the `wildTypeReverse`
 argument will be ignored if specified).
 
-```{r}
+```{r cis-digest}
 cisInput <- digestFastqs(
     fastqForward = file.path(datadir, "cisInput_1.fastq.gz"),
     fastqReverse = file.path(datadir, "cisInput_2.fastq.gz"),
@@ -308,17 +312,17 @@ cisInput <- digestFastqs(
 )
 ```
 
-```{r}
+```{r cis-out}
 cisInput$parameters
 cisInput$filterSummary
 cisInput$errorStatistics[rowSums(cisInput$errorStatistics[, -1]) != 0, ]
 ```
 
-The `summaryTable` now provides the number of reads and unique UMIs observed for
-each variable sequence, and all values in the `mutNames` column will start
+The `summaryTable` now provides the number of reads and unique UMIs observed 
+for each variable sequence, and all values in the `mutNames` column will start
 with `FOS`.
 
-```{r}
+```{r cis-summary}
 head(cisInput$summaryTable)
 ```
 
@@ -331,7 +335,7 @@ sequences for the forward read. If multiple wild type sequences are provided
 like here, `mutscan` will match each read against all of them and find the 
 most similar one for each read.
 
-```{r}
+```{r def-primers}
 leu <- c(
     ATF2 = "GATCCTGATGAAAAAAGGAGAAAGTTTTTAGAGCGAAATAGAGCAGCAGCTTCAAGATGCCGACAAAAAAGGAAAGTCTGGGTTCAGTCTTTAGAGAAGAAAGCTGAAGACTTGAGTTCATTAAATGGTCAGCTGCAGAGTGAAGTCACCCTGCTGAGAAATGAAGTGGCACAGCTGAAACAGCTTCTTCTGGCT",
     ATF7 = "GATCCAGATGAGCGACGGCAGCGCTTTCTGGAGCGCAACCGGGCTGCAGCCTCCCGCTGCCGCCAAAAGCGAAAGCTGTGGGTGTCCTCCCTAGAGAAGAAGGCCGAAGAACTCACTTCTCAGAACATTCAGCTGAGTAATGAAGTCACATTACTACGCAATGAGGTGGCCCAGTTGAAACAGCTACTGTTAGCT",
@@ -382,14 +386,14 @@ leu <- c(
 )
 ```
 
-Next we process the data, not allowing any mismatches in the forward read, but 1
-mismatching codon in the reverse read. Now, we assume that the variable sequence
-starts immediately after the provided primers, and hence we don't specify any
-UMI/constant sequence lengths. For the forward read, the variable region is
-taken to be the remainder of the read (after the primer), whereas for the
-reverse read, we specify the variable sequence length to 96.
+Next we process the data, not allowing any mismatches in the forward read, but 
+1 mismatching codon in the reverse read. Now, we assume that the variable 
+sequence starts immediately after the provided primers, and hence we don't 
+specify any UMI/constant sequence lengths. For the forward read, the variable 
+region is taken to be the remainder of the read (after the primer), whereas 
+for the reverse read, we specify the variable sequence length to 96.
 
-```{r}
+```{r primers-digest}
 leujunt0 <- digestFastqs(
     fastqForward = file.path(datadir, "leujunt0_1.fastq.gz"),
     fastqReverse = file.path(datadir, "leujunt0_2.fastq.gz"),
@@ -424,12 +428,12 @@ leujunt0 <- digestFastqs(
 )
 ```
 
-```{r}
+```{r primers-out}
 leujunt0$parameters
 leujunt0$filterSummary
 ```
 
-```{r}
+```{r primers-summary}
 head(leujunt0$summaryTable)
 ```
 
@@ -445,7 +449,7 @@ process also the output sample for the TRANS experiment for which we
 processed the input sample above, and feed both outputs to 
 `summarizeExperiment()`.
 
-```{r combine}
+```{r combine-digest}
 transOutput <- digestFastqs(
     fastqForward = file.path(datadir, "transOutput_1.fastq.gz"),
     fastqReverse = file.path(datadir, "transOutput_2.fastq.gz"),
@@ -503,13 +507,13 @@ metadata(se)$countType
 
 # Collapsing count matrix to amino acids
 
-The \link{\code[SummarizedExperiment]{SummarizedExperiment}} object generated by
-`summarizeExperiment()` contains one row for each observed variant
+The \link{\code[SummarizedExperiment]{SummarizedExperiment}} object generated 
+by `summarizeExperiment()` contains one row for each observed variant
 (combination). This can be further collapsed by replacing the mutated codon by
 the corresponding amino acid, and aggregating the counts corresponding to the
 same mutated amino acid (combination).
 
-```{r}
+```{r collapse-aa}
 se_collapsed <- collapseMutantsByAA(se)
 head(assay(se_collapsed, "counts"))
 Matrix::colSums(assay(se_collapsed, "counts"))
@@ -524,7 +528,7 @@ full CIS data set from [@Diss2018], which has been processed using
 `digestFastqs()` as illustrated above, and summarized in a 
 `SummarizedExperiment` object provided with the package. 
 
-```{r}
+```{r read-se}
 se <- readRDS(file.path(datadir, "GSE102901_cis_se.rds"))
 ```
 
@@ -532,12 +536,12 @@ First, we can plot a summary of the filtering
 process, indicating the number of reads that were filtered out by 
 (or retained after) each step of the `mutscan` filtering. 
 
-```{r, fig.height=10, fig.width=8}
+```{r plot-filter-reads, fig.height=10, fig.width=8}
 plotFiltering(se, valueType = "reads", onlyActiveFilters = TRUE, 
               plotType = "remaining", facetBy = "sample", numberSize = 3)
 ```
 
-```{r, fig.height=10, fig.width=8}
+```{r plot-filter-frac, fig.height=10, fig.width=8}
 plotFiltering(se, valueType = "fractions", onlyActiveFilters = TRUE,
               plotType = "filtered", facetBy = "step", numberSize = 3)
 ```
@@ -545,14 +549,14 @@ plotFiltering(se, valueType = "fractions", onlyActiveFilters = TRUE,
 We can also generate a pairs plot displaying the correlation among the samples 
 in the data set. 
 
-```{r, fig.height=7}
+```{r plot-pairs, fig.height=7}
 plotPairs(se, selAssay = "counts")
 ```
 
 Additional plot functions can be used to visualize the total count per sample, 
 across all variants, or the distribution of variant counts per sample. 
 
-```{r}
+```{r plot-more}
 plotTotals(se, selAssay = "counts")
 plotDistributions(se, selAssay = "counts", plotType = "density", 
                   pseudocount = 1)
@@ -560,33 +564,35 @@ plotDistributions(se, selAssay = "counts", plotType = "density",
 
 Finally, we can create a full QC report as follows:
 
-```{r, eval=FALSE}
+```{r make-qc-report, eval=FALSE}
 generateQCReport(se, outFile = tempfile(fileext = ".html"))
 ```
 
 
 # Calculating fitness scores
 
-The function `calculateFitnessScore()` can be used to calculate fitness scores as 
-described in [@Diss2018]. The function requires the user to specify a `pairingCol`,
-containing the replicate ID for each sample; one or more `ODCols`, containing
-the optical density for each sample, and a `comparison`, which is a character
-vector of length 3 specifying the comparison to perform, of the form
-(`groupColumn`, `numerator`, `denominator`). Here, `groupColumn` is the name of
-the column in `colData(se)` that contains the grouping information, and
-`numerator` and `denominator` specify the values of this column representing the
-two groups to be compared.
+The function `calculateFitnessScore()` can be used to calculate fitness scores 
+as described in [@Diss2018]. The function requires the user to specify a 
+`pairingCol`, containing the replicate ID for each sample; one or more 
+`ODCols`, containing the optical density for each sample, and a 
+`comparison`, which is a character vector of length 3 specifying the 
+comparison to perform, of the form (`groupColumn`, `numerator`, 
+`denominator`). Here, `groupColumn` is the name of the column in `colData(se)` 
+that contains the grouping information, and `numerator` and `denominator` 
+specify the values of this column representing the two groups to be compared.
 
 Here, we illustrate the application of `calculateFitnessScore()` on the
 SummarizedExperiment object containing all the three CIS
 replicates from [@Diss2018].
 
-```{r}
+```{r calc-ppi}
 se_collapsed <- collapseMutantsByAA(se)
-ppis <- calculateFitnessScore(se = se_collapsed, pairingCol = "Replicate", 
-                              ODCols = c("OD1", "OD2"),
-                              comparison = c("Condition", "cis_output", "cis_input"),
-                              WTrows = "f.0.WT")
+ppis <- calculateFitnessScore(
+    se = se_collapsed, pairingCol = "Replicate", 
+    ODCols = c("OD1", "OD2"),
+    comparison = c("Condition", "cis_output", "cis_input"),
+    WTrows = "f.0.WT"
+)
 head(ppis[order(abs(rowMeans(ppis)), decreasing = TRUE), , drop = FALSE])
 
 ## The PPI score for the WT sequence is 1, by construction
@@ -595,20 +601,21 @@ ppis["f.0.WT", , drop = FALSE]
 
 # Scoring mutations with `edgeR` or `limma`
 
-As an alternative to the fitness scoring, `mutscan` can be used to model the observed
-counts using a generalized linear model (with `edgeR`) or a general linear model
-(with `limma`) and estimate a logFC and a p-value for the enrichment of each
-variant betwen two conditions (or more generally, in association with any
-predictor), compared to one or more WT sequences. Note that for this, at least
-two replicates are required.
+As an alternative to the fitness scoring, `mutscan` can be used to model the
+observed counts using a generalized linear model (with `edgeR`) or a general 
+linear model (with `limma`) and estimate a logFC and a p-value for the 
+enrichment of each variant betwen two conditions (or more generally, in 
+association with any predictor), compared to one or more WT sequences. Note 
+that for this, at least two replicates are required.
 
 We start by looking at the design matrix, in order to determine which of the 
 coefficients to specify for the testing in `calculateRelativeFC()`. For more 
 information about how to set up and interpret design matrices in `edgeR` or 
-`limma`, see e.g. [Law et al (2020)](https://f1000research.com/articles/9-1444), 
+`limma`, see e.g. 
+[Law et al (2020)](https://f1000research.com/articles/9-1444), 
 or [Soneson et al (2020)](https://f1000research.com/articles/9-512).
 
-```{r}
+```{r def-mm}
 model.matrix(~ Replicate + Condition,
              data = colData(se_collapsed))
 ```
@@ -616,7 +623,7 @@ model.matrix(~ Replicate + Condition,
 Next, we apply either `edgeR` or `limma` to extract the logFCs of the mutants, 
 compared to the wildtype sequence.
 
-```{r}
+```{r calc-rel-fc}
 ## edgeR
 edger_scores <- calculateRelativeFC(
     se = se_collapsed,
@@ -644,7 +651,7 @@ limma_scores["f.0.WT", , drop = FALSE]
 testing - in particular, MA (mean-difference) plots and volcano plots can be 
 easily generated. 
 
-```{r}
+```{r plot-rel-fc}
 plotMeanDiff(edger_scores, pointSize = "large")
 plotVolcano(edger_scores, pointSize = "large")
 ```
@@ -662,7 +669,7 @@ the forward and reverse FASTQ files in the same order.
 
 This vignette was compiled on the following system:
 
-```{r}
+```{r session-info}
 sessionInfo()
 ```
 

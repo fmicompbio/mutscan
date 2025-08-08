@@ -60,9 +60,9 @@
     .assertScalar(x = pointSize, type = "character",
                   validValues = c("small", "large"))
     .assertScalar(x = interactivePlot, type = "logical")
-
+    
     if (interactivePlot && !requireNamespace("plotly", quietly = TRUE)) {
-        stop("The 'plotly' package is required to make interactive plots.")
+        stop("The 'plotly' package is required to make interactive plots.") # nocov
     }
     xr <- range(res[[xCol]], na.rm = TRUE)
     yr <- range(res[[yCol]], na.rm = TRUE)
@@ -72,49 +72,56 @@
     if ("y" %in% centerAxis) {
         yr <- c(-max(abs(yr), na.rm = TRUE), max(abs(yr), na.rm = TRUE))
     }
-    gg <- ggplot2::ggplot(res, ggplot2::aes(x = .data[[xCol]], y = .data[[yCol]])) +
-        ggplot2::theme_minimal() + ggplot2::coord_cartesian(xlim = xr, ylim = yr) +
-        ggplot2::theme(axis.text = ggplot2::element_text(size = 12),
-                       axis.title = ggplot2::element_text(size = 14),
-                       title = ggplot2::element_text(size = 14)) +
-        ggplot2::labs(x = xLabel, y = yLabel)
+    gg <- ggplot(res, aes(x = .data[[xCol]], 
+                          y = .data[[yCol]])) +
+        theme_minimal() + 
+        coord_cartesian(xlim = xr, ylim = yr) +
+        theme(axis.text = element_text(size = 12),
+              axis.title = element_text(size = 14),
+              title = element_text(size = 14)) +
+        labs(x = xLabel, y = yLabel)
     if (!is.null(labelCol)) {
         gg <- gg +
-            ggplot2::aes(label = .data[[labelCol]])
+            aes(label = .data[[labelCol]])
     }
     if (pointSize == "large") {
         gg <- gg +
-            ggplot2::geom_point(fill = "lightgrey", color = "grey", pch = 21, size = 1.5)
+            geom_point(fill = "lightgrey", color = "grey", 
+                       pch = 21, size = 1.5)
     } else {
         gg <- gg +
-            ggplot2::geom_point(color = "black", size = 0.25, alpha = 0.5)
+            geom_point(color = "black", size = 0.25, alpha = 0.5)
     }
     if (any(res[[colorCol]] < colorThreshold)) {
         gg <- gg +
-            ggplot2::labs(subtitle = paste0("Points are indicated in red if ",
-                                            colorCol, "<", colorThreshold))
+            labs(subtitle = paste0("Points are indicated in red if ",
+                                   colorCol, "<", colorThreshold))
         if (pointSize == "large") {
             gg <- gg +
-                ggplot2::geom_point(
-                    data = res[res[[colorCol]] < colorThreshold, , drop = FALSE],
+                geom_point(
+                    data = res[res[[colorCol]] < colorThreshold, , 
+                               drop = FALSE],
                     fill = "red", color = "grey", pch = 21, size = 1.5
                 )
         } else {
             gg <- gg +
-                ggplot2::geom_point(
-                    data = res[res[[colorCol]] < colorThreshold, , drop = FALSE],
+                geom_point(
+                    data = res[res[[colorCol]] < colorThreshold, , 
+                               drop = FALSE],
                     color = "red", size = 0.25
                 )
         }
     }
     if (interactivePlot) {
-        plotly::ggplotly(gg)
+        plotly::ggplotly(gg) # nocov
     } else {
         if (!is.null(labelCol) && length(labelValues) > 0) {
-            .assertVector(x = labelValues, type = "character", validValues = res[[labelCol]])
+            .assertVector(x = labelValues, type = "character", 
+                          validValues = res[[labelCol]])
             gg <- gg +
-                ggrepel::geom_text_repel(
-                    data = res[res[[labelCol]] %in% labelValues, , drop = FALSE],
+                geom_text_repel(
+                    data = res[res[[labelCol]] %in% labelValues, , 
+                               drop = FALSE],
                     max.overlaps = Inf, size = 4, min.segment.length = 0.1)
         }
         gg
@@ -124,7 +131,7 @@
 .getColName <- function(res, validValues, aspect) {
     .assertVector(x = res, type = "data.frame")
     colName <- grep(paste(paste0("^", validValues, "$"), collapse = "|"),
-                   colnames(res), value = TRUE)
+                    colnames(res), value = TRUE)
     if (length(colName) == 0) {
         stop("No suitable column found for ", aspect, ", one of the ",
              "following expected: ", paste(validValues, collapse = ", "))
@@ -175,15 +182,17 @@
 #' @export
 #'
 #' @examples
+#' library(SummarizedExperiment)
 #' se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds",
 #'                           package = "mutscan"))[1:200, ]
 #' design <- model.matrix(~ Replicate + Condition,
-#'                        data = SummarizedExperiment::colData(se))
+#'                        data = colData(se))
 #' res <- calculateRelativeFC(se, design, coef = "Conditioncis_output")
 #' plotMeanDiff(res, pointSize = "large", nTopToLabel = 3)
 #'
 plotMeanDiff <- function(res, meanCol = NULL, logFCCol = NULL, pvalCol = NULL,
-                         padjCol = NULL, padjThreshold = 0.05, pointSize = "small",
+                         padjCol = NULL, padjThreshold = 0.05, 
+                         pointSize = "small",
                          interactivePlot = FALSE, nTopToLabel = 0) {
     .assertScalar(x = nTopToLabel, type = "numeric", rngIncl = c(0, Inf))
     .assertVector(x = res, type = "data.frame")
@@ -202,16 +211,17 @@ plotMeanDiff <- function(res, meanCol = NULL, logFCCol = NULL, pvalCol = NULL,
     }
     if (is.null(padjCol)) {
         padjCol <- .getColName(res, validValues = c("FDR", "adj.P.Val"),
-                                aspect = "highlighting")
+                               aspect = "highlighting")
     }
     .assertScalar(pvalCol, type = "character", validValues = colnames(res))
     res$feature <- rownames(res)
     if (nTopToLabel > 0) {
-        labelValues <- res[order(res[[pvalCol]]), "feature"][seq_len(nTopToLabel)]
+        labelValues <- res[order(res[[pvalCol]]), 
+                           "feature"][seq_len(nTopToLabel)]
     } else {
         labelValues <- c()
     }
-
+    
     .plotScatter(res = res, xCol = meanCol, yCol = logFCCol,
                  xLabel = meanCol, yLabel = logFCCol,
                  colorCol = padjCol,
@@ -256,10 +266,11 @@ plotMeanDiff <- function(res, meanCol = NULL, logFCCol = NULL, pvalCol = NULL,
 #' @export
 #'
 #' @examples
+#' library(SummarizedExperiment)
 #' se <- readRDS(system.file("extdata", "GSE102901_cis_se.rds",
 #'                           package = "mutscan"))[1:200, ]
 #' design <- model.matrix(~ Replicate + Condition,
-#'                        data = SummarizedExperiment::colData(se))
+#'                        data = colData(se))
 #' res <- calculateRelativeFC(se, design, coef = "Conditioncis_output")
 #' plotVolcano(res, pointSize = "large", nTopToLabel = 3)
 #'
@@ -275,7 +286,7 @@ plotVolcano <- function(res, logFCCol = NULL, pvalCol = NULL, padjCol = NULL,
     }
     if (is.null(pvalCol)) {
         pvalCol <- .getColName(res, validValues = c("PValue", "P.Value"),
-                            aspect = "y-axis")
+                               aspect = "y-axis")
     }
     if (is.null(padjCol)) {
         padjCol <- .getColName(res, validValues = c("FDR", "adj.P.Val"),
@@ -285,11 +296,12 @@ plotVolcano <- function(res, logFCCol = NULL, pvalCol = NULL, padjCol = NULL,
     res$negLog10P <- -log10(res[[pvalCol]])
     res$feature <- rownames(res)
     if (nTopToLabel > 0) {
-        labelValues <- res[order(res[[pvalCol]]), "feature"][seq_len(nTopToLabel)]
+        labelValues <- res[order(res[[pvalCol]]),
+                           "feature"][seq_len(nTopToLabel)]
     } else {
         labelValues <- c()
     }
-
+    
     .plotScatter(res = res, xCol = logFCCol, yCol = "negLog10P",
                  xLabel = logFCCol, yLabel = paste0("-log10(", pvalCol, ")"),
                  colorCol = padjCol,

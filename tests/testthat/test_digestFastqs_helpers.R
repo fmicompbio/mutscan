@@ -1,4 +1,22 @@
 ## ----------------------------------------------------------------------------
+## complement
+## ----------------------------------------------------------------------------
+test_that("complement works", {
+    expect_identical(complement("a"), "T")
+    expect_identical(complement("A"), "T")
+    expect_identical(complement("c"), "G")
+    expect_identical(complement("C"), "G")
+    expect_identical(complement("g"), "C")
+    expect_identical(complement("G"), "C")
+    expect_identical(complement("t"), "A")
+    expect_identical(complement("T"), "A")
+    expect_identical(complement("n"), "N")
+    expect_identical(complement("N"), "N")
+    expect_error(complement("B"), "Invalid DNA base")
+    expect_error(complement("Q"), "Invalid DNA base")
+})
+
+## ----------------------------------------------------------------------------
 ## compareCodonPositions
 ## ----------------------------------------------------------------------------
 test_that("compareCodonPositions works", {
@@ -365,7 +383,7 @@ test_that("mergeReadPairsPartial works", {
   expect_identical(res2e$mergedSeq, "TTACAACACACA")
   expect_identical(res2e$mergedQual, rep(c(10L, 40L), c(5, 7)))
   expect_identical(res2e$mergedLengths, 12L)
-  
+
   ## invalid overlaps specified/overlaps modified internally
   ## minOverlap > lenF -> no valid overlap
   res0a <- mutscan:::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, lF2, lR2, 8, 7, 9, 9, 1, FALSE)
@@ -397,7 +415,7 @@ test_that("mergeReadPairsPartial works", {
   expect_identical(res0d$mergedQual, qF2)
   expect_identical(res0d$mergedLengths, 7L)
   expect_true(res0d$return)
-  
+
   ## minMergedLength > lenF + lenR -> no valid overlap
   res0e <- mutscan:::test_mergeReadPairPartial(sF2, qF2, sR2, qR2, lF2, lR2, 1, 7, 15, 9, 1, FALSE)
   expect_type(res0e, "list")
@@ -412,7 +430,7 @@ test_that("mergeReadPairsPartial works", {
   expect_identical(res0f$mergedQual, rep(c(10L, 40L), c(2, 5)))
   expect_identical(res0f$mergedLengths, 7L)
   expect_false(res0f$return)
-  
+
   ## padded reads
   for (i in 1:10) {
     sF <- paste(rep(c("C","A"), c(i, 6)), collapse = "")
@@ -495,6 +513,10 @@ test_that("makeBaseHGVS works", {
     expect_equal(makeBaseHGVS(c("f.1.A", "r.4.A", "f.6.C"), ".", "TAGTGTAGTCCGT", "AAGAGCAGTCCGT"),
                  "[1T>A;4_6delinsAGC]_")
     expect_equal(makeBaseHGVS(c("r.4.A"), ".", "TAGTGTAGTCCGT", "TAGAGTAGTCCGT"), "4T>A_")
+    expect_equal(makeBaseHGVS(character(0), ".", "AAA", "AAA"), "_")
+    expect_equal(makeBaseHGVS(c("f.1.A", "r.4.A", "r.8.A"), ".",
+                              "TACTTTAT", "AAGAAAAA"),
+                 "[1T>A;4T>A;8T>A]_")
 })
 
 test_that("makeAAHGVS works", {
@@ -506,4 +528,86 @@ test_that("makeAAHGVS works", {
                  "[(Thr1Leu);(Asp2Met)]_")
     expect_equal(test_makeAAHGVS(c("f.1.L", "f.2.M", "f.7.M"), ".", "TDTLQAETDQLEDEKSALQTEIANLLKEKEKL"),
                  "[(Thr1Leu);(Asp2Met);(Glu7Met)]_")
+    expect_equal(test_makeAAHGVS(character(0), ".", "TDTL"), "_")
+})
+
+## ----------------------------------------------------------------------------
+## compareToWildtype
+## ----------------------------------------------------------------------------
+test_that("compareToWildtype works", {
+    # read is kept
+    expect_identical(
+        test_compareToWildtype(varSeq = "AAAGGACGA", wtSeq = "AATGGACGT",
+                               varIntQual = rep(32L, 9L),
+                               forbiddenCodons_vect = character(0),
+                               mutatedPhredMin = 0.0,
+                               nbrMutatedCodonsMax = 3L,
+                               codonPrefix = "xyz",
+                               nbrMutatedBasesMax = 3L,
+                               mutNameDelimiter = ".",
+                               collapseToWT = TRUE),
+        list(nMutQualTooLow = 0L, nTooManyMutCodons = 0L, nForbiddenCodons = 0L,
+             nTooManyMutBases = 0L, nMutBases = 2L, nMutCodons = 2L,
+             nMutAAs = 1L, mutantName = "xyz_", mutantNameBase = "xyz_",
+             mutantNameCodon = "xyz_", mutantNameBaseHGVS = "xyz:c_",
+             mutantNameAA = "xyz_", mutantNameAAHGVS = "xyz:p_",
+             mutationTypes = c("nonsynonymous", "silent")))
+    expect_identical(
+        test_compareToWildtype(varSeq = "AAAGGACGA", wtSeq = "AATGGACGT",
+                               varIntQual = rep(32L, 9L),
+                               forbiddenCodons_vect = character(0),
+                               mutatedPhredMin = 0.0,
+                               nbrMutatedCodonsMax = 3L,
+                               codonPrefix = "xyz:c",
+                               nbrMutatedBasesMax = 3L,
+                               mutNameDelimiter = ".",
+                               collapseToWT = TRUE),
+        list(nMutQualTooLow = 0L, nTooManyMutCodons = 0L, nForbiddenCodons = 0L,
+             nTooManyMutBases = 0L, nMutBases = 2L, nMutCodons = 2L,
+             nMutAAs = 1L, mutantName = "xyz:c_", mutantNameBase = "xyz:c_",
+             mutantNameCodon = "xyz:c_", mutantNameBaseHGVS = "xyz:c_",
+             mutantNameAA = "xyz:c_", mutantNameAAHGVS = "xyz:p_",
+             mutationTypes = c("nonsynonymous", "silent")))
+    # read is filtered out
+    expect_identical(
+        test_compareToWildtype(varSeq = "CGTCGTCGA", wtSeq = "CGTCGTCGT",
+                               varIntQual = rep(32L, 9L),
+                               forbiddenCodons_vect = character(0),
+                               mutatedPhredMin = 33.0, # <---
+                               nbrMutatedCodonsMax = 3L,
+                               codonPrefix = "xyz",
+                               nbrMutatedBasesMax = 3L,
+                               mutNameDelimiter = ".",
+                               collapseToWT = TRUE),
+        list())
+    expect_identical(
+        test_compareToWildtype(varSeq = "CGACGACGA", wtSeq = "CGTCGTCGT",
+                               varIntQual = rep(32L, 9L),
+                               forbiddenCodons_vect = character(0),
+                               mutatedPhredMin = 0.0,
+                               nbrMutatedCodonsMax = -1L,
+                               codonPrefix = "xyz",
+                               nbrMutatedBasesMax = 2L, # <---
+                               mutNameDelimiter = ".",
+                               collapseToWT = TRUE),
+        list())
+})
+
+## ----------------------------------------------------------------------------
+## groupSimilarSequences
+## ----------------------------------------------------------------------------
+test_that("groupSimilarSequences works", {
+    expect_identical(
+        groupSimilarSequences(c("AA", "AT", "AC", "TT"), 1:4, collapseMaxDist = 0),
+        data.frame(sequence = c("AA", "AT", "AC", "TT"),
+                   representative = c("AA", "AT", "AC", "TT"))
+    )
+    expect_identical(
+        groupSimilarSequences(c("AA", "AT", "AC", "TT"), 1:4, collapseMaxDist = 1),
+        data.frame(sequence = c("AA", "AT", "AC", "TT"),
+                   representative = c("AC", "TT", "AC", "TT"))
+    )
+    expect_warning(groupSimilarSequences(c("AA", "AT", "AC", "TTT"), 1:4,
+                                       collapseMaxDist = 1),
+                 "not all of the same length")
 })

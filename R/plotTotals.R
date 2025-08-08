@@ -15,7 +15,7 @@
 #' 
 #' @importFrom ggplot2 ggplot theme_minimal theme element_text labs 
 #'     geom_bar scale_fill_discrete aes
-#' @importFrom SummarizedExperiment assay rowData
+#' @importFrom SummarizedExperiment assay rowData assayNames
 #' @importFrom rlang .data
 #' 
 #' @examples 
@@ -26,23 +26,25 @@
 plotTotals <- function(se, selAssay = "counts", groupBy = NULL) {
     .assertVector(x = se, type = "SummarizedExperiment")
     .assertScalar(x = selAssay, type = "character",
-                  validValues = SummarizedExperiment::assayNames(se))
+                  validValues = assayNames(se))
     if (!is.null(groupBy)) {
-        .assertScalar(x = groupBy, type = "character",
-                      validValues = colnames(SummarizedExperiment::rowData(se)))
+        .assertScalar(
+            x = groupBy, type = "character",
+            validValues = colnames(rowData(se)))
     }
-
+    
     ## Extract the assay matrix and reformat relevant parts of it for plotting
-    selAssayMat <- SummarizedExperiment::assay(se, selAssay)
+    selAssayMat <- assay(se, selAssay)
     if (!is.null(groupBy)) {
         df <- do.call(
             rbind, 
-            lapply(unique(SummarizedExperiment::rowData(se)[[groupBy]]), 
+            lapply(unique(rowData(se)[[groupBy]]), 
                    function(rn) {
                        data.frame(
                            names = colnames(se),
                            category = rn,
-                           total = colSums(selAssayMat[SummarizedExperiment::rowData(se)[[groupBy]] == rn, ])
+                           total = colSums(
+                               selAssayMat[rowData(se)[[groupBy]] == rn, ])
                        )
                    })
         )
@@ -52,21 +54,22 @@ plotTotals <- function(se, selAssay = "counts", groupBy = NULL) {
                          total = colSums(selAssayMat))
     }
     
-    gg <- ggplot2::ggplot(df, ggplot2::aes(x = .data$names, y = .data$total)) + 
-        ggplot2::theme_minimal() + 
-        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, 
-                                                           vjust = 0.5, size = 12),
-                       axis.text.y = ggplot2::element_text(size = 12),
-                       axis.title = ggplot2::element_text(size = 14)) + 
-        ggplot2::labs(x = "", y = paste0("Total (", selAssay, ")"))
+    gg <- ggplot(df, aes(x = .data$names, y = .data$total)) + 
+        theme_minimal() + 
+        theme(
+            axis.text.x = element_text(angle = 90, hjust = 1, 
+                                       vjust = 0.5, size = 12),
+            axis.text.y = element_text(size = 12),
+            axis.title = element_text(size = 14)) + 
+        labs(x = "", y = paste0("Total (", selAssay, ")"))
     if (!is.null(groupBy)) {
         gg <- gg + 
-            ggplot2::geom_bar(stat = "identity", position = "stack", 
-                              ggplot2::aes(fill = .data$category)) + 
-            ggplot2::scale_fill_discrete(name = groupBy)
+            geom_bar(stat = "identity", position = "stack", 
+                     aes(fill = .data$category)) + 
+            scale_fill_discrete(name = groupBy)
     } else {
         gg <- gg + 
-            ggplot2::geom_bar(stat = "identity", position = "stack")
+            geom_bar(stat = "identity", position = "stack")
     }
     
     gg

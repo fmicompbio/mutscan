@@ -37,14 +37,14 @@ bool reached_end_of_file(gzFile file, char *ret) {
     if (gzeof(file)) {
       return true;
     } else {
-      const char *error_string;
+      const char *error_string; // # nocov start
       error_string = gzerror(file, &err);
       if (err) {
         stop(error_string);
-      }
+      } // # nocov end
     }
   }
-  // Check if we have read until a newline character. Otherwise, the read is 
+  // Check if we have read until a newline character. Otherwise, the read is
   // too long -> break
   if (std::string(ret).back() != '\n') {
     stop("Encountered a read exceeding the maximal allowed length");
@@ -65,21 +65,22 @@ bool get_next_seq(gzFile file, char *seq, char *qual, size_t BUFFER_SIZE) {
   }
   // sequence
   if (reached_end_of_file(file, gzgets(file, seq, BUFFER_SIZE))) {
-    return true;
+    return true; // # nocov
   }
   // quality identifier
   if (reached_end_of_file(file, gzgets(file, qual, BUFFER_SIZE))) {
-    return true;
+    return true; // # nocov
   }
   // quality
   if (reached_end_of_file(file, gzgets(file, qual, BUFFER_SIZE))) {
-    return true;
+    return true; // # nocov
   }
 
   return false;
 }
 
 // create the complement of a base
+// [[Rcpp::export]]
 char complement(char n) {
   switch(n) {
     case 'A':
@@ -176,7 +177,7 @@ std::string translateString(const std::string& s) {
   size_t i = 0, j = 0;
   const int pow4[] = {1, 4, 16};
   int codonVal = 0;
-  
+
   for (i = 0; i < s.size(); i++) {
     if (s[i] == '_') {
       j = 0;
@@ -187,29 +188,29 @@ std::string translateString(const std::string& s) {
         case 'a':
           // codonVal += 0 * pow4[j];
           break;
-        
+
         case 'C':
         case 'c':
           codonVal += 1 * pow4[j];
           break;
-        
+
         case 'G':
         case 'g':
           codonVal += 2 * pow4[j];
           break;
-        
+
         case 'T':
         case 't':
         case 'u':
         case 'U':
           codonVal += 3 * pow4[j];
           break;
-          
+
         default:
           codonVal += 64;
           break;
       }
-      
+
       if (j == 2) {
         if (codonVal > 63) {
           aa.push_back('X');
@@ -221,9 +222,9 @@ std::string translateString(const std::string& s) {
       } else {
         j++;
       }
-    
+
     }
-    
+
   }
   return aa;
 }
@@ -238,33 +239,33 @@ bool hasEnding (std::string const &fullString, std::string const &ending) {
     }
 }
 
-// Helper function to create the ID for a single mutation group (delins or 
+// Helper function to create the ID for a single mutation group (delins or
 // single mutation)
-std::string makeSingleBaseHGVSid(int posMin, int posMax, const std::string wtSeq, 
+std::string makeSingleBaseHGVSid(int posMin, int posMax, const std::string wtSeq,
                                  const std::string varSeq) {
     std::string id = "";
     if (posMax > posMin) {
         // delins
-        id += std::to_string(posMin) + "_" + std::to_string(posMax) + 
-            "delins" + 
+        id += std::to_string(posMin) + "_" + std::to_string(posMax) +
+            "delins" +
             varSeq.substr((size_t)(posMin - 1), (size_t)(posMax - posMin + 1)) + ";";
     } else {
         // single base mutation
-        id += std::to_string(posMin) + wtSeq[posMin - 1] + 
+        id += std::to_string(posMin) + wtSeq[posMin - 1] +
             ">" + varSeq[posMin - 1] + ";";
     }
     return id;
 }
 
 // [[Rcpp::export]]
-std::string makeBaseHGVS(const std::vector<std::string> mutationsSorted, 
-                         const std::string mutNameDelimiter, 
+std::string makeBaseHGVS(const std::vector<std::string> mutationsSorted,
+                         const std::string mutNameDelimiter,
                          const std::string wtSeq, const std::string varSeq) {
   int prevPosMin = -5, prevPosMax = -5; // something far enough from the first mutation position to not cause a delins
   bool moreThanOne = false;
   int pos;
   std::string mutId = "";
-    
+
   if (mutationsSorted.size() == 0) {
     // no mutations - return only _ (all variants should end with this character,
     // as it will be stripped off later)
@@ -306,15 +307,15 @@ std::string makeBaseHGVS(const std::vector<std::string> mutationsSorted,
   return mutId;
 }
 
-std::string makeAAHGVS(const std::vector<std::string> mutationsSorted, 
-                       const std::string mutNameDelimiter, 
-                       const std::string wtSeq, 
+std::string makeAAHGVS(const std::vector<std::string> mutationsSorted,
+                       const std::string mutNameDelimiter,
+                       const std::string wtSeq,
                        std::map<char, std::string> &threeAA) {
   int pos;
   std::string mutAA;
   char wtAA;
   std::string mutId = "";
-    
+
   if (mutationsSorted.size() == 0) {
     // no mutations - return only _ (all variants should end with this character,
     // as it will be stripped off later)
@@ -342,13 +343,13 @@ std::string makeAAHGVS(const std::vector<std::string> mutationsSorted,
 }
 
 // [[Rcpp::export]]
-std::string test_makeAAHGVS(const std::vector<std::string> mutationsSorted, 
-                            const std::string mutNameDelimiter, 
+std::string test_makeAAHGVS(const std::vector<std::string> mutationsSorted,
+                            const std::string mutNameDelimiter,
                             const std::string wtSeq) {
     std::map<char,std::string> threeAA = initializeThreeAA();
     return makeAAHGVS(mutationsSorted, mutNameDelimiter, wtSeq, threeAA);
-} 
-    
+}
+
 // compare read to wildtype sequence,
 // identify mutated bases/codons, filter, update counters
 // and add to the name (mutantName* may be empty if no mutations are found,
@@ -374,11 +375,11 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
                        const int nbrMutatedCodonsMax, const std::set<std::string> &forbiddenCodons,
                        const std::string codonPrefix, const int nbrMutatedBasesMax,
                        int &nMutQualTooLow, int &nTooManyMutCodons, int &nForbiddenCodons,
-                       int &nTooManyMutBases, std::string &mutantName, 
+                       int &nTooManyMutBases, std::string &mutantName,
                        std::string &mutantNameBase, std::string &mutantNameCodon,
                        std::string &mutantNameBaseHGVS, std::string &mutantNameAA,
                        std::string &mutantNameAAHGVS, int &nMutBases,
-                       int &nMutCodons, int &nMutAAs, std::set<std::string> &mutationTypes, 
+                       int &nMutCodons, int &nMutAAs, std::set<std::string> &mutationTypes,
                        const std::string mutNameDelimiter,
                        const bool collapseToWT,
                        std::map<char, std::string> &threeAA) {
@@ -401,7 +402,7 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
       aaPrefixHGVS.pop_back();
       aaPrefixHGVS = aaPrefixHGVS + "p";
   }
-  
+
   // filter if there are too many mutated codons
   // mutatedCodons.clear();
   hasLowQualMutation = false;
@@ -433,9 +434,9 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
       wtAA = translateString(wtCodon);
       if (varAA != wtAA) {
         // add to mutatedAA
-        mutatedAAs.insert(codonPrefix + mutNameDelimiter + 
+        mutatedAAs.insert(codonPrefix + mutNameDelimiter +
           std::to_string((int)(i / 3) + 1) + mutNameDelimiter +
-          varAA + 
+          varAA +
           std::string("_"));
         // nonsynonymous or stop
         if (varAA == "*") {
@@ -509,19 +510,19 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
     mutantNameAAHGVS += aaPrefixHGVS + "_";
   } else {
     std::vector<std::string> mutatedBasesSorted, mutatedCodonsSorted, mutatedAAsSorted;
-    
+
     mutatedBasesSorted.assign(mutatedBases.begin(), mutatedBases.end());
     std::sort(mutatedBasesSorted.begin(), mutatedBasesSorted.end(),
               std::bind(compareCodonPositions, _1, _2, *(mutNameDelimiter.c_str())));
-    
+
     mutatedCodonsSorted.assign(mutatedCodons.begin(), mutatedCodons.end());
     std::sort(mutatedCodonsSorted.begin(), mutatedCodonsSorted.end(),
               std::bind(compareCodonPositions, _1, _2, *(mutNameDelimiter.c_str())));
-    
+
     mutatedAAsSorted.assign(mutatedAAs.begin(), mutatedAAs.end());
     std::sort(mutatedAAsSorted.begin(), mutatedAAsSorted.end(),
               std::bind(compareCodonPositions, _1, _2, *(mutNameDelimiter.c_str())));
-    
+
     for (size_t i = 0; i < mutatedBasesSorted.size(); i++) {
       mutantNameBase += mutatedBasesSorted[i];
       if (nbrMutatedCodonsMax == (-1)) {
@@ -544,20 +545,76 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
       mutantName += codonPrefix + mutNameDelimiter + "0" + mutNameDelimiter + "WT_";
       mutantNameBaseHGVS += basePrefixHGVS + "_";
     } else {
-      mutantNameBaseHGVS += basePrefixHGVS + "." + 
+      mutantNameBaseHGVS += basePrefixHGVS + "." +
           makeBaseHGVS(mutatedBasesSorted, mutNameDelimiter, wtSeq, varSeq);
     }
     if (mutatedAAsSorted.size() == 0) {
       mutantNameAA += codonPrefix + mutNameDelimiter + "0" + mutNameDelimiter + "WT_";
       mutantNameAAHGVS += aaPrefixHGVS + "_";
     } else {
-      mutantNameAAHGVS += aaPrefixHGVS + "." + 
-          makeAAHGVS(mutatedAAsSorted, mutNameDelimiter, 
+      mutantNameAAHGVS += aaPrefixHGVS + "." +
+          makeAAHGVS(mutatedAAsSorted, mutNameDelimiter,
                      translateString(wtSeq), threeAA);
     }
   }
 
   return false;
+}
+
+// [[Rcpp::export]]
+Rcpp::List test_compareToWildtype(
+        const std::string varSeq,
+        const std::string wtSeq,
+        const std::vector<int> varIntQual,
+        const std::vector<std::string> forbiddenCodons_vect,
+        const double mutatedPhredMin = 0.0,
+        const int nbrMutatedCodonsMax = -1,
+        const std::string codonPrefix = "c",
+        const int nbrMutatedBasesMax = -1,
+        const std::string mutNameDelimiter = ".",
+        const bool collapseToWT = false) {
+    // allocate C++ only variables
+    std::map<char,std::string> threeAA = initializeThreeAA();
+    std::set<std::string> forbiddenCodons(forbiddenCodons_vect.begin(),
+                                          forbiddenCodons_vect.end());
+    int nMutQualTooLow = 0, nTooManyMutCodons = 0, nForbiddenCodons = 0;
+    int nTooManyMutBases = 0, nMutBases = 0, nMutCodons = 0, nMutAAs = 0;
+    std::string mutantName(""), mutantNameBase("");
+    std::string mutantNameCodon(""), mutantNameBaseHGVS("");
+    std::string mutantNameAA(""), mutantNameAAHGVS("");
+    std::set<std::string> mutationTypes;
+
+    // call compareToWildtype
+    if (compareToWildtype(varSeq, wtSeq, varIntQual, mutatedPhredMin,
+                          nbrMutatedCodonsMax, forbiddenCodons,
+                          codonPrefix, nbrMutatedBasesMax, nMutQualTooLow,
+                          nTooManyMutCodons, nForbiddenCodons,
+                          nTooManyMutBases, mutantName,
+                          mutantNameBase, mutantNameCodon,
+                          mutantNameBaseHGVS, mutantNameAA,
+                          mutantNameAAHGVS, nMutBases,
+                          nMutCodons, nMutAAs, mutationTypes,
+                          mutNameDelimiter, collapseToWT, threeAA)) {
+        // read should be filtered out -> return empty list
+        return Rcpp::List::create();
+    } else {
+        std::vector<std::string> mutationTypes_vect(mutationTypes.begin(),
+                                                    mutationTypes.end());
+        return Rcpp::List::create(Rcpp::_["nMutQualTooLow"] = nMutQualTooLow,
+                                  Rcpp::_["nTooManyMutCodons"] = nTooManyMutCodons,
+                                  Rcpp::_["nForbiddenCodons"] = nForbiddenCodons,
+                                  Rcpp::_["nTooManyMutBases"] = nTooManyMutBases,
+                                  Rcpp::_["nMutBases"] = nMutBases,
+                                  Rcpp::_["nMutCodons"] = nMutCodons,
+                                  Rcpp::_["nMutAAs"] = nMutAAs,
+                                  Rcpp::_["mutantName"] = mutantName,
+                                  Rcpp::_["mutantNameBase"] = mutantNameBase,
+                                  Rcpp::_["mutantNameCodon"] = mutantNameCodon,
+                                  Rcpp::_["mutantNameBaseHGVS"] = mutantNameBaseHGVS,
+                                  Rcpp::_["mutantNameAA"] = mutantNameAA,
+                                  Rcpp::_["mutantNameAAHGVS"] = mutantNameAAHGVS,
+                                  Rcpp::_["mutationTypes"] = mutationTypes_vect);
+    }
 }
 
 // compare constSeq to constant sequence and update
@@ -607,12 +664,12 @@ struct mutantInfo {
 gzFile  openFastq(std::string filename, const char* mode = "rb") {
   gzFile file = gzopen(filename.c_str(), mode);
   if (!file) {
-    if (errno) {
+    if (errno) { // # nocov start
       stop("Failed to open file '", filename,  "': ",
            strerror(errno), " (errno=", errno, ")");
     } else {
       stop("Failed to open file '", filename, "': zlib out of memory");
-    }
+    } // # nocov end
   }
   return file;
 }
@@ -694,7 +751,7 @@ bool decomposeRead(const std::string sseq,
                                   umiSeq, varSeq, varQual, varLengths, constSeq,
                                   constQual, nNoPrimer, nReadWrongLength);
         if (!post) {
-          return false;
+          return false; // # nocov
         }
         break;
       }
@@ -971,7 +1028,7 @@ void removeEOL(std::string &seq) {
     seq.pop_back();
   }
   if (seq.back() == '\r') {
-    seq.pop_back();
+    seq.pop_back(); // # nocov
   }
 }
 
@@ -986,10 +1043,12 @@ int findClosestRefSeq(std::string &varSeq, std::vector<std::string> &wtSeq,
   int maxsim = 0;
   int nbrbesthits = 0;
   int currsim;
+  size_t minl;
   for (size_t i = 0; i < wtSeq.size(); i++) {
     currsim = 0;
     std::string currSeq = wtSeq[i];
-    for (size_t j = 0; j < currSeq.length(); j++) {
+    minl = std::min(varSeq.size(), currSeq.size());
+    for (size_t j = 0; j < minl; j++) {
       currsim += (currSeq[j] == varSeq[j]);
     }
     if (((int)varSeq.size() - currsim <= (int)upperBoundMismatch)) {
@@ -997,7 +1056,7 @@ int findClosestRefSeq(std::string &varSeq, std::vector<std::string> &wtSeq,
         nbrbesthits++;
       } else if (currsim > maxsim) {
         nbrbesthits = 1;
-        idx = i;
+        idx = (int)i;
         maxsim = currsim;
       }
     }
@@ -1085,11 +1144,11 @@ int findClosestRefSeqTree(std::string &varSeq, BKtree &wtTree,
 // Convert mutant summary to DataFrame
 DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSummary) {
     std::map<std::string, mutantInfo>::iterator mutantSummaryIt;
-    
+
     size_t dfLen = mutantSummary.size();
     std::vector<std::string> dfSeq(dfLen, ""), dfName(dfLen, "");
     std::vector<int> dfReads(dfLen, 0), dfUmis(dfLen, 0), dfMaxReads(dfLen, 0);
-    std::vector<std::string> dfMutBases(dfLen, ""), dfMutCodons(dfLen, ""); 
+    std::vector<std::string> dfMutBases(dfLen, ""), dfMutCodons(dfLen, "");
     std::vector<std::string> dfMutAAs(dfLen, ""), dfVarLengths(dfLen, "");
     std::vector<std::string> dfMutantNameBase(dfLen, ""), dfMutantNameCodon(dfLen, "");
     std::vector<std::string> dfMutantNameBaseHGVS(dfLen, ""), dfMutantNameAA(dfLen, "");
@@ -1107,7 +1166,7 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
         if (!collapsedSequence.empty()) {
             collapsedSequence.pop_back(); // remove final ","
         }
-        
+
         // mutantNameBase
         std::vector<std::string> mutantNameBaseVector((*mutantSummaryIt).second.mutantNameBase.begin(),
                                                       (*mutantSummaryIt).second.mutantNameBase.end());
@@ -1118,7 +1177,7 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
         if (!collapsedMutantNameBase.empty()) {
             collapsedMutantNameBase.pop_back(); // remove final ","
         }
-        
+
         // mutantNameCodon
         std::vector<std::string> mutantNameCodonVector((*mutantSummaryIt).second.mutantNameCodon.begin(),
                                                        (*mutantSummaryIt).second.mutantNameCodon.end());
@@ -1129,7 +1188,7 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
         if (!collapsedMutantNameCodon.empty()) {
             collapsedMutantNameCodon.pop_back(); // remove final ","
         }
-        
+
         // mutantNameBaseHGVS
         std::vector<std::string> mutantNameBaseHGVSVector((*mutantSummaryIt).second.mutantNameBaseHGVS.begin(),
                                                           (*mutantSummaryIt).second.mutantNameBaseHGVS.end());
@@ -1140,7 +1199,7 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
         if (!collapsedMutantNameBaseHGVS.empty()) {
             collapsedMutantNameBaseHGVS.pop_back(); // remove final ","
         }
-        
+
         // mutantNameAA
         std::vector<std::string> mutantNameAAVector((*mutantSummaryIt).second.mutantNameAA.begin(),
                                                     (*mutantSummaryIt).second.mutantNameAA.end());
@@ -1151,7 +1210,7 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
         if (!collapsedMutantNameAA.empty()) {
             collapsedMutantNameAA.pop_back(); // remove final ","
         }
-        
+
         // mutantNameAAHGVS
         std::vector<std::string> mutantNameAAHGVSVector((*mutantSummaryIt).second.mutantNameAAHGVS.begin(),
                                                         (*mutantSummaryIt).second.mutantNameAAHGVS.end());
@@ -1162,7 +1221,7 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
         if (!collapsedMutantNameAAHGVS.empty()) {
             collapsedMutantNameAAHGVS.pop_back(); // remove final ","
         }
-        
+
         // mutationTypes
         std::vector<std::string> mutationTypesVector((*mutantSummaryIt).second.mutationTypes.begin(),
                                                      (*mutantSummaryIt).second.mutationTypes.end());
@@ -1173,7 +1232,7 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
         if (!collapsedMutationTypes.empty()) {
             collapsedMutationTypes.pop_back(); // remove final ","
         }
-        
+
         // collapse all aa sequences associated with the mutant
         std::vector<std::string> sequenceAAVector((*mutantSummaryIt).second.sequenceAA.begin(),
                                                   (*mutantSummaryIt).second.sequenceAA.end());
@@ -1184,7 +1243,7 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
         if (!collapsedSequenceAA.empty()) {
             collapsedSequenceAA.pop_back(); // remove final ","
         }
-        
+
         // collapse all observed nMutBases/nMutCodons
         std::vector<int> nMutBasesVector((*mutantSummaryIt).second.nMutBases.begin(),
                                          (*mutantSummaryIt).second.nMutBases.end());
@@ -1195,7 +1254,7 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
         if (!collapsedNMutBases.empty()) {
             collapsedNMutBases.pop_back();
         }
-        
+
         // codons
         std::vector<int> nMutCodonsVector((*mutantSummaryIt).second.nMutCodons.begin(),
                                           (*mutantSummaryIt).second.nMutCodons.end());
@@ -1206,7 +1265,7 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
         if (!collapsedNMutCodons.empty()) {
             collapsedNMutCodons.pop_back();
         }
-        
+
         // AAs
         std::vector<int> nMutAAsVector((*mutantSummaryIt).second.nMutAAs.begin(),
                                        (*mutantSummaryIt).second.nMutAAs.end());
@@ -1217,7 +1276,7 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
         if (!collapsedNMutAAs.empty()) {
             collapsedNMutAAs.pop_back();
         }
-        
+
         dfName[j] = (*mutantSummaryIt).first;
         dfSeq[j] = collapsedSequence;
         dfReads[j] = (*mutantSummaryIt).second.nReads;
@@ -1236,7 +1295,7 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
         dfVarLengths[j] = (*mutantSummaryIt).second.varLengths;
         j++;
     }
-    
+
     DataFrame df = DataFrame::create(Named("mutantName") = dfName,
                                      Named("sequence") = dfSeq,
                                      Named("nbrReads") = dfReads,
@@ -1254,64 +1313,64 @@ DataFrame mutantSummaryToDataFrame(std::map<std::string, mutantInfo> mutantSumma
                                      Named("mutationTypes") = dfMutationTypes,
                                      Named("sequenceAA") = dfSeqAA,
                                      Named("stringsAsFactors") = false);
-    
+
     return df;
 }
 
 //' Create a conversion table for collapsing similar sequences
-//' @param seqs Character vector with nucleotide sequences (or pairs of 
-//' sequences concatenated with "_") to be collapsed. The sequences must 
+//' @param seqs Character vector with nucleotide sequences (or pairs of
+//' sequences concatenated with "_") to be collapsed. The sequences must
 //' all be of the same length.
 //' @param scores Numeric vector of "scores" for the sequences. Typically
-//' the total read/UMI count. A higher score will be preferred when 
-//' deciding which sequence to use as the representative for a group of 
+//' the total read/UMI count. A higher score will be preferred when
+//' deciding which sequence to use as the representative for a group of
 //' collapsed sequences.
-//' @param collapseMaxDist Numeric scalar defining the tolerance for collapsing 
-//' similar sequences. If the value is in [0, 1), it defines the maximal 
+//' @param collapseMaxDist Numeric scalar defining the tolerance for collapsing
+//' similar sequences. If the value is in [0, 1), it defines the maximal
 //' Hamming distance in terms of a fraction of sequence length:
 //' (\code{round(collapseMaxDist * nchar(sequence))}).
 //' A value greater or equal to 1 is rounded and directly used as the maximum
 //' allowed Hamming distance. Note that sequences can only be
-//' collapsed if they are all of the same length.
-//' @param collapseMinScore Numeric scalar, indicating the minimum score 
-//' required for a sequence to be considered as a representative for a 
-//' group of similar sequences (i.e., to allow other sequences to be 
-//' collapsed into it).
+//' collapsed if they are all of the same length. The default value is 0.
+//' @param collapseMinScore Numeric scalar, indicating the minimum score
+//' required for a sequence to be considered as a representative for a
+//' group of similar sequences (i.e., to allow other sequences to be
+//' collapsed into it). The default value is 0.
 //' @param collapseMinRatio Numeric scalar. During collapsing of
-//' similar sequences, a low-frequency sequence will be collapsed 
-//' with a higher-frequency sequence only if the ratio between the 
-//' high-frequency and the low-frequency scores is at least this 
+//' similar sequences, a low-frequency sequence will be collapsed
+//' with a higher-frequency sequence only if the ratio between the
+//' high-frequency and the low-frequency scores is at least this
 //' high. A value of 0 indicates that no such check is performed.
 //' @param verbose Logical scalar, whether to print progress messages.
-//' 
-//' @return A data.frame with two columns, containing the input sequences 
+//'
+//' @return A data.frame with two columns, containing the input sequences
 //' and the representatives for the groups resulting from grouping similar
 //' sequences, respectively.
-//' 
+//'
 //' @examples
 //' seqs <- c("AACGTAGCA", "ACCGTAGCA", "AACGGAGCA", "ATCGGAGCA", "TGAGGCATA")
 //' scores <- c(5, 1, 3, 1, 8)
-//' groupSimilarSequences(seqs = seqs, scores = scores, 
-//'                       collapseMaxDist = 1, collapseMinScore = 0, 
+//' groupSimilarSequences(seqs = seqs, scores = scores,
+//'                       collapseMaxDist = 1, collapseMinScore = 0,
 //'                       collapseMinRatio = 0, verbose = FALSE)
-//'                             
+//'
 //' @export
 //' @author Michael Stadler, Charlotte Soneson
 // [[Rcpp::export]]
 Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs,
-                                      std::vector<double> scores, 
-                                      double collapseMaxDist, 
-                                      double collapseMinScore,
-                                      double collapseMinRatio,
-                                      bool verbose) {
-    
+                                      std::vector<double> scores,
+                                      double collapseMaxDist=0.0,
+                                      double collapseMinScore=0.0,
+                                      double collapseMinRatio=0.0,
+                                      bool verbose=false) {
+
     // combine seqs and scores
     std::map<std::string, double> seqsScores;
     std::map<std::string, double>::iterator seqsScoresIt, seqsScoresSimIt;
     for (size_t i = 0; i < seqs.size(); i++) {
         seqsScores.insert(std::pair<std::string, double>(seqs[i], scores[i]));
     }
-    
+
     // get sequence length
     size_t seqlen = seqs[0].length();
 
@@ -1323,11 +1382,11 @@ Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs,
         tol = (collapseMaxDist *
             (seqs[0].find("_") != std::string::npos ? seqlen-1 : seqlen));
     }
-    
+
     if (verbose) {
         Rcout << "start collapsing sequences (tolerance: " << tol << ")...";
     }
-    
+
     // sort seqsScores decreasingly by scores
     // ... create an empty intermediate vector
     std::vector<std::pair<std::string, double>> vec;
@@ -1344,7 +1403,7 @@ Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs,
                       return l.second > r.second;
                   return l.first < r.first;
               });
-    
+
     // store sequences in BK tree
     BKtree tree;
     for (vecIt = vec.begin(); vecIt != vec.end(); vecIt++) {
@@ -1357,16 +1416,16 @@ Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs,
         }
     }
     vec.clear(); // remove temporary vector
-    
+
     std::string querySeq, representativeSeq;
     std::vector<std::string> simSeqs;
     std::map<std::string, std::string> single2representative;
-    
+
     // start querying in the order of tree.items (ordered decreasingly by scores)
     size_t start_size = (double)tree.size;
     while (tree.size > 0) {
         querySeq = tree.first();
-        // check in seqsScores if score for querySeq is < variableCollapseMinReads
+        // check in seqsScores if score for querySeq is < collapseMinScore
         seqsScoresIt = seqsScores.find(querySeq);
         if (collapseMinScore > 0 &&
             seqsScoresIt != seqsScores.end() &&
@@ -1396,20 +1455,20 @@ Rcpp::DataFrame groupSimilarSequences(std::vector<std::string> seqs,
                     tree.remove(simSeqs[i]);
                 }
             }
-            
+
             // check for user interruption and print progress
             if ((start_size - tree.size) % 2000 == 0) { // every 2,000 queries (every ~1-2s)
-                Rcpp::checkUserInterrupt(); // ... check for user interrupt
+                Rcpp::checkUserInterrupt(); // ... check for user interrupt # nocov start
                 // ... and give an update
                 if (verbose && (start_size - tree.size) % 2000 == 0) {
                     Rcout << "    " << std::setprecision(4) <<
                         (100.0 * ((double)(start_size - tree.size) / (double)start_size)) <<
-                            "% done" << std::endl;
+                            "% done" << std::endl; // # nocov end
                 }
             }
         }
     }
-    
+
     // return grouping results as a DataFrame
     std::vector<std::string> repseqs(seqs.size());
     std::unordered_set<std::string> uniqueRepseqs;
@@ -1589,7 +1648,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
     // if maxNReads has been reached in the previous file, break
     bool done;
     if (maxNReads != (-1) && nTot >= maxNReads) {
-      done = true;
+      done = true; // # nocov
     } else {
       done = false;
     }
@@ -1630,7 +1689,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
         nTot++;
       }
       if (nTot % 200000 == 0) { // every 200,000 reads (every ~1.6 seconds)
-        Rcpp::checkUserInterrupt(); // ... check for user interrupt
+        Rcpp::checkUserInterrupt(); // ... check for user interrupt # nocov
       }
 
       // if maxNReads has been reached, break
@@ -1831,8 +1890,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             }
             std::string wtForward = wildTypeForward[idxForward];
             std::string wtNameForward = wildTypeForwardNames[idxForward];
-            
-            // if the variable region is longer than the (best matching) WT sequence, 
+
+            // if the variable region is longer than the (best matching) WT sequence,
             // skip the read (consider it to have the wrong length)
             if (varSeqForward.length() > wtForward.length()) {
 #ifdef _OPENMP
@@ -1840,16 +1899,16 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
 #endif
               nReadWrongLength++;
               chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "noPrimer_readWrongLength");
-              continue;  
+              continue;
             }
-            
+
             if (compareToWildtype(varSeqForward, wtForward, varIntQualForward,
                                   mutatedPhredMinForward, nbrMutatedCodonsMaxForward, forbiddenCodonsForward,
                                   wtNameForward, nbrMutatedBasesMaxForward, nMutQualTooLow,
-                                  nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, 
+                                  nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases,
                                   mutantName, mutantNameBase, mutantNameCodon,
                                   mutantNameBaseHGVS, mutantNameAA, mutantNameAAHGVS,
-                                  nMutBases, nMutCodons, 
+                                  nMutBases, nMutCodons,
                                   nMutAAs, mutationTypes, mutNameDelimiter, collapseToWTForward,
                                   threeAA)) {
               // read is to be filtered out
@@ -1908,8 +1967,8 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             }
             std::string wtReverse = wildTypeReverse[idxReverse];
             std::string wtNameReverse = wildTypeReverseNames[idxReverse];
-            
-            // if the variable region is longer than the (best matching) WT sequence, 
+
+            // if the variable region is longer than the (best matching) WT sequence,
             // skip the read (consider it to have the wrong length)
             if (varSeqReverse.length() > wtReverse.length()) {
 #ifdef _OPENMP
@@ -1917,16 +1976,16 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
 #endif
               nReadWrongLength++;
               chunkBuffer->write_seq(ci, outfile1, outfile2, nTot-(int)iChunk+(int)ci, "noPrimer_readWrongLength");
-              continue;  
+              continue;
             }
-            
+
             if (compareToWildtype(varSeqReverse, wtReverse, varIntQualReverse,
                                   mutatedPhredMinReverse, nbrMutatedCodonsMaxReverse, forbiddenCodonsReverse,
                                   wtNameReverse, nbrMutatedBasesMaxReverse, nMutQualTooLow,
-                                  nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases, 
+                                  nTooManyMutCodons, nForbiddenCodons, nTooManyMutBases,
                                   mutantName, mutantNameBase, mutantNameCodon,
                                   mutantNameBaseHGVS, mutantNameAA, mutantNameAAHGVS,
-                                  nMutBases, nMutCodons, 
+                                  nMutBases, nMutCodons,
                                   nMutAAs, mutationTypes, mutNameDelimiter, collapseToWTReverse,
                                   threeAA)) {
               // read is to be filtered out
@@ -2066,13 +2125,13 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
             mutantNameBase.pop_back(); // remove '_' at the end
             mutantNameCodon.pop_back(); // remove '_' at the end
           } else {
-            // will we ever go in here?
+            // will we ever go in here? // # nocov start
             if (wildTypeForward[0].compare("") != 0 ||
                 (!noReverse && wildTypeReverse[0].compare("") != 0)) {
               mutantName = "WT";
               mutantNameBase = "WT";
               mutantNameCodon = "WT";
-            }
+            } // # nocov end
           }
           if (mutantNameBaseHGVS.length() > 0) { // we have a (closest) wildtype name
             mutantNameBaseHGVS.pop_back(); // remove '_' at the end
@@ -2081,11 +2140,11 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
           if (mutantNameAA.length() > 0) { // we have a least one mutation, or sequence-based name
             mutantNameAA.pop_back(); // remove '_' at the end
           } else {
-            // will we ever go in here?
+            // will we ever go in here? // # nocov start
             if (wildTypeForward[0].compare("") != 0 ||
                 (!noReverse && wildTypeReverse[0].compare("") != 0)) {
               mutantNameAA = "WT";
-            }
+            } // # nocov end
           }
           if (!noReverse) { // "trans" experiment
             varSeqForward += (std::string("_") + varSeqReverse);
@@ -2217,7 +2276,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
       mutCounter++;
       // check for user interruption and print progress
       if (mutCounter % 200 == 0) { // every 200 queries
-        Rcpp::checkUserInterrupt(); // ... check for user interrupt
+        Rcpp::checkUserInterrupt(); // ... check for user interrupt # nocov
       }
     }
 
@@ -2235,7 +2294,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
   Rcpp::StringVector wildTypeReverseRcpp(wildTypeReverse.size());
   wildTypeReverseRcpp = wildTypeReverse;
   wildTypeReverseRcpp.attr("names") = wildTypeReverseNames;
-  
+
   std::vector<std::string> forbiddenCodonsUsedForward(forbiddenCodonsForward.begin(), forbiddenCodonsForward.end());
   std::vector<std::string> forbiddenCodonsUsedReverse(forbiddenCodonsReverse.begin(), forbiddenCodonsReverse.end());
   List param;
@@ -2295,7 +2354,7 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                                     Named("nbrMismatchForward") = nPhredMismatchForward,
                                     Named("nbrMatchReverse") = nPhredCorrectReverse,
                                     Named("nbrMismatchReverse") = nPhredMismatchReverse);
-  
+
   // ... filter statistics
   DataFrame filt = DataFrame::create(Named("nbrTotal") = nTot,
                                      Named("f1_nbrAdapter") = nAdapter,
@@ -2313,10 +2372,10 @@ List digestFastqsCpp(std::vector<std::string> fastqForwardVect,
                                      Named("f12_nbrTooManyMutConstant") = nTooManyMutConstant,
                                      Named("f13_nbrTooManyBestConstantHits") = nTooManyBestConstantHits,
                                      Named("nbrRetained") = nRetain);
-  
+
   // ... main data frame
   DataFrame df = mutantSummaryToDataFrame(mutantSummary);
-  
+
   // ... pack into list
   List L = List::create(Named("parameters") = param,
                         Named("filterSummary") = filt,

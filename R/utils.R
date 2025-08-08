@@ -74,11 +74,13 @@
     }
     args <- lapply(mycall, as.character)[-1]
     xname <- if ("x" %in% names(args)) args$x else "argument"
-
+    
     ## Check arguments
     stopifnot(is.null(type) || (length(type) == 1L && is.character(type)))
-    stopifnot(is.null(rngIncl) || (length(rngIncl) == 2L && is.numeric(rngIncl)))
-    stopifnot(is.null(rngExcl) || (length(rngExcl) == 2L && is.numeric(rngExcl)))
+    stopifnot(is.null(rngIncl) || (length(rngIncl) == 2L && 
+                                       is.numeric(rngIncl)))
+    stopifnot(is.null(rngExcl) || (length(rngExcl) == 2L && 
+                                       is.numeric(rngExcl)))
     stopifnot(is.null(len) || (length(len) == 1L && is.numeric(len)))
     stopifnot(is.null(rngLen) || (length(rngLen) == 2L && is.numeric(rngLen)))
     stopifnot(is.logical(allowNULL) && length(allowNULL) == 1L)
@@ -107,13 +109,14 @@
         type <- "numeric"
     }
     
-    if (!is.null(type) && !methods::is(x, type)) {
+    if (!is.null(type) && !is(x, type)) {
         stop("'", xname, "' must be of class '", type, "'", call. = FALSE)
     }
     
     if (!is.null(rngIncl)) {
         if (!is.null(validValues)) {
-            if (any((x < rngIncl[1] | x > rngIncl[2]) & !(x %in% validValues))) {
+            if (any((x < rngIncl[1] | x > rngIncl[2]) & 
+                    !(x %in% validValues))) {
                 stop("'", xname, "' must be within [", rngIncl[1], ",", 
                      rngIncl[2], "] (inclusive), or one of: ", vvPrint,
                      call. = FALSE)
@@ -126,7 +129,8 @@
         }
     } else if (!is.null(rngExcl)) {
         if (!is.null(validValues)) {
-            if (any((x <= rngExcl[1] | x >= rngExcl[2]) & !(x %in% validValues))) {
+            if (any((x <= rngExcl[1] | x >= rngExcl[2]) & 
+                    !(x %in% validValues))) {
                 stop("'", xname, "' must be within (", rngExcl[1], ",", 
                      rngExcl[2], ") (exclusive), or one of: ", vvPrint,
                      call. = FALSE)
@@ -144,11 +148,11 @@
         }
     }
     
-
+    
     if (!is.null(len) && length(x) != len) {
         stop("'", xname, "' must have length ", len, call. = FALSE)
     }
-
+    
     if (!is.null(rngLen) && (length(x) < rngLen[1] || length(x) > rngLen[2])) {
         stop("length of '", xname, "' must be within [", rngLen[1], ",", 
              rngLen[2], "] (inclusive)", call. = FALSE)
@@ -190,17 +194,19 @@
         caller <- deparse(sys.calls()[[sys.nframe() - 1]])
         callerfunc <- sub("\\(.+$", "", caller)
         haveBioc <- requireNamespace("BiocManager", quietly = TRUE)
-        msg <- paste0("The package", ifelse(sum(!avail) > 1, "s '", " '"),
-                      paste(sub("^[^/]+/", "", pkgs[!avail]), collapse = "', '"),
-                      "' ",
-                      ifelse(sum(!avail) > 1, "are", "is"), " required for ",
-                      callerfunc, "(), but not installed.\n")
+        msg <- paste0(
+            "The package", ifelse(sum(!avail) > 1, "s '", " '"),
+            paste(sub("^[^/]+/", "", pkgs[!avail]), collapse = "', '"),
+            "' ",
+            ifelse(sum(!avail) > 1, "are", "is"), " required for ",
+            callerfunc, "(), but not installed.\n")
         if (suggestInstallation) {
-            msg <- paste0(msg,
-                          "Install ", ifelse(sum(!avail) > 1, "them", "it"), " using:\n",
-                          ifelse(haveBioc, "", "install.packages(\"BiocManager\")\n"),
-                          "BiocManager::install(c(\"",
-                          paste(pkgs[!avail], collapse = "\", \""), "\"))")
+            msg <- paste0(
+                msg,
+                "Install ", ifelse(sum(!avail) > 1, "them", "it"), " using:\n",
+                ifelse(haveBioc, "", "install.packages(\"BiocManager\")\n"),
+                "BiocManager::install(c(\"",
+                paste(pkgs[!avail], collapse = "\", \""), "\"))")
         }
         stop(msg, call. = FALSE)
     }

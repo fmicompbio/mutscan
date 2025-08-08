@@ -19,11 +19,11 @@ test_that("plotTotals fails with incorrect arguments", {
 
 test_that("plotTotals works as expected", {
     ## Defaults
-    expect_s3_class(plotTotals(se = se, selAssay = "counts",
-                               groupBy = NULL), "ggplot")
+    expect_true(ggplot2::is_ggplot(plotTotals(se = se, selAssay = "counts",
+                                              groupBy = NULL)))
 
     ## Group by column
-    expect_s3_class(plotTotals(se = se, selAssay = "counts",
-                               groupBy = "categ"), "ggplot")
+    expect_true(ggplot2::is_ggplot(plotTotals(se = se, selAssay = "counts",
+                                              groupBy = "categ")))
     
 })

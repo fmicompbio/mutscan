@@ -80,6 +80,26 @@
 #' \item outCombined - the \code{digestFastqs} output for the combined run.
 #' }
 #' 
+#' @examples 
+#' fqFile <- system.file("extdata", "cisInput_1.fastq.gz", 
+#'                       package = "mutscan")
+#' out <- linkMultipleVariants(
+#'     combinedDigestParams = list(fastqForward = fqFile, 
+#'                                 elementsForward = "SVCV", 
+#'                                 elementLengthsForward = c(1, 10, 18, 96)),
+#'     # the first variable sequence is the UMI
+#'     umi = list(fastqForward = fqFile, elementsForward = "SVCS",
+#'                elementLengthsForward = c(1, 10, 18, 96)),
+#'     # the second variable sequence is the amplicon variant
+#'     var = list(fastqForward = fqFile, elementsForward = "SSCV",
+#'                elementLengthsForward = c(1, 10, 18, 96), 
+#'                collapseMaxDist = 3, collapseMinScore = 1)
+#' )
+#' # conversion tables
+#' lapply(out$convSeparate, head)
+#' # aggregated count table
+#' head(out$countAggregated)
+#' 
 #' @importFrom dplyr select rename group_by summarize across matches mutate
 #' @importFrom tidyr separate separate_rows
 #' @importFrom rlang .data
@@ -113,9 +133,10 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     paramsSeparate <- lapply(paramsSeparate, function(parm) {
         c(parm, as.list(defaults[!(names(defaults) %in% names(parm))]))
     })
-    combinedDigestParams <- c(combinedDigestParams,
-                              as.list(defaults[!(names(defaults) %in%
-                                                     names(combinedDigestParams))]))
+    combinedDigestParams <- 
+        c(combinedDigestParams,
+          as.list(defaults[!(names(defaults) %in%
+                                 names(combinedDigestParams))]))
 
     ## --------------------------------------------------------------------- ##
     ## Checks
@@ -159,29 +180,29 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     outCombined <- do.call(digestFastqs, combinedDigestParams)
 
     ## Get count matrix with "raw" (uncorrected) sequences
-    countCombined <- outCombined$summaryTable %>%
-        dplyr::select("sequence", "nbrReads", "varLengths") %>%
-        dplyr::mutate(idx = paste0("I", seq_along(.data$sequence)))
+    countCombined <- outCombined$summaryTable |>
+        dplyr::select("sequence", "nbrReads", "varLengths") |>
+        mutate(idx = paste0("I", seq_along(.data$sequence)))
 
     ## If applicable, separate into forward and reverse sequences
     if (any(grepl("_", countCombined$sequence))) {
-        countCombined <- countCombined %>%
-            tidyr::separate(.data$sequence, into = c("sequenceForward", 
+        countCombined <- countCombined |>
+            separate(.data$sequence, into = c("sequenceForward", 
                                                      "sequenceReverse"), 
-                            sep = "_") %>%
-            tidyr::separate(.data$varLengths, into = c("varLengthsForward", 
+                            sep = "_") |>
+            separate(.data$varLengths, into = c("varLengthsForward", 
                                                        "varLengthsReverse"),
-                            sep = "_") %>%
-            dplyr::mutate(
+                            sep = "_") |>
+            mutate(
                 nCompForward = vapply(strsplit(.data$varLengthsForward, ","), 
                                       length, 0),
                 nCompReverse = vapply(strsplit(.data$varLengthsReverse, ","), 
                                       length, 0))
     } else {
-        countCombined <- countCombined %>%
-            dplyr::rename(sequenceForward = "sequence",
-                          varLengthsForward = "varLengths") %>%
-            dplyr::mutate(
+        countCombined <- countCombined |>
+            rename(sequenceForward = "sequence",
+                          varLengthsForward = "varLengths") |>
+            mutate(
                 nCompForward = vapply(strsplit(.data$varLengthsForward, ","), 
                                       length, 0))
     }
@@ -196,8 +217,8 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
         tmp <- split(countCombined, countCombined$varLengthsForward)
         countCombined <- unsplit(lapply(tmp, function(df) {
             w <- as.numeric(strsplit(df$varLengthsForward[1], ",")[[1]])
-            df <- df %>%
-                tidyr::separate(
+            df <- df |>
+                separate(
                     .data$sequenceForward, 
                     into = names(paramsSeparate)[seq_along(w)],
                     # into = paste0("V", seq_along(w)),
@@ -211,8 +232,8 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
         tmp <- split(countCombined, countCombined$varLengthsReverse)
         countCombined <- unsplit(lapply(tmp, function(df) {
             w <- as.numeric(strsplit(df$varLengthsReverse[1], ",")[[1]])
-            df <- df %>%
-                tidyr::separate(
+            df <- df |>
+                separate(
                     .data$sequenceReverse, 
                     into = names(paramsSeparate)[offsetForward + seq_along(w)],
                     # into = paste0("V", offsetForward + seq_along(w)),
@@ -226,10 +247,12 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     outSeparate <- lapply(paramsSeparate, function(ps) {
         tmp <- do.call(digestFastqs, ps[!names(ps) %in% collapseParams])
         if (any(collapseParams %in% names(ps))) {
-            ## Collapse this variable region -> need to call groupSimilarSequences
+            ## Collapse this variable region -> need to call 
+            ## groupSimilarSequences
             tbl <- do.call(groupSimilarSequences, 
                            c(list(seqs = tmp$summaryTable$sequence,
-                                  scores = tmp$summaryTable$nbrReads, verbose = FALSE),
+                                  scores = tmp$summaryTable$nbrReads,
+                                  verbose = FALSE),
                              ps[names(ps) %in% collapseParams]))
             colnames(tbl)[colnames(tbl) == "representative"] <- "mutantName"
             tmp$summaryTable <- tbl
@@ -242,9 +265,9 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
     
     ## Conversion tables
     convSeparate <- lapply(outSeparate, function(out) {
-        out$summaryTable %>%
-            dplyr::select("mutantName", "sequence") %>%
-            tidyr::separate_rows("sequence", sep = ",")
+        out$summaryTable |>
+            dplyr::select("mutantName", "sequence") |>
+            separate_rows("sequence", sep = ",")
     })
 
     ## --------------------------------------------------------------------- ##
@@ -261,9 +284,9 @@ linkMultipleVariants <- function(combinedDigestParams = list(), ...) {
                                    drop = FALSE]
 
     ## Aggregate counts
-    countAggregated <- countCombined %>%
-        dplyr::group_by(dplyr::across(names(paramsSeparate))) %>%
-        dplyr::summarize(nbrReads = sum(.data$nbrReads), .groups = "drop")
+    countAggregated <- countCombined |>
+        group_by(across(names(paramsSeparate))) |>
+        summarize(nbrReads = sum(.data$nbrReads), .groups = "drop")
 
     list(countAggregated = countAggregated, convSeparate = convSeparate,
          outCombined = outCombined, filtSeparate = filtSeparate)
