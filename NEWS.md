@@ -1,3 +1,7 @@
+# mutscan 0.99.1
+
+* Fix non-ASCII characters in CITATION file
+
 # mutscan 0.99.0
 
 * Prepare for Bioconductor submission
