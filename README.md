@@ -19,7 +19,15 @@ vignettes.
 
 ## Installation
 
-You can install the development version of `mutscan` from GitHub with:
+`mutscan` is available from Bioconductor (from release 3.22) and can be 
+installed with:
+
+```r
+# install.packages("BiocManager")
+BiocManager::install("mutscan")
+```
+
+You can also install the development version of `mutscan` from GitHub with:
 
 ``` r
 # install.packages("devtools")
