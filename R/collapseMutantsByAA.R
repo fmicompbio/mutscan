@@ -169,13 +169,6 @@ collapseMutants <- function(se, nameCol) {
                   validValues = colnames(rowData(se)))
     
     ## Collapse assays
-    ## Matrix.utils has been removed from CRAN
-    # aList <- lapply(assays(se), function(a) {
-    #     Matrix.utils::aggregate.Matrix(
-    #         x = a,
-    #         groupings = factor(rowData(se)[[nameCol]]),
-    #         fun = "colSums")
-    # })
     aList <- lapply(assays(se), function(a) {
         rowsum(
             x = a,
