@@ -3,7 +3,7 @@ on:
   push:
   pull_request:
     branches:
-      - master
+      - devel
 
 name: R-CMD-check
 
@@ -48,11 +48,6 @@ jobs:
         run: |
           install.packages('remotes')
         shell: Rscript {0}
-
-      #- name: Install Matrix.utils (from CRAN archive)
-      #  run: |
-      #    remotes::install_version("Matrix.utils", version = "0.9.8", repos = "http://cran.us.r-project.org")
-      #  shell: Rscript {0}
 
       - name: Query dependencies
         run: |
@@ -102,11 +97,11 @@ jobs:
         id: build-install-check
         uses: grimbough/bioc-actions/build-install-check@v1
 
-      # - name: Run BiocCheck
-      #   uses: grimbough/bioc-actions/run-BiocCheck@v1
-      #   with:
-      #     arguments: '--no-check-bioc-views --no-check-bioc-help'
-      #     error-on: 'error'
+      - name: Run BiocCheck
+        uses: grimbough/bioc-actions/run-BiocCheck@v1
+        with:
+          arguments: '--no-check-bioc-views --no-check-bioc-help'
+          error-on: 'error'
 
       - name: Upload install log if the build/install/check step fails
         if: always() && (steps.build-install-check.outcome == 'failure')
@@ -124,7 +119,7 @@ jobs:
         shell: Rscript {0}
 
       - name: Deploy
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && matrix.config.os == 'macOS-latest'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/devel' && matrix.config.os == 'macOS-latest'
         run: |
           R CMD INSTALL .
           Rscript -e "remotes::install_dev('pkgdown'); pkgdown::deploy_to_branch(new_process = FALSE)"
