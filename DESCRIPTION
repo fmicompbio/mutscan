@@ -1,6 +1,6 @@
 Package: mutscan
 Title: Preprocessing and Analysis of Deep Mutational Scanning Data
-Version: 0.99.2
+Version: 1.0.0
 Authors@R: 
     c(person(given = "Charlotte",
              family = "Soneson",
