@@ -1,0 +1,4 @@
+# License
+
+    YEAR: 2022
+    COPYRIGHT HOLDER: Friedrich Miescher Institute for Biomedical Research

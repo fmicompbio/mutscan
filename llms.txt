@@ -1,0 +1,77 @@
+# mutscan
+
+![mutscan](reference/figures/mutscan.png)
+
+  
+
+  
+
+`mutscan` is an R package to process, statistically analyse and
+visualise multiplexed assays of variant effect data. The package is
+under active development, and the functionality and user interface may
+change. For more detailed information about how to run `mutscan`, please
+consult the vignettes.
+
+## Installation
+
+`mutscan` is available from Bioconductor (from release 3.22) and can be
+installed with:
+
+``` r
+# install.packages("BiocManager")
+BiocManager::install("mutscan")
+```
+
+You can also install the development version of `mutscan` from GitHub
+with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("fmicompbio/mutscan")
+```
+
+# Package index
+
+## All functions
+
+- [`calcNearestStringDist()`](https://fmicompbio.github.io/mutscan/reference/calcNearestStringDist.md)
+  : Calculate distances to the nearest string
+- [`calculateFitnessScore()`](https://fmicompbio.github.io/mutscan/reference/calculateFitnessScore.md)
+  : Calculate fitness scores.
+- [`calculateRelativeFC()`](https://fmicompbio.github.io/mutscan/reference/calculateRelativeFC.md)
+  : Calculate logFCs relative to WT using edgeR
+- [`collapseMutantsBySimilarity()`](https://fmicompbio.github.io/mutscan/reference/collapseMutantsBySimilarity.md)
+  [`collapseMutantsByAA()`](https://fmicompbio.github.io/mutscan/reference/collapseMutantsBySimilarity.md)
+  [`collapseMutants()`](https://fmicompbio.github.io/mutscan/reference/collapseMutantsBySimilarity.md)
+  : Collapse mutants by similarity
+- [`digestFastqs()`](https://fmicompbio.github.io/mutscan/reference/digestFastqs.md)
+  : Read, filter and digest sequences from fastq file(s).
+- [`generateQCReport()`](https://fmicompbio.github.io/mutscan/reference/generateQCReport.md)
+  : Generate QC report
+- [`groupSimilarSequences()`](https://fmicompbio.github.io/mutscan/reference/groupSimilarSequences.md)
+  : Create a conversion table for collapsing similar sequences
+- [`linkMultipleVariants()`](https://fmicompbio.github.io/mutscan/reference/linkMultipleVariants.md)
+  : Process an experiment with multiple variable sequences
+- [`plotDistributions()`](https://fmicompbio.github.io/mutscan/reference/plotDistributions.md)
+  : Plot distribution of observed values
+- [`plotFiltering()`](https://fmicompbio.github.io/mutscan/reference/plotFiltering.md)
+  : Visualize the filtering procedure
+- [`plotMeanDiff()`](https://fmicompbio.github.io/mutscan/reference/plotMeanDiff.md)
+  : Construct an MA (mean-difference) plot
+- [`plotPairs()`](https://fmicompbio.github.io/mutscan/reference/plotPairs.md)
+  : Make pairs plot of selected assay from a SummarizedExperiment object
+- [`plotTotals()`](https://fmicompbio.github.io/mutscan/reference/plotTotals.md)
+  : Plot the column totals of a selected assay
+- [`plotVolcano()`](https://fmicompbio.github.io/mutscan/reference/plotVolcano.md)
+  : Construct a volcano plot
+- [`relabelMutPositions()`](https://fmicompbio.github.io/mutscan/reference/relabelMutPositions.md)
+  : Relabel the positions of mutations in the designated ID
+- [`summarizeExperiment()`](https://fmicompbio.github.io/mutscan/reference/summarizeExperiment.md)
+  : Summarize and collapse multiple mutational scanning experiments
+
+# Articles
+
+### All vignettes
+
+- [Multiplexed assays of variant effect analysis with
+  \`mutscan\`](https://fmicompbio.github.io/mutscan/articles/mutscan.md):
