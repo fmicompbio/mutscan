@@ -74,8 +74,8 @@ Michael Stadler, Charlotte Soneson
 ``` r
 seqs <- c("AACGTAGCA", "ACCGTAGCA", "AACGGAGCA", "ATCGGAGCA", "TGAGGCATA")
 scores <- c(5, 1, 3, 1, 8)
-groupSimilarSequences(seqs = seqs, scores = scores, 
-                      collapseMaxDist = 1, collapseMinScore = 0, 
+groupSimilarSequences(seqs = seqs, scores = scores,
+                      collapseMaxDist = 1, collapseMinScore = 0,
                       collapseMinRatio = 0, verbose = FALSE)
 #>    sequence representative
 #> 1 AACGTAGCA      AACGTAGCA
@@ -83,5 +83,4 @@ groupSimilarSequences(seqs = seqs, scores = scores,
 #> 3 AACGGAGCA      AACGTAGCA
 #> 4 ATCGGAGCA      ATCGGAGCA
 #> 5 TGAGGCATA      TGAGGCATA
-                            
 ```

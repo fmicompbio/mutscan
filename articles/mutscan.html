@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mutscan</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,7 +55,7 @@
                         <h4 data-toc-skip class="author">Charlotte
 Soneson and Michael Stadler</h4>
             
-            <h4 data-toc-skip class="date">29 October 2025</h4>
+            <h4 data-toc-skip class="date">14 April 2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/fmicompbio/mutscan/blob/devel/vignettes/mutscan.Rmd" class="external-link"><code>vignettes/mutscan.Rmd</code></a></small>
       <div class="d-none name"><code>mutscan.Rmd</code></div>
@@ -441,7 +441,7 @@ and time of processing.</p>
 <span><span class="co">#&gt; [1] 1024</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $processingInfo</span></span>
-<span><span class="co">#&gt; [1] "Processed by mutscan v1.1.0 on 2025-10-29 19:25:29.586519"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Processed by mutscan v1.1.1 on 2026-04-14 07:27:39.054337"</span></span></code></pre></div>
 <p>The <code>filterSummary</code> data.frame contains a summary of the
 number of reads filtered out in each step. Note that for any given
 filtering step, only the reads retained by the previous filters are
@@ -769,7 +769,7 @@ into one variable sequence, only one wild type sequence is provided (the
 <span><span class="co">#&gt; [1] 1024</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $processingInfo</span></span>
-<span><span class="co">#&gt; [1] "Processed by mutscan v1.1.0 on 2025-10-29 19:25:29.970813"</span></span>
+<span><span class="co">#&gt; [1] "Processed by mutscan v1.1.1 on 2026-04-14 07:27:39.517181"</span></span>
 <span><span class="va">cisInput</span><span class="op">$</span><span class="va">filterSummary</span></span>
 <span><span class="co">#&gt;   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span></span>
 <span><span class="co">#&gt; 1     1000           126              0                     0</span></span>
@@ -1186,7 +1186,7 @@ variable sequence length to 96.</p>
 <span><span class="co">#&gt; [1] 1024</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $processingInfo</span></span>
-<span><span class="co">#&gt; [1] "Processed by mutscan v1.1.0 on 2025-10-29 19:25:30.171391"</span></span>
+<span><span class="co">#&gt; [1] "Processed by mutscan v1.1.1 on 2026-04-14 07:27:39.807636"</span></span>
 <span><span class="va">leujunt0</span><span class="op">$</span><span class="va">filterSummary</span></span>
 <span><span class="co">#&gt;   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength</span></span>
 <span><span class="co">#&gt; 1     1000             0            126                     0</span></span>
@@ -1470,26 +1470,26 @@ of the <code>mutscan</code> filtering.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotFiltering.html">plotFiltering</a></span><span class="op">(</span><span class="va">se</span>, valueType <span class="op">=</span> <span class="st">"reads"</span>, onlyActiveFilters <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>              plotType <span class="op">=</span> <span class="st">"remaining"</span>, facetBy <span class="op">=</span> <span class="st">"sample"</span>, numberSize <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
-<p><img src="mutscan_files/figure-html/plot-filter-reads-1.png" class="r-plt" width="768"></p>
+<p><img src="mutscan_files/figure-html/plot-filter-reads-1.png" class="r-plt" alt="" width="768"></p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotFiltering.html">plotFiltering</a></span><span class="op">(</span><span class="va">se</span>, valueType <span class="op">=</span> <span class="st">"fractions"</span>, onlyActiveFilters <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>              plotType <span class="op">=</span> <span class="st">"filtered"</span>, facetBy <span class="op">=</span> <span class="st">"step"</span>, numberSize <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
-<p><img src="mutscan_files/figure-html/plot-filter-frac-1.png" class="r-plt" width="768"></p>
+<p><img src="mutscan_files/figure-html/plot-filter-frac-1.png" class="r-plt" alt="" width="768"></p>
 <p>We can also generate a pairs plot displaying the correlation among
 the samples in the data set.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotPairs.html">plotPairs</a></span><span class="op">(</span><span class="va">se</span>, selAssay <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="mutscan_files/figure-html/plot-pairs-1.png" class="r-plt" width="700"></p>
+<p><img src="mutscan_files/figure-html/plot-pairs-1.png" class="r-plt" alt="" width="700"></p>
 <p>Additional plot functions can be used to visualize the total count
 per sample, across all variants, or the distribution of variant counts
 per sample.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotTotals.html">plotTotals</a></span><span class="op">(</span><span class="va">se</span>, selAssay <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="mutscan_files/figure-html/plot-more-1.png" class="r-plt" width="700"></p>
+<p><img src="mutscan_files/figure-html/plot-more-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotDistributions.html">plotDistributions</a></span><span class="op">(</span><span class="va">se</span>, selAssay <span class="op">=</span> <span class="st">"counts"</span>, plotType <span class="op">=</span> <span class="st">"density"</span>, </span>
 <span>                  pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="mutscan_files/figure-html/plot-more-2.png" class="r-plt" width="700"></p>
+<p><img src="mutscan_files/figure-html/plot-more-2.png" class="r-plt" alt="" width="700"></p>
 <p>Finally, we can create a full QC report as follows:</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/generateQCReport.html">generateQCReport</a></span><span class="op">(</span><span class="va">se</span>, outFile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".html"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -1588,23 +1588,23 @@ sequence.</p>
 <span>    method <span class="op">=</span> <span class="st">"edgeR"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">edger_scores</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">edger_scores</span><span class="op">$</span><span class="va">PValue</span><span class="op">)</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            logFC   logCPM        F       PValue          FDR logFC_shrunk</span></span>
-<span><span class="co">#&gt; f.27.* -4.503529 11.12474 15282.12 1.382897e-23 5.691459e-21    -4.502824</span></span>
-<span><span class="co">#&gt; f.7.G  -4.184471 11.14499 14270.70 2.286049e-23 5.691459e-21    -4.183994</span></span>
-<span><span class="co">#&gt; f.28.* -4.387484 11.14116 13973.55 2.667871e-23 5.691459e-21    -4.386944</span></span>
-<span><span class="co">#&gt; f.7.*  -4.460187 10.87738 13025.46 4.468224e-23 5.883625e-21    -4.459450</span></span>
-<span><span class="co">#&gt; f.14.* -4.373749 10.90447 12836.43 4.974299e-23 5.883625e-21    -4.372984</span></span>
-<span><span class="co">#&gt; f.18.* -4.823126 10.52294 12485.43 6.097352e-23 5.883625e-21    -4.821931</span></span>
+<span><span class="co">#&gt; f.27.* -4.503507 11.12474 14566.17 2.086636e-24 9.061367e-22    -4.502824</span></span>
+<span><span class="co">#&gt; f.7.G  -4.184495 11.14499 13607.70 3.528342e-24 9.061367e-22    -4.183994</span></span>
+<span><span class="co">#&gt; f.28.* -4.387507 11.14116 13284.48 4.247516e-24 9.061367e-22    -4.386944</span></span>
+<span><span class="co">#&gt; f.7.*  -4.460185 10.87738 12511.63 6.745260e-24 9.663684e-22    -4.459450</span></span>
+<span><span class="co">#&gt; f.14.* -4.373711 10.90447 12285.63 7.763935e-24 9.663684e-22    -4.372984</span></span>
+<span><span class="co">#&gt; f.28.G -3.942580 11.21716 11850.16 1.025681e-23 9.663684e-22    -3.942115</span></span>
 <span><span class="co">#&gt;        df.total df.prior df.test</span></span>
-<span><span class="co">#&gt; f.27.* 14.69484 11.69481       1</span></span>
-<span><span class="co">#&gt; f.7.G  14.69484 11.69481       1</span></span>
-<span><span class="co">#&gt; f.28.* 14.69484 11.69481       1</span></span>
-<span><span class="co">#&gt; f.7.*  14.69484 11.69481       1</span></span>
-<span><span class="co">#&gt; f.14.* 14.69484 11.69481       1</span></span>
-<span><span class="co">#&gt; f.18.* 14.69481 11.69481       1</span></span>
+<span><span class="co">#&gt; f.27.* 15.45022 12.45019       1</span></span>
+<span><span class="co">#&gt; f.7.G  15.45022 12.45019       1</span></span>
+<span><span class="co">#&gt; f.28.* 15.45022 12.45019       1</span></span>
+<span><span class="co">#&gt; f.7.*  15.45022 12.45019       1</span></span>
+<span><span class="co">#&gt; f.14.* 15.45022 12.45019       1</span></span>
+<span><span class="co">#&gt; f.28.G 15.45022 12.45019       1</span></span>
 <span><span class="co">## As before, the WT sequence has a logFC close to 0, by construction</span></span>
 <span><span class="va">edger_scores</span><span class="op">[</span><span class="st">"f.0.WT"</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
 <span><span class="co">#&gt;               logFC   logCPM F PValue FDR  logFC_shrunk df.total df.prior</span></span>
-<span><span class="co">#&gt; f.0.WT 9.039892e-16 19.30433 0      1   1 -4.801394e-15 14.69484 11.69481</span></span>
+<span><span class="co">#&gt; f.0.WT 9.039516e-16 19.30433 0      1   1 -2.364216e-15 15.45022 12.45019</span></span>
 <span><span class="co">#&gt;        df.test</span></span>
 <span><span class="co">#&gt; f.0.WT       1</span></span>
 <span></span>
@@ -1641,10 +1641,10 @@ of the statistical testing - in particular, MA (mean-difference) plots
 and volcano plots can be easily generated.</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotMeanDiff.html">plotMeanDiff</a></span><span class="op">(</span><span class="va">edger_scores</span>, pointSize <span class="op">=</span> <span class="st">"large"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="mutscan_files/figure-html/plot-rel-fc-1.png" class="r-plt" width="700"></p>
+<p><img src="mutscan_files/figure-html/plot-rel-fc-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotVolcano.html">plotVolcano</a></span><span class="op">(</span><span class="va">edger_scores</span>, pointSize <span class="op">=</span> <span class="st">"large"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="mutscan_files/figure-html/plot-rel-fc-2.png" class="r-plt" width="700"></p>
+<p><img src="mutscan_files/figure-html/plot-rel-fc-2.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
 <h2 id="faq">FAQ<a class="anchor" aria-label="anchor" href="#faq"></a>
@@ -1666,13 +1666,13 @@ forward and reverse FASTQ files in the same order.</p>
 <p>This vignette was compiled on the following system:</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; R version 4.5.1 (2025-06-13)</span></span>
-<span><span class="co">#&gt; Platform: aarch64-apple-darwin20</span></span>
-<span><span class="co">#&gt; Running under: macOS Sequoia 15.7.1</span></span>
+<span><span class="co">#&gt; R version 4.6.0 alpha (2026-04-08 r89818)</span></span>
+<span><span class="co">#&gt; Platform: aarch64-apple-darwin23</span></span>
+<span><span class="co">#&gt; Running under: macOS Sequoia 15.7.4</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matrix products: default</span></span>
-<span><span class="co">#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRblas.0.dylib </span></span>
-<span><span class="co">#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1</span></span>
+<span><span class="co">#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.0.dylib </span></span>
+<span><span class="co">#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; locale:</span></span>
 <span><span class="co">#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8</span></span>
@@ -1685,38 +1685,39 @@ forward and reverse FASTQ files in the same order.</p>
 <span><span class="co">#&gt; [8] base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt;  [1] mutscan_1.1.0               SummarizedExperiment_1.39.2</span></span>
-<span><span class="co">#&gt;  [3] Biobase_2.69.1              GenomicRanges_1.61.8       </span></span>
-<span><span class="co">#&gt;  [5] Seqinfo_0.99.4              IRanges_2.43.8             </span></span>
-<span><span class="co">#&gt;  [7] S4Vectors_0.47.6            BiocGenerics_0.55.4        </span></span>
-<span><span class="co">#&gt;  [9] generics_0.1.4              MatrixGenerics_1.21.0      </span></span>
-<span><span class="co">#&gt; [11] matrixStats_1.5.0           BiocStyle_2.37.1           </span></span>
+<span><span class="co">#&gt;  [1] mutscan_1.1.1               SummarizedExperiment_1.41.1</span></span>
+<span><span class="co">#&gt;  [3] Biobase_2.71.0              GenomicRanges_1.63.2       </span></span>
+<span><span class="co">#&gt;  [5] Seqinfo_1.1.0               IRanges_2.45.0             </span></span>
+<span><span class="co">#&gt;  [7] S4Vectors_0.49.1            BiocGenerics_0.57.0        </span></span>
+<span><span class="co">#&gt;  [9] generics_0.1.4              MatrixGenerics_1.23.0      </span></span>
+<span><span class="co">#&gt; [11] matrixStats_1.5.0           BiocStyle_2.39.0           </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;  [1] gtable_0.3.6        xfun_0.53           bslib_0.9.0        </span></span>
-<span><span class="co">#&gt;  [4] ggplot2_4.0.0       htmlwidgets_1.6.4   ggrepel_0.9.6      </span></span>
-<span><span class="co">#&gt;  [7] GGally_2.4.0        lattice_0.22-7      bitops_1.0-9       </span></span>
-<span><span class="co">#&gt; [10] vctrs_0.6.5         tools_4.5.1         parallel_4.5.1     </span></span>
-<span><span class="co">#&gt; [13] tibble_3.3.0        pkgconfig_2.0.3     Matrix_1.7-4       </span></span>
-<span><span class="co">#&gt; [16] RColorBrewer_1.1-3  S7_0.2.0            desc_1.4.3         </span></span>
-<span><span class="co">#&gt; [19] lifecycle_1.0.4     compiler_4.5.1      farver_2.1.2       </span></span>
-<span><span class="co">#&gt; [22] Biostrings_2.77.2   Rsamtools_2.25.3    textshaping_1.0.4  </span></span>
-<span><span class="co">#&gt; [25] statmod_1.5.1       codetools_0.2-20    htmltools_0.5.8.1  </span></span>
-<span><span class="co">#&gt; [28] sass_0.4.10         yaml_2.3.10         crayon_1.5.3       </span></span>
-<span><span class="co">#&gt; [31] pkgdown_2.1.3.9000  pillar_1.11.1       jquerylib_0.1.4    </span></span>
-<span><span class="co">#&gt; [34] tidyr_1.3.1         BiocParallel_1.43.4 DT_0.34.0          </span></span>
-<span><span class="co">#&gt; [37] limma_3.65.7        DelayedArray_0.35.4 cachem_1.1.0       </span></span>
-<span><span class="co">#&gt; [40] abind_1.4-8         ggstats_0.11.0      metapod_1.17.0     </span></span>
-<span><span class="co">#&gt; [43] locfit_1.5-9.12     tidyselect_1.2.1    digest_0.6.37      </span></span>
-<span><span class="co">#&gt; [46] dplyr_1.1.4         purrr_1.1.0         bookdown_0.45      </span></span>
-<span><span class="co">#&gt; [49] labeling_0.4.3      fastmap_1.2.0       grid_4.5.1         </span></span>
-<span><span class="co">#&gt; [52] cli_3.6.5           SparseArray_1.9.1   magrittr_2.0.4     </span></span>
-<span><span class="co">#&gt; [55] S4Arrays_1.9.2      withr_3.0.2         edgeR_4.7.6        </span></span>
-<span><span class="co">#&gt; [58] scales_1.4.0        rmarkdown_2.30      XVector_0.49.3     </span></span>
-<span><span class="co">#&gt; [61] ragg_1.5.0          evaluate_1.0.5      knitr_1.50         </span></span>
-<span><span class="co">#&gt; [64] rlang_1.1.6         Rcpp_1.1.0          glue_1.8.0         </span></span>
-<span><span class="co">#&gt; [67] BiocManager_1.30.26 csaw_1.43.1         jsonlite_2.0.0     </span></span>
-<span><span class="co">#&gt; [70] R6_2.6.1            systemfonts_1.3.1   fs_1.6.6</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] gtable_0.3.6        xfun_0.57           bslib_0.10.0       </span></span>
+<span><span class="co">#&gt;  [4] ggplot2_4.0.2       htmlwidgets_1.6.4   ggrepel_0.9.8      </span></span>
+<span><span class="co">#&gt;  [7] GGally_2.4.0        lattice_0.22-9      bitops_1.0-9       </span></span>
+<span><span class="co">#&gt; [10] vctrs_0.7.2         tools_4.6.0         parallel_4.6.0     </span></span>
+<span><span class="co">#&gt; [13] tibble_3.3.1        pkgconfig_2.0.3     Matrix_1.7-5       </span></span>
+<span><span class="co">#&gt; [16] RColorBrewer_1.1-3  S7_0.2.1            desc_1.4.3         </span></span>
+<span><span class="co">#&gt; [19] lifecycle_1.0.5     compiler_4.6.0      farver_2.1.2       </span></span>
+<span><span class="co">#&gt; [22] Biostrings_2.79.5   Rsamtools_2.27.2    textshaping_1.0.5  </span></span>
+<span><span class="co">#&gt; [25] statmod_1.5.1       codetools_0.2-20    htmltools_0.5.9    </span></span>
+<span><span class="co">#&gt; [28] sass_0.4.10         yaml_2.3.12         crayon_1.5.3       </span></span>
+<span><span class="co">#&gt; [31] pkgdown_2.2.0.9000  pillar_1.11.1       jquerylib_0.1.4    </span></span>
+<span><span class="co">#&gt; [34] tidyr_1.3.2         BiocParallel_1.45.0 DT_0.34.0          </span></span>
+<span><span class="co">#&gt; [37] limma_3.67.1        DelayedArray_0.37.1 cachem_1.1.0       </span></span>
+<span><span class="co">#&gt; [40] abind_1.4-8         ggstats_0.13.0      metapod_1.19.2     </span></span>
+<span><span class="co">#&gt; [43] locfit_1.5-9.12     tidyselect_1.2.1    digest_0.6.39      </span></span>
+<span><span class="co">#&gt; [46] dplyr_1.2.1         purrr_1.2.1         bookdown_0.46      </span></span>
+<span><span class="co">#&gt; [49] labeling_0.4.3      fastmap_1.2.0       grid_4.6.0         </span></span>
+<span><span class="co">#&gt; [52] cli_3.6.5           SparseArray_1.11.13 magrittr_2.0.5     </span></span>
+<span><span class="co">#&gt; [55] S4Arrays_1.11.1     withr_3.0.2         edgeR_4.9.5        </span></span>
+<span><span class="co">#&gt; [58] scales_1.4.0        rmarkdown_2.31      XVector_0.51.0     </span></span>
+<span><span class="co">#&gt; [61] otel_0.2.0          ragg_1.5.2          evaluate_1.0.5     </span></span>
+<span><span class="co">#&gt; [64] knitr_1.51          rlang_1.2.0         Rcpp_1.1.1         </span></span>
+<span><span class="co">#&gt; [67] glue_1.8.0          BiocManager_1.30.27 csaw_1.45.0        </span></span>
+<span><span class="co">#&gt; [70] jsonlite_2.0.0      R6_2.6.1            systemfonts_1.3.2  </span></span>
+<span><span class="co">#&gt; [73] fs_2.0.1</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -1729,7 +1730,7 @@ forward and reverse FASTQ files in the same order.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.9000.</p>
 </div>
 
     </footer>

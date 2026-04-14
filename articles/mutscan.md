@@ -381,7 +381,7 @@ transInput$parameters
 #> [1] 1024
 #> 
 #> $processingInfo
-#> [1] "Processed by mutscan v1.1.0 on 2025-10-29 19:25:29.586519"
+#> [1] "Processed by mutscan v1.1.1 on 2026-04-14 07:27:39.054337"
 ```
 
 The `filterSummary` data.frame contains a summary of the number of reads
@@ -722,7 +722,7 @@ cisInput$parameters
 #> [1] 1024
 #> 
 #> $processingInfo
-#> [1] "Processed by mutscan v1.1.0 on 2025-10-29 19:25:29.970813"
+#> [1] "Processed by mutscan v1.1.1 on 2026-04-14 07:27:39.517181"
 cisInput$filterSummary
 #>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength
 #> 1     1000           126              0                     0
@@ -1147,7 +1147,7 @@ leujunt0$parameters
 #> [1] 1024
 #> 
 #> $processingInfo
-#> [1] "Processed by mutscan v1.1.0 on 2025-10-29 19:25:30.171391"
+#> [1] "Processed by mutscan v1.1.1 on 2026-04-14 07:27:39.807636"
 leujunt0$filterSummary
 #>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength
 #> 1     1000             0            126                     0
@@ -1584,23 +1584,23 @@ edger_scores <- calculateRelativeFC(
     method = "edgeR")
 head(edger_scores[order(edger_scores$PValue), , drop = FALSE])
 #>            logFC   logCPM        F       PValue          FDR logFC_shrunk
-#> f.27.* -4.503529 11.12474 15282.12 1.382897e-23 5.691459e-21    -4.502824
-#> f.7.G  -4.184471 11.14499 14270.70 2.286049e-23 5.691459e-21    -4.183994
-#> f.28.* -4.387484 11.14116 13973.55 2.667871e-23 5.691459e-21    -4.386944
-#> f.7.*  -4.460187 10.87738 13025.46 4.468224e-23 5.883625e-21    -4.459450
-#> f.14.* -4.373749 10.90447 12836.43 4.974299e-23 5.883625e-21    -4.372984
-#> f.18.* -4.823126 10.52294 12485.43 6.097352e-23 5.883625e-21    -4.821931
+#> f.27.* -4.503507 11.12474 14566.17 2.086636e-24 9.061367e-22    -4.502824
+#> f.7.G  -4.184495 11.14499 13607.70 3.528342e-24 9.061367e-22    -4.183994
+#> f.28.* -4.387507 11.14116 13284.48 4.247516e-24 9.061367e-22    -4.386944
+#> f.7.*  -4.460185 10.87738 12511.63 6.745260e-24 9.663684e-22    -4.459450
+#> f.14.* -4.373711 10.90447 12285.63 7.763935e-24 9.663684e-22    -4.372984
+#> f.28.G -3.942580 11.21716 11850.16 1.025681e-23 9.663684e-22    -3.942115
 #>        df.total df.prior df.test
-#> f.27.* 14.69484 11.69481       1
-#> f.7.G  14.69484 11.69481       1
-#> f.28.* 14.69484 11.69481       1
-#> f.7.*  14.69484 11.69481       1
-#> f.14.* 14.69484 11.69481       1
-#> f.18.* 14.69481 11.69481       1
+#> f.27.* 15.45022 12.45019       1
+#> f.7.G  15.45022 12.45019       1
+#> f.28.* 15.45022 12.45019       1
+#> f.7.*  15.45022 12.45019       1
+#> f.14.* 15.45022 12.45019       1
+#> f.28.G 15.45022 12.45019       1
 ## As before, the WT sequence has a logFC close to 0, by construction
 edger_scores["f.0.WT", , drop = FALSE]
 #>               logFC   logCPM F PValue FDR  logFC_shrunk df.total df.prior
-#> f.0.WT 9.039892e-16 19.30433 0      1   1 -4.801394e-15 14.69484 11.69481
+#> f.0.WT 9.039516e-16 19.30433 0      1   1 -2.364216e-15 15.45022 12.45019
 #>        df.test
 #> f.0.WT       1
 
@@ -1666,13 +1666,13 @@ This vignette was compiled on the following system:
 
 ``` r
 sessionInfo()
-#> R version 4.5.1 (2025-06-13)
-#> Platform: aarch64-apple-darwin20
-#> Running under: macOS Sequoia 15.7.1
+#> R version 4.6.0 alpha (2026-04-08 r89818)
+#> Platform: aarch64-apple-darwin23
+#> Running under: macOS Sequoia 15.7.4
 #> 
 #> Matrix products: default
-#> BLAS:   /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRblas.0.dylib 
-#> LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
+#> BLAS:   /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.0.dylib 
+#> LAPACK: /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
 #> 
 #> locale:
 #> [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
@@ -1685,36 +1685,37 @@ sessionInfo()
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] mutscan_1.1.0               SummarizedExperiment_1.39.2
-#>  [3] Biobase_2.69.1              GenomicRanges_1.61.8       
-#>  [5] Seqinfo_0.99.4              IRanges_2.43.8             
-#>  [7] S4Vectors_0.47.6            BiocGenerics_0.55.4        
-#>  [9] generics_0.1.4              MatrixGenerics_1.21.0      
-#> [11] matrixStats_1.5.0           BiocStyle_2.37.1           
+#>  [1] mutscan_1.1.1               SummarizedExperiment_1.41.1
+#>  [3] Biobase_2.71.0              GenomicRanges_1.63.2       
+#>  [5] Seqinfo_1.1.0               IRanges_2.45.0             
+#>  [7] S4Vectors_0.49.1            BiocGenerics_0.57.0        
+#>  [9] generics_0.1.4              MatrixGenerics_1.23.0      
+#> [11] matrixStats_1.5.0           BiocStyle_2.39.0           
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] gtable_0.3.6        xfun_0.53           bslib_0.9.0        
-#>  [4] ggplot2_4.0.0       htmlwidgets_1.6.4   ggrepel_0.9.6      
-#>  [7] GGally_2.4.0        lattice_0.22-7      bitops_1.0-9       
-#> [10] vctrs_0.6.5         tools_4.5.1         parallel_4.5.1     
-#> [13] tibble_3.3.0        pkgconfig_2.0.3     Matrix_1.7-4       
-#> [16] RColorBrewer_1.1-3  S7_0.2.0            desc_1.4.3         
-#> [19] lifecycle_1.0.4     compiler_4.5.1      farver_2.1.2       
-#> [22] Biostrings_2.77.2   Rsamtools_2.25.3    textshaping_1.0.4  
-#> [25] statmod_1.5.1       codetools_0.2-20    htmltools_0.5.8.1  
-#> [28] sass_0.4.10         yaml_2.3.10         crayon_1.5.3       
-#> [31] pkgdown_2.1.3.9000  pillar_1.11.1       jquerylib_0.1.4    
-#> [34] tidyr_1.3.1         BiocParallel_1.43.4 DT_0.34.0          
-#> [37] limma_3.65.7        DelayedArray_0.35.4 cachem_1.1.0       
-#> [40] abind_1.4-8         ggstats_0.11.0      metapod_1.17.0     
-#> [43] locfit_1.5-9.12     tidyselect_1.2.1    digest_0.6.37      
-#> [46] dplyr_1.1.4         purrr_1.1.0         bookdown_0.45      
-#> [49] labeling_0.4.3      fastmap_1.2.0       grid_4.5.1         
-#> [52] cli_3.6.5           SparseArray_1.9.1   magrittr_2.0.4     
-#> [55] S4Arrays_1.9.2      withr_3.0.2         edgeR_4.7.6        
-#> [58] scales_1.4.0        rmarkdown_2.30      XVector_0.49.3     
-#> [61] ragg_1.5.0          evaluate_1.0.5      knitr_1.50         
-#> [64] rlang_1.1.6         Rcpp_1.1.0          glue_1.8.0         
-#> [67] BiocManager_1.30.26 csaw_1.43.1         jsonlite_2.0.0     
-#> [70] R6_2.6.1            systemfonts_1.3.1   fs_1.6.6
+#>  [1] gtable_0.3.6        xfun_0.57           bslib_0.10.0       
+#>  [4] ggplot2_4.0.2       htmlwidgets_1.6.4   ggrepel_0.9.8      
+#>  [7] GGally_2.4.0        lattice_0.22-9      bitops_1.0-9       
+#> [10] vctrs_0.7.2         tools_4.6.0         parallel_4.6.0     
+#> [13] tibble_3.3.1        pkgconfig_2.0.3     Matrix_1.7-5       
+#> [16] RColorBrewer_1.1-3  S7_0.2.1            desc_1.4.3         
+#> [19] lifecycle_1.0.5     compiler_4.6.0      farver_2.1.2       
+#> [22] Biostrings_2.79.5   Rsamtools_2.27.2    textshaping_1.0.5  
+#> [25] statmod_1.5.1       codetools_0.2-20    htmltools_0.5.9    
+#> [28] sass_0.4.10         yaml_2.3.12         crayon_1.5.3       
+#> [31] pkgdown_2.2.0.9000  pillar_1.11.1       jquerylib_0.1.4    
+#> [34] tidyr_1.3.2         BiocParallel_1.45.0 DT_0.34.0          
+#> [37] limma_3.67.1        DelayedArray_0.37.1 cachem_1.1.0       
+#> [40] abind_1.4-8         ggstats_0.13.0      metapod_1.19.2     
+#> [43] locfit_1.5-9.12     tidyselect_1.2.1    digest_0.6.39      
+#> [46] dplyr_1.2.1         purrr_1.2.1         bookdown_0.46      
+#> [49] labeling_0.4.3      fastmap_1.2.0       grid_4.6.0         
+#> [52] cli_3.6.5           SparseArray_1.11.13 magrittr_2.0.5     
+#> [55] S4Arrays_1.11.1     withr_3.0.2         edgeR_4.9.5        
+#> [58] scales_1.4.0        rmarkdown_2.31      XVector_0.51.0     
+#> [61] otel_0.2.0          ragg_1.5.2          evaluate_1.0.5     
+#> [64] knitr_1.51          rlang_1.2.0         Rcpp_1.1.1         
+#> [67] glue_1.8.0          BiocManager_1.30.27 csaw_1.45.0        
+#> [70] jsonlite_2.0.0      R6_2.6.1            systemfonts_1.3.2  
+#> [73] fs_2.0.1
 ```

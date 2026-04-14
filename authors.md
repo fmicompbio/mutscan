@@ -17,8 +17,8 @@ Source:
 
 Soneson C, Bendel A, Diss G, Stadler M (2023). “mutscan-a flexible R
 package for efficient end-to-end analysis of multiplexed assays of
-variant effect data.” *Genome Biology*, **24**, 132. ISSN 1474-760X,
-[doi:10.1186/s13059-023-02967-0](https://doi.org/10.1186/s13059-023-02967-0),
+variant effect data.” *Genome Biology*, **24**, 132. ISSN 1474-760X.
+[doi:10.1186/s13059-023-02967-0](https://doi.org/10.1186/s13059-023-02967-0).
 <https://doi.org/10.1186/s13059-023-02967-0>.
 
     @Article{,
