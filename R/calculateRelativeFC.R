@@ -37,6 +37,7 @@
 #' @importFrom SummarizedExperiment colData assay assayNames assays
 #' @importFrom limma voom eBayes topTable lmFit contrasts.fit
 #' @importFrom csaw normOffsets
+#' @importFrom utils modifyList
 #'
 #' @examples
 #' library(SummarizedExperiment)
@@ -172,7 +173,8 @@ calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
         tt$df.test <- qlf$df.test
     } else if (method == "limma") {
         if (!is.null(dge$offset)) {
-            vm <- voom(dge, design = design, lib.size = exp(dge$offset))
+            vm <- voom(modifyList(dge, list(offset = NULL)), 
+                       design = design, lib.size = exp(dge$offset))
         } else {
             vm <- voom(dge, design = design,
                        lib.size = getNormLibSizes(dge))
