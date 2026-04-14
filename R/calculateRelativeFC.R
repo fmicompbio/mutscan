@@ -33,7 +33,7 @@
 #' framework (edgeR or limma). 
 #' 
 #' @importFrom edgeR DGEList scaleOffset estimateDisp glmQLFit glmQLFTest
-#'     topTags predFC topTags calcNormFactors getNormLibSizes
+#'     topTags predFC topTags normLibSizes getNormLibSizes
 #' @importFrom SummarizedExperiment colData assay assayNames assays
 #' @importFrom limma voom eBayes topTable lmFit contrasts.fit
 #' @importFrom csaw normOffsets
@@ -133,11 +133,11 @@ calculateRelativeFC <- function(se, design, coef = NULL, contrast = NULL,
         ## aveLogCPM does not use provided offsets
         ## In this case, we know that WTrows is NULL, so all features
         ## will be used for the normalization
-        dge <- calcNormFactors(dge)
+        dge <- normLibSizes(dge)
         dge <- normOffsets(dge)
     } else if (normMethod == "TMM") {
         ## TMM normalization, with all features
-        dge <- calcNormFactors(dge)
+        dge <- normLibSizes(dge)
     } else if (normMethod == "geomean") {
         ## Use size factors (offsets) derived from the geometric mean
         ## of the WT rows
