@@ -381,7 +381,7 @@ transInput$parameters
 #> [1] 1024
 #> 
 #> $processingInfo
-#> [1] "Processed by mutscan v1.1.1 on 2026-04-14 07:27:39.054337"
+#> [1] "Processed by mutscan v1.3.0 on 2026-04-28 18:01:10.756292"
 ```
 
 The `filterSummary` data.frame contains a summary of the number of reads
@@ -722,7 +722,7 @@ cisInput$parameters
 #> [1] 1024
 #> 
 #> $processingInfo
-#> [1] "Processed by mutscan v1.1.1 on 2026-04-14 07:27:39.517181"
+#> [1] "Processed by mutscan v1.3.0 on 2026-04-28 18:01:11.165366"
 cisInput$filterSummary
 #>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength
 #> 1     1000           126              0                     0
@@ -1147,7 +1147,7 @@ leujunt0$parameters
 #> [1] 1024
 #> 
 #> $processingInfo
-#> [1] "Processed by mutscan v1.1.1 on 2026-04-14 07:27:39.807636"
+#> [1] "Processed by mutscan v1.3.0 on 2026-04-28 18:01:11.381144"
 leujunt0$filterSummary
 #>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength
 #> 1     1000             0            126                     0
@@ -1666,7 +1666,7 @@ This vignette was compiled on the following system:
 
 ``` r
 sessionInfo()
-#> R version 4.6.0 alpha (2026-04-08 r89818)
+#> R version 4.6.0 Patched (2026-04-27 r89967)
 #> Platform: aarch64-apple-darwin23
 #> Running under: macOS Sequoia 15.7.4
 #> 
@@ -1685,37 +1685,37 @@ sessionInfo()
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] mutscan_1.1.1               SummarizedExperiment_1.41.1
+#>  [1] mutscan_1.3.0               SummarizedExperiment_1.41.1
 #>  [3] Biobase_2.71.0              GenomicRanges_1.63.2       
 #>  [5] Seqinfo_1.1.0               IRanges_2.45.0             
-#>  [7] S4Vectors_0.49.1            BiocGenerics_0.57.0        
+#>  [7] S4Vectors_0.49.2            BiocGenerics_0.57.1        
 #>  [9] generics_0.1.4              MatrixGenerics_1.23.0      
 #> [11] matrixStats_1.5.0           BiocStyle_2.39.0           
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] gtable_0.3.6        xfun_0.57           bslib_0.10.0       
-#>  [4] ggplot2_4.0.2       htmlwidgets_1.6.4   ggrepel_0.9.8      
+#>  [4] ggplot2_4.0.3       htmlwidgets_1.6.4   ggrepel_0.9.8      
 #>  [7] GGally_2.4.0        lattice_0.22-9      bitops_1.0-9       
-#> [10] vctrs_0.7.2         tools_4.6.0         parallel_4.6.0     
+#> [10] vctrs_0.7.3         tools_4.6.0         parallel_4.6.0     
 #> [13] tibble_3.3.1        pkgconfig_2.0.3     Matrix_1.7-5       
-#> [16] RColorBrewer_1.1-3  S7_0.2.1            desc_1.4.3         
+#> [16] RColorBrewer_1.1-3  S7_0.2.2            desc_1.4.3         
 #> [19] lifecycle_1.0.5     compiler_4.6.0      farver_2.1.2       
 #> [22] Biostrings_2.79.5   Rsamtools_2.27.2    textshaping_1.0.5  
 #> [25] statmod_1.5.1       codetools_0.2-20    htmltools_0.5.9    
 #> [28] sass_0.4.10         yaml_2.3.12         crayon_1.5.3       
 #> [31] pkgdown_2.2.0.9000  pillar_1.11.1       jquerylib_0.1.4    
 #> [34] tidyr_1.3.2         BiocParallel_1.45.0 DT_0.34.0          
-#> [37] limma_3.67.1        DelayedArray_0.37.1 cachem_1.1.0       
+#> [37] limma_3.67.3        DelayedArray_0.37.1 cachem_1.1.0       
 #> [40] abind_1.4-8         ggstats_0.13.0      metapod_1.19.2     
 #> [43] locfit_1.5-9.12     tidyselect_1.2.1    digest_0.6.39      
-#> [46] dplyr_1.2.1         purrr_1.2.1         bookdown_0.46      
+#> [46] dplyr_1.2.1         purrr_1.2.2         bookdown_0.46      
 #> [49] labeling_0.4.3      fastmap_1.2.0       grid_4.6.0         
-#> [52] cli_3.6.5           SparseArray_1.11.13 magrittr_2.0.5     
-#> [55] S4Arrays_1.11.1     withr_3.0.2         edgeR_4.9.5        
+#> [52] cli_3.6.6           SparseArray_1.11.13 magrittr_2.0.5     
+#> [55] S4Arrays_1.11.1     withr_3.0.2         edgeR_4.9.9        
 #> [58] scales_1.4.0        rmarkdown_2.31      XVector_0.51.0     
 #> [61] otel_0.2.0          ragg_1.5.2          evaluate_1.0.5     
-#> [64] knitr_1.51          rlang_1.2.0         Rcpp_1.1.1         
-#> [67] glue_1.8.0          BiocManager_1.30.27 csaw_1.45.0        
+#> [64] knitr_1.51          rlang_1.2.0         Rcpp_1.1.1-1.1     
+#> [67] glue_1.8.1          BiocManager_1.30.27 csaw_1.45.0        
 #> [70] jsonlite_2.0.0      R6_2.6.1            systemfonts_1.3.2  
-#> [73] fs_2.0.1
+#> [73] fs_2.1.0
 ```
