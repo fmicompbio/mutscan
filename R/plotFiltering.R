@@ -36,7 +36,7 @@
 #' @importFrom tibble rownames_to_column 
 #' @importFrom tidyr gather
 #' @importFrom ggplot2 ggplot aes geom_bar facet_wrap theme theme_bw labs
-#'     geom_text element_text
+#' @importFrom ggplot2 geom_text element_text
 #' @importFrom rlang .data
 #' 
 #' @examples 

@@ -37,7 +37,7 @@
 #' @noRd
 #'
 #' @importFrom ggplot2 ggplot theme_minimal coord_cartesian theme labs
-#'     element_text geom_point aes
+#' @importFrom ggplot2 element_text geom_point aes
 #' @importFrom rlang .data
 #' @importFrom ggrepel geom_text_repel
 .plotScatter <- function(res, xCol, yCol, xLabel = xCol, yLabel = yCol,

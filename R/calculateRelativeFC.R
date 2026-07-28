@@ -33,7 +33,7 @@
 #' framework (edgeR or limma). 
 #' 
 #' @importFrom edgeR DGEList scaleOffset estimateDisp glmQLFit glmQLFTest
-#'     topTags predFC topTags normLibSizes getNormLibSizes
+#' @importFrom edgeR topTags predFC topTags normLibSizes getNormLibSizes
 #' @importFrom SummarizedExperiment colData assay assayNames assays
 #' @importFrom limma voom eBayes topTable lmFit contrasts.fit
 #' @importFrom csaw normOffsets

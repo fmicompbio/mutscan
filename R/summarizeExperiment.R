@@ -47,7 +47,7 @@
 #' @importFrom IRanges IntegerList
 #' @importFrom methods is new as
 #' @importFrom dplyr bind_rows distinct left_join mutate filter group_by
-#'     summarize
+#' @importFrom dplyr summarize
 #' @importFrom rlang .data
 #' @importFrom stats setNames
 #' 
