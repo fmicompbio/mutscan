@@ -20,6 +20,9 @@ std::set<std::string> splitSet(const std::string& s, char delimiter) {
 // [[Rcpp::export]]
 DataFrame mergeValues(std::vector<std::string> mutNamesIn, std::vector<std::string> valuesIn,
                       char delimiter = ',') {
+    if (mutNamesIn.size() != valuesIn.size()) {
+        stop("mutNamesIn and valuesIn don't have the same length");
+    }
     std::map<std::string, std::set<std::string>> valueSet;
     std::map<std::string, std::set<std::string>>::iterator valueSetIt;
 

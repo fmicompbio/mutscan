@@ -300,6 +300,10 @@ test_that("summarizeExperiment works as expected when collapsing to WT", {
 })
 
 test_that("mergeValues works", {
+    expect_error(mergeValues(c("A", "B", "C"), 
+                             c("a", "b")),
+                 "mutNamesIn and valuesIn don't have the same length")
+    
     res <- mergeValues(c("A", "B", "C", "A", "D", "B"),
                        c("a,b", "b,c", "c", "b,c", "b,a", "d"))
     expect_s3_class(res, "data.frame")
