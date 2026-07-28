@@ -23,8 +23,8 @@ Given a character vector, calculate the distance for each element
 to the nearest neighbor amongst all the other elements.
 }
 \examples{
-calcNearestStringDist(c("lazy", "hazy", "crazy"))
-calcNearestStringDist(c("lazy", "hazy", "crazy"), metric = "hamming_shift")
+calcNearestStringDist(c("lazy", "hazy", "cozy"))
+calcNearestStringDist(c("lazy", "hazy", "cozy"), metric = "hamming_shift")
 calcNearestStringDist(c("lazy", "hazy", "crazy"), metric = "levenshtein")
 
 }

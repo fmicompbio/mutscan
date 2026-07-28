@@ -15,8 +15,8 @@
 #' @return An integer vector of the same length as \code{x}.
 #' 
 #' @examples
-#' calcNearestStringDist(c("lazy", "hazy", "crazy"))
-#' calcNearestStringDist(c("lazy", "hazy", "crazy"), metric = "hamming_shift")
+#' calcNearestStringDist(c("lazy", "hazy", "cozy"))
+#' calcNearestStringDist(c("lazy", "hazy", "cozy"), metric = "hamming_shift")
 #' calcNearestStringDist(c("lazy", "hazy", "crazy"), metric = "levenshtein")
 #' 
 #' @export
