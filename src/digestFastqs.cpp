@@ -46,7 +46,8 @@ bool reached_end_of_file(gzFile file, char *ret) {
   }
   // Check if we have read until a newline character. Otherwise, the read is
   // too long -> break
-  if (std::string(ret).back() != '\n') {
+  std::string s(ret);
+  if (!s.empty() && s.back() != '\n') {
     stop("Encountered a read exceeding the maximal allowed length");
   }
   return false;
