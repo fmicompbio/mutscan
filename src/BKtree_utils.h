@@ -217,7 +217,7 @@ private:
   node* root;                                // pointer to root node
   std::unordered_set<std::string> deleted;   // nodes deleted from the tree but not yet removed
   std::string metric;                        // name of the distance metric to use
-  int (*distance)(const std::string&, const std::string&, int); // pointer to function to calcluate string distance
+  int (*distance)(const std::string&, const std::string&, int); // pointer to function to calculate string distance
   int max_absolute_shift;                    // maximum shift (only used for metric="hamming_shift")
 
   // set the distance function pointer according to metric
