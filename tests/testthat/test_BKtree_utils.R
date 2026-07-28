@@ -34,6 +34,8 @@ test_that("hamming_distance() works", {
 
   expect_error(hamming_distance(c(s1, s1), s2))
   expect_error(hamming_distance(s1, c(s2, s2)))
+  expect_error(hamming_distance(s1, s3),
+               "The compared strings must have the same length")
 
   expect_identical(hamming_distance(s1, s1),  0L)
   expect_identical(hamming_distance(s2, s2),  0L)
@@ -57,10 +59,13 @@ test_that("hamming_shift_distance() works", {
   s2 <- "ACAAAACGTTGCCCC"
   s3 <- "AGTCATGCTTAGAAA"
   s4 <- "AAAAGTCATGCTTAG"
+  s5 <- "ACGT"
 
   expect_error(hamming_shift_distance(c(s1, s1), s2))
   expect_error(hamming_shift_distance(s1, c(s2, s2)))
   expect_error(hamming_shift_distance(s1, s2, c(1L, -1L)))
+  expect_error(hamming_shift_distance(s1, s5),
+               "The compared strings must have the same length")
 
   expect_identical(hamming_shift_distance(s1, s1),  0L)
   expect_identical(hamming_shift_distance(s2, s2),  0L)
