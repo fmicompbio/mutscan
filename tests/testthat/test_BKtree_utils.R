@@ -34,6 +34,8 @@ test_that("hamming_distance() works", {
 
   expect_error(hamming_distance(c(s1, s1), s2))
   expect_error(hamming_distance(s1, c(s2, s2)))
+  expect_error(hamming_distance(s1, s3),
+               "The compared strings must have the same length")
 
   expect_identical(hamming_distance(s1, s1),  0L)
   expect_identical(hamming_distance(s2, s2),  0L)
@@ -57,10 +59,13 @@ test_that("hamming_shift_distance() works", {
   s2 <- "ACAAAACGTTGCCCC"
   s3 <- "AGTCATGCTTAGAAA"
   s4 <- "AAAAGTCATGCTTAG"
+  s5 <- "ACGT"
 
   expect_error(hamming_shift_distance(c(s1, s1), s2))
   expect_error(hamming_shift_distance(s1, c(s2, s2)))
   expect_error(hamming_shift_distance(s1, s2, c(1L, -1L)))
+  expect_error(hamming_shift_distance(s1, s5),
+               "The compared strings must have the same length")
 
   expect_identical(hamming_shift_distance(s1, s1),  0L)
   expect_identical(hamming_shift_distance(s2, s2),  0L)
@@ -143,8 +148,8 @@ test_that("low-level BKtree wrapper functions work as expected", {
   expect_true(tree2$has(seqs[1], 0))
   expect_true(tree$has(seqs[1], k))
   expect_true(tree2$has(seqs[1], k))
-  expect_false(tree$has("non_existing", 0))
-  expect_false(tree2$has("non_existing", 0))
+  expect_false(tree$has(paste(rep("A", 30), collapse = ""), 0))
+  expect_false(tree2$has(paste(rep("A", 30), collapse = ""), 0))
 
   # get first element
   expect_identical(tree$first(), seqs[1])
@@ -219,7 +224,7 @@ test_that("low-level BKtree wrapper functions work as expected", {
   expect_true(all(tree2$search(seqs[2], 19) %in% seqs))
 
   # remove sequences
-  expect_identical(tree$remove("non_existing"), NULL)
+  expect_identical(tree$remove(paste(rep("A", 30), collapse = "")), NULL)
   expect_identical(tree2$remove("non_existing"), NULL)
   expect_identical(tree$size, n)
   expect_identical(tree2$size, n)

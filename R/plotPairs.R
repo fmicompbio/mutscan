@@ -43,9 +43,9 @@
 #'
 #' @importFrom GGally eval_data_col ggpairs
 #' @importFrom ggplot2 ggplot annotate theme_void ylim stat_density2d
-#'     scale_fill_continuous geom_point theme_bw theme element_blank aes
-#'     geom_histogram scale_x_continuous scale_y_continuous geom_abline
-#'     after_stat element_rect
+#' @importFrom ggplot2 scale_fill_continuous geom_point theme_bw theme
+#' @importFrom ggplot2 element_blank aes geom_histogram scale_x_continuous
+#' @importFrom ggplot2 scale_y_continuous geom_abline after_stat element_rect
 #' @importFrom stats cor
 #' @importFrom SummarizedExperiment assayNames assay
 #' @importFrom grDevices hcl.colors rgb colorRamp

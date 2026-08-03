@@ -23,8 +23,8 @@
 #' @importFrom dplyr group_by arrange mutate desc ungroup left_join
 #' @importFrom SummarizedExperiment colData assay assayNames
 #' @importFrom ggplot2 ggplot scale_x_log10 scale_y_log10 labs geom_line 
-#'     facet_wrap geom_density geom_histogram theme_minimal theme 
-#'     element_text aes
+#' @importFrom ggplot2 facet_wrap geom_density geom_histogram theme_minimal 
+#' @importFrom ggplot2 theme element_text aes
 #' @importFrom rlang .data
 #' 
 #' @examples 

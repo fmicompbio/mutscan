@@ -157,7 +157,7 @@ collapseMutantsByAA <- function(se) {
 #' @importFrom DelayedArray rowsum
 #' @importFrom S4Vectors metadata DataFrame
 #' @importFrom SummarizedExperiment assays rowData SummarizedExperiment colData
-#'     rowData<-
+#' @importFrom SummarizedExperiment rowData<-
 #' @importFrom dplyr across group_by summarize full_join
 #' @importFrom stats setNames
 #'

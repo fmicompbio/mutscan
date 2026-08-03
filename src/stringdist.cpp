@@ -1,4 +1,7 @@
+#include <Rcpp.h>
 #include "stringdist.h"
+
+using namespace Rcpp;
 
 // distance metrices used by the BKtree class:
 // calculate levenshtein distance between pair of strings
@@ -55,7 +58,10 @@ int levenshtein_distance(const std::string &str1, const std::string &str2,
 // }
 // [[Rcpp::export]]
 int hamming_distance(const std::string &str1, const std::string &str2,
-                     int ignored_variable = -1){
+                     int ignored_variable = -1) {
+    if (str1.size() != str2.size()) {
+        stop("The compared strings must have the same length");
+    }
     const char *a = str1.data(), *b = str2.data();
     
     return std::inner_product(a, a + str1.length(), b, 0,
@@ -87,6 +93,9 @@ int hamming_distance(const std::string &str1, const std::string &str2,
 // [[Rcpp::export]]
 int hamming_shift_distance(const std::string &str1, const std::string &str2,
                            int max_abs_shift = -1){
+    if (str1.size() != str2.size()) {
+        stop("The compared strings must have the same length");
+    }
     int d = str1.size(), ds = 0;
     const char *a = str1.data(), *b = str2.data();
     if (max_abs_shift < 0) {

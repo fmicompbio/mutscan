@@ -46,7 +46,8 @@ bool reached_end_of_file(gzFile file, char *ret) {
   }
   // Check if we have read until a newline character. Otherwise, the read is
   // too long -> break
-  if (std::string(ret).back() != '\n') {
+  std::string s(ret);
+  if (!s.empty() && s.back() != '\n') {
     stop("Encountered a read exceeding the maximal allowed length");
   }
   return false;
@@ -406,7 +407,7 @@ bool compareToWildtype(const std::string varSeq, const std::string wtSeq,
   // filter if there are too many mutated codons
   // mutatedCodons.clear();
   hasLowQualMutation = false;
-  for (size_t i = 0; i < varSeq.length(); i++) {
+  for (size_t i = 0; i < std::min(varSeq.length(), wtSeq.length()); i++) {
     if (varSeq[i] != wtSeq[i]) { // found mismatching base
       // record if the mutated base quality is below a threshold
       if (varIntQual[i] < mutatedPhredMin) {

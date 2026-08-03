@@ -25,8 +25,8 @@ using namespace Rcpp;
 //' @return An integer vector of the same length as \code{x}.
 //' 
 //' @examples
-//' calcNearestStringDist(c("lazy", "hazy", "crazy"))
-//' calcNearestStringDist(c("lazy", "hazy", "crazy"), metric = "hamming_shift")
+//' calcNearestStringDist(c("lazy", "hazy", "cozy"))
+//' calcNearestStringDist(c("lazy", "hazy", "cozy"), metric = "hamming_shift")
 //' calcNearestStringDist(c("lazy", "hazy", "crazy"), metric = "levenshtein")
 //' 
 //' @export
@@ -37,8 +37,12 @@ IntegerVector calcNearestStringDist(std::vector<std::string> x,
     // declare variables
     size_t i, j, n = x.size();
     int dist1;
-    int (*distance)(const std::string&, const std::string&, int); // pointer to function to calcluate string distance
+    int (*distance)(const std::string&, const std::string&, int); // pointer to function to calculate string distance
     IntegerVector dists(n, INT_MAX);
+    
+    if (n < 2) {
+        return IntegerVector(n, 0);
+    }
     
     // set distance function pointer
     if (metric == "hamming") {

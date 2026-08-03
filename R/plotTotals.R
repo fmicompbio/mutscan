@@ -14,7 +14,7 @@
 #' @return A ggplot object.
 #' 
 #' @importFrom ggplot2 ggplot theme_minimal theme element_text labs 
-#'     geom_bar scale_fill_discrete aes
+#' @importFrom ggplot2 geom_bar scale_fill_discrete aes
 #' @importFrom SummarizedExperiment assay rowData assayNames
 #' @importFrom rlang .data
 #' 
