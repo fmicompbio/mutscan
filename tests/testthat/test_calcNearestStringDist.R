@@ -38,6 +38,7 @@ test_that("calcNearestStringDist works as expected", {
     expect_type(res5 <- calcNearestStringDist(x = strs1, metric = "hamming_shift", nThreads = 1L), "integer")
     expect_type(res6 <- calcNearestStringDist(x = strs1, metric = "hamming_shift", nThreads = 4L), "integer")
     expect_type(res7 <- calcNearestStringDist(x = strs1[1], metric = "hamming", nThreads = 1L), "integer")
+    expect_type(res8 <- calcNearestStringDist(x = character(0), metric = "hamming", nThreads = 1L), "integer")
 
     expect_identical(d, res1)
     expect_identical(e, res3)
@@ -46,6 +47,7 @@ test_that("calcNearestStringDist works as expected", {
     expect_identical(res3, res4)
     expect_identical(res5, res6)
     expect_identical(res7, 0L)
+    expect_length(res8, 0L)
 })
 
 
