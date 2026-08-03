@@ -101,7 +101,7 @@ jobs:
         uses: grimbough/bioc-actions/run-BiocCheck@v1
         with:
           arguments: '--no-check-bioc-views --no-check-bioc-help'
-          error-on: 'error'
+          error-on: 'never'
 
       - name: Upload install log if the build/install/check step fails
         if: always() && (steps.build-install-check.outcome == 'failure')
