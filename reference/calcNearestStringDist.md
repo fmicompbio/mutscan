@@ -31,10 +31,10 @@ An integer vector of the same length as `x`.
 ## Examples
 
 ``` r
-calcNearestStringDist(c("lazy", "hazy", "crazy"))
-#> [1] 1 1 4
-calcNearestStringDist(c("lazy", "hazy", "crazy"), metric = "hamming_shift")
-#> [1] 1 1 3
+calcNearestStringDist(c("lazy", "hazy", "cozy"))
+#> [1] 1 1 2
+calcNearestStringDist(c("lazy", "hazy", "cozy"), metric = "hamming_shift")
+#> [1] 1 1 2
 calcNearestStringDist(c("lazy", "hazy", "crazy"), metric = "levenshtein")
 #> [1] 1 1 2
 ```

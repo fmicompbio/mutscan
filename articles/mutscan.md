@@ -1,6 +1,7 @@
 # Multiplexed assays of variant effect analysis with \`mutscan\`
 
 ``` r
+
 library(SummarizedExperiment)
 library(mutscan)
 ```
@@ -44,6 +45,7 @@ The `mutscan` package contains several small example FASTQ files
 representing different types of experiments:
 
 ``` r
+
 datadir <- system.file("extdata", package = "mutscan")
 dir(datadir)
 #>  [1] "cisInput_1.fastq.gz"                 "cisInput_2.fastq.gz"                
@@ -187,6 +189,7 @@ additionally name the final mutants according to the positions and
 sequences of the mutated codons.
 
 ``` r
+
 transInput <- digestFastqs(
     fastqForward = file.path(datadir, "transInput_1.fastq.gz"),
     fastqReverse = file.path(datadir, "transInput_2.fastq.gz"),
@@ -226,6 +229,7 @@ records all parameter values used during the processing, as well as the
 `mutscan` version and time of processing.
 
 ``` r
+
 transInput$parameters
 #> $fastqForward
 #> [1] "/Users/runner/work/_temp/Library/mutscan/extdata/transInput_1.fastq.gz"
@@ -381,7 +385,7 @@ transInput$parameters
 #> [1] 1024
 #> 
 #> $processingInfo
-#> [1] "Processed by mutscan v1.3.0 on 2026-04-28 18:01:10.756292"
+#> [1] "Processed by mutscan v1.3.1 on 2026-08-03 13:09:07.161658"
 ```
 
 The `filterSummary` data.frame contains a summary of the number of reads
@@ -390,6 +394,7 @@ the reads retained by the previous filters are considered. The numbers
 in the filter column names indicate the order of the filters.
 
 ``` r
+
 transInput$filterSummary
 #>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength
 #> 1     1000           314              0                     0
@@ -419,6 +424,7 @@ the mutated codon or nucleotide. A sequence without mutations is named
 sequence.
 
 ``` r
+
 head(transInput$summaryTable)
 #>            mutantName
 #> 1 FOS.0.WT_JUN.13.CCC
@@ -476,6 +482,7 @@ and mismatching bases in the constant sequences, stratified by the phred
 quality score (from 0 to 99).
 
 ``` r
+
 transInput$errorStatistics[rowSums(transInput$errorStatistics[, -1]) != 0, ]
 #>    PhredQuality nbrMatchForward nbrMismatchForward nbrMatchReverse
 #> 15           14             160                 11             204
@@ -495,6 +502,7 @@ The `errorStatistics` output can be used to estimate the sequencing
 error rate:
 
 ``` r
+
 (propErrorsConstantF <- sum(transInput$errorStatistics$nbrMismatchForward) /
    (nchar(transInput$parameters$constantForward) * 
         transInput$filterSummary$nbrRetained))
@@ -522,6 +530,7 @@ type sequence is provided (the `wildTypeReverse` argument will be
 ignored if specified).
 
 ``` r
+
 cisInput <- digestFastqs(
     fastqForward = file.path(datadir, "cisInput_1.fastq.gz"),
     fastqReverse = file.path(datadir, "cisInput_2.fastq.gz"),
@@ -567,6 +576,7 @@ cisInput <- digestFastqs(
 ```
 
 ``` r
+
 cisInput$parameters
 #> $fastqForward
 #> [1] "/Users/runner/work/_temp/Library/mutscan/extdata/cisInput_1.fastq.gz"
@@ -722,7 +732,7 @@ cisInput$parameters
 #> [1] 1024
 #> 
 #> $processingInfo
-#> [1] "Processed by mutscan v1.3.0 on 2026-04-28 18:01:11.165366"
+#> [1] "Processed by mutscan v1.3.1 on 2026-08-03 13:09:07.515391"
 cisInput$filterSummary
 #>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength
 #> 1     1000           126              0                     0
@@ -756,6 +766,7 @@ observed for each variable sequence, and all values in the `mutNames`
 column will start with `FOS`.
 
 ``` r
+
 head(cisInput$summaryTable)
 #>   mutantName
 #> 1   FOS.0.WT
@@ -804,6 +815,7 @@ sequences are provided like here, `mutscan` will match each read against
 all of them and find the most similar one for each read.
 
 ``` r
+
 leu <- c(
     ATF2 = "GATCCTGATGAAAAAAGGAGAAAGTTTTTAGAGCGAAATAGAGCAGCAGCTTCAAGATGCCGACAAAAAAGGAAAGTCTGGGTTCAGTCTTTAGAGAAGAAAGCTGAAGACTTGAGTTCATTAAATGGTCAGCTGCAGAGTGAAGTCACCCTGCTGAGAAATGAAGTGGCACAGCTGAAACAGCTTCTTCTGGCT",
     ATF7 = "GATCCAGATGAGCGACGGCAGCGCTTTCTGGAGCGCAACCGGGCTGCAGCCTCCCGCTGCCGCCAAAAGCGAAAGCTGTGGGTGTCCTCCCTAGAGAAGAAGGCCGAAGAACTCACTTCTCAGAACATTCAGCTGAGTAATGAAGTCACATTACTACGCAATGAGGTGGCCCAGTTGAAACAGCTACTGTTAGCT",
@@ -863,6 +875,7 @@ read (after the primer), whereas for the reverse read, we specify the
 variable sequence length to 96.
 
 ``` r
+
 leujunt0 <- digestFastqs(
     fastqForward = file.path(datadir, "leujunt0_1.fastq.gz"),
     fastqReverse = file.path(datadir, "leujunt0_2.fastq.gz"),
@@ -904,6 +917,7 @@ leujunt0 <- digestFastqs(
 ```
 
 ``` r
+
 leujunt0$parameters
 #> $fastqForward
 #> [1] "/Users/runner/work/_temp/Library/mutscan/extdata/leujunt0_1.fastq.gz"
@@ -1147,7 +1161,7 @@ leujunt0$parameters
 #> [1] 1024
 #> 
 #> $processingInfo
-#> [1] "Processed by mutscan v1.3.0 on 2026-04-28 18:01:11.381144"
+#> [1] "Processed by mutscan v1.3.1 on 2026-08-03 13:09:07.815469"
 leujunt0$filterSummary
 #>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength
 #> 1     1000             0            126                     0
@@ -1162,6 +1176,7 @@ leujunt0$filterSummary
 ```
 
 ``` r
+
 head(leujunt0$summaryTable)
 #>             mutantName
 #> 1 ATF2.0.WT_JUN.13.CCC
@@ -1225,6 +1240,7 @@ feed both outputs to
 [`summarizeExperiment()`](https://fmicompbio.github.io/mutscan/reference/summarizeExperiment.md).
 
 ``` r
+
 transOutput <- digestFastqs(
     fastqForward = file.path(datadir, "transOutput_1.fastq.gz"),
     fastqReverse = file.path(datadir, "transOutput_2.fastq.gz"),
@@ -1383,6 +1399,7 @@ amino acid, and aggregating the counts corresponding to the same mutated
 amino acid (combination).
 
 ``` r
+
 se_collapsed <- collapseMutantsByAA(se)
 head(assay(se_collapsed, "counts"))
 #>                   sample1 sample2
@@ -1433,6 +1450,7 @@ as illustrated above, and summarized in a `SummarizedExperiment` object
 provided with the package.
 
 ``` r
+
 se <- readRDS(file.path(datadir, "GSE102901_cis_se.rds"))
 ```
 
@@ -1441,6 +1459,7 @@ number of reads that were filtered out by (or retained after) each step
 of the `mutscan` filtering.
 
 ``` r
+
 plotFiltering(se, valueType = "reads", onlyActiveFilters = TRUE, 
               plotType = "remaining", facetBy = "sample", numberSize = 3)
 ```
@@ -1448,6 +1467,7 @@ plotFiltering(se, valueType = "reads", onlyActiveFilters = TRUE,
 ![](mutscan_files/figure-html/plot-filter-reads-1.png)
 
 ``` r
+
 plotFiltering(se, valueType = "fractions", onlyActiveFilters = TRUE,
               plotType = "filtered", facetBy = "step", numberSize = 3)
 ```
@@ -1458,6 +1478,7 @@ We can also generate a pairs plot displaying the correlation among the
 samples in the data set.
 
 ``` r
+
 plotPairs(se, selAssay = "counts")
 ```
 
@@ -1468,12 +1489,14 @@ sample, across all variants, or the distribution of variant counts per
 sample.
 
 ``` r
+
 plotTotals(se, selAssay = "counts")
 ```
 
 ![](mutscan_files/figure-html/plot-more-1.png)
 
 ``` r
+
 plotDistributions(se, selAssay = "counts", plotType = "density", 
                   pseudocount = 1)
 ```
@@ -1483,6 +1506,7 @@ plotDistributions(se, selAssay = "counts", plotType = "density",
 Finally, we can create a full QC report as follows:
 
 ``` r
+
 generateQCReport(se, outFile = tempfile(fileext = ".html"))
 ```
 
@@ -1506,6 +1530,7 @@ on the SummarizedExperiment object containing all the three CIS
 replicates from \[@Diss2018\].
 
 ``` r
+
 se_collapsed <- collapseMutantsByAA(se)
 ppis <- calculateFitnessScore(
     se = se_collapsed, pairingCol = "Replicate", 
@@ -1555,6 +1580,7 @@ in `edgeR` or `limma`, see e.g.  [Law et al
 (2020)](https://f1000research.com/articles/9-512).
 
 ``` r
+
 model.matrix(~ Replicate + Condition,
              data = colData(se_collapsed))
 #>            (Intercept) Replicate Conditioncis_output
@@ -1575,6 +1601,7 @@ Next, we apply either `edgeR` or `limma` to extract the logFCs of the
 mutants, compared to the wildtype sequence.
 
 ``` r
+
 ## edgeR
 edger_scores <- calculateRelativeFC(
     se = se_collapsed,
@@ -1639,12 +1666,14 @@ statistical testing - in particular, MA (mean-difference) plots and
 volcano plots can be easily generated.
 
 ``` r
+
 plotMeanDiff(edger_scores, pointSize = "large")
 ```
 
 ![](mutscan_files/figure-html/plot-rel-fc-1.png)
 
 ``` r
+
 plotVolcano(edger_scores, pointSize = "large")
 ```
 
@@ -1665,10 +1694,11 @@ FASTQ files in the same order.
 This vignette was compiled on the following system:
 
 ``` r
+
 sessionInfo()
-#> R version 4.6.0 Patched (2026-04-27 r89967)
+#> R version 4.6.1 (2026-06-24)
 #> Platform: aarch64-apple-darwin23
-#> Running under: macOS Sequoia 15.7.4
+#> Running under: macOS Tahoe 26.5.2
 #> 
 #> Matrix products: default
 #> BLAS:   /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.0.dylib 
@@ -1685,37 +1715,37 @@ sessionInfo()
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] mutscan_1.3.0               SummarizedExperiment_1.41.1
-#>  [3] Biobase_2.71.0              GenomicRanges_1.63.2       
-#>  [5] Seqinfo_1.1.0               IRanges_2.45.0             
-#>  [7] S4Vectors_0.49.2            BiocGenerics_0.57.1        
-#>  [9] generics_0.1.4              MatrixGenerics_1.23.0      
-#> [11] matrixStats_1.5.0           BiocStyle_2.39.0           
+#>  [1] mutscan_1.3.1               SummarizedExperiment_1.43.0
+#>  [3] Biobase_2.73.2              GenomicRanges_1.65.1       
+#>  [5] Seqinfo_1.3.0               IRanges_2.47.2             
+#>  [7] S4Vectors_0.51.6            BiocGenerics_0.59.10       
+#>  [9] generics_0.1.4              MatrixGenerics_1.25.0      
+#> [11] matrixStats_1.5.0           BiocStyle_2.41.0           
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] gtable_0.3.6        xfun_0.57           bslib_0.10.0       
+#>  [1] gtable_0.3.6        xfun_0.60           bslib_0.11.0       
 #>  [4] ggplot2_4.0.3       htmlwidgets_1.6.4   ggrepel_0.9.8      
-#>  [7] GGally_2.4.0        lattice_0.22-9      bitops_1.0-9       
-#> [10] vctrs_0.7.3         tools_4.6.0         parallel_4.6.0     
-#> [13] tibble_3.3.1        pkgconfig_2.0.3     Matrix_1.7-5       
+#>  [7] GGally_2.4.0        lattice_0.22-9      bitops_1.1-0       
+#> [10] vctrs_0.7.3         tools_4.6.1         parallel_4.6.1     
+#> [13] tibble_3.3.1        pkgconfig_2.0.3     Matrix_1.7-6       
 #> [16] RColorBrewer_1.1-3  S7_0.2.2            desc_1.4.3         
-#> [19] lifecycle_1.0.5     compiler_4.6.0      farver_2.1.2       
-#> [22] Biostrings_2.79.5   Rsamtools_2.27.2    textshaping_1.0.5  
-#> [25] statmod_1.5.1       codetools_0.2-20    htmltools_0.5.9    
+#> [19] lifecycle_1.0.5     compiler_4.6.1      farver_2.1.2       
+#> [22] Biostrings_2.81.6   Rsamtools_2.29.0    textshaping_1.0.5  
+#> [25] statmod_1.5.2       codetools_0.2-20    htmltools_0.5.9    
 #> [28] sass_0.4.10         yaml_2.3.12         crayon_1.5.3       
-#> [31] pkgdown_2.2.0.9000  pillar_1.11.1       jquerylib_0.1.4    
-#> [34] tidyr_1.3.2         BiocParallel_1.45.0 DT_0.34.0          
-#> [37] limma_3.67.3        DelayedArray_0.37.1 cachem_1.1.0       
-#> [40] abind_1.4-8         ggstats_0.13.0      metapod_1.19.2     
+#> [31] pkgdown_2.2.1.9000  pillar_1.11.1       jquerylib_0.1.4    
+#> [34] tidyr_1.3.2         BiocParallel_1.47.0 DT_0.34.0          
+#> [37] limma_3.69.2        DelayedArray_0.39.3 cachem_1.1.0       
+#> [40] abind_1.4-8         ggstats_0.13.0      metapod_1.21.0     
 #> [43] locfit_1.5-9.12     tidyselect_1.2.1    digest_0.6.39      
-#> [46] dplyr_1.2.1         purrr_1.2.2         bookdown_0.46      
-#> [49] labeling_0.4.3      fastmap_1.2.0       grid_4.6.0         
-#> [52] cli_3.6.6           SparseArray_1.11.13 magrittr_2.0.5     
-#> [55] S4Arrays_1.11.1     withr_3.0.2         edgeR_4.9.9        
-#> [58] scales_1.4.0        rmarkdown_2.31      XVector_0.51.0     
+#> [46] dplyr_1.2.1         purrr_1.2.2         bookdown_0.47      
+#> [49] labeling_0.4.3      fastmap_1.2.0       grid_4.6.1         
+#> [52] cli_3.6.6           SparseArray_1.13.2  magrittr_2.0.5     
+#> [55] S4Arrays_1.13.0     withr_3.0.3         edgeR_4.11.4       
+#> [58] scales_1.4.0        rmarkdown_2.31      XVector_0.53.0     
 #> [61] otel_0.2.0          ragg_1.5.2          evaluate_1.0.5     
-#> [64] knitr_1.51          rlang_1.2.0         Rcpp_1.1.1-1.1     
-#> [67] glue_1.8.1          BiocManager_1.30.27 csaw_1.45.0        
+#> [64] knitr_1.51          rlang_1.3.0         Rcpp_1.1.2         
+#> [67] glue_1.8.1          BiocManager_1.30.27 csaw_1.47.1        
 #> [70] jsonlite_2.0.0      R6_2.6.1            systemfonts_1.3.2  
 #> [73] fs_2.1.0
 ```

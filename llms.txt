@@ -18,6 +18,7 @@ consult the vignettes.
 installed with:
 
 ``` r
+
 # install.packages("BiocManager")
 BiocManager::install("mutscan")
 ```
@@ -26,6 +27,7 @@ You can also install the development version of `mutscan` from GitHub
 with:
 
 ``` r
+
 # install.packages("devtools")
 devtools::install_github("fmicompbio/mutscan")
 ```
