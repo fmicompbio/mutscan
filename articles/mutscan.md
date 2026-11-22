@@ -385,7 +385,7 @@ transInput$parameters
 #> [1] 1024
 #> 
 #> $processingInfo
-#> [1] "Processed by mutscan v1.3.1 on 2026-08-03 13:09:07.161658"
+#> [1] "Processed by mutscan v1.3.1 on 2026-11-22 18:29:57.244503"
 ```
 
 The `filterSummary` data.frame contains a summary of the number of reads
@@ -732,7 +732,7 @@ cisInput$parameters
 #> [1] 1024
 #> 
 #> $processingInfo
-#> [1] "Processed by mutscan v1.3.1 on 2026-08-03 13:09:07.515391"
+#> [1] "Processed by mutscan v1.3.1 on 2026-11-22 18:29:57.505695"
 cisInput$filterSummary
 #>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength
 #> 1     1000           126              0                     0
@@ -1161,7 +1161,7 @@ leujunt0$parameters
 #> [1] 1024
 #> 
 #> $processingInfo
-#> [1] "Processed by mutscan v1.3.1 on 2026-08-03 13:09:07.815469"
+#> [1] "Processed by mutscan v1.3.1 on 2026-11-22 18:29:57.703454"
 leujunt0$filterSummary
 #>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength
 #> 1     1000             0            126                     0
@@ -1627,7 +1627,7 @@ head(edger_scores[order(edger_scores$PValue), , drop = FALSE])
 ## As before, the WT sequence has a logFC close to 0, by construction
 edger_scores["f.0.WT", , drop = FALSE]
 #>               logFC   logCPM F PValue FDR  logFC_shrunk df.total df.prior
-#> f.0.WT 9.039516e-16 19.30433 0      1   1 -2.364216e-15 15.45022 12.45019
+#> f.0.WT 9.039516e-16 19.30433 0      1   1 -2.330133e-15 15.45022 12.45019
 #>        df.test
 #> f.0.WT       1
 
@@ -1638,6 +1638,7 @@ limma_scores <- calculateRelativeFC(
                           data = colData(se_collapsed)),
     coef = "Conditioncis_output", pseudocount = 1, WTrows = "f.0.WT",
     method = "limma")
+#> voomLmFit is now recommended over voom
 head(limma_scores[order(limma_scores$P.Value), , drop = FALSE])
 #>            logFC      CI.L      CI.R   AveExpr         t      P.Value
 #> f.27.* -4.503210 -4.622021 -4.384400  9.963039 -84.07624 5.299650e-16
@@ -1696,9 +1697,9 @@ This vignette was compiled on the following system:
 ``` r
 
 sessionInfo()
-#> R version 4.6.1 (2026-06-24)
+#> R version 4.6.2 (2026-10-29)
 #> Platform: aarch64-apple-darwin23
-#> Running under: macOS Tahoe 26.5.2
+#> Running under: macOS Tahoe 26.7.2
 #> 
 #> Matrix products: default
 #> BLAS:   /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.0.dylib 
@@ -1716,36 +1717,35 @@ sessionInfo()
 #> 
 #> other attached packages:
 #>  [1] mutscan_1.3.1               SummarizedExperiment_1.43.0
-#>  [3] Biobase_2.73.2              GenomicRanges_1.65.1       
-#>  [5] Seqinfo_1.3.0               IRanges_2.47.2             
-#>  [7] S4Vectors_0.51.6            BiocGenerics_0.59.10       
+#>  [3] Biobase_2.73.2              GenomicRanges_1.65.4       
+#>  [5] Seqinfo_1.3.2               IRanges_2.47.5             
+#>  [7] S4Vectors_0.51.10           BiocGenerics_0.59.13       
 #>  [9] generics_0.1.4              MatrixGenerics_1.25.0      
 #> [11] matrixStats_1.5.0           BiocStyle_2.41.0           
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] gtable_0.3.6        xfun_0.60           bslib_0.11.0       
-#>  [4] ggplot2_4.0.3       htmlwidgets_1.6.4   ggrepel_0.9.8      
-#>  [7] GGally_2.4.0        lattice_0.22-9      bitops_1.1-0       
-#> [10] vctrs_0.7.3         tools_4.6.1         parallel_4.6.1     
+#>  [1] gtable_0.3.6        xfun_0.62           bslib_0.12.0       
+#>  [4] ggplot2_4.0.4       htmlwidgets_1.6.4   ggrepel_0.9.8      
+#>  [7] GGally_2.5.0        lattice_0.23-1      bitops_1.1-0       
+#> [10] vctrs_0.7.3         tools_4.6.2         parallel_4.6.2     
 #> [13] tibble_3.3.1        pkgconfig_2.0.3     Matrix_1.7-6       
-#> [16] RColorBrewer_1.1-3  S7_0.2.2            desc_1.4.3         
-#> [19] lifecycle_1.0.5     compiler_4.6.1      farver_2.1.2       
-#> [22] Biostrings_2.81.6   Rsamtools_2.29.0    textshaping_1.0.5  
+#> [16] RColorBrewer_1.1-3  S7_1.0.0            desc_1.4.3         
+#> [19] lifecycle_1.0.5     compiler_4.6.2      farver_2.1.2       
+#> [22] Biostrings_2.81.9   Rsamtools_2.29.0    textshaping_1.1.0  
 #> [25] statmod_1.5.2       codetools_0.2-20    htmltools_0.5.9    
-#> [28] sass_0.4.10         yaml_2.3.12         crayon_1.5.3       
+#> [28] sass_0.5.0          yaml_2.3.12         crayon_1.5.3       
 #> [31] pkgdown_2.2.1.9000  pillar_1.11.1       jquerylib_0.1.4    
 #> [34] tidyr_1.3.2         BiocParallel_1.47.0 DT_0.34.0          
-#> [37] limma_3.69.2        DelayedArray_0.39.3 cachem_1.1.0       
-#> [40] abind_1.4-8         ggstats_0.13.0      metapod_1.21.0     
-#> [43] locfit_1.5-9.12     tidyselect_1.2.1    digest_0.6.39      
-#> [46] dplyr_1.2.1         purrr_1.2.2         bookdown_0.47      
-#> [49] labeling_0.4.3      fastmap_1.2.0       grid_4.6.1         
-#> [52] cli_3.6.6           SparseArray_1.13.2  magrittr_2.0.5     
-#> [55] S4Arrays_1.13.0     withr_3.0.3         edgeR_4.11.4       
-#> [58] scales_1.4.0        rmarkdown_2.31      XVector_0.53.0     
-#> [61] otel_0.2.0          ragg_1.5.2          evaluate_1.0.5     
-#> [64] knitr_1.51          rlang_1.3.0         Rcpp_1.1.2         
-#> [67] glue_1.8.1          BiocManager_1.30.27 csaw_1.47.1        
-#> [70] jsonlite_2.0.0      R6_2.6.1            systemfonts_1.3.2  
-#> [73] fs_2.1.0
+#> [37] limma_3.99.5        DelayedArray_0.39.8 cachem_1.1.0       
+#> [40] abind_1.4-8         ggstats_0.14.0      metapod_1.21.1     
+#> [43] tidyselect_1.2.1    digest_0.6.39       dplyr_1.2.1        
+#> [46] purrr_1.2.2         bookdown_0.48       labeling_0.4.3     
+#> [49] fastmap_1.2.0       grid_4.6.2          cli_3.6.6          
+#> [52] SparseArray_1.13.5  magrittr_2.0.5      S4Arrays_1.13.3    
+#> [55] withr_3.0.3         edgeR_4.99.13       scales_1.4.0       
+#> [58] rmarkdown_2.32      XVector_0.53.0      otel_0.3.0         
+#> [61] ragg_1.5.2          evaluate_1.0.5      knitr_1.52         
+#> [64] rlang_1.3.0         Rcpp_1.1.2          glue_1.8.1         
+#> [67] BiocManager_1.30.27 csaw_1.47.1         jsonlite_2.0.0     
+#> [70] R6_2.6.1            systemfonts_1.3.4   fs_2.1.0
 ```

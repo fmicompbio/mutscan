@@ -168,7 +168,7 @@ head(res)
 #> f.0.WT  1.9721335 20.083627 59.456865 1.858697e-11 3.860020e-10    1.9721331
 #> f.1.AAC 1.3121715  4.688782 16.841571 9.097826e-05 3.084009e-04    1.2983948
 #> f.1.AAG 1.0388250  5.677955 12.906277 5.405369e-04 1.637991e-03    1.0342284
-#> f.1.ACC 2.0874104 12.862431 62.641335 7.172371e-12 1.793093e-10    2.0873513
+#> f.1.ACC 2.0874104 12.862431 62.641336 7.172371e-12 1.793093e-10    2.0873513
 #> f.1.ACG 1.8698754 13.513672 51.069321 2.539192e-10 2.821324e-09    1.8698449
 #> f.1.AGC 0.9302662  4.754181  8.738407 4.004634e-03 1.013831e-02    0.9228443
 #>         df.total df.prior df.test
@@ -184,7 +184,7 @@ res <- calculateRelativeFC(se, design, coef = "Conditioncis_output",
                            method = "edgeR", WTrows = "f.0.WT")
 head(res)
 #>                 logFC    logCPM         F       PValue          FDR
-#> f.0.WT   4.209908e-16 19.757846  0.000000 1.000000e+00 1.000000e+00
+#> f.0.WT   4.345624e-16 19.757846  0.000000 1.000000e+00 1.000000e+00
 #> f.1.AAC -6.419635e-01  4.553595  9.542087 1.063414e-02 1.321011e-02
 #> f.1.AAG -8.818448e-01  5.655807 24.029119 5.109289e-04 9.461646e-04
 #> f.1.ACC  1.207040e-01 12.506900 29.621010 2.244723e-04 4.628294e-04
@@ -201,6 +201,7 @@ head(res)
 ## Calculate "absolute" log-fold changes with limma
 res <- calculateRelativeFC(se, design, coef = "Conditioncis_output", 
                            method = "limma")
+#> voomLmFit is now recommended over voom
 head(res)
 #>             logFC      CI.L     CI.R   AveExpr         t      P.Value
 #> f.0.WT  1.9474812 1.5678409 2.327121 19.757630 10.074558 3.681165e-22
@@ -220,6 +221,7 @@ head(res)
 stopifnot("f.0.WT" %in% rownames(se))
 res <- calculateRelativeFC(se, design, coef = "Conditioncis_output", 
                            method = "limma", WTrows = "f.0.WT")
+#> voomLmFit is now recommended over voom
 head(res)
 #>                 logFC        CI.L        CI.R   AveExpr             t
 #> f.0.WT   9.531162e-08 -0.03804257  0.03804276 19.757630  5.947923e-06
