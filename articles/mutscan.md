@@ -385,7 +385,7 @@ transInput$parameters
 #> [1] 1024
 #> 
 #> $processingInfo
-#> [1] "Processed by mutscan v1.3.1 on 2026-11-22 18:29:57.244503"
+#> [1] "Processed by mutscan v1.5.0 on 2026-11-24 19:32:36.273889"
 ```
 
 The `filterSummary` data.frame contains a summary of the number of reads
@@ -732,7 +732,7 @@ cisInput$parameters
 #> [1] 1024
 #> 
 #> $processingInfo
-#> [1] "Processed by mutscan v1.3.1 on 2026-11-22 18:29:57.505695"
+#> [1] "Processed by mutscan v1.5.0 on 2026-11-24 19:32:36.58408"
 cisInput$filterSummary
 #>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength
 #> 1     1000           126              0                     0
@@ -1161,7 +1161,7 @@ leujunt0$parameters
 #> [1] 1024
 #> 
 #> $processingInfo
-#> [1] "Processed by mutscan v1.3.1 on 2026-11-22 18:29:57.703454"
+#> [1] "Processed by mutscan v1.5.0 on 2026-11-24 19:32:36.801355"
 leujunt0$filterSummary
 #>   nbrTotal f1_nbrAdapter f2_nbrNoPrimer f3_nbrReadWrongLength
 #> 1     1000             0            126                     0
@@ -1716,7 +1716,7 @@ sessionInfo()
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] mutscan_1.3.1               SummarizedExperiment_1.43.0
+#>  [1] mutscan_1.5.0               SummarizedExperiment_1.43.0
 #>  [3] Biobase_2.73.2              GenomicRanges_1.65.4       
 #>  [5] Seqinfo_1.3.2               IRanges_2.47.5             
 #>  [7] S4Vectors_0.51.10           BiocGenerics_0.59.13       
